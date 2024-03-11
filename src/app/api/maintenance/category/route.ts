@@ -3,19 +3,9 @@ import { format } from 'date-fns/format';
 import { NextRequest, NextResponse } from 'next/server';
 import Category from '@/model/categoryModel';
 import { connect } from '@/dbConfig/dbConfig';
-// import { mapToObject } from '../../../../utils/helper';
+import { mapToObject } from '@/utils/helpers';
+
 connect();
-function mapToObject(map: Map<string, any>): { [key: string]: any } {
-	const obj: { [key: string]: any } = {};
-	for (let [key, value] of map) {
-		// Checking if the value is a string representation of a number
-		if (typeof value === 'string' && !isNaN(Number(value))) {
-			value = Number(value);
-		}
-		obj[key] = value;
-	}
-	return obj;
-}
 
 export async function GET(request: NextRequest, { params }: any) {
 	try {
@@ -49,6 +39,8 @@ export async function POST(request: NextRequest, { params }: any) {
 		let cookie = request.cookies.get('token')?.value || '';
 
 		const body = await request.json();
+
+		console.log(body);
 
 		const data = await Category.create(body);
 
