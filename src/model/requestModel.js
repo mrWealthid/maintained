@@ -19,7 +19,7 @@ const requestSchema = new mongoose.Schema({
 });
 
 const Request =
-	mongoose.models.request || mongoose.model('Request', requestSchema);
+	mongoose.models.Request || mongoose.model('Request', requestSchema);
 
 // Make.init().then((x) => console.log(x));
 module.exports = Request;
