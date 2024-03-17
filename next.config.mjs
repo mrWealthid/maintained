@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	env: {
-		CLOUDINARY_NAME: 'dw9grhu99'
+		CLOUDINARY_NAME: process.env.CLOUDINARY_NAME
 	}
 };
 
