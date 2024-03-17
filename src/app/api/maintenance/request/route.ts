@@ -4,10 +4,21 @@ import { format } from 'date-fns/format';
 import { NextRequest, NextResponse } from 'next/server';
 import Request from '@/model/requestModel';
 import { connect } from '@/dbConfig/dbConfig';
-import { mapToObject } from '@/utils/helpers';
+import { mapToObject, fileToBase64 } from '@/utils/helpers';
+import cloudinary from '@/utils/cloudinary';
+import DatauriParser from 'datauri/parser';
+import path from 'path';
+import axios from 'axios';
+
 // import { mapToObject } from '../../../../utils/helper';
 
 connect();
+
+// export const config = {
+// 	api: {
+// 		bodyParser: false
+// 	}
+// };
 
 export async function GET(request: NextRequest) {
 	try {
@@ -61,6 +72,8 @@ export async function GET(request: NextRequest) {
 	}
 }
 
+const parser = new DatauriParser();
+
 export async function POST(request: NextRequest, { params }: any) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
@@ -68,6 +81,20 @@ export async function POST(request: NextRequest, { params }: any) {
 		let cookie = request.cookies.get('token')?.value || '';
 
 		const body = await request.json();
+
+		// // create video
+		// const createVideo = async (vid: any) => {
+		// 	const base64Video = parser.format(
+		// 		path.extname(vid.originalname).toString(),
+		// 		vid.buffer
+		// 	);
+		// 	const uploadedVideoResponse = await cloudinary.v2.uploader.upload(
+		// 		base64Video.content!,
+
+		// 		{ resource_type: 'video' }
+		// 	);
+		// 	return uploadedVideoResponse;
+		// };
 
 		const data = await Request.create(body);
 

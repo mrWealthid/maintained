@@ -10,7 +10,7 @@ type maintnenanceType = {
 	title: string;
 	description: string;
 	status: 'PENDING' | 'ASSIGNED' | 'DECLINED' | 'COMPLETED';
-	id: string;
+	_id: string;
 };
 const MaintnenanceComponent = () => {
 	const [status, setStatus] = useState<string>('ALL');
@@ -31,7 +31,7 @@ const MaintnenanceComponent = () => {
 			<Tabs status={status} handleClick={handleClick} />
 			<section className='grid grid-cols-3 gap-2'>
 				{data?.map((request: maintnenanceType) => (
-					<MaintenanceCard key={request.id} {...request} />
+					<MaintenanceCard key={request._id} {...request} />
 				))}
 			</section>
 		</>

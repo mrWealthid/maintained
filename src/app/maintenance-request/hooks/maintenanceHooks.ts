@@ -1,28 +1,32 @@
+import { toast } from 'react-hot-toast';
 import { IListResponse } from '@/components/Table/models/table.model';
-import { useQuery } from '@tanstack/react-query';
-import { fetchMaintenanceRequests } from '../service/maintenance-service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+	fetchMaintenanceRequests,
+	handleCreateMaintenaceRequest
+} from '../service/maintenance-service';
 
 export function useCreateMaintenanceRequest(
 	bookingId: any,
 	isEditing: any,
 	close: any
 ) {
-	// const queryClient = useQueryClient();
-	// const { isLoading: isCreating, mutate: createBooking } = useMutation({
-	// 	mutationFn: (payload) =>
-	// 		handleCreateBooking(payload, bookingId, isEditing),
-	// 	onSuccess: () => {
-	// 		toast.success('Bookings successfully created...');
-	// 		queryClient.invalidateQueries({
-	// 			queryKey: ['bookings']
-	// 		});
+	const queryClient = useQueryClient();
+	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
+		mutationFn: (payload: FormData) =>
+			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
+		onSuccess: () => {
+			toast.success('Maintenance Request successfully created...');
+			queryClient.invalidateQueries({
+				queryKey: ['requests']
+			});
 
-	// 		close();
-	// 	},
-	// 	onError: (err: any) => toast.error(err.message)
-	// });
+			close();
+		},
+		onError: (err: any) => toast.error(err.message)
+	});
 
-	return { isCreating: false, createMaintenance: (val: any) => {} };
+	return { isCreating, createMaintenance };
 }
 
 export function useFetchMaintenanceRequests(
