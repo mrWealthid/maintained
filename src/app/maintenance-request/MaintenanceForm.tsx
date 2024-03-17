@@ -19,7 +19,7 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 	} | null>(null);
 
 	const [selectedImages, setSelectedImages] = useState<FileList | null>(null);
-	const [selectedVideo, setSelectedVideo] = useState();
+	const [selectedVideo, setSelectedVideo] = useState<FileList | null>(null);
 
 	const { register, handleSubmit, getValues, formState } = useForm({
 		mode: 'all',
@@ -44,11 +44,13 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 	async function onSubmit(data: any) {
 		// const { category }: any = autoCompleteValue;
 
-		const urls = await handleMultipleImages(selectedImages!);
+		const imgUrls = await handleMultipleUpload(selectedImages!, 'image');
+		const videoUrls = await handleMultipleUpload(selectedVideo!, 'video');
 
 		const payload = {
 			...data,
-			images: urls
+			images: imgUrls,
+			video: videoUrls
 		};
 
 		createMaintenance(payload);
@@ -58,14 +60,14 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		console.log(err);
 	}
 
-	function batchUpload(file: FileList) {
+	function batchUpload(file: FileList, type: 'video' | 'image') {
 		return Array.from(file).map(async (fl) => {
 			const formData = new FormData();
 			formData.append('upload_preset', 'qayfdqjn');
 			formData.append('file', fl);
 
 			try {
-				const response = await uploader(formData); // Assuming 'uploader' is your function to handle the upload
+				const response = await uploader(formData, type); // Assuming 'uploader' is your function to handle the upload
 				return response; // Return the response or the specific URL part of the response
 			} catch (error) {
 				console.error('Upload error:', error);
@@ -74,8 +76,12 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		});
 	}
 
-	async function handleMultipleImages(file: FileList) {
-		const uploadPromises = batchUpload(file);
+	async function handleMultipleUpload(
+		file: FileList,
+		type: 'video' | 'image'
+	) {
+		if (!file) return;
+		const uploadPromises = batchUpload(file, type);
 		try {
 			const urls = await Promise.all(uploadPromises);
 			console.log(urls);
@@ -86,9 +92,9 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		}
 	}
 
-	async function uploader(formData: any) {
+	async function uploader(formData: FormData, type: 'video' | 'image') {
 		const uploadResponse = await axios.post(
-			`https://api.cloudinary.com/v1_1/dw9grhu99/image/upload`,
+			`https://api.cloudinary.com/v1_1/dw9grhu99/${type}/upload`,
 			formData
 		);
 		return uploadResponse.data.url;
@@ -99,13 +105,17 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 
 		setSelectedImages(files);
 	};
-	const handleVideoSelect = (file: FileList | null) => {
-		const vid = file![0];
-		if (vid) {
-			// setSelectedVideo(vid);
-			// Handle the files, such as uploading them to a server or processing them
-			console.log(file);
-		}
+	const handleVideoSelect = (files: FileList) => {
+		// const vid = file![0];
+		// if (vid) {
+		// 	// setSelectedVideo(vid);
+		// 	// Handle the files, such as uploading them to a server or processing them
+		// 	console.log(file);
+		// }
+
+		if (files.length < 1) return;
+
+		setSelectedVideo(files);
 	};
 
 	function UploadFileIcon() {
