@@ -63,7 +63,12 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 	function batchUpload(file: FileList, type: 'video' | 'image') {
 		return Array.from(file).map(async (fl) => {
 			const formData = new FormData();
-			formData.append('upload_preset', 'qayfdqjn');
+			/image/.test(type)
+				? formData.append('upload_preset', `${process.env.IMG_PRESET}`)
+				: formData.append(
+						'upload_preset',
+						`${process.env.VIDEO_PRESET}`
+				  );
 			formData.append('file', fl);
 
 			try {
@@ -84,7 +89,6 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		const uploadPromises = batchUpload(file, type);
 		try {
 			const urls = await Promise.all(uploadPromises);
-			console.log(urls);
 			return urls; // Now 'urls' contains all the URLs from the resolved promises
 		} catch (error) {
 			console.error('Error uploading one or more files:', error);
@@ -94,7 +98,7 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 
 	async function uploader(formData: FormData, type: 'video' | 'image') {
 		const uploadResponse = await axios.post(
-			`https://api.cloudinary.com/v1_1/dw9grhu99/${type}/upload`,
+			`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
 			formData
 		);
 		return uploadResponse.data.url;
