@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 
 connect();
 
-const signToken = (id: any) =>
-	jwt.sign({ id }, process.env.JWT_SECRET!, {
+const signToken = (id: string, role: string) =>
+	jwt.sign({ id, role }, process.env.JWT_SECRET!, {
 		expiresIn: process.env.JWT_EXPIRES_IN
 	});
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
 		//3) If everything is ok, send token to client
 
-		const token = signToken(user._id);
+		const token = signToken(user._id, user.role);
 		const response = NextResponse.json({
 			status: 'success',
 			token

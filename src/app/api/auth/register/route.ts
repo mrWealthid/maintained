@@ -1,17 +1,18 @@
 import { connect } from '@/dbConfig/dbConfig';
 import User from '@/model/userModel';
+import Business from '@/model/businessModel';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
 connect();
 
-const signToken = (id: any) =>
-	jwt.sign({ id }, process.env.JWT_SECRET!, {
+const signToken = (id: string, role: string) =>
+	jwt.sign({ id, role }, process.env.JWT_SECRET!, {
 		expiresIn: process.env.JWT_EXPIRES_IN
 	});
 
 const createSendToken = (user: any, statusCode: any) => {
-	const token = signToken(user._id);
+	const token = signToken(user._id, user.role);
 
 	// const cookieOptions: {expires:any, httpOnly: boolean} = {
 	// 	// expires: new Date(Date.now() + process.env?.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 1000),
@@ -78,13 +79,26 @@ export async function POST(request: NextRequest) {
 				{ status: 400 }
 			);
 
+		const business = await Business.create({
+			businessName: req.businessName,
+			registrationId: req.registrationId,
+			businessContact: req.businessContact,
+			country: req.country,
+			businessAddress: req.businessAddress,
+			businessEmail: req.businessEmail,
+			businessCreator: req.name
+		});
+
+		console.log('Business', business);
+
 		const newUser = await User.create({
 			name: req.name,
 			email: req.email,
+			businessId: business._id,
 			password: req.password,
-			role: req.role
+			role: 'ADMIN'
 		});
-		console.log(newUser);
+		console.log('User', newUser);
 
 		//send verification email
 
