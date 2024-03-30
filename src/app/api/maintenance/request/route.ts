@@ -9,6 +9,8 @@ import cloudinary from '@/utils/cloudinary';
 import DatauriParser from 'datauri/parser';
 import path from 'path';
 import axios from 'axios';
+import MiddlewareFeatures from '@/middlewareFeatures';
+import mongoose, { Types, ObjectId, Mongoose } from 'mongoose';
 
 // import { mapToObject } from '../../../../utils/helper';
 
@@ -24,7 +26,26 @@ export async function GET(request: NextRequest) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
 
-		let cookie = request.cookies.get('token')?.value || '';
+		const verify = new MiddlewareFeatures().verifyToken();
+
+		if (!verify?.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'UnAuthorized' },
+				{ status: 401 }
+			);
+		}
+
+		let filter = {};
+		if (verify.isAdminRole) {
+		}
+
+		if (verify.isUserRole) {
+			// console.log(verify.userInfo.id);
+			filter = { userId: new Types.ObjectId(verify.userId) };
+		}
+
+		// console.log(isAuthUser);
+		// let cookie = request.cookies.get('token')?.value || '';
 
 		const query: any = request.nextUrl.searchParams;
 
@@ -32,7 +53,6 @@ export async function GET(request: NextRequest) {
 
 		console.log(transformedQuery);
 
-		let filter = {};
 		const features = new APIFeatures(Request.find(filter), transformedQuery)
 			.filter()
 			.sort()
@@ -71,8 +91,6 @@ export async function GET(request: NextRequest) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }
-
-const parser = new DatauriParser();
 
 export async function POST(request: NextRequest, { params }: any) {
 	try {
