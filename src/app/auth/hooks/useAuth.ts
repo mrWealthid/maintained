@@ -18,7 +18,7 @@ import {
 } from '../model/model';
 
 export function useLogin() {
-	const { isLoading, mutate: login } = useMutation({
+	const { isPending: isLoading, mutate: login } = useMutation({
 		mutationFn: (payload: ILogin) => handleLogin(payload),
 		onError: (err: any) => toast.error(err.message)
 	});
@@ -29,7 +29,7 @@ export function useLogin() {
 	};
 }
 export function useRegister() {
-	const { isLoading, mutate: registering } = useMutation({
+	const { isPending: isLoading, mutate: registering } = useMutation({
 		mutationFn: (payload: IRegister) => handleRegister(payload),
 
 		onError: (err: any) => toast.error(err.message)
@@ -41,7 +41,7 @@ export function useRegister() {
 	};
 }
 export function useLogout(router: any) {
-	const { isLoading, mutate: loggingOut } = useMutation({
+	const { isPending: isLoading, mutate: loggingOut } = useMutation({
 		mutationFn: () => handleLogout(),
 		onSuccess: () => router.push('/auth/login'),
 		onError: (err: any) => toast.error(handleClientErrorMessage(err))
@@ -53,7 +53,7 @@ export function useLogout(router: any) {
 	};
 }
 export function useResetPassword() {
-	const { isLoading, mutate: resetPassword } = useMutation({
+	const { isPending: isLoading, mutate: resetPassword } = useMutation({
 		mutationFn: (payload: IResetPassword) => handleForgetPassword(payload),
 		onSuccess: (data) => toast.success(data.message),
 		onError: (err: any) => toast.error(handleClientErrorMessage(err))
@@ -65,7 +65,7 @@ export function useResetPassword() {
 	};
 }
 export function useUpdatePassword() {
-	const { isLoading, mutate: updatePassword } = useMutation({
+	const { isPending: isLoading, mutate: updatePassword } = useMutation({
 		mutationFn: (payload: IUpdatePassword) => handleResetPassword(payload),
 		onSuccess: (data) => toast.success(data.message),
 		onError: (err: any) => toast.error(err.message)
