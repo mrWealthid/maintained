@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { createContext } from 'react';
 import { IListResponse, ITable, Icolumn } from './models/table.model';
-import { formatCurrency } from '@/utils/helpers';
+import { formatCurrency } from '@/utils/helper';
 
 import { useTable } from './hooks/useTable';
 import Modal from '../shared/Modal/Modal-component';
@@ -131,30 +131,30 @@ function Table({
 				isDownloadable,
 				isRefetching
 			}}>
-			<div className=" overflow-x-auto    card p-2">
+			<div className=' overflow-x-auto    card p-2'>
 				<TableHeaderAction handleFilter={handleFilter}>
 					{headerActions}
 				</TableHeaderAction>
 				{isLoading && (
-					<section className="flex justify-center items-center">
+					<section className='flex justify-center items-center'>
 						{' '}
 						<Image
 							width={100}
 							height={100}
-							alt="spinner"
-							src="/images/spinner.svg"
+							alt='spinner'
+							src='/images/spinner.svg'
 						/>
 					</section>
 				)}
 				{!isLoading && (
 					<table
 						ref={tableRef}
-						className="w-full   text-sm  text-gray-500 ">
+						className='w-full   text-sm  text-gray-500 '>
 						{children}
 					</table>
 				)}
 
-				<div className="mt-3 text-xs">
+				<div className='mt-3 text-xs'>
 					<Paginator
 
 					// handlePaginate={handlePaginate}
@@ -185,7 +185,7 @@ function TableFilterForm({ column, onCloseModal }: any) {
 		<form
 			onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
 			className=' flex flex-col gap-3 p-6  items-center"'>
-			<section className=" grid  gap-3   grid-cols-1 ">
+			<section className=' grid  gap-3   grid-cols-1 '>
 				{columns.map((column: Icolumn) => {
 					if (column.searchType === 'TEXT') {
 						return (
@@ -200,9 +200,9 @@ function TableFilterForm({ column, onCloseModal }: any) {
 											: column.header,
 										{}
 									)}
-									className="input-style"
+									className='input-style'
 									placeholder={`Enter ${column.header}`}
-									type="text"
+									type='text'
 									id={column.header}
 								/>
 							</TextInput>
@@ -220,8 +220,8 @@ function TableFilterForm({ column, onCloseModal }: any) {
 											? column.filterKey
 											: column.header
 									)}
-									className="input-style"
-									type="number"
+									className='input-style'
+									type='number'
 									id={column.header}
 								/>
 							</TextInput>
@@ -260,21 +260,21 @@ function TableFilterForm({ column, onCloseModal }: any) {
 				/>
 			</TextInput> */}
 
-			<section className="flex justify-end gap-4">
+			<section className='flex justify-end gap-4'>
 				<ButtonComponent
-					type="reset"
+					type='reset'
 					handleClick={() => {
 						cancelFilter();
 						onCloseModal();
 					}}
-					styles="rounded-3xl"
+					styles='rounded-3xl'
 					btnText={'Cancel'}></ButtonComponent>
 
 				<ButtonComponent
-					type="submit"
+					type='submit'
 					loading={isRefetching}
 					// handleClick={onCloseModal}
-					styles="rounded-3xl"
+					styles='rounded-3xl'
 					disabled={!formState.isValid}
 					btnText={`Search
 					`}></ButtonComponent>
@@ -286,18 +286,18 @@ function TableFilterForm({ column, onCloseModal }: any) {
 function TableFilter() {
 	const { columns, filterIsActive, tableRef }: any = useContext(TableContext);
 	return (
-		<div className="">
+		<div className=''>
 			<Modal>
-				<Modal.Open opens="filter-form">
+				<Modal.Open opens='filter-form'>
 					<button
-						type="button"
+						type='button'
 						className={`  ${
 							filterIsActive
 								? 'ring-1  ring-offset-2 text-success  ring-success'
 								: ''
 						} w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl  bg-gray-50 font-light text-black border btn`}>
 						{filterIsActive ? (
-							<FcFilledFilter size={15} color="green" />
+							<FcFilledFilter size={15} color='green' />
 						) : (
 							<CiFilter size={15} />
 						)}
@@ -305,7 +305,7 @@ function TableFilter() {
 					</button>
 				</Modal.Open>
 
-				<Modal.Window name="filter-form">
+				<Modal.Window name='filter-form'>
 					<TableFilterForm />
 				</Modal.Window>
 			</Modal>
@@ -316,7 +316,7 @@ function TableFilter() {
 function TableHeader() {
 	const { columns, actionable }: any = useContext(TableContext);
 	return (
-		<thead className="text-xs text-left wheat-light bg-primary   text-white w-full uppercase">
+		<thead className='text-xs text-left wheat-light bg-primary   text-white w-full uppercase'>
 			<tr>
 				{/* <th className="px-2 py-4 uppercase">
 					<input
@@ -332,18 +332,18 @@ function TableHeader() {
 					</label>
 				</th> */}
 
-				<td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
+				<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
 					<span>S/N</span>
 				</td>
 
 				{columns.map((col: Icolumn) => (
 					<th
 						key={col.header}
-						className="py-4 px-2  flex-grow uppercase">
+						className='py-4 px-2  flex-grow uppercase'>
 						{col.header}
 					</th>
 				))}
-				{actionable && <th className="px-2 py-4 uppercase">Actions</th>}
+				{actionable && <th className='px-2 py-4 uppercase'>Actions</th>}
 			</tr>
 		</thead>
 	);
@@ -352,10 +352,10 @@ export function TableHeaderAction({ children }: any) {
 	const { handleFilter, tableRef, queryKey, isDownloadable }: any =
 		useContext(TableContext);
 	return (
-		<div className="flex flex-col flex-wrap items-center  justify-between mb-2 px-3 overflow-x-auto md:flex-row">
-			<div className="flex items-center gap-2 mt-4"></div>
+		<div className='flex flex-col flex-wrap items-center  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
+			<div className='flex items-center gap-2 mt-4'></div>
 
-			<div className="flex py-1 flex-wrap items-center gap-3 mt-2 md:gap-2">
+			<div className='flex py-1 flex-wrap items-center gap-3 mt-2 md:gap-2'>
 				<TableFilter />
 
 				{cloneElement(children, { handleFilter })}
@@ -366,8 +366,8 @@ export function TableHeaderAction({ children }: any) {
 						sheet={queryKey}
 						currentTableRef={tableRef.current}>
 						<button
-							type="button"
-							className="w-full  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center  bg-gray-50  dark:glass dark:border-none font-light text-black border btn">
+							type='button'
+							className='w-full  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center  bg-gray-50  dark:glass dark:border-none font-light text-black border btn'>
 							<IoCloudDownloadOutline /> Export
 						</button>
 					</DownloadTableExcel>
@@ -391,22 +391,22 @@ function TableRow({ children, customRow }: any) {
 
 	if (data?.length < 1) {
 		return (
-			<tbody className=" w-full h-5">
+			<tbody className=' w-full h-5'>
 				<tr>
-					<td className="  block p-2 text-sm ">No data available</td>
+					<td className='  block p-2 text-sm '>No data available</td>
 				</tr>
 			</tbody>
 		);
 	}
 
 	return (
-		<tbody className="">
+		<tbody className=''>
 			{!customRow
 				? data?.map((row: any, i: any) => {
 						return (
 							<tr
 								key={i}
-								className="text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b hover:glass ">
+								className='text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b  transition-shadow hover:shadow   duration-500 '>
 								{/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"
@@ -420,7 +420,7 @@ function TableRow({ children, customRow }: any) {
 										#
 									</label>
 								</td> */}
-								<td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
+								<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
 									<span>{i + 1}.</span>
 								</td>
 
@@ -441,7 +441,7 @@ function TableRow({ children, customRow }: any) {
 													key={column.accessor + i}>
 													<span
 														title={value}
-														className="bg-green-400    text-xs w-1/2 justify-center text-white py-2 px-3 rounded-3xl inline-flex">
+														className='bg-green-400    text-xs w-1/2 justify-center text-white py-2 px-3 rounded-3xl inline-flex'>
 														{value}
 													</span>
 												</td>
@@ -476,7 +476,7 @@ function TableRow({ children, customRow }: any) {
 														title={formatCurrency(
 															value
 														)}
-														className="ellipsis-overflow block">
+														className='ellipsis-overflow block'>
 														{formatCurrency(value)}
 													</span>
 												</td>
@@ -513,7 +513,7 @@ function TableRow({ children, customRow }: any) {
 										<td key={column.accessor + i}>
 											<span
 												title={value}
-												className="block ellipsis-overflow">
+												className='block ellipsis-overflow'>
 												{value}
 											</span>
 										</td>
@@ -556,8 +556,8 @@ function Paginator() {
 	}
 
 	return (
-		<section className="flex justify-between items-center">
-			<section className="flex-col flex  dark:border-t p-2 gap-1">
+		<section className='flex justify-between items-center'>
+			<section className='flex-col flex  dark:border-t p-2 gap-1'>
 				<strong>Summary</strong>
 				<p>
 					{' '}
@@ -571,9 +571,9 @@ function Paginator() {
 			</section>
 			{data?.length > 0 && (
 				<nav
-					className="flex gap-3"
-					aria-label="Page navigation example">
-					<section className="flex items-center gap-1">
+					className='flex gap-3'
+					aria-label='Page navigation example'>
+					<section className='flex items-center gap-1'>
 						<span>Rows Per Page</span>
 						<select
 							onChange={(e) => {
@@ -585,10 +585,10 @@ function Paginator() {
 								// handlePaginate(page, e.target.value);
 							}}
 							value={limit}
-							id="sort"
-							name="sort"
-							title="sortdropdown"
-							className="text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded">
+							id='sort'
+							name='sort'
+							title='sortdropdown'
+							className='text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded'>
 							<option value={5}>5</option>
 							<option value={10}>10</option>
 							<option value={15}>15</option>
@@ -596,7 +596,7 @@ function Paginator() {
 						</select>
 					</section>
 
-					<ul className="flex items-center gap-2 h-10 text-base">
+					<ul className='flex items-center gap-2 h-10 text-base'>
 						<li
 							onClick={() => {
 								page > 1 && handlePaginate(page - 1, limit);
@@ -605,19 +605,19 @@ function Paginator() {
 								className={`${
 									page === 1 && 'cursor-not-allowed'
 								} flex items-center justify-center px-4 h-10 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:glass dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
-								<span className="sr-only">Previous</span>
+								<span className='sr-only'>Previous</span>
 								<svg
-									className="w-3 h-3"
-									aria-hidden="true"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 6 10">
+									className='w-3 h-3'
+									aria-hidden='true'
+									xmlns='http://www.w3.org/2000/svg'
+									fill='none'
+									viewBox='0 0 6 10'>
 									<path
-										stroke="currentColor"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth="2"
-										d="M5 1 1 5l4 4"
+										stroke='currentColor'
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth='2'
+										d='M5 1 1 5l4 4'
 									/>
 								</svg>
 							</a>
@@ -652,19 +652,19 @@ function Paginator() {
 										? 'cursor-not-allowed '
 										: ''
 								} flex items-center  justify-center px-4 h-10 leading-tight text-gray-500 bg-white dark:glass border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700  dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
-								<span className="sr-only">Next</span>
+								<span className='sr-only'>Next</span>
 								<svg
-									className="w-3 h-3"
-									aria-hidden="true"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 6 10">
+									className='w-3 h-3'
+									aria-hidden='true'
+									xmlns='http://www.w3.org/2000/svg'
+									fill='none'
+									viewBox='0 0 6 10'>
 									<path
-										stroke="currentColor"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth="2"
-										d="m1 9 4-4-4-4"
+										stroke='currentColor'
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth='2'
+										d='m1 9 4-4-4-4'
 									/>
 								</svg>
 							</a>
