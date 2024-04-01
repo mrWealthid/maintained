@@ -5,6 +5,7 @@ interface FileUploadProps {
 	accept: string;
 	multiple: boolean;
 	id: string;
+	icon: any;
 	onFileSelect: (files: FileList) => void; // Callback function to pass the selected files to the parent component
 }
 
@@ -13,7 +14,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	label,
 	accept,
 	multiple,
-	id
+	id,
+	icon
 }) => {
 	const [selected, setSelected] = useState<FileList | null>(null);
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -59,11 +61,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
 		<div>
 			<label className='text-xs'>{label}</label>
 			<label
-				className='bg-blue-100 flex flex-col gap-2 cursor-pointer justify-center items-center h-32 w-1/3'
+				className='bg-blue-100 p-4 flex flex-col gap-2 cursor-pointer rounded-lg justify-center items-center h-32'
 				htmlFor={id}>
-				<UploadFileIcon />
-
-				<small>Multiple Selection</small>
+				{/* <UploadFileIcon /> */}
+				{icon}
+				<small>Single/Multiple Selection</small>
 			</label>
 			<input
 				title='filepicker'
@@ -75,11 +77,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				id={id}
 			/>
 			{selected && (
-				<div>
-					<p>Selected files:</p>
-					<ul>
+				<div className='flex flex-col mt-2 gap-2'>
+					<small>Selected files:</small>
+					<ul className=' flex flex-col   gap-2'>
 						{Array.from(selected).map((file, index) => (
-							<li key={file.name}>{file.name}</li>
+							<li
+								className='bg-gray-50 inline text-xs p-2 rounded-lg'
+								key={file.name}>
+								{file.name}
+							</li>
 						))}
 					</ul>
 				</div>
