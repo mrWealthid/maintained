@@ -1,8 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import MaintenanceCard from '../maintenance-request/MaintenanceCard';
-import Tabs from '../maintenance-request/Tabs';
-import MaintenanceComponent from '../maintenance-request/view/MaintnenanceComponent';
+import MaintenanceComponent from '@/components/ui/MaintenanceComponent';
 import { CiCirclePlus } from 'react-icons/ci';
 
 export default function Home() {

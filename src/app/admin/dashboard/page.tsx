@@ -1,8 +1,4 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import MaintenanceCard from './maintenance-request/MaintenanceCard';
-import Tabs from './maintenance-request/Tabs';
-import MaintnenanceComponent from './maintenance-request/view/MaintnenanceComponent';
+import MaintenanceComponent from '@/components/ui/MaintenanceComponent';
 
 export default function Home() {
 	function handleClick(val: number) {}
@@ -16,7 +12,7 @@ export default function Home() {
 
 				<div>{/* <AddMaintenance /> */}</div>
 			</section>
-			<MaintnenanceComponent />
+			<MaintenanceComponent />
 		</main>
 	);
 }
