@@ -2,57 +2,55 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const Business = require('@/model/businessModel');
 
-const userSchema = new mongoose.Schema(
-	{
-		name: { type: String, required: [true, 'Please tell us your name!'] },
-		email: {
-			type: String,
-			required: [true, 'Please provide your email'],
-			unique: true,
-			lowercase: true,
-			validate: [validator.isEmail, 'Please provide a valid email']
-		},
-		photo: { type: String, default: 'default.jpg' },
-		role: {
-			type: String,
-			enum: ['user', 'admin'],
-			default: 'user'
-		},
-		password: {
-			type: String,
-			required: [true, 'Please provide a password'],
-			minlength: 8,
-			select: false
-		},
-
-		businessId: {
-			type: mongoose.Schema.ObjectId,
-			ref: Business,
-			required: [true, 'User must belong to a business']
-		},
-		createdAt: {
-			type: Date,
-			default: Date.now(),
-			select: false
-		},
-
-		dateOfBirth: {
-			type: Date
-			// required: [true, 'Please add date of birth'],
-		},
-
-		passwordChangedAt: Date,
-		passwordResetToken: String,
-		passwordResetExpires: Date,
-		active: {
-			type: Boolean,
-			default: true,
-			select: false
-		}
+const userSchema = new mongoose.Schema({
+	name: { type: String, required: [true, 'Please tell us your name!'] },
+	email: {
+		type: String,
+		required: [true, 'Please provide your email'],
+		unique: true,
+		lowercase: true,
+		validate: [validator.isEmail, 'Please provide a valid email']
 	},
-	{ toJSON: { virtuals: true }, toObject: { virtuals: true } }
-);
+	photo: { type: String, default: 'default.jpg' },
+	role: {
+		type: String,
+		enum: ['USER', 'ADMIN', 'SUPER_ADMIN'],
+		default: 'USER'
+	},
+	password: {
+		type: String,
+		required: [true, 'Please provide a password'],
+		minlength: 8,
+		select: false
+	},
+
+	business: {
+		type: mongoose.Schema.ObjectId,
+		ref: Business,
+		required: [true, 'User must belong to a business']
+	},
+	createdAt: {
+		type: Date,
+		default: Date.now(),
+		select: false
+	},
+
+	dateOfBirth: {
+		type: Date
+		// required: [true, 'Please add date of birth'],
+	},
+
+	passwordChangedAt: Date,
+	passwordResetToken: String,
+	passwordResetExpires: Date,
+	active: {
+		type: Boolean,
+		default: true,
+		select: false
+	}
+});
 
 userSchema.pre('save', async function (next) {
 	//Only run function if password was modified

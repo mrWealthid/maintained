@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Business = require('./businessModel');
+const User = require('./userModel');
 
 const requestSchema = new mongoose.Schema({
 	title: { type: String, required: true },
@@ -16,6 +18,16 @@ const requestSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now(),
 		select: false
+	},
+	userId: {
+		type: mongoose.Schema.ObjectId,
+		ref: User,
+		required: [true, 'Request must belong to a User']
+	},
+	businessId: {
+		type: mongoose.Schema.ObjectId,
+		ref: Business,
+		required: [true, 'Request must belong to a business']
 	}
 });
 

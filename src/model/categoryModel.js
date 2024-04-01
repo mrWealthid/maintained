@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
 	name: { type: String, required: true },
-	description: { type: String, required: true },
+	description: { type: String },
 	createdAt: {
 		type: Date,
 		default: Date.now(),
@@ -11,7 +11,7 @@ const categorySchema = new mongoose.Schema({
 });
 
 const Category =
-	mongoose.models.category || mongoose.model('Category', categorySchema);
+	mongoose.models.Category || mongoose.model('Category', categorySchema);
 
 // Make.init().then((x) => console.log(x));
 module.exports = Category;

@@ -1,55 +1,61 @@
-const businessSchema = new mongoose.Schema({
-	businessName: {
-		type: String,
-		required: true
-	},
-	registrationId: {
-		type: String,
-		required: true
-	},
-	businessContact: {
-		type: String,
-		required: true
-	},
-	country: {
-		type: String,
-		required: true
-	},
-	businessAddress: {
-		type: String,
-		required: true
-	},
-	description: String,
-	createdAt: {
-		type: Date,
-		default: Date.now
-	},
-	businessEmail: {
-		type: String,
-		required: [true, 'Please provide your business email'],
-		unique: true,
-		lowercase: true,
-		validate: [validator.isEmail, 'Please provide a valid email']
-	},
-	businessCreator: {
-		type: String,
-		required: true
-	},
-	// businessCreatorId: {
-	// 	type: String,
-	// 	required: true
-	// },
-	logo: { type: String, default: 'default.jpg' }
+const mongoose = require('mongoose');
+const validator = require('validator');
 
-	// businessUsers: {
-	// 	type: mongoose.Schema.ObjectId,
-	// 	ref: User
-	// 	// required: [true, 'User must belong to a business']
-	// },
-	// businessLogo: String
+const businessSchema = new mongoose.Schema(
+	{
+		businessName: {
+			type: String,
+			required: true
+		},
+		registrationId: {
+			type: String,
+			required: true
+		},
+		businessContact: {
+			type: String,
+			required: true
+		},
+		country: {
+			type: String,
+			required: true
+		},
+		businessAddress: {
+			type: String,
+			required: true
+		},
+		description: String,
+		createdAt: {
+			type: Date,
+			default: Date.now
+		},
+		businessEmail: {
+			type: String,
+			required: [true, 'Please provide your business email'],
+			unique: true,
+			lowercase: true,
+			validate: [validator.isEmail, 'Please provide a valid email']
+		},
+		businessCreator: {
+			type: String,
+			required: true
+		},
+		// businessCreatorId: {
+		// 	type: String,
+		// 	required: true
+		// },
+		logo: { type: String, default: 'default.jpg' }
 
-	// Add other fields as needed
-});
+		// businessUsers: {
+		// 	type: mongoose.Schema.ObjectId,
+		// 	ref: User
+		// 	// required: [true, 'User must belong to a business']
+		// },
+		// businessLogo: String
+
+		// Add other fields as needed
+	},
+	{ toJSON: { virtuals: true }, toObject: { virtuals: true } }
+);
 
 businessSchema.pre(/^find/, function (next) {
 	this.find({ active: { $ne: false } });
