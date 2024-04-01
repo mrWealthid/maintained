@@ -1,6 +1,5 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
 
 class MiddlewareFeatures {
 	userInfo: any;
