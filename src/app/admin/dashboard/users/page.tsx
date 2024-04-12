@@ -1,11 +1,16 @@
 import React from 'react';
 import UserList from './list/UserList';
+import AddUser from './AddUser';
 
-const page = () => {
+const page = async () => {
+	// axios('')
+
 	return (
-		<div className='w-full'>
-			<div className='flex items-center justify-between'>
+		<div className='w-full flex flex-col gap-3'>
+			<div className='flex items-center  justify-between'>
 				<h1 className='title'> All Users </h1>
+
+				<AddUser />
 			</div>
 
 			<UserList />
