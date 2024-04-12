@@ -3,8 +3,8 @@ import { Icolumn } from '@/components/Table/models/table.model';
 import Table from '@/components/Table/Table';
 import React from 'react';
 import { fetchUsers } from '../service/user.service';
-import UserRowAction from './UserRowAction';
 import UserHeaderActions from './UserHeaderActions';
+import UserRow from './UserRow';
 
 const UserList = () => {
 	const columns: Icolumn[] = [
@@ -15,7 +15,8 @@ const UserList = () => {
 			header: 'role',
 			accessor: 'role',
 			custom: { type: 'style' }
-		}
+		},
+		{ header: 'Nationality', accessor: 'business.country' }
 	];
 
 	return (
@@ -23,11 +24,12 @@ const UserList = () => {
 			headerActions={<UserHeaderActions />}
 			service={fetchUsers}
 			// actionable={false}
+
 			queryKey='users'
 			columns={columns}>
 			<Table.TableHeader />
-			<Table.TableRow>
-				<UserRowAction />
+			<Table.TableRow customRow={true}>
+				<UserRow />
 			</Table.TableRow>
 		</Table>
 	);

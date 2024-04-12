@@ -1,3 +1,4 @@
+import { decode } from 'jsonwebtoken';
 import { Router } from 'next/router';
 import { useMutation } from '@tanstack/react-query';
 import {
@@ -7,6 +8,7 @@ import {
 	handleRegister,
 	handleResetPassword
 } from '../service/auth-service';
+import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
 import { handleClientErrorMessage } from '@/utils/helper';
@@ -14,18 +16,31 @@ import {
 	ILogin,
 	IRegister,
 	IResetPassword,
+	IToken,
 	IUpdatePassword
 } from '../model/model';
 
 export function useLogin() {
-	const { isPending: isLoading, mutate: login } = useMutation({
+	const router = useRouter();
+	const {
+		isPending: isLoading,
+		mutate: login,
+		data
+	} = useMutation({
 		mutationFn: (payload: ILogin) => handleLogin(payload),
-		onError: (err: any) => toast.error(err.message)
+		onError: (err: any) => toast.error(err.message),
+		onSuccess: (data) => {
+			const userInfo = decode(data.token) as IToken;
+			if (userInfo.role === 'USER') router.push('/dashboard');
+			if (userInfo.role === 'ADMIN') router.push('/admin/dashboard');
+		}
 	});
 
+	console.log(data);
 	return {
 		isLoading,
-		login
+		login,
+		data
 	};
 }
 export function useRegister() {

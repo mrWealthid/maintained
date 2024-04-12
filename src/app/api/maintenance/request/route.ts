@@ -11,6 +11,7 @@ import path from 'path';
 import axios from 'axios';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import mongoose, { Types, ObjectId, Mongoose } from 'mongoose';
+import User from '@/model/userModel';
 
 // import { mapToObject } from '../../../../utils/helper';
 
@@ -21,13 +22,12 @@ connect();
 // 		bodyParser: false
 // 	}
 // };
+// const verify = new MiddlewareFeatures().verifyToken();
 
 export async function GET(request: NextRequest) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
-
 		const verify = new MiddlewareFeatures().verifyToken();
-
 		if (!verify?.isUserAuthenticated) {
 			return NextResponse.json(
 				{ error: 'UnAuthorized' },
@@ -37,11 +37,12 @@ export async function GET(request: NextRequest) {
 
 		let filter = {};
 		if (verify.isAdminRole) {
+			const user = await User.findById(verify.userId);
+			filter = { business: new Types.ObjectId(user.business) };
 		}
 
 		if (verify.isUserRole) {
-			// console.log(verify.userInfo.id);
-			filter = { userId: new Types.ObjectId(verify.userId) };
+			filter = { user: new Types.ObjectId(verify.userId) };
 		}
 
 		// console.log(isAuthUser);
@@ -51,9 +52,24 @@ export async function GET(request: NextRequest) {
 
 		const transformedQuery = mapToObject(query);
 
-		console.log(transformedQuery);
+		// console.log(transformedQuery);
 
-		const features = new APIFeatures(Request.find(filter), transformedQuery)
+		const requestQuery = Request.find(filter).populate([
+			{
+				path: 'category',
+				select: 'name '
+			},
+			{
+				path: 'user',
+				select: 'name'
+			},
+			{
+				path: 'business',
+				select: 'businessName'
+			}
+		]);
+
+		const features = new APIFeatures(requestQuery, transformedQuery)
 			.filter()
 			.sort()
 			.limitFields()
@@ -95,9 +111,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest, { params }: any) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
+		const verify = new MiddlewareFeatures().verifyToken();
+		if (!verify?.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'UnAuthorized' },
+				{ status: 401 }
+			);
+		}
 
-		let cookie = request.cookies.get('token')?.value || '';
-
+		const user = await User.findById(verify.userId);
 		const body = await request.json();
 
 		// // create video
@@ -114,7 +136,11 @@ export async function POST(request: NextRequest, { params }: any) {
 		// 	return uploadedVideoResponse;
 		// };
 
-		const data = await Request.create(body);
+		const data = await Request.create({
+			...body,
+			user: verify.userId,
+			business: user.business
+		});
 
 		const response = NextResponse.json(
 			{
