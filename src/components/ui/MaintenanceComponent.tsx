@@ -3,15 +3,10 @@
 import React, { useState } from 'react';
 import MaintenanceCard from './MaintenanceCard';
 import Tabs from '../../app/admin/dashboard/maintenance-request/Tabs';
-import { useFetchMaintenanceRequests } from '../../app/admin/dashboard/maintenance-request/hooks/maintenanceHooks';
 import { IListResponse } from '@/components/Table/models/table.model';
+import { IRequest } from '../shared/model/model';
+import { useFetchMaintenanceRequests } from '@/app/(users)/dashboard/maintenance-request/hooks/maintenanceHooks';
 
-type maintnenanceType = {
-	title: string;
-	description: string;
-	status: 'PENDING' | 'ASSIGNED' | 'DECLINED' | 'COMPLETED';
-	_id: string;
-};
 const MaintenanceComponent = () => {
 	const [status, setStatus] = useState<string>('PENDING');
 	const {
@@ -30,7 +25,7 @@ const MaintenanceComponent = () => {
 		<>
 			<Tabs status={status} handleClick={handleClick} />
 			<section className='grid grid-cols-3 gap-2'>
-				{data?.map((request: maintnenanceType) => (
+				{data?.map((request: IRequest) => (
 					<MaintenanceCard key={request._id} {...request} />
 				))}
 			</section>

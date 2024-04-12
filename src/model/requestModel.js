@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
 const Business = require('./businessModel');
 const User = require('./userModel');
+const Category = require('./categoryModel');
 
 const requestSchema = new mongoose.Schema({
 	title: { type: String, required: true },
 	area: { type: String, required: true },
 	description: { type: String, required: true },
-	category: { type: String, required: true },
+	category: {
+		type: mongoose.Schema.ObjectId,
+		ref: Category,
+		required: [true, 'Request must belong to a category']
+	},
 	status: {
 		type: String,
 		enum: ['PENDING', 'ASSIGNED', 'DECLINED', 'COMPLETED'],
@@ -16,15 +21,15 @@ const requestSchema = new mongoose.Schema({
 	images: [String],
 	createdAt: {
 		type: Date,
-		default: Date.now(),
-		select: false
+		default: Date.now()
+		// select: false
 	},
-	userId: {
+	user: {
 		type: mongoose.Schema.ObjectId,
 		ref: User,
 		required: [true, 'Request must belong to a User']
 	},
-	businessId: {
+	business: {
 		type: mongoose.Schema.ObjectId,
 		ref: Business,
 		required: [true, 'Request must belong to a business']

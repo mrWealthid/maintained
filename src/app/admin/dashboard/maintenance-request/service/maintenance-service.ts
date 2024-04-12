@@ -26,17 +26,16 @@ export async function handleCreateMaintenaceRequest(
 	}
 }
 
-export async function fetchMaintenanceRequests(
-	status: any,
-	page: number = 1,
-	limit: number = 10
+export async function fetchMaintenanceRequestList(
+	page: number,
+	limit: number,
+	query: string | null
 ) {
 	// const calcDate = new Date(new Date().setDate(new Date().getDate() - days));
 
-	const url =
-		status === 'ALL'
-			? `/api/maintenance/request?limit=${limit}&page=${page}`
-			: `/api/maintenance/request?limit=${limit}&page=${page}&status=${status}`;
+	const url = query
+		? `/api/maintenance/request?limit=${limit}&page=${page}${query}`
+		: `/api/maintenance/request?limit=${limit}&page=${page}`;
 	try {
 		const response = await axios(url);
 		const data = await response.data;

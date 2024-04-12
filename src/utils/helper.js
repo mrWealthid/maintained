@@ -1,3 +1,4 @@
+import { REQUEST_STATUS } from './enums';
 export const convertTime = (time) => {
 	const options = {
 		hour: 'numeric',
@@ -39,20 +40,31 @@ export const formatDate = (date) => {
 	return TodaysDate;
 };
 
+// export function getStatusColor(val) {
+// 	let style = '';
+// 	if (val === 'UNCONFIRMED') {
+// 		style = 'bg-pending text-white';
+// 	}
+
+// 	if (val === 'CHECKED_OUT') {
+// 		style = 'bg-gray-300';
+// 	}
+
+// 	if (val === 'CHECKED_IN') {
+// 		style = 'bg-success text-white';
+// 	}
+// 	return style;
+// }
+
 export function getStatusColor(val) {
-	let style = '';
-	if (val === 'UNCONFIRMED') {
-		style = 'bg-pending text-white';
-	}
+	const colorObj = {
+		[REQUEST_STATUS.pending]: 'yellow',
+		[REQUEST_STATUS.completed]: 'green',
+		[REQUEST_STATUS.assigned]: 'blue',
+		[REQUEST_STATUS.declined]: 'red'
+	};
 
-	if (val === 'CHECKED_OUT') {
-		style = 'bg-gray-300';
-	}
-
-	if (val === 'CHECKED_IN') {
-		style = 'bg-success text-white';
-	}
-	return style;
+	return colorObj[val];
 }
 
 export const formatCurrency = (value, currency = 'USD', locale = 'en') => {

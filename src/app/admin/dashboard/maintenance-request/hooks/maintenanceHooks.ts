@@ -1,10 +1,7 @@
 import { toast } from 'react-hot-toast';
 import { IListResponse } from '@/components/Table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-	fetchMaintenanceRequests,
-	handleCreateMaintenaceRequest
-} from '../service/maintenance-service';
+import { handleCreateMaintenaceRequest } from '../service/maintenance-service';
 
 export function useCreateMaintenanceRequest(
 	bookingId: any,
@@ -29,20 +26,20 @@ export function useCreateMaintenanceRequest(
 	return { isCreating, createMaintenance };
 }
 
-export function useFetchMaintenanceRequests(
-	status: string,
-	page: number = 1,
-	limit: number = 10
-): IListResponse {
-	const { isLoading, data, error, isRefetching } = useQuery({
-		queryKey: ['requests', status],
-		queryFn: () => fetchMaintenanceRequests(status, page, limit)
-	});
+// export function useFetchMaintenanceRequests(
+// 	status: string,
+// 	page: number = 1,
+// 	limit: number = 10
+// ): IListResponse {
+// 	const { isLoading, data, error, isRefetching } = useQuery({
+// 		queryKey: ['requests', status],
+// 		queryFn: () => fetchMaintenanceRequests(status, page, limit)
+// 	});
 
-	return {
-		isLoading,
-		error,
-		isRefetching,
-		...data
-	};
-}
+// 	return {
+// 		isLoading,
+// 		error,
+// 		isRefetching,
+// 		...data
+// 	};
+// }
