@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export async function fetchUsers(
 	page: number,
 	limit: number,
@@ -7,13 +9,22 @@ export async function fetchUsers(
 		? `/api/users?limit=${limit}&page=${page}`
 		: `/api/users?limit=${limit}&page=${page}&${search}`;
 	try {
-		const response = await fetch(url);
+		const response = await axios(url);
 
-		if (!response.ok) {
-			throw new Error(`HTTP error! Status: ${response.status}`);
-		}
+		const data = await response.data;
 
-		const data = await response.json();
+		return data;
+	} catch (err) {
+		console.log(err);
+	}
+}
+
+export async function handleCreateUser(payload: any) {
+	const url = '/api/users/invite-user';
+	try {
+		const response = await axios.post(url, payload);
+
+		const data = await response.data;
 
 		return data;
 	} catch (err) {

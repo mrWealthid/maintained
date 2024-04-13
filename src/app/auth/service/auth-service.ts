@@ -59,6 +59,15 @@ export async function handleResetPassword(payload: IUpdatePassword) {
 		throw Error(handleClientErrorMessage(err));
 	}
 }
+export async function handleOnboardUser(payload: any) {
+	try {
+		const res = await axios.post(`/api/auth/onboard`, payload);
+		const data = await res.data;
+		return data;
+	} catch (err) {
+		throw Error(handleClientErrorMessage(err));
+	}
+}
 export async function handleLogout() {
 	try {
 		await axios(`/api/auth/logout`);

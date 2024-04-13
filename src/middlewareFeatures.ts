@@ -4,18 +4,12 @@ import { cookies } from 'next/headers';
 class MiddlewareFeatures {
 	userInfo: any;
 	private token;
-	private isAdmin: boolean;
-	private isUser: boolean;
-	private isSuperAdmin: boolean;
 	private isAuthenticated: boolean;
 
 	constructor() {
 		this.token = cookies().get('token');
 		this.userInfo = null;
 		this.isAuthenticated = false;
-		this.isSuperAdmin = false;
-		this.isUser = false;
-		this.isAdmin = false;
 	}
 
 	// getRoleType() {

@@ -35,13 +35,15 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 	);
 
 	async function onSubmit(data: any) {
-		const payload = {
-			...data
-		};
+		const { firstName, lastName, ...rest } = data;
 
+		const payload = {
+			...rest,
+			name: firstName + ' ' + lastName
+		};
 		console.log(payload);
 
-		// createUser(payload);
+		createUser(payload);
 	}
 
 	function onError(err: any) {
@@ -104,21 +106,7 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 								placeholder='johndoe@gmail.com'
 							/>
 						</EmailInput>
-						<TextInput
-							name={'dateOfBirth'}
-							label='Date Of Birth'
-							error={errors?.[
-								'dateOfBirth'
-							]?.message?.toString()}>
-							<input
-								{...register('dateOfBirth', {
-									required: 'This field is required'
-								})}
-								className='input-style'
-								type='date'
-								id='dateOfBirth'
-							/>
-						</TextInput>
+					
 						{/*
 						<TextInput
 							name={'lastName'}
@@ -151,8 +139,6 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 								<option> ADMIN</option>
 							</select>
 						</TextInput>
-
-				
 					</div>
 					<section className='flex justify-end gap-4'>
 						<ButtonComponent

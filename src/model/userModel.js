@@ -42,6 +42,8 @@ const userSchema = new mongoose.Schema({
 		// required: [true, 'Please add date of birth'],
 	},
 
+	inviteToken: String,
+	inviteTokenExpires: Date,
 	passwordChangedAt: Date,
 	passwordResetToken: String,
 	passwordResetExpires: Date,
@@ -49,6 +51,10 @@ const userSchema = new mongoose.Schema({
 		type: Boolean,
 		default: true,
 		select: false
+	},
+	status: {
+		type: String,
+		enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
 	}
 });
 
@@ -102,6 +108,19 @@ userSchema.methods.createPasswordResetToken = function () {
 	//for 10mins
 	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 	return resetToken;
+};
+
+userSchema.methods.createUserInviteToken = function () {
+	const inviteToken = crypto.randomBytes(32).toString('hex');
+	this.inviteToken = crypto
+		.createHash('sha256')
+		.update(inviteToken)
+		.digest('hex');
+
+	console.log({ inviteToken }, this.inviteToken);
+	//for 24hrs
+	this.inviteTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+	return inviteToken;
 };
 
 userSchema.pre(/^find/, function (next) {

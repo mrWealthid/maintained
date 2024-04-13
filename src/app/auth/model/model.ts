@@ -31,3 +31,10 @@ export interface IBusiness {
 	logo?: string;
 	businessUsers?: Array<any>;
 }
+
+export interface IToken {
+	id: string;
+	role: 'ADMIN' | 'USER' | 'SUPER_ADMIN';
+	iat: number;
+	exp: number;
+}

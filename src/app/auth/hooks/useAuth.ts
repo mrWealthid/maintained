@@ -5,6 +5,7 @@ import {
 	handleForgetPassword,
 	handleLogin,
 	handleLogout,
+	handleOnboardUser,
 	handleRegister,
 	handleResetPassword
 } from '../service/auth-service';
@@ -89,6 +90,18 @@ export function useUpdatePassword() {
 	return {
 		isLoading,
 		updatePassword
+	};
+}
+export function useOnboardUser() {
+	const { isPending: isLoading, mutate: onboardUser } = useMutation({
+		mutationFn: (payload: any) => handleOnboardUser(payload),
+		onSuccess: (data) => toast.success(data.message),
+		onError: (err: any) => toast.error(err.message)
+	});
+
+	return {
+		isLoading,
+		onboardUser
 	};
 }
 
