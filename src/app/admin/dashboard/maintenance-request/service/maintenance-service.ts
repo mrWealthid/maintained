@@ -34,7 +34,7 @@ export async function fetchMaintenanceRequestList(
 	// const calcDate = new Date(new Date().setDate(new Date().getDate() - days));
 
 	const url = query
-		? `/api/maintenance/request?limit=${limit}&page=${page}${query}`
+		? `/api/maintenance/request?limit=${limit}&page=${page}&${query}`
 		: `/api/maintenance/request?limit=${limit}&page=${page}`;
 	try {
 		const response = await axios(url);

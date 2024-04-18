@@ -7,7 +7,7 @@ import { REQUEST_STATUS } from '@/utils/enums';
 const RequestHeaderActions = ({ handleFilter }: any) => {
 	const [query, setQuery] = useState<{
 		status: string;
-	} | null>(null);
+	} | null>({ status: REQUEST_STATUS.pending });
 
 	async function handleClick(query: any) {
 		setQuery(query);
@@ -30,7 +30,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 			<div className=''>
 				<button
 					onClick={() =>
-						handleClick({ checkStatus: REQUEST_STATUS.pending })
+						handleClick({ status: REQUEST_STATUS.pending })
 					}
 					type='button'
 					className={`${
@@ -45,7 +45,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 				<button
 					onClick={() =>
 						handleClick({
-							checkStatus: REQUEST_STATUS.assigned
+							status: REQUEST_STATUS.assigned
 						})
 					}
 					type='button'
@@ -62,7 +62,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 				<button
 					onClick={() =>
 						handleClick({
-							checkStatus: REQUEST_STATUS.completed
+							status: REQUEST_STATUS.completed
 						})
 					}
 					type='button'
@@ -79,7 +79,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 				<button
 					onClick={() =>
 						handleClick({
-							checkStatus: REQUEST_STATUS.declined
+							status: REQUEST_STATUS.declined
 						})
 					}
 					type='button'

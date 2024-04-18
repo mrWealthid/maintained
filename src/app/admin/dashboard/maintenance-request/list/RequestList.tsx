@@ -4,6 +4,7 @@ import RequestHeaderActions from './RequestHeaderActions';
 import { Icolumn } from '@/components/Table/models/table.model';
 import RequestRow from './RequestRow';
 import { fetchMaintenanceRequestList } from '../service/maintenance-service';
+import { REQUEST_STATUS } from '@/utils/enums';
 
 const RequestsList = () => {
 	// const cabins = await getData('/api/cabins', 'cabins', 'no-discount');
@@ -22,7 +23,13 @@ const RequestsList = () => {
 			header: 'status',
 			accessor: 'status',
 			searchType: 'DROPDOWN',
-			filterKey: 'status'
+			filterKey: 'status',
+			selectOptions: [
+				{ name: 'pending', value: REQUEST_STATUS.pending },
+				{ name: 'assigned', value: REQUEST_STATUS.assigned },
+				{ name: 'completed', value: REQUEST_STATUS.completed },
+				{ name: 'declined', value: REQUEST_STATUS.declined }
+			]
 		},
 
 		{
