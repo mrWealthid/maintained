@@ -7,6 +7,11 @@ export interface ITable {
 	service: any;
 	actionable?: boolean;
 	isDownloadable?: boolean;
+	defaultParams?: IsearchParams;
+}
+
+export interface IsearchParams {
+	[key: string]: any;
 }
 
 interface TableConfig {
@@ -25,8 +30,13 @@ export interface Icolumn {
 		bolden?: boolean;
 	};
 	searchType?: 'TEXT' | 'DROPDOWN' | 'NUMBER';
-	selectOptions?: Object[];
+	selectOptions?: IselectOptions[];
 	filterKey?: string;
+}
+
+export interface IselectOptions {
+	name: string;
+	value: string | number;
 }
 
 export interface IListResponse {

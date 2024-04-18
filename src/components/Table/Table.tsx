@@ -7,7 +7,13 @@ import React, {
 	useState
 } from 'react';
 import { createContext } from 'react';
-import { IListResponse, ITable, Icolumn } from './models/table.model';
+import {
+	IListResponse,
+	ITable,
+	Icolumn,
+	IsearchParams,
+	IselectOptions
+} from './models/table.model';
 import { formatCurrency } from '@/utils/helper';
 
 import { useTable } from './hooks/useTable';
@@ -31,11 +37,14 @@ function Table({
 	service,
 	limit: limitVal,
 	actionable = true,
-	isDownloadable = true
+	isDownloadable = true,
+	defaultParams = {}
 }: ITable) {
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(limitVal || 5);
-	const [search, setSearch] = useState<string | null>(null);
+	const [search, setSearch] = useState<string | null>(
+		objectToQueryParams(defaultParams!)
+	);
 	const [filterIsActive, setfilterIsActive] = useState(false);
 
 	const {
@@ -47,7 +56,7 @@ function Table({
 		isRefetching
 	}: IListResponse = useTable(page, limit, service, queryKey, search);
 
-	function handleFilter(val: { key: string; value: string | number } | null) {
+	function handleFilter(val: IsearchParams | null) {
 		let transformedSearchQuery = '';
 		if (!val) {
 			setfilterIsActive(false);
@@ -155,17 +164,14 @@ function Table({
 				)}
 
 				<div className='mt-3 text-xs'>
-					<Paginator
-
-					// handlePaginate={handlePaginate}
-					/>
+					<Paginator />
 				</div>
 			</div>
 		</TableContext.Provider>
 	);
 }
 
-function TableFilterForm({ column, onCloseModal }: any) {
+function TableFilterForm({ onCloseModal }: any) {
 	const { handleFilter, cancelFilter }: any = useContext(TableContext);
 	const { register, handleSubmit, formState } = useForm({
 		mode: 'onChange'
@@ -178,56 +184,86 @@ function TableFilterForm({ column, onCloseModal }: any) {
 		handleFilter(data);
 
 		onCloseModal();
-		// console.log(objectToQueryParams(data));
 	}
 
 	return (
 		<form
 			onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
 			className=' flex flex-col gap-3 p-6  items-center"'>
-			<section className=' grid  gap-3   grid-cols-1 '>
-				{columns.map((column: Icolumn) => {
-					if (column.searchType === 'TEXT') {
-						return (
-							<TextInput
-								key={column.accessor}
-								name={column.header}
-								label={column.header}>
-								<input
-									{...register(
-										column.filterKey
-											? column.filterKey
-											: column.header,
-										{}
-									)}
-									className='input-style'
-									placeholder={`Enter ${column.header}`}
-									type='text'
-									id={column.header}
-								/>
-							</TextInput>
-						);
-					}
-					if (column.searchType === 'NUMBER') {
-						return (
-							<TextInput
-								key={column.accessor}
-								name={column.header}
-								label={column.header}>
-								<input
-									{...register(
-										column.filterKey
-											? column.filterKey
-											: column.header
-									)}
-									className='input-style'
-									type='number'
-									id={column.header}
-								/>
-							</TextInput>
-						);
-					}
-				})}
+			<section className=' grid  gap-3 grid-cols-1 '>
+				{columns
+					.slice()
+					.filter((val: Icolumn) => val.searchType)
+					.map((column: Icolumn) => {
+						if (/TEXT/.test(column.searchType!)) {
+							return (
+								<TextInput
+									key={column.accessor}
+									name={column.header}
+									label={column.header}>
+									<input
+										{...register(
+											column.filterKey
+												? column.filterKey
+												: column.header,
+											{}
+										)}
+										className='input-style'
+										placeholder={`Enter ${column.header}`}
+										type='text'
+										id={column.header}
+									/>
+								</TextInput>
+							);
+						}
+						if (/NUMBER/.test(column.searchType!)) {
+							return (
+								<TextInput
+									key={column.accessor}
+									name={column.header}
+									label={column.header}>
+									<input
+										{...register(
+											column.filterKey
+												? column.filterKey
+												: column.header
+										)}
+										className='input-style'
+										type='number'
+										id={column.header}
+									/>
+								</TextInput>
+							);
+						}
+						if (/DROPDOWN/.test(column.searchType!)) {
+							return (
+								<TextInput
+									key={column.accessor}
+									name={column.header}
+									label={column.header}>
+									<select
+										className='input-style'
+										{...register(
+											column.filterKey
+												? column.filterKey
+												: column.header
+										)}>
+										<option value=''>Select Options</option>
+										{column.selectOptions?.map(
+											(options: IselectOptions, i) => (
+												<React.Fragment key={i}>
+													<option
+														value={options.value}>
+														{options.name}
+													</option>
+												</React.Fragment>
+											)
+										)}
+									</select>
+								</TextInput>
+							);
+						}
+					})}
 			</section>
 			{/* <TextInput
 				name={'description'}
