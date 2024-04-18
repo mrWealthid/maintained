@@ -3,5 +3,14 @@ export const REQUEST_STATUS = {
 	assigned: 'ASSIGNED',
 	declined: 'DECLINED',
 	completed: 'COMPLETED',
-	all:'ALL'
+	all: 'ALL'
+};
+export const INVITE_STATUS = {
+	invited: 'INVITED',
+	activated: 'ACTIVATED',
+	declined: 'DECLINED'
+};
+export const ROLE_STATUS = {
+	admin: 'ADMIN',
+	user: 'USER'
 };

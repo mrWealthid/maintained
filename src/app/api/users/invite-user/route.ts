@@ -3,6 +3,7 @@ import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import MiddlewareFeatures from '@/middlewareFeatures';
+import { Emails } from '@/utils/email-resend';
 // import { Emails } from '@/utils/email-resend';
 
 connect();
@@ -19,7 +20,12 @@ export async function POST(request: NextRequest) {
 		}
 		//2) Get business details from admin user
 
-		const adminUser = await User.findById(verify?.userId);
+		const adminUser = await User.findById(verify?.userId).populate([
+			{
+				path: 'business',
+				select: 'businessName'
+			}
+		]);
 
 		const body = await request.json();
 
@@ -39,11 +45,12 @@ export async function POST(request: NextRequest) {
 
 		const user = await User({
 			email: body.email,
-			business: adminUser.business,
+			business: adminUser.business.id,
 			dateOfBirth: body.dateOfBirth,
 			role: body.role,
 			name: body.name,
-			status: 'INVITED'
+			status: 'INVITED',
+			businessName: adminUser.business.businessName
 		});
 
 		const inviteToken = user.createUserInviteToken();
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
 				? `http://localhost:3000/auth/onboard-user/${inviteToken}`
 				: `https://hotel-app-blush-beta.vercel.app/auth/onboard-user/${inviteToken}`;
 
-		// await new Emails(user, resetURL).sendPasswordReset();
+		await new Emails(user, inviteURL, adminUser.business).sendInviteUser();
 
 		//3) If everything is ok, send token to client
 
