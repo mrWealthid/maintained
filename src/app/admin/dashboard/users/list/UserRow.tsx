@@ -27,7 +27,7 @@ function UserRow({ data }: any) {
 				return (
 					<tr
 						key={i}
-						className=' dark:border-none dark:text-white text-secondary relative border-b hover:glass '>
+						className='dark:border-none dark:text-white text-secondary relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
@@ -76,15 +76,22 @@ function UserRow({ data }: any) {
 						<td>
 							<span
 								className=' block ellipsis-overflow'
-								title={row.role}>
-								{row.role}
+								title={row.business.country}>
+								{row.business.country}
 							</span>
 						</td>
 						<td>
 							<span
 								className=' block ellipsis-overflow'
-								title={row.business.country}>
-								{row.business.country}
+								title={row.status}>
+								{row.status}
+							</span>
+						</td>
+						<td>
+							<span
+								className=' block ellipsis-overflow'
+								title={row.role}>
+								{row.role}
 							</span>
 						</td>
 
