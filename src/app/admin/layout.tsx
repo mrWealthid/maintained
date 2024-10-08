@@ -15,7 +15,6 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<p>Test</p>
 			<Header />
 			<section>
 				<SideBar />
