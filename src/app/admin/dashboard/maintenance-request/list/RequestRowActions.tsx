@@ -66,7 +66,7 @@ const RequestRowActions = ({ rowData }: any) => {
 									<Menu.Item>
 										{({ active }) => (
 											<Modal.Open opens='check-out'>
-												<button className='group gap-1 flex w-full hover:glass  items-center rounded-md px-2 py-2 text-sm'>
+												<button className='group gap-1 flex w-full   items-center rounded-md px-2 py-2 text-sm'>
 													{active ? (
 														<HiArrowUpOnSquare />
 													) : (
@@ -83,7 +83,7 @@ const RequestRowActions = ({ rowData }: any) => {
 										{({ active }) => (
 											<button
 												onClick={() => setOpen(true)}
-												className='group gap-1 flex w-full hover:glass  items-center rounded-md px-2 py-2 text-sm'>
+												className='group gap-1 flex w-full   items-center rounded-md px-2 py-2 text-sm'>
 												{active ? (
 													<MdOutlinePrint />
 												) : (
@@ -99,7 +99,7 @@ const RequestRowActions = ({ rowData }: any) => {
 										<Link
 											href={`bookings/${rowData.id}`}
 											className='
-											 group flex gap-1 w-full hover:glass items-center rounded-md px-2 py-2 text-sm'>
+											 group flex gap-1 w-full  items-center rounded-md px-2 py-2 text-sm'>
 											{active ? <HiEye /> : <HiEye />}
 											View Details
 										</Link>
@@ -112,7 +112,7 @@ const RequestRowActions = ({ rowData }: any) => {
 										{({ active }) => (
 											<Link
 												href={`checkin/${rowData.id}`}
-												className='group flex gap-1 w-full hover:glass items-center rounded-md px-2 py-2 text-sm'>
+												className='group flex gap-1 w-full  items-center rounded-md px-2 py-2 text-sm'>
 												{active ? (
 													<HiArrowDownOnSquare />
 												) : (
@@ -128,7 +128,7 @@ const RequestRowActions = ({ rowData }: any) => {
 									<Menu.Item>
 										{({ active }) => (
 											<Modal.Open opens='delete-booking'>
-												<button className='group gap-1 flex w-full hover:glass  items-center rounded-md px-2 py-2 text-sm'>
+												<button className='group gap-1 flex w-full  items-center rounded-md px-2 py-2 text-sm'>
 													{active ? (
 														<HiTrash />
 													) : (

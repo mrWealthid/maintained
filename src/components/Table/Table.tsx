@@ -442,7 +442,7 @@ function TableRow({ children, customRow }: any) {
 						return (
 							<tr
 								key={i}
-								className='text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b  transition-shadow hover:shadow   duration-500 '>
+								className='text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b    duration-500 '>
 								{/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"

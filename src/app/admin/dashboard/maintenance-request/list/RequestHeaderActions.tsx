@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
 import { REQUEST_STATUS } from '@/utils/enums';
+import { GetColorObject } from '@/utils/helper';
 
 const RequestHeaderActions = ({ handleFilter }: any) => {
 	const [query, setQuery] = useState<{
@@ -13,6 +14,8 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 		setQuery(query);
 		query ? handleFilter(query) : handleFilter(null);
 	}
+
+	const colorObj = GetColorObject();
 
 	return (
 		<>
@@ -37,7 +40,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 						query?.status === REQUEST_STATUS.pending &&
 						'!bg-primary text-white'
 					} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl  bg-gray-50  dark:glass dark:border-none font-light text-black border btn`}>
-					<FaCircle color='yellow' />
+					<FaCircle color={colorObj[REQUEST_STATUS.pending]} />
 					Pending
 				</button>
 			</div>
@@ -53,7 +56,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 						query?.status === REQUEST_STATUS.assigned &&
 						'!bg-primary text-white'
 					} w-full flex gap-1 items-center  text-xs px-6 py-2 rounded-3xl  dark:glass dark:border-none bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='yellow' />
+					<FaCircle color={colorObj[REQUEST_STATUS.assigned]} />
 					Assigned
 				</button>
 			</div>
@@ -70,7 +73,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 						query?.status === REQUEST_STATUS.completed &&
 						'!bg-primary text-white'
 					} w-full  text-xs px-6 py-2 flex items-center gap-1 rounded-3xl  dark:glass dark:border-none  bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='green' />
+					<FaCircle color={colorObj[REQUEST_STATUS.completed]} />
 					Completed
 				</button>
 			</div>
@@ -87,7 +90,7 @@ const RequestHeaderActions = ({ handleFilter }: any) => {
 						query?.status === REQUEST_STATUS.declined &&
 						'!bg-primary text-white'
 					} w-full  text-xs px-6 py-2 flex items-center gap-1 rounded-3xl  dark:glass dark:border-none  bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='red' />
+					<FaCircle color={colorObj[REQUEST_STATUS.declined]} />
 					Declined
 				</button>
 			</div>

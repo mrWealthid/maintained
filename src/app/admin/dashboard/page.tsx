@@ -10,7 +10,7 @@ export default function Home() {
 					Maintained
 				</p>
 
-				<div>{/* <AddMaintenance /> */}</div>
+
 			</section>
 			<MaintenanceComponent />
 		</main>

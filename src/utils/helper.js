@@ -56,11 +56,19 @@ export const formatDate = (date) => {
 // 	return style;
 // }
 
+export function GetColorObject() {
+	return {
+		[REQUEST_STATUS.pending]: '#F7CB73',
+		[REQUEST_STATUS.completed]: 'green',
+		[REQUEST_STATUS.assigned]: '9AD9EB',
+		[REQUEST_STATUS.declined]: 'red'
+	};
+}
 export function getStatusColor(val) {
 	const colorObj = {
-		[REQUEST_STATUS.pending]: 'yellow',
+		[REQUEST_STATUS.pending]: '#F7CB73',
 		[REQUEST_STATUS.completed]: 'green',
-		[REQUEST_STATUS.assigned]: 'blue',
+		[REQUEST_STATUS.assigned]: '9AD9EB',
 		[REQUEST_STATUS.declined]: 'red'
 	};
 

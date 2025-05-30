@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 			.update(inviteToken)
 			.digest('hex');
 
-		console.log(hashedToken);
+		console.log({ hashedToken });
 
 		const user = await User.findOne({
 			inviteToken: hashedToken,
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 		}
 		user.password = password;
 		user.passwordConfirm = password;
-		user.active = true;
+		user.status = undefined;
 		user.inviteToken = undefined;
 		user.inviteTokenExpires = undefined;
 		await user.save();

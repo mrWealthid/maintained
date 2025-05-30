@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
 		//create the user but will be assigned a
 
-		const user = await User({
+		const user = await new User({
 			email: body.email,
 			business: adminUser.business.id,
 			dateOfBirth: body.dateOfBirth,

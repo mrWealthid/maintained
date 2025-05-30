@@ -20,22 +20,17 @@ const MaintenanceCard = ({
 		<section className='request-card'>
 			<div className='flex items-center justify-between w-full text-xs'>
 				<section className='flex gap-5 items-center'>
-					<time className='text-gray-500'>
+					<time className='text-gray-500 dark:text-white'>
 						<p>{new Date(createdAt).toLocaleDateString()}</p>
 					</time>
-					<span
-						title={area}
-						className='z-10 rounded-full bg-gray-50 px-3 source py-1.5 font-medium text-gray-600 hover:bg-gray-100'>
+					<span title={area} className='request-card__details'>
 						{area}
 					</span>
 				</section>
 
-				<section className=''>
-					<span className='z-10 rounded-full bg-gray-50 px-3 source py-1.5 flex items-center gap-2 text-xs font-medium text-gray-600 hover:bg-gray-100'>
-						<FaCircle
-							color={`${getStatusColor(status)}`}
-
-						/>
+				<section>
+					<span className='request-card__details '>
+						<FaCircle color={`${getStatusColor(status)}`} />
 						{status}
 					</span>
 
@@ -46,22 +41,22 @@ const MaintenanceCard = ({
 			<div className='group'>
 				<h3
 					title={title}
-					className='mt-3 text-lg font-semibold title leading-6 text-primary group-hover:text-gray-600'>
+					className='mt-3 text-lg font-semibold title leading-6  dark:text-gray-400 text-primary dark:group-hover:text-white group-hover:text-gray-600'>
 					{title}
 				</h3>
-				<p className='mt-5 line-clamp-3 description text-sm leading-6 text-gray-600'>
+				<p className='mt-5 line-clamp-3 description text-sm leading-6 text-gray-600  dark:text-gray-400'>
 					{description}
 				</p>
 			</div>
 
 			<div className='w-full mt-8 flex text-xs justify-between items-center gap-x-4'>
-				<span className='relative z-10 author flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100'>
+				<span className='request-card__details'>
 					<CiUser />
 					<span className='ellipsis-overflow'>{user.name}</span>
 				</span>
 				<span
 					title={'category:' + category.name}
-					className='relative z-10 author flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100'>
+					className='request-card__details'>
 					<i className='fa-regular fa-user'></i>
 					<span className='ellipsis-overflow'>{category.name}</span>
 				</span>
@@ -129,7 +124,7 @@ export default MaintenanceCard;
 //   <div class="w-full mt-8 flex text-xs justify-between items-center gap-x-4">
 //     <span
 //       title="{{ article.author }}"
-//       class="relative z-10 author flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
+//       class="request-card__details"
 //     >
 //       <i class="fa-regular fa-user"></i>
 //       <span class="ellipsis-overflow">
