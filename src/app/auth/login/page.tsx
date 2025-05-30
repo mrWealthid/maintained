@@ -111,7 +111,7 @@ const LoginComponent = () => {
 
 							<section className=' '>
 								<ButtonComponent
-									styles='rounded-3xl 2xl:w-1/5'
+									styles='rounded-3xl w-full'
 									btnText='Submit'
 									loading={isLoading}
 									type='submit'

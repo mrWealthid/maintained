@@ -30,7 +30,7 @@ const UserRowAction = ({ rowData }: any) => {
 								<Menu.Item>
 									{({ active }) => (
 										<Modal.Open opens='edit-cabin-form'>
-											<button className='group text-black flex w-full gap-1  hover:glass items-center rounded-md px-2 py-2 text-sm'>
+											<button className='group text-black flex w-full gap-1  items-center rounded-md px-2 py-2 text-sm'>
 												{active ? (
 													<HiPencil />
 												) : (
@@ -63,7 +63,7 @@ const UserRowAction = ({ rowData }: any) => {
 								<Menu.Item>
 									{({ active }) => (
 										<Modal.Open opens='confirm-modal'>
-											<button className='group text-black  hover:glass gap-1 flex w-full items-center rounded-md px-2 py-2 text-sm'>
+											<button className='group text-black  gap-1 flex w-full items-center rounded-md px-2 py-2 text-sm'>
 												{active ? (
 													<HiTrash />
 												) : (
