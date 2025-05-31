@@ -99,7 +99,7 @@ function RequestRow({ data }: any) {
 									title={new Date(
 										row.createdAt
 									).toDateString()}
-									className='flex  text-[12px]  md:text-[10px] gap-1'>
+									className='flex  text-xs  md:text-sm gap-1'>
 									{/* <span>
 										{new Date(row.startDate).toDateString()}{' '}
 										➡️
