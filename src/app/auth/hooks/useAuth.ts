@@ -29,8 +29,7 @@ export function useLogin() {
 		data
 	} = useMutation({
 		mutationFn: (payload: ILogin) => handleLogin(payload),
-		onError: (err: any) =>
-			toast.error(handleClientErrorMessage(err.message)),
+		onError: (err: any) => toast.error(err.message),
 		onSuccess: (data) => {
 			const userInfo = decode(data.token) as IToken;
 			if (userInfo.role === 'USER') router.push('/dashboard');
@@ -48,8 +47,7 @@ export function useLogin() {
 export function useRegister() {
 	const { isPending: isLoading, mutate: registering } = useMutation({
 		mutationFn: (payload: IRegister) => handleRegister(payload),
-		onError: (err: any) =>
-			toast.error(handleClientErrorMessage(err.message))
+		onError: (err: any) => toast.error(err.message)
 	});
 
 	return {

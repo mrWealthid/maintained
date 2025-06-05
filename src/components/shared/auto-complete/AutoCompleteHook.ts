@@ -8,7 +8,7 @@ export function useAutoComplete(
 	const { isLoading, data, error, isRefetching } = useQuery({
 		queryKey: ['search' + queryKey + search],
 		queryFn: () => service(search),
-		keepPreviousData: true
+		placeholderData: () => undefined
 	});
 
 	return {isRefetching ,
