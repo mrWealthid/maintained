@@ -1,11 +1,12 @@
-import axios from 'axios';
-
 export async function fetchProfile() {
 	const url = `/api/users/me`;
 	try {
-		const response = await axios(url);
+		const response = await fetch(url);
 
-		const { data } = response;
+		if (!response.ok) {
+			throw new Error(`HTTP error! Status: ${response.status}`);
+		}
+		const data = await response.json();
 		return data;
 	} catch (err) {
 		console.log(err);

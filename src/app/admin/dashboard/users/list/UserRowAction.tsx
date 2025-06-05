@@ -1,4 +1,4 @@
-import Modal from '@/components/shared/Modal/Modal-component';
+import Modal from '@/components/shared/modal/Modal';
 import React, { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { HiPencil, HiSquare2Stack, HiTrash } from 'react-icons/hi2';

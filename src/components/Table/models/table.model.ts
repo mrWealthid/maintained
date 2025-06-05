@@ -38,7 +38,6 @@ export interface IselectOptions {
 	name: string;
 	value: string | number;
 }
-
 export interface IListResponse {
 	isLoading: boolean;
 	error: any;

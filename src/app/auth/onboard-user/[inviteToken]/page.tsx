@@ -1,6 +1,6 @@
 'use client';
-import ButtonComponent from '@/components/shared/Form-inputs/Button';
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
+import TextInput from '@/components/shared/form-elements/Text-Input';
+import ButtonComponent from '@/components/shared/form-elements/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';

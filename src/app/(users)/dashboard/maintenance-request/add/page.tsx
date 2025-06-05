@@ -1,14 +1,14 @@
 'use client';
 
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
-import ButtonComponent from '@/components/shared/Form-inputs/Button';
 import React, { useEffect, useState } from 'react';
+import TextInput from '@/components/shared/form-elements/Text-Input';
+import ButtonComponent from '@/components/shared/form-elements/Button';
 import { useForm } from 'react-hook-form';
-import AutoComplete from '@/components/shared/AutoComplete/AutoComplete';
+import AutoComplete from '@/components/shared/auto-complete/AutoComplete';
 
 import { useCreateMaintenanceRequest } from '../hooks/maintenanceHooks';
 import { fetchCategory } from '../service/maintenance-service';
-import FileUpload from '@/components/shared/Form-inputs/File-Upload';
+import FileUpload from '@/components/shared/form-elements/File-Upload';
 import { IoIosCloudUpload } from 'react-icons/io';
 
 import axios from 'axios';

@@ -1,5 +1,5 @@
 import { toast } from 'react-hot-toast';
-import { IListResponse } from '@/components/Table/models/table.model';
+import { IListResponse } from '@/components/table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	fetchMaintenanceRequests,

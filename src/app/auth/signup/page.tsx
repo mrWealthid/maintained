@@ -1,7 +1,7 @@
 'use client';
-import EmailInput from '@/components/shared/Form-inputs/Email-Input';
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
-import ButtonComponent from '@/components/shared/Form-inputs/Button';
+import EmailInput from '@/components/shared/form-elements/Email-Input';
+import TextInput from '@/components/shared/form-elements/Text-Input';
+import ButtonComponent from '@/components/shared/form-elements/Button';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -278,16 +278,14 @@ const SignupComponent = () => {
 								</TextInput>
 							</div>
 						</section>
-						<section className=' '>
-							<ButtonComponent
-								styles='rounded-3xl 2xl:w-1/5'
-								btnText='Submit'
-								type='submit'
-								loading={isLoading}
-								disabled={!formState.isValid || isLoading}
-								// afterIcon="/assets/send.svg"
-							/>
-						</section>
+						<ButtonComponent
+							styles='w-full mt-4'
+							btnText='Register'
+							type='submit'
+							loading={isLoading}
+							disabled={!formState.isValid || isLoading}
+							// afterIcon="/assets/send.svg"
+						/>
 						<p className='text-sm text-primary dark:text-label-color flex gap-2'>
 							Already Have An Account ?
 							<Link

@@ -2,10 +2,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useRef, useState } from 'react';
-import useClickOutside from '@/components/shared/Hooks/ClickOutside';
 import { RiHomeLine, RiUserReceivedLine } from 'react-icons/ri';
 import { MdOutlineAirlineSeatIndividualSuite } from 'react-icons/md';
 import { CiSettings, CiUser } from 'react-icons/ci';
+import useClickOutside from '@/components/shared/hooks/ClickOutside';
 
 export interface IRoute {
 	name: string;

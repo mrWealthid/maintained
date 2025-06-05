@@ -1,28 +1,32 @@
+// dbConfig.ts
 import mongoose from 'mongoose';
 
+let isConnected = false; // Global variable to track connection
+
 export async function connect() {
+	if (isConnected) {
+		return; // Prevent multiple connections
+	}
+
 	const DB = process.env.DATABASE_URI?.replace(
 		'<PASSWORD>',
 		process.env.DATABASE_PASSWORD!
 	);
 
+	if (!DB) {
+		throw new Error(
+			'Database URI or password is not defined in env variables'
+		);
+	}
+
 	try {
-		await mongoose.connect(DB!);
-		const connection = mongoose.connection;
+		const db = await mongoose.connect(DB);
 
-		connection.on('connected', () => {
-			console.log('MongoDB connected successfully');
-		});
+		isConnected = !!db.connections[0].readyState;
 
-		connection.on('error', (err) => {
-			console.log(
-				'MongoDB connection error. Please make sure MongoDB is running. ' +
-					err
-			);
-			process.exit();
-		});
+		console.log('✅ MongoDB connected:', db.connection.host);
 	} catch (error) {
-		console.log('Something goes wrong!');
-		console.log(error);
+		console.error('❌ MongoDB connection error:', error);
+		throw new Error('Could not connect to the database');
 	}
 }

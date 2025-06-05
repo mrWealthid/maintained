@@ -1,8 +1,8 @@
 'use client';
 
-import EmailInput from '@/components/shared/Form-inputs/Email-Input';
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
-import ButtonComponent from '@/components/shared/Form-inputs/Button';
+import EmailInput from '@/components/shared/form-elements/Email-Input';
+import TextInput from '@/components/shared/form-elements/Text-Input';
+import ButtonComponent from '@/components/shared/form-elements/Button';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -22,8 +22,7 @@ const LoginComponent = () => {
 	const { isLoading, login } = useLogin();
 
 	async function onSubmit(payload: any) {
-		login(payload);
-		// login(payload, { onSuccess: () => router.push('/dashboard') });
+		login(payload, { onSuccess: () => router.push('/dashboard') });
 	}
 
 	const { errors, isSubmitting } = formState;
@@ -39,7 +38,7 @@ const LoginComponent = () => {
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
+				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3  p-10 flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center text-primary dark:text-label-color font-bold text-2xl'>
 						Sign In to Get Started
 					</p>
@@ -57,7 +56,6 @@ const LoginComponent = () => {
 					<section className='w-full'>
 						<form
 							onSubmit={handleSubmit(onSubmit, onError)}
-							action=''
 							className='w-full flex flex-col justify-center gap-2 items-center'>
 							<EmailInput
 								name={'email'}
@@ -109,15 +107,14 @@ const LoginComponent = () => {
 								</div>
 							</TextInput>
 
-							<section className=' '>
-								<ButtonComponent
-									styles='rounded-3xl w-full'
-									btnText='Submit'
-									loading={isLoading}
-									type='submit'
-									disabled={!formState.isValid || isLoading}
-								/>
-							</section>
+							<ButtonComponent
+								styles='w-full mt-4'
+								btnText='Login'
+								loading={isLoading}
+								type='submit'
+								disabled={!formState.isValid || isLoading}
+							/>
+
 							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
 								Forgot Password ?
 								<Link

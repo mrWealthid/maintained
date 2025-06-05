@@ -1,31 +1,25 @@
-'use client';
+"use client";
 import React, {
-	cloneElement,
-	useContext,
-	useEffect,
-	useRef,
-	useState
-} from 'react';
-import { createContext } from 'react';
-import {
-	IListResponse,
-	ITable,
-	Icolumn,
-	IsearchParams,
-	IselectOptions
-} from './models/table.model';
-import { formatCurrency } from '@/utils/helper';
+  cloneElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { createContext } from "react";
+import { IListResponse, ITable, Icolumn, IsearchParams, IselectOptions } from "./models/table.model";
+import { formatCurrency } from "@/utils/helper";
 
-import { useTable } from './hooks/useTable';
-import Modal from '../shared/Modal/Modal-component';
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
-import { useForm } from 'react-hook-form';
-import ButtonComponent from '../shared/Form-inputs/Button';
-import { FcFilledFilter } from 'react-icons/fc';
-import { CiFilter } from 'react-icons/ci';
-import { DownloadTableExcel } from 'react-export-table-to-excel';
-import { IoCloudDownloadOutline } from 'react-icons/io5';
-import Image from 'next/image';
+import { useTable } from "./hooks/useTable";
+import Modal from "../shared/modal/Modal";
+import TextInput from "@/components/shared/form-elements/Text-Input";
+import { useForm } from "react-hook-form";
+import ButtonComponent from "../shared/form-elements/Button";
+import { FcFilledFilter } from "react-icons/fc";
+import { CiFilter } from "react-icons/ci";
+import { DownloadTableExcel } from "react-export-table-to-excel";
+import { IoCloudDownloadOutline } from "react-icons/io5";
+import Image from "next/image";
 
 const TableContext = createContext({});
 
@@ -45,6 +39,7 @@ function Table({
 	const [search, setSearch] = useState<string | null>(
 		objectToQueryParams(defaultParams!)
 	);
+
 	const [filterIsActive, setfilterIsActive] = useState(false);
 
 	const {
@@ -56,7 +51,7 @@ function Table({
 		isRefetching
 	}: IListResponse = useTable(page, limit, service, queryKey, search);
 
-	function handleFilter(val: IsearchParams | null) {
+  function handleFilter(val: IsearchParams | null) {
 		let transformedSearchQuery = '';
 		if (!val) {
 			setfilterIsActive(false);
@@ -70,7 +65,7 @@ function Table({
 		setPage(1);
 
 		setfilterIsActive(true);
-	}
+  }
 
 	function cancelFilter() {
 		setfilterIsActive(false);
@@ -164,32 +159,36 @@ function Table({
 				)}
 
 				<div className='mt-3 text-xs'>
-					<Paginator />
+					<Paginator
+
+					// handlePaginate={handlePaginate}
+					/>
 				</div>
 			</div>
 		</TableContext.Provider>
 	);
 }
 
-function TableFilterForm({ onCloseModal }: any) {
-	const { handleFilter, cancelFilter }: any = useContext(TableContext);
-	const { register, handleSubmit, formState } = useForm({
-		mode: 'onChange'
-	});
-	// const { errors, isSubmitting } = formState;
+function TableFilterForm({ column, onCloseModal }: any) {
+  const { handleFilter, cancelFilter }: any = useContext(TableContext);
+  const { register, handleSubmit, formState } = useForm({
+    mode: "onChange",
+  });
+  // const { errors, isSubmitting } = formState;
 
-	const { columns, isRefetching }: any = useContext(TableContext);
+  const { columns, isRefetching }: any = useContext(TableContext);
 
-	async function onSubmit(data: any, onCloseModal: any) {
-		handleFilter(data);
+  async function onSubmit(data: any, onCloseModal: any) {
+    handleFilter(data);
 
-		onCloseModal();
-	}
+    onCloseModal();
+    // console.log(objectToQueryParams(data));
+  }
 
-	return (
+  return (
 		<form
 			onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
-			className=' flex flex-col gap-3 p-6  items-center"'>
+			className=' flex flex-col gap-3  items-center"'>
 			<section className=' grid  gap-3 grid-cols-1 '>
 				{columns
 					.slice()
@@ -295,8 +294,8 @@ function TableFilterForm({ onCloseModal }: any) {
 					id={column.header}
 				/>
 			</TextInput> */}
-
-			<section className='flex justify-end gap-4'>
+			<hr className='-mx-6 my-3' />
+			<section className='flex justify-end  gap-4'>
 				<ButtonComponent
 					type='reset'
 					handleClick={() => {
@@ -316,45 +315,46 @@ function TableFilterForm({ onCloseModal }: any) {
 					`}></ButtonComponent>
 			</section>
 		</form>
-	);
+  );
 }
 
 function TableFilter() {
-	const { columns, filterIsActive, tableRef }: any = useContext(TableContext);
-	return (
-		<div className=''>
-			<Modal>
-				<Modal.Open opens='filter-form'>
-					<button
-						type='button'
-						className={`  ${
-							filterIsActive
-								? 'ring-1  ring-offset-2 text-success  ring-success'
-								: ''
-						} w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl  bg-gray-50 font-light text-black border btn`}>
-						{filterIsActive ? (
-							<FcFilledFilter size={15} color='green' />
-						) : (
-							<CiFilter size={15} />
-						)}
-						Filter
-					</button>
-				</Modal.Open>
+  const { columns, filterIsActive, tableRef }: any = useContext(TableContext);
+  return (
+    <div>
+      <Modal>
+        <Modal.Open opens="filter-form">
+          <button
+            type="button"
+            className={`  ${
+              filterIsActive
+                ? "ring-1  ring-offset-2 text-success  ring-success"
+                : ""
+            } w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl  bg-gray-50 font-light text-black border btn`}
+          >
+            {filterIsActive ? (
+              <FcFilledFilter size={15} color="green" />
+            ) : (
+              <CiFilter size={15} />
+            )}
+            Filter
+          </button>
+        </Modal.Open>
 
-				<Modal.Window name='filter-form'>
-					<TableFilterForm />
-				</Modal.Window>
-			</Modal>
-		</div>
-	);
+        <Modal.Window title="Manage Filters" name="filter-form">
+          <TableFilterForm />
+        </Modal.Window>
+      </Modal>
+    </div>
+  );
 }
 
 function TableHeader() {
-	const { columns, actionable }: any = useContext(TableContext);
-	return (
-		<thead className='text-xs text-left wheat-light bg-primary   text-white w-full uppercase'>
-			<tr>
-				{/* <th className="px-2 py-4 uppercase">
+  const { columns, actionable }: any = useContext(TableContext);
+  return (
+    <thead className="text-xs text-left wheat-light bg-primary   text-white w-full uppercase">
+      <tr>
+        {/* <th className="px-2 py-4 uppercase">
 					<input
 						title="check"
 						id="checkbox-all-search"
@@ -368,48 +368,48 @@ function TableHeader() {
 					</label>
 				</th> */}
 
-				<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
-					<span>S/N</span>
-				</td>
+        <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
+          <span>S/N</span>
+        </td>
 
-				{columns.map((col: Icolumn) => (
-					<th
-						key={col.header}
-						className='py-4 px-2  flex-grow uppercase'>
-						{col.header}
-					</th>
-				))}
-				{actionable && <th className='px-2 py-4 uppercase'>Actions</th>}
-			</tr>
-		</thead>
-	);
+        {columns.map((col: Icolumn) => (
+          <th key={col.header} className="py-4 px-2  flex-grow uppercase">
+            {col.header}
+          </th>
+        ))}
+        {actionable && <th className="px-2 py-4 uppercase">Actions</th>}
+      </tr>
+    </thead>
+  );
 }
 export function TableHeaderAction({ children }: any) {
-	const { handleFilter, tableRef, queryKey, isDownloadable }: any =
-		useContext(TableContext);
-	return (
-		<div className='flex flex-col flex-wrap items-center  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
-			<div className='flex items-center gap-2 mt-4'></div>
+  const { handleFilter, tableRef, queryKey, isDownloadable }: any =
+    useContext(TableContext);
+  return (
+    <div className="flex flex-col flex-wrap items-center  justify-between mb-2 px-3 overflow-x-auto md:flex-row">
+      <div className="flex items-center gap-2 mt-4"></div>
 
-			<div className='flex py-1 flex-wrap items-center gap-3 mt-2 md:gap-2'>
-				<TableFilter />
+      <div className="flex py-1 flex-wrap items-center gap-3 mt-2 md:gap-2">
+        <TableFilter />
 
-				{cloneElement(children, { handleFilter })}
+        {cloneElement(children, { handleFilter })}
 
-				{isDownloadable && (
-					<DownloadTableExcel
-						filename={`${queryKey} table`}
-						sheet={queryKey}
-						currentTableRef={tableRef.current}>
-						<button
-							type='button'
-							className='w-full  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center  bg-gray-50  dark:glass dark:border-none font-light text-black border btn'>
-							<IoCloudDownloadOutline /> Export
-						</button>
-					</DownloadTableExcel>
-				)}
+        {isDownloadable && (
+          <DownloadTableExcel
+            filename={`${queryKey} table`}
+            sheet={queryKey}
+            currentTableRef={tableRef.current}
+          >
+            <button
+              type="button"
+              className="w-full  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center  bg-gray-50  dark:glass dark:border-none font-light text-black border btn"
+            >
+              <IoCloudDownloadOutline /> Export
+            </button>
+          </DownloadTableExcel>
+        )}
 
-				{/* <div className="flex gap-3 items-center">
+        {/* <div className="flex gap-3 items-center">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 512 512"
@@ -418,32 +418,33 @@ export function TableHeaderAction({ children }: any) {
 					</svg>
 					<p className="text-sm w-11">Print</p>
 				</div> */}
-			</div>
-		</div>
-	);
+      </div>
+    </div>
+  );
 }
 function TableRow({ children, customRow }: any) {
-	const { columns, data, actionable }: any = useContext(TableContext);
+  const { columns, data, actionable }: any = useContext(TableContext);
 
-	if (data?.length < 1) {
-		return (
-			<tbody className=' w-full h-5'>
-				<tr>
-					<td className='  block p-2 text-sm '>No data available</td>
-				</tr>
-			</tbody>
-		);
-	}
+  if (data?.length < 1) {
+    return (
+      <tbody className=" w-full h-5">
+        <tr>
+          <td className="  block p-2 text-sm ">No data available</td>
+        </tr>
+      </tbody>
+    );
+  }
 
-	return (
-		<tbody className=''>
-			{!customRow
-				? data?.map((row: any, i: any) => {
-						return (
-							<tr
-								key={i}
-								className='text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b    duration-500 '>
-								{/* <td className=" font-medium whitespace-nowrap">
+  return (
+    <tbody className="">
+      {!customRow
+        ? data?.map((row: any, i: any) => {
+            return (
+              <tr
+                key={i}
+                className="text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b  "
+              >
+                {/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"
 										id="checkbox-all-search"
@@ -456,260 +457,249 @@ function TableRow({ children, customRow }: any) {
 										#
 									</label>
 								</td> */}
-								<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
-									<span>{i + 1}.</span>
-								</td>
+                <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
+                  <span>{i + 1}.</span>
+                </td>
 
-								{columns.map((column: Icolumn, i: any) => {
-									//This logic helps check for more accessors; double items in a row cell
-									const value = column.accessor
-										?.split('.')
-										.reduce((obj, key) => obj[key], row);
+                {columns.map((column: Icolumn, i: any) => {
+                  //This logic helps check for more accessors; double items in a row cell
+                  const value = column.accessor
+                    ?.split(".")
+                    .reduce((obj, key) => obj[key], row);
 
-									if (column.custom) {
-										if (column.custom.type === 'style') {
-											return (
-												<td
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													}`}
-													key={column.accessor + i}>
-													<span
-														title={value}
-														className='bg-green-400    text-xs w-1/2 justify-center text-white py-2 px-3 rounded-3xl inline-flex'>
-														{value}
-													</span>
-												</td>
-											);
-										}
-										if (column.custom.type === 'date') {
-											return (
-												<td
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} ellipisis-overflow block`}
-													title={new Date(
-														value
-													).toDateString()}
-													key={column.accessor + i}>
-													{new Date(
-														value
-													).toDateString()}
-												</td>
-											);
-										}
-										if (column.custom.type === 'currency') {
-											return (
-												<td
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													}  `}
-													key={column.accessor + i}>
-													<span
-														title={formatCurrency(
-															value
-														)}
-														className='ellipsis-overflow block'>
-														{formatCurrency(value)}
-													</span>
-												</td>
-											);
-										}
-										if (column.custom.type === 'percent') {
-											return (
-												<td
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} `}
-													title={value}
-													key={column.accessor + i}>
-													{value} %
-												</td>
-											);
-										}
-										if (column.custom.type === 'sentence') {
-											return (
-												<td
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} `}
-													key={column.accessor + i}>
-													{value} {''}{' '}
-													{column.custom.suffix}
-												</td>
-											);
-										}
-									}
-									return (
-										<td key={column.accessor + i}>
-											<span
-												title={value}
-												className='block ellipsis-overflow'>
-												{value}
-											</span>
-										</td>
-									);
-								})}
+                  if (column.custom) {
+                    if (column.custom.type === "style") {
+                      return (
+                        <td
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          }`}
+                          key={column.accessor + i}
+                        >
+                          <span
+                            title={value}
+                            className="bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
+                          >
+                            {value}
+                          </span>
+                        </td>
+                      );
+                    }
+                    if (column.custom.type === "date") {
+                      return (
+                        <td
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } ellipisis-overflow block`}
+                          title={new Date(value).toDateString()}
+                          key={column.accessor + i}
+                        >
+                          {new Date(value).toDateString()}
+                        </td>
+                      );
+                    }
+                    if (column.custom.type === "currency") {
+                      return (
+                        <td
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          }  `}
+                          key={column.accessor + i}
+                        >
+                          <span
+                            title={formatCurrency(value)}
+                            className="ellipsis-overflow block"
+                          >
+                            {formatCurrency(value)}
+                          </span>
+                        </td>
+                      );
+                    }
+                    if (column.custom.type === "percent") {
+                      return (
+                        <td
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } `}
+                          title={value}
+                          key={column.accessor + i}
+                        >
+                          {value} %
+                        </td>
+                      );
+                    }
+                    if (column.custom.type === "sentence") {
+                      return (
+                        <td
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } `}
+                          key={column.accessor + i}
+                        >
+                          {value} {""} {column.custom.suffix}
+                        </td>
+                      );
+                    }
+                  }
+                  return (
+                    <td key={column.accessor + i}>
+                      <span title={value} className="block ellipsis-overflow">
+                        {value}
+                      </span>
+                    </td>
+                  );
+                })}
 
-								{actionable &&
-									cloneElement(children, { rowData: row })}
-							</tr>
-						);
-				  })
-				: cloneElement(children, { data })}
-		</tbody>
-	);
+                {actionable && cloneElement(children, { rowData: row })}
+              </tr>
+            );
+          })
+        : cloneElement(children, { data })}
+    </tbody>
+  );
 }
 
 function Paginator() {
-	const [maxNumPage, setMaxNumPage] = useState(0);
+  const [maxNumPage, setMaxNumPage] = useState(0);
 
-	const {
-		updateLimit,
-		data,
-		limit,
-		page,
-		totalRecords,
-		handlePaginate
-	}: any = useContext(TableContext);
-	function CalcNumOfPages(data: number, limit: number) {
-		return Math.ceil(data / limit);
-	}
+  const { updateLimit, data, limit, page, totalRecords, handlePaginate }: any =
+    useContext(TableContext);
+  function CalcNumOfPages(data: number, limit: number) {
+    return Math.ceil(data / limit);
+  }
 
-	useEffect(() => {
-		setMaxNumPage(Math.ceil(totalRecords / limit));
-	}, [totalRecords, limit]);
+  useEffect(() => {
+    setMaxNumPage(Math.ceil(totalRecords / limit));
+  }, [totalRecords, limit]);
 
-	function displayButtons() {
-		let val = CalcNumOfPages(totalRecords, limit);
-		let newArray = Array.from({ length: val }, (value, index) => index + 1);
-		return newArray;
-	}
+  function displayButtons() {
+    let val = CalcNumOfPages(totalRecords, limit);
+    let newArray = Array.from({ length: val }, (value, index) => index + 1);
+    return newArray;
+  }
 
-	return (
-		<section className='flex justify-between items-center'>
-			<section className='flex-col flex  dark:border-t p-2 gap-1'>
-				<strong>Summary</strong>
-				<p>
-					{' '}
-					Showing <span>1</span> to <span>{data?.length}</span> of{' '}
-					<span>{totalRecords}</span> results
-				</p>
-				<hr />
-				<div>
-					Total: {totalRecords} | Size: {limit} | Page: {page}
-				</div>
-			</section>
-			{data?.length > 0 && (
-				<nav
-					className='flex gap-3'
-					aria-label='Page navigation example'>
-					<section className='flex items-center gap-1'>
-						<span>Rows Per Page</span>
-						<select
-							onChange={(e) => {
-								updateLimit(e.target.value);
-								// service(limit, page);
-								// setLimit(e.target.value);
+  return (
+    <section className="flex justify-between items-center">
+      <section className="flex-col flex  dark:border-t p-2 gap-1">
+        <strong>Summary</strong>
+        <p>
+          {" "}
+          Showing <span>1</span> to <span>{data?.length}</span> of{" "}
+          <span>{totalRecords}</span> results
+        </p>
+        <hr />
+        <div>
+          Total: {totalRecords} | Size: {limit} | Page: {page}
+        </div>
+      </section>
+      {data?.length > 0 && (
+        <nav className="flex gap-3" aria-label="Page navigation example">
+          <section className="flex items-center gap-1">
+            <span>Rows Per Page</span>
+            <select
+              onChange={(e) => {
+                updateLimit(e.target.value);
+                // service(limit, page);
+                // setLimit(e.target.value);
 
-								// paginate(e.target.value)
-								// handlePaginate(page, e.target.value);
-							}}
-							value={limit}
-							id='sort'
-							name='sort'
-							title='sortdropdown'
-							className='text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded'>
-							<option value={5}>5</option>
-							<option value={10}>10</option>
-							<option value={15}>15</option>
-							<option value={20}>20</option>
-						</select>
-					</section>
+                // paginate(e.target.value)
+                // handlePaginate(page, e.target.value);
+              }}
+              value={limit}
+              id="sort"
+              name="sort"
+              title="sortdropdown"
+              className="text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </section>
 
-					<ul className='flex items-center gap-2 h-10 text-base'>
-						<li
-							onClick={() => {
-								page > 1 && handlePaginate(page - 1, limit);
-							}}>
-							<a
-								className={`${
-									page === 1 && 'cursor-not-allowed'
-								} flex items-center justify-center px-4 h-10 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:glass dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
-								<span className='sr-only'>Previous</span>
-								<svg
-									className='w-3 h-3'
-									aria-hidden='true'
-									xmlns='http://www.w3.org/2000/svg'
-									fill='none'
-									viewBox='0 0 6 10'>
-									<path
-										stroke='currentColor'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth='2'
-										d='M5 1 1 5l4 4'
-									/>
-								</svg>
-							</a>
-						</li>
-						{displayButtons()
-							.slice(page - 1, page + 2)
-							.map((val, index) => (
-								<li
-									onClick={() => {
-										handlePaginate(val, limit);
-									}}
-									key={val}>
-									<a
-										className={`${
-											val === page
-												? '!bg-primary  text-white'
-												: 'bg-white hover:bg-gray-100 dark:hover:text-primary'
-										} flex items-center  dark:glass dark:border-none   rounded-3xl justify-center px-4 h-10 leading-tight text-primary dark:text-white cursor-pointer  border border-gray-300 `}>
-										{val}
-									</a>
-								</li>
-							))}
+          <ul className="flex items-center gap-2 h-10 text-base">
+            <li
+              onClick={() => {
+                page > 1 && handlePaginate(page - 1, limit);
+              }}
+            >
+              <a
+                className={`${
+                  page === 1 && "cursor-not-allowed"
+                } flex items-center justify-center px-4 h-10 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:glass dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}
+              >
+                <span className="sr-only">Previous</span>
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 1 1 5l4 4"
+                  />
+                </svg>
+              </a>
+            </li>
+            {displayButtons()
+              .slice(page - 1, page + 2)
+              .map((val, index) => (
+                <li
+                  onClick={() => {
+                    handlePaginate(val, limit);
+                  }}
+                  key={val}
+                >
+                  <a
+                    className={`${
+                      val === page
+                        ? "!bg-primary  text-white"
+                        : "bg-white hover:bg-gray-100 dark:hover:text-primary"
+                    } flex items-center  dark:glass dark:border-none   rounded-3xl justify-center px-4 h-10 leading-tight text-primary dark:text-white cursor-pointer  border border-gray-300 `}
+                  >
+                    {val}
+                  </a>
+                </li>
+              ))}
 
-						<li>
-							<a
-								onClick={() => {
-									maxNumPage > page &&
-										handlePaginate(page + 1, limit);
-								}}
-								className={`${
-									maxNumPage <= page
-										? 'cursor-not-allowed '
-										: ''
-								} flex items-center  justify-center px-4 h-10 leading-tight text-gray-500 bg-white dark:glass border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700  dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
-								<span className='sr-only'>Next</span>
-								<svg
-									className='w-3 h-3'
-									aria-hidden='true'
-									xmlns='http://www.w3.org/2000/svg'
-									fill='none'
-									viewBox='0 0 6 10'>
-									<path
-										stroke='currentColor'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth='2'
-										d='m1 9 4-4-4-4'
-									/>
-								</svg>
-							</a>
-						</li>
-					</ul>
-				</nav>
-			)}
-		</section>
-	);
+            <li>
+              <a
+                onClick={() => {
+                  maxNumPage > page && handlePaginate(page + 1, limit);
+                }}
+                className={`${
+                  maxNumPage <= page ? "cursor-not-allowed " : ""
+                } flex items-center  justify-center px-4 h-10 leading-tight text-gray-500 bg-white dark:glass border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700  dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}
+              >
+                <span className="sr-only">Next</span>
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m1 9 4-4-4-4"
+                  />
+                </svg>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
+    </section>
+  );
 }
 
 Table.TableHeader = TableHeader;

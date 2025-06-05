@@ -1,7 +1,7 @@
 'use client';
-import Table from '@/components/Table/Table';
+import Table from '@/components/table/Table';
 import RequestHeaderActions from './RequestHeaderActions';
-import { Icolumn } from '@/components/Table/models/table.model';
+import { Icolumn } from '@/components/table/models/table.model';
 import RequestRow from './RequestRow';
 import { fetchMaintenanceRequestList } from '../service/maintenance-service';
 import { REQUEST_STATUS } from '@/utils/enums';

@@ -1,12 +1,13 @@
 'use client';
 
-import TextInput from '@/components/shared/Form-inputs/Text-Input';
-import ButtonComponent from '@/components/shared/Form-inputs/Button';
+import EmailInput from '@/components/shared/form-elements/Email-Input';
+import TextInput from '@/components/shared/form-elements/Text-Input';
+import ButtonComponent from '@/components/shared/form-elements/Button';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import AutoComplete from '@/components/shared/AutoComplete/AutoComplete';
+import AutoComplete from '@/components/shared/auto-complete/AutoComplete';
 import {} from './service/user.service';
-import { DateRangePicker } from '@/components/shared/DatePicker/DatePicker';
+import { DateRangePicker } from '@/components/shared/date-picker/DatePicker';
 import {
 	addDays,
 	differenceInDays,
@@ -16,7 +17,6 @@ import {
 	parseISO
 } from 'date-fns';
 import { useCreateUser } from './hooks/userHooks';
-import EmailInput from '@/components/shared/Form-inputs/Email-Input';
 
 const UserForm = ({ user, onCloseModal, settings }: any) => {
 	const isEditing = !!user?.id;
@@ -106,7 +106,7 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 								placeholder='johndoe@gmail.com'
 							/>
 						</EmailInput>
-					
+
 						{/*
 						<TextInput
 							name={'lastName'}
@@ -140,7 +140,8 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 							</select>
 						</TextInput>
 					</div>
-					<section className='flex justify-end gap-4'>
+					<hr className='-mx-6 my-3' />
+					<section className='flex justify-end  gap-4'>
 						<ButtonComponent
 							type='reset'
 							handleClick={() => onCloseModal?.()}

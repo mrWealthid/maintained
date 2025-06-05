@@ -1,9 +1,10 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
 import SideBar from './SideBarComponent';
-import Header from '@/components/shared/header/Header';
+
 import LoginComponent from '@/app/auth/login/page';
 import { NextRequest, NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
+import Header from '@/components/shared/header/Header';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -15,7 +16,9 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<Header />
+			<header>
+				<Header />
+			</header>
 			<section>
 				<SideBar />
 			</section>

@@ -1,4 +1,4 @@
-import MaintnenanceComponent from '@/components/ui/MaintenanceComponent';
+import MaintenanceComponent from '@/components/ui/MaintenanceComponent';
 
 export default function Home() {
 	function handleClick(val: number) {}
@@ -12,7 +12,7 @@ export default function Home() {
 
 				<div>{/* <AddMaintenance /> */}</div>
 			</section>
-			<MaintnenanceComponent />
+			<MaintenanceComponent />
 		</main>
 	);
 }
