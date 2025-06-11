@@ -71,9 +71,11 @@ export async function GET(request: NextRequest) {
 		if (Object.values(transformedQuery).length > 0) {
 			const excludedFields = ['page', 'sort', 'limit', 'fields'];
 			excludedFields.forEach((el) => delete transformedQuery[el]);
-			count = await User.find(filter).find(transformedQuery).count();
+			count = await User.find(filter)
+				.find(transformedQuery)
+				.countDocuments();
 		} else {
-			count = await User.count(filter);
+			count = await User.countDocuments(filter);
 		}
 
 		// const user = await User.findOne({ _id: userId });
