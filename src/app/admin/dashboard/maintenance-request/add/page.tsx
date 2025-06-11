@@ -13,6 +13,9 @@ import { IoIosCloudUpload } from 'react-icons/io';
 
 import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
+import { Router } from 'next/router';
+import { useRouter } from 'next/navigation';
+import { Category } from '@/app/(users)/dashboard/maintenance-request/model/request.model';
 
 const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 	const isEditing = !!maintenance?.id;
@@ -22,6 +25,9 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 
 	const [selectedImages, setSelectedImages] = useState<FileList | null>(null);
 	const [selectedVideo, setSelectedVideo] = useState<FileList | null>(null);
+	const [uploadProgress, setUploadProgress] = useState<
+		Record<string, number>
+	>({});
 
 	const { register, handleSubmit, getValues, formState } = useForm({
 		mode: 'all',
@@ -32,12 +38,16 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		}
 	});
 
-	const { errors, isSubmitting } = formState;
+	const router = useRouter();
+	const { errors } = formState;
 	const { isCreating, createMaintenance } = useCreateMaintenanceRequest(
 		maintenance?.id,
-		isEditing,
-		onCloseModal
+		isEditing
+		// onCloseModal
 	);
+
+	const [isUploading, setIsUploading] = useState(false);
+	const isSubmitting = isUploading || isCreating;
 
 	function handleAutoCompleteValues(values: any) {
 		setAutoCompleteValue({ ...autoCompleteValue, ...values });
@@ -55,30 +65,71 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 			video: videoUrls
 		};
 
-		createMaintenance(payload);
+		createMaintenance(payload, {
+			onSuccess: () => {
+				router.push('/dashboard/maintenance-request');
+			}
+		});
 	}
 
 	function onError(err: any) {
 		console.log(err);
 	}
 
-	function batchUpload(file: FileList, type: 'video' | 'image') {
-		return Array.from(file).map(async (fl) => {
+	// function batchUpload(file: FileList, type: 'video' | 'image') {
+	// 	return Array.from(file).map(async (fl) => {
+	// 		const formData = new FormData();
+	// 		/image/.test(type)
+	// 			? formData.append('upload_preset', `${process.env.IMG_PRESET}`)
+	// 			: formData.append(
+	// 					'upload_preset',
+	// 					`${process.env.VIDEO_PRESET}`
+	// 			  );
+	// 		formData.append('file', fl);
+
+	// 		try {
+	// 			const response = await uploader(formData, type); // Assuming 'uploader' is your function to handle the upload
+	// 			return response; // Return the response or the specific URL part of the response
+	// 		} catch (error) {
+	// 			console.error('Upload error:', error);
+	// 			throw error; // Ensure errors are propagated
+	// 		}
+	// 	});
+	// }
+
+	function batchUpload(
+		fileList: FileList,
+		type: 'video' | 'image',
+		setProgress?: (fileName: string, percent: number) => void
+	) {
+		return Array.from(fileList).map(async (file) => {
 			const formData = new FormData();
-			/image/.test(type)
-				? formData.append('upload_preset', `${process.env.IMG_PRESET}`)
-				: formData.append(
-						'upload_preset',
-						`${process.env.VIDEO_PRESET}`
-				  );
-			formData.append('file', fl);
+			formData.append(
+				'upload_preset',
+				type === 'image'
+					? process.env.IMG_PRESET!
+					: process.env.VIDEO_PRESET!
+			);
+			formData.append('file', file);
 
 			try {
-				const response = await uploader(formData, type); // Assuming 'uploader' is your function to handle the upload
-				return response; // Return the response or the specific URL part of the response
+				const response = await axios.post(
+					`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
+					formData,
+					{
+						onUploadProgress: (event) => {
+							const percent = Math.round(
+								(event.loaded * 100) / (event.total ?? 1)
+							);
+							if (setProgress) setProgress(file.name, percent);
+						}
+					}
+				);
+
+				return response.data.url;
 			} catch (error) {
 				console.error('Upload error:', error);
-				throw error; // Ensure errors are propagated
+				throw error;
 			}
 		});
 	}
@@ -88,83 +139,87 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		type: 'video' | 'image'
 	) {
 		if (!file) return;
-		const uploadPromises = batchUpload(file, type);
+		setIsUploading(true);
+		const uploadPromises = batchUpload(file, type, updateProgress);
 		try {
 			const urls = await Promise.all(uploadPromises);
-			return urls; // Now 'urls' contains all the URLs from the resolved promises
+			return urls;
 		} catch (error) {
 			console.error('Error uploading one or more files:', error);
-			throw error; // Optionally handle this error further or re-throw
+			throw error;
+		} finally {
+			setIsUploading(false); // upload ended
 		}
 	}
 
-	async function uploader(formData: FormData, type: 'video' | 'image') {
-		const uploadResponse = await axios.post(
-			`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
-			formData
-		);
-		return uploadResponse.data.url;
-	}
+	// async function uploader(formData: FormData, type: 'video' | 'image') {
+	// 	const uploadResponse = await axios.post(
+	// 		`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
+	// 		formData
+	// 	);
+	// 	return uploadResponse.data.url;
+	// }
 
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
-
 		setSelectedImages(files);
 	};
 	const handleVideoSelect = (files: FileList) => {
-		// const vid = file![0];
-		// if (vid) {
-		// 	// setSelectedVideo(vid);
-		// 	// Handle the files, such as uploading them to a server or processing them
-		// 	console.log(file);
-		// }
-
 		if (files.length < 1) return;
 
 		setSelectedVideo(files);
 	};
 
-	function UploadFileIcon() {
-		return (
-			<svg
-				width={20}
-				height={20}
-				viewBox='0 0 20 20'
-				fill='none'
-				xmlns='http://www.w3.org/2000/svg'
-				className={''}>
-				<path
-					d='M17.5 12.5V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V12.5'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-				<path
-					d='M14.1673 6.66667L10.0007 2.5L5.83398 6.66667'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-				<path
-					d='M10 2.5V12.5'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-			</svg>
-		);
-	}
+	// function UploadFileIcon() {
+	// 	return (
+	// 		<svg
+	// 			width={20}
+	// 			height={20}
+	// 			viewBox='0 0 20 20'
+	// 			fill='none'
+	// 			xmlns='http://www.w3.org/2000/svg'
+	// 			className={''}>
+	// 			<path
+	// 				d='M17.5 12.5V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V12.5'
+	// 				stroke='#E80F6D'
+	// 				strokeWidth={2}
+	// 				strokeLinecap='round'
+	// 				strokeLinejoin='round'
+	// 			/>
+	// 			<path
+	// 				d='M14.1673 6.66667L10.0007 2.5L5.83398 6.66667'
+	// 				stroke='#E80F6D'
+	// 				strokeWidth={2}
+	// 				strokeLinecap='round'
+	// 				strokeLinejoin='round'
+	// 			/>
+	// 			<path
+	// 				d='M10 2.5V12.5'
+	// 				stroke='#E80F6D'
+	// 				strokeWidth={2}
+	// 				strokeLinecap='round'
+	// 				strokeLinejoin='round'
+	// 			/>
+	// 		</svg>
+	// 	);
+	// }
+
+	const updateProgress = (fileName: string, percent: number) => {
+		setUploadProgress((prev) => ({
+			...prev,
+			[fileName]: percent
+		}));
+	};
 
 	return (
-		<div className='w-1/2  my-10 flex flex-col gap-4 container-text '>
-			<p>Request Maintenance</p>
+		<div className='w-2/3 my-10 flex flex-col gap-4 container-text '>
+			<section className='flex justify-between items-center'>
+				<h3>Request Maintenance</h3>
+			</section>
 
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
-				className=' flex flex-1 p-1 sm:p-6  rounded-lg card items-center'>
+				className=' flex flex-1 p-3 sm:p-6  rounded-lg card  items-center'>
 				<section className='flex-col flex gap-2 w-full'>
 					<TextInput
 						name={'title'}
@@ -199,11 +254,11 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 					</TextInput>
 
 					<div>
-						<AutoComplete
+						<AutoComplete<Category>
 							queryKey='category'
 							service={fetchCategory}
 							label={'Category'}
-							key={'_id'}
+							optionKey={'_id'}
 							// custom={'regularPrice'}
 							displayValue={'name'}
 							handler={handleAutoCompleteValues}
@@ -244,8 +299,8 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 							id='area'
 						/>
 					</TextInput>
-					<section className='w-full flex gap-10 justify-center '>
-						<div>
+					<section className='w-full items-start flex gap-10'>
+						<div className='w-1/2  bg-gray-50  p-2 rounded-2xl'>
 							<FileUpload
 								id='image'
 								label={'Upload Images'}
@@ -253,10 +308,12 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 								multiple={true}
 								accept={'image/jpeg, image/png, image/gif'}
 								icon={<IoIosCloudUpload />}
+								selectedFiles={selectedImages}
+								uploadProgress={uploadProgress}
 							/>
 						</div>
 
-						<div>
+						<div className='w-1/2 bg-gray-50  p-2 rounded-2xl'>
 							<FileUpload
 								id='video'
 								label={'Upload Videos'}
@@ -264,6 +321,8 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 								multiple={true}
 								accept={'video/mp4,video/x-m4v,video/*'}
 								icon={<RiVideoUploadLine />}
+								selectedFiles={selectedVideo}
+								uploadProgress={uploadProgress}
 							/>
 							{/* <div className='hidden'>
 							<TextInput
@@ -285,20 +344,20 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 						</div>
 					</section>
 
-					<section className='flex justify-end gap-4'>
-						<ButtonComponent
+					<hr className='-mx-6 my-3' />
+					<section className='flex justify-end  gap-4'>
+						{/* <ButtonComponent
 							type='reset'
-							handleClick={() => onCloseModal?.()}
 							styles='rounded-3xl'
-							btnText={'Cancel'}></ButtonComponent>
+							btnText={'Cancel'}></ButtonComponent> */}
 
 						<ButtonComponent
 							type='submit'
-							styles='rounded-3xl'
-							// disabled={!formState.isValid || isSubmitting}
-							loading={isCreating}
+							styles=' w-1/3'
+							disabled={!formState.isValid || isSubmitting}
+							loading={isSubmitting}
 							btnText={` ${
-								isEditing ? 'Update Request' : ' Submit Request'
+								isEditing ? 'Update Request' : 'Submit'
 							}`}></ButtonComponent>
 					</section>
 				</section>

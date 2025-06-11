@@ -5,8 +5,8 @@ import { handleCreateMaintenaceRequest } from '../service/maintenance-service';
 
 export function useCreateMaintenanceRequest(
 	bookingId: any,
-	isEditing: any,
-	close: any
+	isEditing: any
+	// close: any
 ) {
 	const queryClient = useQueryClient();
 	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
@@ -18,7 +18,7 @@ export function useCreateMaintenanceRequest(
 				queryKey: ['requests']
 			});
 
-			close();
+			// close();
 		},
 		onError: (err: any) => toast.error(err.message)
 	});
