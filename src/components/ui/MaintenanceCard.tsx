@@ -1,6 +1,6 @@
 import React from 'react';
 import { IRequest } from '../shared/model/model';
-import { FaCircle } from 'react-icons/fa';
+import { FaCircle, FaEye } from 'react-icons/fa';
 import { getStatusColor } from '@/utils/helper';
 import { CiUser } from 'react-icons/ci';
 
@@ -61,22 +61,9 @@ const MaintenanceCard = ({
 					<span className='ellipsis-overflow'>{category.name}</span>
 				</span>
 
-				<section className='flex gap-2 items-center text-xs'>
-					<span className='article-url' title='External URL'>
-						<a
-							target='_blank'
-							href='{{ article.url }}'
-							className='relative z-10 rounded-full flex items-center gap-2 bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100'>
-							view
-							<i className='fa-solid fa-arrow-up-right-from-square'></i>
-						</a>
-					</span>
-
-					{/* <div className='w-full flex justify-end'>
-				<button className='btn  rounded-3xl !py-1 px-2 btn-primary !w-1/3'>
-					View
-				</button>
-			</div> */}
+				<section className='flex request-card__details gap-2 items-center text-xs'>
+					<span>View</span>
+					<span>{<FaEye className='text-primary' />}</span>
 				</section>
 			</div>
 		</section>

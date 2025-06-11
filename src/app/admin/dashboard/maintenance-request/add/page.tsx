@@ -164,7 +164,7 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
-				className=' flex flex-1 p-1 sm:p-6  rounded-lg bg-white  items-center'>
+				className=' flex flex-1 p-1 sm:p-6  rounded-lg card items-center'>
 				<section className='flex-col flex gap-2 w-full'>
 					<TextInput
 						name={'title'}

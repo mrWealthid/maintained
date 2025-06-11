@@ -10,3 +10,11 @@ export interface IRequest {
 	area: string;
 	category: { name: string };
 }
+
+export interface FileUploadPreview {
+	id: number;
+	url: string;
+	type: string;
+	file: File;
+	uploadProgress: number;
+}

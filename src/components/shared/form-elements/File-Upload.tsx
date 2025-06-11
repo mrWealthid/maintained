@@ -1,4 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
+import { FileUploadPreview } from '../model/model';
+import { FaTimes } from 'react-icons/fa';
 
 interface FileUploadProps {
 	label: string;
@@ -7,6 +9,8 @@ interface FileUploadProps {
 	id: string;
 	icon: any;
 	onFileSelect: (files: FileList) => void; // Callback function to pass the selected files to the parent component
+	selectedFiles?: FileList | null;
+	uploadProgress?: Record<string, number>;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -15,12 +19,36 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	accept,
 	multiple,
 	id,
-	icon
+	icon,
+	uploadProgress
 }) => {
 	const [selected, setSelected] = useState<FileList | null>(null);
+	const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
+
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files;
+		if (!files) return;
+
 		onFileSelect(event.target.files!);
 		setSelected(event.target.files);
+		const newPreviews: FileUploadPreview[] = Array.from(files).map(
+			(file, i) => ({
+				id: Date.now() + i,
+				url: URL.createObjectURL(file),
+				type: file.type,
+				file,
+				uploadProgress: 0
+			})
+		);
+		setPreviews(newPreviews);
+	};
+
+	const handleRemovePreview = (id: number) => {
+		setPreviews((prev) => {
+			const toRemove = prev.find((p) => p.id === id);
+			if (toRemove) URL.revokeObjectURL(toRemove.url); // cleanup
+			return prev.filter((p) => p.id !== id);
+		});
 	};
 
 	function UploadFileIcon() {
@@ -59,13 +87,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
 	return (
 		<div>
-			<label className='text-xs'>{label}</label>
+			<label htmlFor={id} className='text-xs cursor-pointer'>
+				{label}
+			</label>
 			<label
-				className='bg-blue-100 p-4 flex flex-col gap-2 cursor-pointer rounded-lg justify-center items-center h-32'
-				htmlFor={id}>
-				{/* <UploadFileIcon /> */}
-				{icon}
-				<small>Single/Multiple Selection</small>
+				htmlFor={id}
+				className='bg-gray-100 p-4 flex flex-col gap-2 cursor-pointer rounded-lg justify-center items-center h-32'>
+				<span className='glass p-4  rounded-full'>{icon}</span>
+				{/* <small>Single/Multiple Selection</small> */}
 			</label>
 			<input
 				title='filepicker'
@@ -73,21 +102,62 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				onChange={handleFileChange}
 				accept={accept}
 				multiple={multiple}
-				className=' hidden p-1'
+				className='hidden p-1'
 				id={id}
 			/>
-			{selected && (
-				<div className='flex flex-col mt-2 gap-2'>
-					<small>Selected files:</small>
-					<ul className=' flex flex-col   gap-2'>
-						{Array.from(selected).map((file, index) => (
-							<li
-								className='bg-gray-50 inline text-xs p-2 rounded-lg'
-								key={file.name}>
-								{file.name}
-							</li>
-						))}
-					</ul>
+
+			{previews.length > 0 && (
+				<div className='mt-4 grid grid-cols-2 gap-4'>
+					{previews.map((file) => {
+						const progress = uploadProgress?.[file.file.name] ?? 0;
+						const angle = Math.round(progress * 3.6); // convert % to degrees
+						return (
+							<div
+								key={file.id}
+								className='relative rounded-md border p-1'>
+								<button
+									onClick={() => handleRemovePreview(file.id)}
+									className='absolute top-1 cursor pointer z-10 right-1 bg-white rounded-full p-1 shadow hover:bg-gray-100'
+									title='Remove'>
+									<FaTimes size={16} />
+								</button>
+
+								{file.type.startsWith('image/') ? (
+									<img
+										src={file.url}
+										alt='preview'
+										className='w-full h-32 object-cover rounded-md'
+									/>
+								) : file.type.startsWith('video/') ? (
+									<video
+										src={file.url}
+										controls
+										className='w-full h-32 object-cover rounded-md'
+									/>
+								) : (
+									<p>Unsupported file type</p>
+								)}
+
+								{progress > 0 && progress <= 100 && (
+									<div className='absolute inset-0 flex items-center justify-center z-20'>
+										<div className='relative w-10 h-10'>
+											<div
+												className='absolute inset-0 rounded-full'
+												style={{
+													background: `conic-gradient(green ${
+														progress * 3.6
+													}deg, #e5e7eb 0deg)`
+												}}
+											/>
+											<div className='absolute inset-1 rounded-full bg-white flex items-center justify-center text-xs font-medium text-gray-800'>
+												{progress}%
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
+						);
+					})}
 				</div>
 			)}
 		</div>
