@@ -15,16 +15,21 @@ export async function POST(request: NextRequest) {
 	const { email, newPassword, currentPassword, confirmNewPassword } =
 		await request.json();
 	try {
-		const user = await User.find({ email }).select('+password');
+		const user = await User.findOne({ email }).select('+password');
+
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'User not found' },
+				{ status: 404 }
+			);
+		}
 
 		//2 Check if the password is correct
-		if (
-			!(await user.correctPassword(
-				newPassword,
-				user.password
-			))
-		) {
-			return NextResponse.json({error:'Your current password is wrong'},{status: 400});
+		if (!(await user.correctPassword(currentPassword, user.password))) {
+			return NextResponse.json(
+				{ error: 'Your current password is wrong' },
+				{ status: 400 }
+			);
 		}
 		//3 If so, update password
 
