@@ -10,7 +10,7 @@ export default function ReceiptPopup({ activity, open = true, setOpen }: any) {
 
 	const componentRef: MutableRefObject<HTMLDivElement | null> = useRef(null);
 	const handlePrint = useReactToPrint({
-		content: () => componentRef.current
+		content: () => componentRef.current as HTMLDivElement
 	});
 
 	const cancelButtonRef = useRef(null);
