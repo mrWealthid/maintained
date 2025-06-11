@@ -23,3 +23,10 @@
 // 		</main>
 // 	);
 // }
+import React, { FC } from 'react';
+
+const page: FC = () => {
+	return <div>Home</div>;
+};
+
+export default page;

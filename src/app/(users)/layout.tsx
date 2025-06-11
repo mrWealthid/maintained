@@ -14,9 +14,9 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			{/* Name */}
-
-			<Header />
+			<header className='dashboard-header sticky top-0 w-full'>
+				<Header />
+			</header>
 			<section>
 				<SideBar />
 			</section>
