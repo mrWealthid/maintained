@@ -17,7 +17,7 @@ const MaintenanceCard = ({
 	category
 }: IRequest) => {
 	return (
-		<section className='request-card'>
+		<section className='request-card w-full'>
 			<div className='flex items-center justify-between w-full text-xs'>
 				<section className='flex gap-5 items-center'>
 					<time className='text-gray-500 dark:text-white'>

@@ -212,14 +212,14 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 	};
 
 	return (
-		<div className='w-2/3 my-10 flex flex-col gap-4 container-text '>
+		<div className='lg:w-2/3  flex flex-col gap-4 lg:container-text'>
 			<section className='flex justify-between items-center'>
 				<h3>Request Maintenance</h3>
 			</section>
 
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
-				className=' flex flex-1 p-3 sm:p-6  rounded-lg card  items-center'>
+				className='flex flex-1 p-6 rounded-lg card  items-center'>
 				<section className='flex-col flex gap-2 w-full'>
 					<TextInput
 						name={'title'}
@@ -299,8 +299,8 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 							id='area'
 						/>
 					</TextInput>
-					<section className='w-full items-start flex gap-10'>
-						<div className='w-1/2  bg-gray-50  p-2 rounded-2xl'>
+					<section className='w-full items-start flex-col lg:flex-row flex gap-10'>
+						<div className=' w-full lg:w-1/2  bg-gray-50  p-2 rounded-2xl'>
 							<FileUpload
 								id='image'
 								label={'Upload Images'}
@@ -313,7 +313,7 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 							/>
 						</div>
 
-						<div className='w-1/2 bg-gray-50  p-2 rounded-2xl'>
+						<div className='w-full lg:w-1/2 bg-gray-50  p-2 rounded-2xl'>
 							<FileUpload
 								id='video'
 								label={'Upload Videos'}

@@ -4,7 +4,7 @@ import { REQUEST_STATUS } from '@/utils/enums';
 
 const Tabs = ({ handleClick, status }: any) => {
 	return (
-		<section className=' flex gap-2 justify-end'>
+		<section className='flex  items-center -space-x-4  flex-wrap justify-end'>
 			<div className=''>
 				<button
 					onClick={() => handleClick('ALL')}
@@ -56,7 +56,7 @@ const Tabs = ({ handleClick, status }: any) => {
 					className={`${
 						status === REQUEST_STATUS.completed &&
 						'!bg-primary text-white'
-					} w-full  text-xs px-6 py-2 rounded-3xl dark:glass dark:border-none  bg-gray-50 font-light text-black dark:text-white border btn`}>
+					} w-full  text-xs px-6  py-2 rounded-3xl dark:glass dark:border-none  bg-gray-50 font-light text-black dark:text-white border btn`}>
 					Completed
 				</button>
 			</div>

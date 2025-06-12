@@ -24,7 +24,7 @@ const MaintenanceComponent = () => {
 	return (
 		<>
 			<Tabs status={status} handleClick={handleClick} />
-			<section className='grid grid-cols-3 gap-2'>
+			<section className='grid md:grid-cols-3  grid-cols-1 gap-2'>
 				{data?.map((request: IRequest) => (
 					<MaintenanceCard key={request._id} {...request} />
 				))}
