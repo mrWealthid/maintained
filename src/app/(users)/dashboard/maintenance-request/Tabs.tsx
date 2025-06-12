@@ -5,18 +5,18 @@ import { REQUEST_STATUS } from '@/utils/enums';
 const Tabs = ({ handleClick, status }: any) => {
 	return (
 		<section className='flex items-center -space-x-4  flex-wrap justify-end'>
-			<div className={`${status === REQUEST_STATUS.all && '!z-50'}`}>
+			<div className={`${status === REQUEST_STATUS.all && '!z-10'}`}>
 				<button
 					onClick={() => handleClick(REQUEST_STATUS.all)}
 					type='button'
 					className={`${
 						status === REQUEST_STATUS.all &&
-						'!bg-primary text-white z-50'
+						'!bg-primary text-white z-10'
 					} w-full  text-xs px-6 py-2 rounded-3xl  dark:border-none   transition-all duration-500 bg-gray-50 dark:glass font-light text-black  dark:text-white border btn`}>
-					Alls
+					All
 				</button>
 			</div>
-			<div className={`${status === REQUEST_STATUS.pending && '!z-50'}`}>
+			<div className={`${status === REQUEST_STATUS.pending && '!z-10'}`}>
 				<button
 					onClick={() => handleClick(REQUEST_STATUS.pending)}
 					type='button'
@@ -28,7 +28,7 @@ const Tabs = ({ handleClick, status }: any) => {
 				</button>
 			</div>
 
-			<div className={`${status === REQUEST_STATUS.assigned && '!z-50'}`}>
+			<div className={`${status === REQUEST_STATUS.assigned && '!z-10'}`}>
 				<button
 					onClick={() => handleClick(REQUEST_STATUS.assigned)}
 					type='button'
@@ -39,7 +39,7 @@ const Tabs = ({ handleClick, status }: any) => {
 					Assigned
 				</button>
 			</div>
-			<div className={`${status === REQUEST_STATUS.declined && '!z-50'}`}>
+			<div className={`${status === REQUEST_STATUS.declined && '!z-10'}`}>
 				<button
 					onClick={() => handleClick(REQUEST_STATUS.declined)}
 					type='button'
@@ -51,7 +51,7 @@ const Tabs = ({ handleClick, status }: any) => {
 				</button>
 			</div>
 			<div
-				className={`${status === REQUEST_STATUS.completed && '!z-50'}`}>
+				className={`${status === REQUEST_STATUS.completed && '!z-10'}`}>
 				<button
 					onClick={() => handleClick(REQUEST_STATUS.completed)}
 					type='button'

@@ -3,8 +3,11 @@ import { IListResponse } from '@/components/table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	fetchMaintenanceRequests,
-	handleCreateMaintenaceRequest
+	handleCreateMaintenaceRequest,
+	handleDeleteRequest
 } from '../service/maintenance-service';
+import { RequestStatus } from '../model/request.model';
+import { ApiError } from '@/components/shared/model/model';
 
 export function useCreateMaintenanceRequest(
 	bookingId: any,
@@ -30,7 +33,7 @@ export function useCreateMaintenanceRequest(
 }
 
 export function useFetchMaintenanceRequests(
-	status: string,
+	status: RequestStatus,
 	page: number = 1,
 	limit: number = 10
 ): IListResponse {
@@ -45,4 +48,20 @@ export function useFetchMaintenanceRequests(
 		isRefetching,
 		...data
 	};
+}
+
+export function useDeleteMaintenanceTicket() {
+	const queryClient = useQueryClient();
+	const { isPending: isDeleting, mutate: deleteTicket } = useMutation({
+		mutationFn: (id: string) => handleDeleteRequest(id),
+		onSuccess: () => {
+			toast.success('Maintenance Request successfully deleted');
+			queryClient.invalidateQueries({
+				queryKey: ['requests']
+			});
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isDeleting, deleteTicket };
 }

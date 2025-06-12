@@ -1,11 +1,15 @@
 import { toast } from 'react-hot-toast';
 import { IListResponse } from '@/components/table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { handleCreateMaintenaceRequest } from '../service/maintenance-service';
+import {
+	handleCreateMaintenaceRequest,
+	handleDeleteRequest
+} from '../service/maintenance-service';
+import { ApiError } from '@/components/shared/model/model';
 
 export function useCreateMaintenanceRequest(
-	bookingId: any,
-	isEditing: any
+	bookingId: string,
+	isEditing: boolean
 	// close: any
 ) {
 	const queryClient = useQueryClient();
@@ -13,7 +17,7 @@ export function useCreateMaintenanceRequest(
 		mutationFn: (payload: FormData) =>
 			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
 		onSuccess: () => {
-			toast.success('Maintenance Request successfully created...');
+			toast.success('Maintenance Request successfully created');
 			queryClient.invalidateQueries({
 				queryKey: ['requests']
 			});
@@ -43,3 +47,19 @@ export function useCreateMaintenanceRequest(
 // 		...data
 // 	};
 // }
+
+export function useDeleteMaintenanceTicket() {
+	const queryClient = useQueryClient();
+	const { isPending: isDeleting, mutate: deleteTicket } = useMutation({
+		mutationFn: (id: string) => handleDeleteRequest(id),
+		onSuccess: () => {
+			toast.success('Maintenance Request successfully deleted');
+			queryClient.invalidateQueries({
+				queryKey: ['requests']
+			});
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isDeleting, deleteTicket };
+}

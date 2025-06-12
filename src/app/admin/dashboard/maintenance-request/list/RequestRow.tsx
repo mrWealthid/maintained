@@ -114,7 +114,7 @@ function RequestRow({ data }: any) {
 							</span>
 						</td>
 
-						<RequestRowActions rowData={row} />
+						<RequestRowActions request={row} />
 					</tr>
 				);
 			})}

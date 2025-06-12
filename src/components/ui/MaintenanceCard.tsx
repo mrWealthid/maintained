@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { FC, Fragment } from 'react';
 import { IRequest } from '../shared/model/model';
 import { FaCircle, FaEye } from 'react-icons/fa';
 import { getStatusColor } from '@/utils/helper';
 import { CiUser } from 'react-icons/ci';
+import Modal from '../shared/modal/Modal';
+import { Menu, Transition } from '@headlessui/react';
+import Link from 'next/link';
+import { HiEye, HiTrash } from 'react-icons/hi2';
+import { CgMenuGridO } from 'react-icons/cg';
+import ConfirmationPage from './ConfirmationPage';
+import { useDeleteMaintenanceTicket } from '@/app/(users)/dashboard/maintenance-request/hooks/maintenanceHooks';
 
-const MaintenanceCard = ({
+const MaintenanceCard: FC<IRequest> = ({
 	title,
 	description,
 	status,
 	_id: id,
 	createdAt,
-	images,
-	videos,
 	user,
 	area,
 	category
-}: IRequest) => {
+}) => {
+	const { isDeleting, deleteTicket } = useDeleteMaintenanceTicket();
+	function handleDelete(onCloseModal: () => void) {
+		deleteTicket(id, {
+			onSuccess: () => onCloseModal()
+		});
+	}
+	// function handleCheckout(onCloseModal: any) {
+	// 	checkOutBooking(
+	// 		{ checkStatus: 'CHECKED_OUT' },
+	// 		{
+	// 			onSuccess: () => onCloseModal()
+	// 		}
+	// 	);
+	// }
 	return (
 		<section className='request-card w-full'>
 			<div className='flex items-center justify-between w-full text-xs'>
@@ -61,7 +80,99 @@ const MaintenanceCard = ({
 					<span className='ellipsis-overflow'>{category.name}</span>
 				</span>
 
+				{/* <section className='flex request-card__details gap-2 items-center text-xs'>
+					<span>View</span>
+					<span>{<FaEye className='text-primary' />}</span>
+				</section> */}
 				<section className='flex request-card__details gap-2 items-center text-xs'>
+					<Modal>
+						<Menu
+							as='div'
+							className='relative inline-block text-left'>
+							{({ open }) => (
+								<>
+									<div>
+										<Menu.Button
+											className={`inline-flex card w-full justify-center rounded-full border p-3 text-sm font-medium text-primary dark:text-white
+
+		  ${open ? 'ring-1 ring-primary ring-offset-1 bg-gray-50 ' : ''}
+		`}>
+											<CgMenuGridO />
+										</Menu.Button>
+									</div>
+									<Transition
+										as={Fragment}
+										enter='transition ease-out duration-100'
+										enterFrom='transform opacity-0 scale-95'
+										enterTo='transform opacity-100 scale-100'
+										leave='transition ease-in duration-75'
+										leaveFrom='transform opacity-100 scale-100'
+										leaveTo='transform opacity-0 scale-95'>
+										<Menu.Items className='absolute text-black z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none'>
+											<div className='px-1 py-1'>
+												<Menu.Item>
+													{({ active }) => (
+														<Link
+															href={`bookings/`}
+															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+															{active ? (
+																<HiEye />
+															) : (
+																<HiEye />
+															)}
+															View Details
+														</Link>
+													)}
+												</Menu.Item>
+
+												<Menu.Item>
+													{({ active }) => (
+														<Modal.Open opens='delete-ticket'>
+															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+																{active ? (
+																	<HiTrash color='red' />
+																) : (
+																	<HiTrash color='red' />
+																)}
+																Delete
+															</button>
+														</Modal.Open>
+													)}
+												</Menu.Item>
+											</div>
+										</Menu.Items>
+									</Transition>
+								</>
+							)}
+						</Menu>
+
+						<Modal.Window
+							name='delete-ticket'
+							title='Delete Maintenance Ticket'
+							description='Request ticket will be deleted permanently'>
+							<ConfirmationPage
+								handler={(onCloseModal: any) => {
+									handleDelete(onCloseModal);
+								}}
+								isLoading={isDeleting}
+								modalText={
+									'Are you sure you want to delete this ticket'
+								}
+							/>
+						</Modal.Window>
+
+						{/* <Modal.Window name="check-out">
+					<ConfirmationPage
+						handler={(onCloseModal: any) =>
+							handleCheckout(onCloseModal)
+						}
+						isLoading={isCheckingOut}
+						modalText={`Are you sure you want to checkout
+							 ${rowData.guests.name}`}
+					/>
+				</Modal.Window> */}
+					</Modal>
+
 					<span>View</span>
 					<span>{<FaEye className='text-primary' />}</span>
 				</section>

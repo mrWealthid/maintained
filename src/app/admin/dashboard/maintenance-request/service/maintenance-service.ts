@@ -8,21 +8,17 @@ export async function handleCreateMaintenaceRequest(
 	try {
 		const res = isEditing
 			? await axios.patch(`/api/bookings/${booking.id}`, data)
-			: await axios.post(
-					`/api/maintenance/request`,
-					data
-					// responseType: 'stream',
-					// headers: {
-					// 	'Content-Type': 'multipart/form-data'
-					// }
-			  );
+			: await axios.post(`/api/maintenance/request`, data);
 
 		const resData = await res.data;
 		return resData;
-	} catch (err: any) {
-		throw new Error(
-			`Request could not be created Status: ${err.response.status}`
-		);
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`Request could not be created Status: ${err.response.status}`
+			);
+		}
+		throw new Error('Request could not be created');
 	}
 }
 
@@ -40,10 +36,13 @@ export async function fetchMaintenanceRequestList(
 		const response = await axios(url);
 		const data = await response.data;
 		return data;
-	} catch (err: any) {
-		throw new Error(
-			`Requests could not be loaded Status: ${err.response.status}`
-		);
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`Requests could not be loaded Status: ${err.response.status}`
+			);
+		}
+		throw new Error('Requests could not be loaded');
 	}
 }
 export async function fetchCategory(query: string | null) {
@@ -55,9 +54,27 @@ export async function fetchCategory(query: string | null) {
 
 		const data = await response.data;
 		return data;
-	} catch (err: any) {
-		throw new Error(
-			`Category could not be loaded Status: ${err.response.status}`
-		);
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`Category could not be loaded Status: ${err.response.status}`
+			);
+		}
+		throw new Error('Category could not be loaded');
+	}
+}
+
+export async function handleDeleteRequest(id: string) {
+	try {
+		const res = await axios.delete(`/api/maintenance/request/${id}`);
+		const data = await res.data;
+		return data;
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`Request could not be deleted Status: ${err.response.status}`
+			);
+		}
+		throw new Error(`Request could not be deleted`);
 	}
 }

@@ -9,6 +9,7 @@ export interface IRequest {
 	user: { name: string };
 	area: string;
 	category: { name: string };
+	id: string;
 }
 
 export interface FileUploadPreview {
@@ -17,4 +18,20 @@ export interface FileUploadPreview {
 	type: string;
 	file: File;
 	uploadProgress: number;
+}
+
+export interface ApiError {
+	message: string;
+}
+
+export interface ApiResponse<T> {
+	status: string;
+	message: string;
+	data: T;
+}
+
+export interface ITab {
+	title: string;
+	order: number;
+	icon: React.ReactNode;
 }
