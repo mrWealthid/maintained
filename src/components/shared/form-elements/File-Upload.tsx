@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useState } from 'react';
 import { FileUploadPreview } from '../model/model';
 import { FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface FileUploadProps {
 	label: string;
@@ -123,7 +124,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 								</button>
 
 								{file.type.startsWith('image/') ? (
-									<img
+									<Image
 										src={file.url}
 										alt='preview'
 										className='w-full h-32 object-cover rounded-md'

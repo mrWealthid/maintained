@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/utils/helpers';
+import { formatCurrency } from '@/utils/helper';
 import React, { ForwardedRef, MutableRefObject } from 'react';
 
 const ReceiptPage = React.forwardRef(
@@ -14,16 +14,16 @@ const ReceiptPage = React.forwardRef(
 		return (
 			<section
 				ref={ref}
-				className="bg-white pb-10 w-full  text-primary flex flex-col gap-3 ">
-				<section className="flex justify-end text-white p-6 bg-primary">
+				className='bg-white pb-10 w-full  text-primary flex flex-col gap-3 '>
+				<section className='flex justify-end text-white p-6 bg-primary'>
 					<p>BookStays</p>
 				</section>
 
-				<section className="px-8 flex flex-col gap-8">
-					<section className="text-lg font-semibold">Receipt</section>
+				<section className='px-8 flex flex-col gap-8'>
+					<section className='text-lg font-semibold'>Receipt</section>
 
 					{/* Time and reference */}
-					<section className="">
+					<section className=''>
 						<section>
 							<small>Date:</small>
 							<small> {new Date().toLocaleString()} </small>
@@ -36,9 +36,9 @@ const ReceiptPage = React.forwardRef(
 
 					{/* Bill Details */}
 
-					<section className="flex justify-between">
-						<section className=" flex flex-col">
-							<p className=" font-medium">Bill To</p>
+					<section className='flex justify-between'>
+						<section className=' flex flex-col'>
+							<p className=' font-medium'>Bill To</p>
 							<small>{guests?.name}</small>
 							<small>{guests?.email}</small>
 							<small>{guests?.nationality}</small>
@@ -47,8 +47,8 @@ const ReceiptPage = React.forwardRef(
 						<p>:</p>
 					</section> */}
 
-						<section className=" flex flex-col">
-							<p className=" font-medium">Company</p>
+						<section className=' flex flex-col'>
+							<p className=' font-medium'>Company</p>
 
 							<small>13333 Ball Street</small>
 							<small>Nashville, Tennese</small>
@@ -58,11 +58,11 @@ const ReceiptPage = React.forwardRef(
 					</section>
 
 					<section>
-						<p className=" font-medium pb-2">ITEM</p>
+						<p className=' font-medium pb-2'>ITEM</p>
 
-						<hr className="pb-2" />
-						<section className="text-xs">
-							<section className="grid font-medium grid-cols-5 gap-2 ">
+						<hr className='pb-2' />
+						<section className='text-xs'>
+							<section className='grid font-medium grid-cols-5 gap-2 '>
 								<div>Cabin</div>
 								<div>GUESTS</div>
 
@@ -71,7 +71,7 @@ const ReceiptPage = React.forwardRef(
 								<div>TOTAL</div>
 							</section>
 
-							<section className="grid grid-cols-5 mt-2 gap-2">
+							<section className='grid grid-cols-5 mt-2 gap-2'>
 								<div>{cabin?.name}</div>
 								{/* <div>{guests?.name}</div> */}
 								<div>{numGuests}</div>
@@ -84,22 +84,22 @@ const ReceiptPage = React.forwardRef(
 						</section>
 					</section>
 
-					<section className="flex text-sm  justify-end">
+					<section className='flex text-sm  justify-end'>
 						<div>
-							<div className="flex  justify-end gap-3">
-								<p className=" font-medium">SUB TOTAL:</p>
+							<div className='flex  justify-end gap-3'>
+								<p className=' font-medium'>SUB TOTAL:</p>
 								<span>{formatCurrency(totalPrice)}</span>
 							</div>
 
-							<div className="flex justify-end gap-3">
-								<p className=" font-medium">ORDER TOTAL:</p>
+							<div className='flex justify-end gap-3'>
+								<p className=' font-medium'>ORDER TOTAL:</p>
 
 								<span>{formatCurrency(totalPrice)}</span>
 							</div>
 						</div>
 					</section>
 
-					<section className="text-center italic text-xs">
+					<section className='text-center italic text-xs'>
 						<p>...Thank you for choosing us...</p>
 					</section>
 				</section>
