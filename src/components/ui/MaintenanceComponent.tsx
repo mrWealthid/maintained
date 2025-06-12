@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import MaintenanceCard from './MaintenanceCard';
-import Tabs from '../../app/admin/dashboard/maintenance-request/Tabs';
+
 import { IListResponse } from '@/components/table/models/table.model';
 import { IRequest } from '../shared/model/model';
 import { useFetchMaintenanceRequests } from '@/app/(users)/dashboard/maintenance-request/hooks/maintenanceHooks';
+import Tabs from '@/app/(users)/dashboard/maintenance-request/Tabs';
 
 const MaintenanceComponent = () => {
 	const [status, setStatus] = useState<string>('PENDING');
