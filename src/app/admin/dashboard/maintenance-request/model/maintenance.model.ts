@@ -1,5 +1,9 @@
-import { IRequest } from '@/components/shared/model/model';
+import { MaintenanceRequest } from '@/components/shared/model/model';
 
 export type RequestRowActionsProps = {
-	request: IRequest;
+	request: MaintenanceRequest;
+};
+
+export type RequestRowProps = {
+	data?: MaintenanceRequest[];
 };

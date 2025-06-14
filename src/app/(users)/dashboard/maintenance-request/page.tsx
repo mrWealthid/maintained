@@ -18,7 +18,7 @@ export default function Home() {
 						type='button'
 						className='btn-primary flex items-center gap-1 rounded-3xl'>
 						<CiCirclePlus size={18} />
-						<Link href={'maintenance-request/add'}>
+						<Link href={'maintenance-request/manage'}>
 							Make Request
 						</Link>
 					</button>

@@ -1,26 +1,31 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import TextInput from '@/components/shared/form-elements/Text-Input';
 import ButtonComponent from '@/components/shared/form-elements/Button';
 import { useForm } from 'react-hook-form';
 import AutoComplete from '@/components/shared/auto-complete/AutoComplete';
 
-import { useCreateMaintenanceRequest } from '../hooks/maintenanceHooks';
-import { fetchCategory } from '../service/maintenance-service';
 import FileUpload from '@/components/shared/form-elements/File-Upload';
 import { IoIosCloudUpload } from 'react-icons/io';
 
 import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
-import { Router } from 'next/router';
 import { useRouter } from 'next/navigation';
-import { Category } from '../model/request.model';
+import { useCreateMaintenanceRequest } from '../hooks/maintenanceHooks';
+import { fetchCategory } from '../service/maintenance-service';
+import {
+	MaintenanceRequestForm,
+	MaintenanceRequestFormProps
+} from '../model/request.model';
+import { Category, MaintenanceRequestPayload } from '../../model/model';
 
-const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
-	const isEditing = !!maintenance?.id;
+const MaintenanceForm: FC<MaintenanceRequestFormProps> = ({
+	maintenanceRequest
+}) => {
+	const isEditing = !!maintenanceRequest?._id;
 	const [autoCompleteValue, setAutoCompleteValue] = useState<{
-		category: any;
+		category: Category;
 	} | null>(null);
 
 	const [selectedImages, setSelectedImages] = useState<FileList | null>(null);
@@ -29,21 +34,25 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		Record<string, number>
 	>({});
 
-	const { register, handleSubmit, getValues, formState } = useForm({
-		mode: 'all',
-		defaultValues: isEditing ? { ...maintenance } : {},
-		values: {
-			category: autoCompleteValue?.category?._id,
-			images: selectedImages
-		}
-	});
+	const { register, handleSubmit, getValues, setValue, formState } =
+		useForm<MaintenanceRequestForm>({
+			mode: 'all',
+			defaultValues: isEditing
+				? {
+						...maintenanceRequest,
+						category:
+							typeof maintenanceRequest.category === 'object'
+								? maintenanceRequest.category._id
+								: maintenanceRequest.category
+					}
+				: {}
+		});
 
 	const router = useRouter();
-	const { errors } = formState;
+	const { errors, isValid, isDirty } = formState;
 	const { isCreating, createMaintenance } = useCreateMaintenanceRequest(
-		maintenance?.id,
-		isEditing
-		// onCloseModal
+		isEditing,
+		maintenanceRequest?.id
 	);
 
 	const [isUploading, setIsUploading] = useState(false);
@@ -51,19 +60,15 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 
 	function handleAutoCompleteValues(values: any) {
 		setAutoCompleteValue({ ...autoCompleteValue, ...values });
+		if (values.category) setValue('category', values.category._id);
 	}
 
-	async function onSubmit(data: any) {
-		// const { category }: any = autoCompleteValue;
-
+	async function onSubmit(data: MaintenanceRequestForm) {
+		console.log('Submitting form:', data);
 		const imgUrls = await handleMultipleUpload(selectedImages!, 'image');
 		const videoUrls = await handleMultipleUpload(selectedVideo!, 'video');
 
-		const payload = {
-			...data,
-			images: imgUrls,
-			video: videoUrls
-		};
+		const payload = BuildRequestPayload(data, imgUrls, videoUrls);
 
 		createMaintenance(payload, {
 			onSuccess: () => {
@@ -72,30 +77,24 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		});
 	}
 
+	function BuildRequestPayload(
+		data: MaintenanceRequestForm,
+		imgUrls?: string[],
+		videoUrls?: string[]
+	): MaintenanceRequestPayload {
+		return {
+			...data,
+			images: imgUrls,
+			videos: videoUrls,
+			...(isEditing && {
+				status: maintenanceRequest?.status
+			})
+		};
+	}
+
 	function onError(err: any) {
 		console.log(err);
 	}
-
-	// function batchUpload(file: FileList, type: 'video' | 'image') {
-	// 	return Array.from(file).map(async (fl) => {
-	// 		const formData = new FormData();
-	// 		/image/.test(type)
-	// 			? formData.append('upload_preset', `${process.env.IMG_PRESET}`)
-	// 			: formData.append(
-	// 					'upload_preset',
-	// 					`${process.env.VIDEO_PRESET}`
-	// 			  );
-	// 		formData.append('file', fl);
-
-	// 		try {
-	// 			const response = await uploader(formData, type); // Assuming 'uploader' is your function to handle the upload
-	// 			return response; // Return the response or the specific URL part of the response
-	// 		} catch (error) {
-	// 			console.error('Upload error:', error);
-	// 			throw error; // Ensure errors are propagated
-	// 		}
-	// 	});
-	// }
 
 	function batchUpload(
 		fileList: FileList,
@@ -170,40 +169,6 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 		setSelectedVideo(files);
 	};
 
-	// function UploadFileIcon() {
-	// 	return (
-	// 		<svg
-	// 			width={20}
-	// 			height={20}
-	// 			viewBox='0 0 20 20'
-	// 			fill='none'
-	// 			xmlns='http://www.w3.org/2000/svg'
-	// 			className={''}>
-	// 			<path
-	// 				d='M17.5 12.5V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V12.5'
-	// 				stroke='#E80F6D'
-	// 				strokeWidth={2}
-	// 				strokeLinecap='round'
-	// 				strokeLinejoin='round'
-	// 			/>
-	// 			<path
-	// 				d='M14.1673 6.66667L10.0007 2.5L5.83398 6.66667'
-	// 				stroke='#E80F6D'
-	// 				strokeWidth={2}
-	// 				strokeLinecap='round'
-	// 				strokeLinejoin='round'
-	// 			/>
-	// 			<path
-	// 				d='M10 2.5V12.5'
-	// 				stroke='#E80F6D'
-	// 				strokeWidth={2}
-	// 				strokeLinecap='round'
-	// 				strokeLinejoin='round'
-	// 			/>
-	// 		</svg>
-	// 	);
-	// }
-
 	const updateProgress = (fileName: string, percent: number) => {
 		setUploadProgress((prev) => ({
 			...prev,
@@ -261,6 +226,7 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 							optionKey={'_id'}
 							// custom={'regularPrice'}
 							displayValue={'name'}
+							initialValue={maintenanceRequest?.category}
 							handler={handleAutoCompleteValues}
 						/>
 						<div className='hidden'>
@@ -324,41 +290,24 @@ const MaintenanceForm = ({ maintenance, onCloseModal, settings }: any) => {
 								selectedFiles={selectedVideo}
 								uploadProgress={uploadProgress}
 							/>
-							{/* <div className='hidden'>
-							<TextInput
-								name={'video'}
-								error={errors?.['video']?.message?.toString()}>
-								<input
-									title='images'
-									{...register('video', {
-										required: 'This field is required'
-									})}
-									className='input-style'
-									type='text'
-									hidden
-									readOnly
-									id='video'
-								/>
-							</TextInput>
-						</div> */}
 						</div>
 					</section>
 
 					<hr className='-mx-6 my-3' />
 					<section className='flex justify-end  gap-4'>
 						{/* <ButtonComponent
-							type='reset'
-							styles='rounded-3xl'
-							btnText={'Cancel'}></ButtonComponent> */}
+                            type='reset'
+                            styles='rounded-3xl'
+                            btnText={'Cancel'}></ButtonComponent> */}
 
 						<ButtonComponent
 							type='submit'
 							styles=' w-1/3'
-							disabled={!formState.isValid || isSubmitting}
+							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${
-								isEditing ? 'Update Request' : 'Submit'
-							}`}></ButtonComponent>
+								isEditing ? 'Update' : 'Submit'
+							} Request`}></ButtonComponent>
 					</section>
 				</section>
 			</form>

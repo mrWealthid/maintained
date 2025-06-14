@@ -17,7 +17,7 @@ const requestSchema = new mongoose.Schema({
 		enum: ['PENDING', 'ASSIGNED', 'DECLINED', 'COMPLETED'],
 		default: 'PENDING'
 	},
-	video: [String],
+	videos: [String],
 	images: [String],
 	createdAt: {
 		type: Date,

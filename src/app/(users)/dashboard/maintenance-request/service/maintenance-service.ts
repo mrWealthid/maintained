@@ -1,29 +1,32 @@
-import { IRequest } from '@/components/shared/model/model';
+import {
+	MaintenanceRequest,
+	MaintenanceRequestPayload
+} from '@/components/shared/model/model';
 import { REQUEST_STATUS } from '@/utils/enums';
 import axios from 'axios';
 import { RequestStatus } from '../model/request.model';
 
-export async function handleCreateMaintenaceRequest(
-	data: FormData,
-	request: IRequest,
-	isEditing: boolean
-) {
-	try {
-		const res = isEditing
-			? await axios.patch(`/api/maintenance/request/${request.id}`, data)
-			: await axios.post(`/api/maintenance/request`, data);
+// export async function handleCreateMaintenaceRequest(
+// 	data: MaintenanceRequestPayload,
+// 	isEditing: boolean,
+// 	requestId?: string
+// ) {
+// 	try {
+// 		const res = isEditing
+// 			? await axios.patch(`/api/maintenance/request/${requestId}`, data)
+// 			: await axios.post(`/api/maintenance/request`, data);
 
-		const resData = await res.data;
-		return resData;
-	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Request could not be created Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Request could not be created');
-	}
-}
+// 		const resData = await res.data;
+// 		return resData;
+// 	} catch (err: unknown) {
+// 		if (axios.isAxiosError(err) && err.response) {
+// 			throw new Error(
+// 				`Request could not be created Status: ${err.response.status}`
+// 			);
+// 		}
+// 		throw new Error('Request could not be created');
+// 	}
+// }
 
 export async function fetchMaintenanceRequests(
 	status: RequestStatus,

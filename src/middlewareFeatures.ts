@@ -5,41 +5,39 @@ class MiddlewareFeatures {
 	userInfo: any;
 	private token;
 	private isAuthenticated: boolean;
+	private isAdmin: boolean;
+	private isUser: boolean;
+	private isSuperAdmin: boolean;
 
 	constructor() {
 		this.token = cookies().get('token');
 		this.userInfo = null;
 		this.isAuthenticated = false;
+		this.isAdmin = false;
+		this.isUser = false;
+		this.isSuperAdmin = false;
 	}
-
-	// getRoleType() {
-	// 	console.log(this.userInfo?.role);
-	// 	this.isAdmin = /ADMIN/.test(this.userInfo?.role);
-	// 	this.isUser = /USER/.test(this.userInfo?.role);
-	// 	this.isSuperAdmin = /SUPER_ADMIN/.test(this.userInfo?.role);
-	// 	return this;
-	// }
 
 	get isUserAuthenticated() {
 		return this.isAuthenticated;
 	}
 
 	get isAdminRole() {
-		return /ADMIN/.test(this.userInfo?.role);
+		return this.isAdmin;
 	}
 	get isUserRole() {
-		return /USER/.test(this.userInfo?.role);
+		return this.isUser;
 	}
 	get isSuperAdminRole() {
-		return /SUPER_ADMIN/.test(this.userInfo?.role);
+		return this.isSuperAdmin;
 	}
 
 	get userId() {
-		return this.userInfo.id;
+		return this.userInfo?.id;
 	}
 
 	verifyToken() {
-		if (!this.token) return;
+		if (!this.token?.value) return this;
 		try {
 			this.userInfo = jwt.verify(
 				this.token.value,
@@ -47,11 +45,22 @@ class MiddlewareFeatures {
 			);
 
 			this.isAuthenticated = true;
-		} catch (e) {
+			this.setRoleFlags();
+		} catch {
 			this.userInfo = null;
 			this.isAuthenticated = false;
+			this.isAdmin = false;
+			this.isUser = false;
+			this.isSuperAdmin = false;
 		}
 		return this;
+	}
+
+	private setRoleFlags() {
+		const role = this.userInfo?.role || '';
+		this.isAdmin = /ADMIN/.test(role);
+		this.isUser = /USER/.test(role);
+		this.isSuperAdmin = /SUPER_ADMIN/.test(role);
 	}
 }
 

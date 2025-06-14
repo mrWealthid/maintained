@@ -1,8 +1,9 @@
 import RequestRowActions from './RequestRowActions';
 import { formatCurrency, getStatusColor } from '@/utils/helper';
 import { REQUEST_STATUS } from '@/utils/enums';
+import { RequestRowProps } from '../model/maintenance.model';
 
-function RequestRow({ data }: any) {
+function RequestRow({ data }: RequestRowProps) {
 	// function getStatusColor(val: string): string {
 	// 	let style = '';
 	// 	if (val === REQUEST_STATUS.pending) {

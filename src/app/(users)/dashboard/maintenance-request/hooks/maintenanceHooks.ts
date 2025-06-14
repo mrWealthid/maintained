@@ -3,34 +3,33 @@ import { IListResponse } from '@/components/table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	fetchMaintenanceRequests,
-	handleCreateMaintenaceRequest,
 	handleDeleteRequest
 } from '../service/maintenance-service';
 import { RequestStatus } from '../model/request.model';
 import { ApiError } from '@/components/shared/model/model';
 
-export function useCreateMaintenanceRequest(
-	bookingId: any,
-	isEditing: any
-	// close: any
-) {
-	const queryClient = useQueryClient();
-	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
-		mutationFn: (payload: FormData) =>
-			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
-		onSuccess: () => {
-			toast.success('Maintenance Request successfully created...');
-			queryClient.invalidateQueries({
-				queryKey: ['requests']
-			});
+// export function useCreateMaintenanceRequest(
+// 	bookingId: any,
+// 	isEditing: any
+// 	// close: any
+// ) {
+// 	const queryClient = useQueryClient();
+// 	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
+// 		mutationFn: (payload: FormData) =>
+// 			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
+// 		onSuccess: () => {
+// 			toast.success('Maintenance Request successfully created...');
+// 			queryClient.invalidateQueries({
+// 				queryKey: ['requests']
+// 			});
 
-			// close();
-		},
-		onError: (err: any) => toast.error(err.message)
-	});
+// 			// close();
+// 		},
+// 		onError: (err: any) => toast.error(err.message)
+// 	});
 
-	return { isCreating, createMaintenance };
-}
+// 	return { isCreating, createMaintenance };
+// }
 
 export function useFetchMaintenanceRequests(
 	status: RequestStatus,

@@ -1,17 +1,17 @@
 import React, { FC, Fragment } from 'react';
-import { IRequest } from '../shared/model/model';
+import { MaintenanceRequest } from '../shared/model/model';
 import { FaCircle, FaEye } from 'react-icons/fa';
 import { getStatusColor } from '@/utils/helper';
 import { CiUser } from 'react-icons/ci';
 import Modal from '../shared/modal/Modal';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
-import { HiEye, HiTrash } from 'react-icons/hi2';
+import { HiEye, HiPencil, HiTrash } from 'react-icons/hi2';
 import { CgMenuGridO } from 'react-icons/cg';
 import ConfirmationPage from './ConfirmationPage';
 import { useDeleteMaintenanceTicket } from '@/app/(users)/dashboard/maintenance-request/hooks/maintenanceHooks';
 
-const MaintenanceCard: FC<IRequest> = ({
+const MaintenanceCard: FC<MaintenanceRequest> = ({
 	title,
 	description,
 	status,
@@ -121,6 +121,21 @@ const MaintenanceCard: FC<IRequest> = ({
 																<HiEye />
 															)}
 															View Details
+														</Link>
+													)}
+												</Menu.Item>
+
+												<Menu.Item>
+													{({ active }) => (
+														<Link
+															href={`maintenance-request/manage/${id}`}
+															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+															{active ? (
+																<HiPencil color='green' />
+															) : (
+																<HiPencil color='green' />
+															)}
+															Edit Details
 														</Link>
 													)}
 												</Menu.Item>

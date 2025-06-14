@@ -9,11 +9,14 @@ connect();
 
 export async function GET(request: NextRequest) {
 	try {
-		//2) Check if user exists & password is correct after it's hashed
-
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		console.log(verify?.userId);
+		if (!verify.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'Unauthorized access' },
+				{ status: 401 }
+			);
+		}
 
 		const user = await User.findById(verify?.userId).populate([
 			{
@@ -35,18 +38,5 @@ export async function GET(request: NextRequest) {
 		return response;
 	} catch (error: any) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
-	}
-}
-
-function getUserDetails(token: string) {
-	console.log('Sent_Cookie', token);
-	try {
-		const decodedToken: any = verify(token, process.env.JWT_SECRET!);
-		console.log(decodedToken);
-		console.log('I got here');
-		return decodedToken.id;
-	} catch (err: any) {
-		// console.log('My error', err);
-		throw new Error(err.message);
 	}
 }

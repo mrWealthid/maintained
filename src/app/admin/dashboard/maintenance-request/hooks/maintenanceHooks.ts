@@ -1,34 +1,31 @@
 import { toast } from 'react-hot-toast';
 import { IListResponse } from '@/components/table/models/table.model';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-	handleCreateMaintenaceRequest,
-	handleDeleteRequest
-} from '../service/maintenance-service';
+import { handleDeleteRequest } from '../service/maintenance-service';
 import { ApiError } from '@/components/shared/model/model';
 
-export function useCreateMaintenanceRequest(
-	bookingId: string,
-	isEditing: boolean
-	// close: any
-) {
-	const queryClient = useQueryClient();
-	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
-		mutationFn: (payload: FormData) =>
-			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
-		onSuccess: () => {
-			toast.success('Maintenance Request successfully created');
-			queryClient.invalidateQueries({
-				queryKey: ['requests']
-			});
+// export function useCreateMaintenanceRequest(
+// 	bookingId: string,
+// 	isEditing: boolean
+// 	// close: any
+// ) {
+// 	const queryClient = useQueryClient();
+// 	const { isPending: isCreating, mutate: createMaintenance } = useMutation({
+// 		mutationFn: (payload: FormData) =>
+// 			handleCreateMaintenaceRequest(payload, bookingId, isEditing),
+// 		onSuccess: () => {
+// 			toast.success('Maintenance Request successfully created...');
+// 			queryClient.invalidateQueries({
+// 				queryKey: ['requests']
+// 			});
 
-			// close();
-		},
-		onError: (err: any) => toast.error(err.message)
-	});
+// 			// close();
+// 		},
+// 		onError: (err: any) => toast.error(err.message)
+// 	});
 
-	return { isCreating, createMaintenance };
-}
+// 	return { isCreating, createMaintenance };
+// }
 
 // export function useFetchMaintenanceRequests(
 // 	status: string,
@@ -55,7 +52,7 @@ export function useDeleteMaintenanceTicket() {
 		onSuccess: () => {
 			toast.success('Maintenance Request successfully deleted');
 			queryClient.invalidateQueries({
-				queryKey: ['requests']
+				queryKey: ['requests', 5, 1, null]
 			});
 		},
 		onError: (err: ApiError) => toast.error(err.message)

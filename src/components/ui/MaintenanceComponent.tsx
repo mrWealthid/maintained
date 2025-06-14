@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import MaintenanceCard from './MaintenanceCard';
 
 import { IListResponse } from '@/components/table/models/table.model';
-import { IRequest } from '../shared/model/model';
+import { MaintenanceRequest } from '../shared/model/model';
 import { useFetchMaintenanceRequests } from '@/app/(users)/dashboard/maintenance-request/hooks/maintenanceHooks';
 import Tabs from '@/app/(users)/dashboard/maintenance-request/Tabs';
 
@@ -26,7 +26,7 @@ const MaintenanceComponent = () => {
 		<>
 			<Tabs status={status} handleClick={handleClick} />
 			<section className='grid md:grid-cols-3  grid-cols-1 gap-2'>
-				{data?.map((request: IRequest) => (
+				{data?.map((request: MaintenanceRequest) => (
 					<MaintenanceCard key={request._id} {...request} />
 				))}
 			</section>

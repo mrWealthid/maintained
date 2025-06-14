@@ -127,6 +127,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 									<Image
 										src={file.url}
 										alt='preview'
+										width={100}
+										height={100}
 										className='w-full h-32 object-cover rounded-md'
 									/>
 								) : file.type.startsWith('video/') ? (
@@ -146,7 +148,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 												className='absolute inset-0 rounded-full'
 												style={{
 													background: `conic-gradient(green ${
-														progress * 3.6
+														angle
 													}deg, #e5e7eb 0deg)`
 												}}
 											/>

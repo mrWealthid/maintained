@@ -158,6 +158,7 @@ interface AutoCompleteProps<T> {
 	displayValue: keyof T;
 	handler: (value: Record<string, unknown>) => void;
 	custom?: keyof T;
+	initialValue?: T | null;
 }
 
 export default function AutoComplete<T>({
@@ -167,9 +168,10 @@ export default function AutoComplete<T>({
 	optionKey = 'id',
 	displayValue,
 	handler,
-	custom
+	custom,
+	initialValue
 }: AutoCompleteProps<T>) {
-	const [selected, setSelected] = useState<T | null>(null);
+	const [selected, setSelected] = useState<T | null>(initialValue ?? null);
 	const [query, setQuery] = useState('');
 
 	const debouncedSearchTerm = useDebounce(query, 1000);
@@ -269,10 +271,10 @@ export default function AutoComplete<T>({
 																		result[
 																			custom
 																		]
-																  )
+																	)
 																: (result[
 																		custom
-																  ] as string)}
+																	] as string)}
 														</span>
 													)}
 												</span>

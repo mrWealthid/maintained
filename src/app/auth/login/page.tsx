@@ -15,7 +15,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 const LoginComponent = () => {
 	const { register, handleSubmit, getValues, formState } = useForm({
 		mode: 'onChange',
-		defaultValues: { email: 'admin@gmail.com', password: '12345678' }
+		defaultValues: { email: 'tela@mailsac.com', password: '12345678' }
 	});
 
 	const router = useRouter();

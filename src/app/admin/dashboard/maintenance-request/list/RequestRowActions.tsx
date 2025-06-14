@@ -17,7 +17,7 @@ import {
 } from 'react-icons/hi2';
 import { MdOutlineLocalPrintshop, MdOutlinePrint } from 'react-icons/md';
 import { CgMenuGridO } from 'react-icons/cg';
-import { IRequest } from '@/components/shared/model/model';
+import { MaintenanceRequest } from '@/components/shared/model/model';
 import { useDeleteMaintenanceTicket } from '../hooks/maintenanceHooks';
 import { RequestRowActionsProps } from '../model/maintenance.model';
 import ConfirmationPage from '@/components/ui/ConfirmationPage';

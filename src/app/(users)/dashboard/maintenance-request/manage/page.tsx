@@ -1,4 +1,5 @@
 'use client';
+
 import MaintenanceForm from '@/components/shared/maintenance/form/MaintenanceRequest';
 
 const Page = () => {
