@@ -1,12 +1,10 @@
 'use client';
-
-import React, { useState } from 'react';
-import Modal from '@/components/shared/modal/Modal';
-
+import React, { FC } from 'react';
 import { CiCirclePlus } from 'react-icons/ci';
 import UserForm from './UserForm';
+import Modal from '@/app/shared/components/modal/Modal';
 
-const AddUser = ({ settings }: any) => {
+const AddUser: FC = () => {
 	return (
 		<Modal>
 			<Modal.Open opens='user-form'>
@@ -22,7 +20,7 @@ const AddUser = ({ settings }: any) => {
 				title='Manage Users'
 				description='Add team members to your organization'
 				name='user-form'>
-				<UserForm settings={settings} />
+				<UserForm />
 			</Modal.Window>
 		</Modal>
 	);

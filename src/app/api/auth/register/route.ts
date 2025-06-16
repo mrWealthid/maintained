@@ -73,12 +73,12 @@ export async function POST(request: NextRequest) {
 		const req = await request.json();
 
 		const checkIfUserExist = await User.findOne({ email: req.email });
-		if (checkIfUserExist)
+		if (checkIfUserExist) {
 			return NextResponse.json(
 				{ error: 'Email is already in use' },
 				{ status: 400 }
 			);
-
+		}
 		const business = await Business.create({
 			businessName: req.businessName,
 			registrationId: req.registrationId,

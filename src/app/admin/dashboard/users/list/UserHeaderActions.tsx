@@ -1,19 +1,19 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
 import { INVITE_STATUS } from '@/utils/enums';
+import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
 
-const UserHeaderActions = ({ handleFilter }: any) => {
-	const [query, setQuery] = useState<{
-		status: string;
-	} | null>({ status: INVITE_STATUS.invited });
+const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
+	const [query, setQuery] = useState<UserFilterQuery | null>({
+		status: INVITE_STATUS.invited
+	});
 
-	// handleFilter(query);
-
-	async function handleClick(query: any) {
+	async function handleClick(query: UserFilterQuery | null) {
 		setQuery(query);
-		query ? handleFilter(query) : handleFilter(null);
+		if (handleFilter) {
+			query ? handleFilter(query) : handleFilter(null);
+		}
 	}
 
 	return (
@@ -64,7 +64,7 @@ const UserHeaderActions = ({ handleFilter }: any) => {
 				<button
 					onClick={() =>
 						handleClick({
-							checkStatus: INVITE_STATUS.activated
+							status: INVITE_STATUS.activated
 						})
 					}
 					type='button'
@@ -81,7 +81,7 @@ const UserHeaderActions = ({ handleFilter }: any) => {
 				<button
 					onClick={() =>
 						handleClick({
-							checkStatus: INVITE_STATUS.declined
+							status: INVITE_STATUS.declined
 						})
 					}
 					type='button'

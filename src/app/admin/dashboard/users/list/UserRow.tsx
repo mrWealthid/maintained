@@ -1,8 +1,8 @@
-import { formatCurrency, getStatusColor } from '@/utils/helper';
-import { REQUEST_STATUS } from '@/utils/enums';
+
+import { UserRowProps } from '@/app/shared/model/model';
 import UserRowAction from './UserRowAction';
 
-function UserRow({ data }: any) {
+function UserRow({ data }:UserRowProps) {
 	// function getStatusColor(val: string): string {
 	// 	let style = '';
 	// 	if (val === REQUEST_STATUS.pending) {
@@ -95,7 +95,7 @@ function UserRow({ data }: any) {
 							</span>
 						</td>
 
-						<UserRowAction rowData={row} />
+						<UserRowAction user={row} />
 					</tr>
 				);
 			})}

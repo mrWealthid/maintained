@@ -1,31 +1,26 @@
 'use client';
 
-import EmailInput from '@/components/shared/form-elements/Email-Input';
-import TextInput from '@/components/shared/form-elements/Text-Input';
-import ButtonComponent from '@/components/shared/form-elements/Button';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useResetPassword } from '../hooks/useAuth';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-// import axiosInstance from '@/app/utils/intercerptor';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import { IResetPassword } from '../model/model';
 
 const ResetPasswordComponent = () => {
-	const { register, handleSubmit, getValues, formState } = useForm({
+	const { register, handleSubmit, formState } = useForm<{ email: string }>({
 		mode: 'onChange'
 		// defaultValues: { email: 'admin@gmail.com', password: '12345678' }
 	});
 
-	const router = useRouter();
 	const { isLoading, resetPassword } = useResetPassword();
 
-	async function onSubmit(payload: any) {
+	async function onSubmit(payload: IResetPassword) {
 		resetPassword(payload);
 	}
 
-	const { errors, isSubmitting } = formState;
+	const { errors, isValid } = formState;
 
 	function onError(err: any) {
 		console.log(err);
@@ -71,7 +66,7 @@ const ResetPasswordComponent = () => {
 								btnText='Reset'
 								loading={isLoading}
 								type='submit'
-								disabled={!formState.isValid || isLoading}
+								disabled={!isValid || isLoading}
 							/>
 
 							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>

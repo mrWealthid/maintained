@@ -1,16 +1,19 @@
 'use client';
-import TextInput from '@/components/shared/form-elements/Text-Input';
-import ButtonComponent from '@/components/shared/form-elements/Button';
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useOnboardUser } from '../../hooks/useAuth';
-import { IUpdatePassword } from '../../model/model';
+import { OnboardUserForm } from '../../model/model';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
 
-const OnboardComponent = ({ params }: any) => {
-	const { register, handleSubmit, getValues, formState } = useForm({
+const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
+	params
+}) => {
+	const { register, handleSubmit, formState } = useForm<OnboardUserForm>({
 		mode: 'onChange'
 	});
 
@@ -18,7 +21,7 @@ const OnboardComponent = ({ params }: any) => {
 	const { isLoading, onboardUser } = useOnboardUser();
 
 	async function onSubmit(payload: any) {
-		const data: IUpdatePassword = {
+		const data = {
 			...payload,
 			inviteToken: params.inviteToken
 		};
@@ -26,7 +29,7 @@ const OnboardComponent = ({ params }: any) => {
 		onboardUser(data, { onSuccess: () => router.push('/auth/login') });
 	}
 
-	const { errors, isSubmitting } = formState;
+	const { errors, isValid } = formState;
 
 	function onError(err: any) {
 		console.log(err);
@@ -144,7 +147,7 @@ const OnboardComponent = ({ params }: any) => {
 									btnText='Submit'
 									loading={isLoading}
 									type='submit'
-									disabled={!formState.isValid || isLoading}
+									disabled={!isValid || isLoading}
 								/>
 							</section>
 
@@ -164,4 +167,4 @@ const OnboardComponent = ({ params }: any) => {
 	);
 };
 
-export default OnboardComponent;
+export default OnboardingComponent;

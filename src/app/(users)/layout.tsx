@@ -1,7 +1,8 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
-import SideBar from '../(users)/dashboard/SideBarComponent';
-import Header from '@/components/shared/header/Header';
+import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { redirect } from 'next/navigation';
+import { routes } from '../shared/routes';
+import Header from '../shared/components/header/Header';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -18,7 +19,7 @@ export default function DashboardLayout({
 				<Header />
 			</header>
 			<section>
-				<SideBar />
+				<SideBar routes={routes} />
 			</section>
 
 			<section className=' sm:ml-64 flex flex-col h-screen gap-6 '>

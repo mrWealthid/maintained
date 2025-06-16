@@ -1,31 +1,26 @@
 'use client';
 
-import EmailInput from '@/components/shared/form-elements/Email-Input';
-import TextInput from '@/components/shared/form-elements/Text-Input';
-import ButtonComponent from '@/components/shared/form-elements/Button';
-import React, { useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import AutoComplete from '@/components/shared/auto-complete/AutoComplete';
-import {} from './service/user.service';
-import { DateRangePicker } from '@/components/shared/date-picker/DatePicker';
-import {
-	addDays,
-	differenceInDays,
-	formatISO,
-	startOfDay,
-	endOfDay,
-	parseISO
-} from 'date-fns';
 import { useCreateUser } from './hooks/userHooks';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import { ROLES } from '@/utils/enums';
+import {
+	CreateUserPayload,
+	ManageUserForm,
+	ManageUserFormProps
+} from '@/app/shared/model/model';
 
-const UserForm = ({ user, onCloseModal, settings }: any) => {
+const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 	const isEditing = !!user?.id;
 
-	const { register, handleSubmit, getValues, formState } = useForm({
-		mode: 'all',
-		defaultValues: isEditing ? { ...user } : {},
-		values: {}
-	});
+	const { register, handleSubmit, getValues, formState } =
+		useForm<ManageUserForm>({
+			mode: 'all',
+			defaultValues: isEditing ? { ...user } : {}
+		});
 
 	const { errors, isSubmitting } = formState;
 	const { isCreating, createUser } = useCreateUser(
@@ -34,14 +29,13 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 		onCloseModal
 	);
 
-	async function onSubmit(data: any) {
+	async function onSubmit(data: ManageUserForm) {
 		const { firstName, lastName, ...rest } = data;
 
 		const payload = {
 			...rest,
 			name: firstName + ' ' + lastName
 		};
-		console.log(payload);
 
 		createUser(payload);
 	}
@@ -135,8 +129,8 @@ const UserForm = ({ user, onCloseModal, settings }: any) => {
 									required: 'This field is required'
 								})}>
 								<option> Select Role</option>
-								<option> USER</option>
-								<option> ADMIN</option>
+								<option> {ROLES.user}</option>
+								<option> {ROLES.admin}</option>
 							</select>
 						</TextInput>
 					</div>

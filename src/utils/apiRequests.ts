@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/app/shared/model/model';
 import { headers } from 'next/headers';
 
 export async function getData(url: any, tag?: any) {
@@ -18,7 +19,11 @@ export async function getData(url: any, tag?: any) {
 	}
 }
 
-export async function findData(url: string, id: string, revalidate = 0) {
+export async function findData<T>(
+	url: string,
+	id: string,
+	revalidate = 0
+): Promise<ApiResponse<T> | undefined> {
 	const host = headers().get('host');
 	const protocol = process?.env.NODE_ENV === 'development' ? 'http' : 'https';
 	try {

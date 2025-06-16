@@ -1,11 +1,13 @@
 'use client';
-import { Icolumn } from '@/components/table/models/table.model';
-import Table from '@/components/table/Table';
+
 import React from 'react';
 import { fetchUsers } from '../service/user.service';
 import UserHeaderActions from './UserHeaderActions';
 import UserRow from './UserRow';
-import { INVITE_STATUS, ROLE_STATUS } from '@/utils/enums';
+import { INVITE_STATUS, ROLES } from '@/utils/enums';
+import { Icolumn } from '@/app/shared/components/table/models/table.model';
+import Table from '@/app/shared/components/table/Table';
+import { User } from '@/app/shared/model/model';
 
 const UserList = () => {
 	const columns: Icolumn[] = [
@@ -34,14 +36,14 @@ const UserList = () => {
 			searchType: 'DROPDOWN',
 			filterKey: 'role',
 			selectOptions: [
-				{ name: 'admin', value: ROLE_STATUS.admin },
-				{ name: 'user', value: ROLE_STATUS.user }
+				{ name: 'admin', value: ROLES.admin },
+				{ name: 'user', value: ROLES.user }
 			]
 		}
 	];
 
 	return (
-		<Table
+		<Table<User>
 			headerActions={<UserHeaderActions />}
 			service={fetchUsers}
 			defaultParams={{ status: INVITE_STATUS.invited }}

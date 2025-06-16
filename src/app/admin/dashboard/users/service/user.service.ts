@@ -14,8 +14,13 @@ export async function fetchUsers(
 		const data = await response.data;
 
 		return data;
-	} catch (err) {
-		console.log(err);
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`User could not be fetched Status: ${err.response.status}`
+			);
+		}
+		throw new Error('User could not be fetched');
 	}
 }
 
@@ -27,7 +32,12 @@ export async function handleCreateUser(payload: any) {
 		const data = await response.data;
 
 		return data;
-	} catch (err) {
-		console.log(err);
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`User could not be created Status: ${err.response.status}`
+			);
+		}
+		throw new Error('User could not be created');
 	}
 }

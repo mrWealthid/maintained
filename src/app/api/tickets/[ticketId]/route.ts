@@ -1,0 +1,111 @@
+import MiddlewareFeatures from '@/middlewareFeatures';
+import Ticket from '@/model/ticketModel';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(
+	request: NextRequest,
+	{ params }: { params: { ticketId: string } }
+) {
+	try {
+		// const verify = new MiddlewareFeatures().verifyToken();
+
+		// if (!verify.isUserAuthenticated) {
+		// 	return NextResponse.json(
+		// 		{ error: 'Unauthorized access' },
+		// 		{ status: 401 }
+		// 	);
+		// }
+
+		const ticketId = params.ticketId;
+
+		const maintenanceRequest = await Ticket.findOne({
+			_id: ticketId
+		}).populate({
+			path: 'category',
+			select: 'name '
+		});
+
+		const response = NextResponse.json({
+			status: 'success',
+			data: maintenanceRequest
+		});
+
+		return response;
+	} catch (error: any) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+}
+
+export async function PATCH(
+	request: NextRequest,
+	{ params }: { params: { ticketId: string } }
+) {
+	try {
+		const verify = new MiddlewareFeatures().verifyToken();
+
+		if (!verify.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'Unauthorized access' },
+				{ status: 401 }
+			);
+		}
+
+		const body = await request.json();
+		const ticketId = params.ticketId;
+
+		const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, body, {
+			new: true,
+			runValidators: true
+		});
+
+		if (!updatedRequest) {
+			return NextResponse.json(
+				{ error: 'No cabin found with ID' },
+				{ status: 404 }
+			);
+		}
+		const response = NextResponse.json({
+			message: 'Request Updated Successfully',
+			success: true,
+			data: updatedRequest
+		});
+
+		return response;
+	} catch (error: any) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+}
+
+export async function DELETE(
+	request: NextRequest,
+	{ params }: { params: { ticketId: string } }
+) {
+	try {
+		const verify = new MiddlewareFeatures().verifyToken();
+
+		if (!verify.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'Unauthorized access' },
+				{ status: 401 }
+			);
+		}
+		const ticketId = params.ticketId;
+
+		const maintenanceRequest = await Ticket.findByIdAndDelete(ticketId);
+
+		if (!maintenanceRequest) {
+			return NextResponse.json(
+				{ error: 'No request found with id' },
+				{ status: 404 }
+			);
+		}
+		const response = NextResponse.json({
+			message: 'Request Deleted Successfully',
+			success: true
+		});
+
+		return response;
+	} catch (error: any) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+}

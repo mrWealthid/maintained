@@ -1,11 +1,12 @@
 import { toast } from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { handleCreateUser } from '../service/user.service';
+import { CreateUserPayload } from '@/app/shared/model/model';
 
 export function useCreateUser(bookingId: any, isEditing: any, close: any) {
 	const queryClient = useQueryClient();
 	const { isPending: isCreating, mutate: createUser } = useMutation({
-		mutationFn: (payload) => handleCreateUser(payload),
+		mutationFn: (payload: CreateUserPayload) => handleCreateUser(payload),
 		// handleCreateMaintenaceRequest(payload, bookingId, isEditing),
 
 		onSuccess: () => {

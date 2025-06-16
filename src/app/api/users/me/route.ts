@@ -1,8 +1,6 @@
 import { connect } from '@/dbConfig/dbConfig';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 connect();

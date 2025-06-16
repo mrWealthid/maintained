@@ -1,5 +1,4 @@
 import { decode } from 'jsonwebtoken';
-import { Router } from 'next/router';
 import { useMutation } from '@tanstack/react-query';
 import {
 	handleForgetPassword,
@@ -12,14 +11,16 @@ import {
 import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
-import { handleClientErrorMessage } from '@/utils/helper';
 import {
 	ILogin,
 	IRegister,
 	IResetPassword,
 	IToken,
-	IUpdatePassword
+	IUpdatePassword,
+	OnboardUser
 } from '../model/model';
+import { ApiError } from 'next/dist/server/api-utils';
+import { ROLES } from '@/utils/enums';
 
 export function useLogin() {
 	const router = useRouter();
@@ -29,12 +30,17 @@ export function useLogin() {
 		data
 	} = useMutation({
 		mutationFn: (payload: ILogin) => handleLogin(payload),
-		onError: (err: any) => toast.error(err.message),
 		onSuccess: (data) => {
+			console.time('start');
 			const userInfo = decode(data.token) as IToken;
-			if (userInfo.role === 'USER') router.push('/dashboard');
-			if (userInfo.role === 'ADMIN') router.push('/admin/dashboard');
-		}
+			// const tt = new MiddlewareFeatures().userInfo;
+			// console.log(tt);
+
+			console.timeEnd('end');
+			if (userInfo.role === ROLES.user) router.push('/dashboard');
+			if (userInfo.role === ROLES.admin) router.push('/admin/dashboard');
+		},
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	// console.log(data);
@@ -47,7 +53,7 @@ export function useLogin() {
 export function useRegister() {
 	const { isPending: isLoading, mutate: registering } = useMutation({
 		mutationFn: (payload: IRegister) => handleRegister(payload),
-		onError: (err: any) => toast.error(err.message)
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	return {
@@ -59,7 +65,7 @@ export function useLogout(router: any) {
 	const { isPending: isLoading, mutate: loggingOut } = useMutation({
 		mutationFn: () => handleLogout(),
 		onSuccess: () => router.push('/auth/login'),
-		onError: (err: any) => toast.error(handleClientErrorMessage(err))
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	return {
@@ -71,7 +77,7 @@ export function useResetPassword() {
 	const { isPending: isLoading, mutate: resetPassword } = useMutation({
 		mutationFn: (payload: IResetPassword) => handleForgetPassword(payload),
 		onSuccess: (data) => toast.success(data.message),
-		onError: (err: any) => toast.error(handleClientErrorMessage(err))
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	return {
@@ -83,7 +89,7 @@ export function useUpdatePassword() {
 	const { isPending: isLoading, mutate: updatePassword } = useMutation({
 		mutationFn: (payload: IUpdatePassword) => handleResetPassword(payload),
 		onSuccess: (data) => toast.success(data.message),
-		onError: (err: any) => toast.error(err.message)
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	return {
@@ -93,9 +99,9 @@ export function useUpdatePassword() {
 }
 export function useOnboardUser() {
 	const { isPending: isLoading, mutate: onboardUser } = useMutation({
-		mutationFn: (payload: any) => handleOnboardUser(payload),
+		mutationFn: (payload: OnboardUser) => handleOnboardUser(payload),
 		onSuccess: (data) => toast.success(data.message),
-		onError: (err: any) => toast.error(err.message)
+		onError: (err: ApiError) => toast.error(err.message)
 	});
 
 	return {
