@@ -8,7 +8,7 @@ const Page: FC<{ params: { requestId: string } }> = async ({ params }) => {
 
 	return (
 		<>
-			<MaintenanceForm maintenanceRequest={data} />
+			<MaintenanceForm maintenanceRequest={requestId ? data : null} />
 		</>
 	);
 };
