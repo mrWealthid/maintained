@@ -3,6 +3,7 @@ import User from '@/model/userModel';
 import Business from '@/model/businessModel';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { ROLES } from '@/utils/enums';
 
 connect();
 
@@ -11,19 +12,8 @@ const signToken = (id: string, role: string) =>
 		expiresIn: process.env.JWT_EXPIRES_IN
 	});
 
-const createSendToken = (user: any, statusCode: any) => {
+const createSendToken = (user: any, statusCode: number) => {
 	const token = signToken(user._id, user.role);
-
-	// const cookieOptions: {expires:any, httpOnly: boolean} = {
-	// 	// expires: new Date(Date.now() + process.env?.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 1000),
-
-	// 	httpOnly: true,
-	// 	// secure: req.secure || req.header('x-forwarded-proto') === 'https'
-	// };
-
-	// if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-
-	// res.cookie('jwt', token, cookieOptions);
 
 	//Remove password from output
 	user.password = undefined;
@@ -35,7 +25,7 @@ const createSendToken = (user: any, statusCode: any) => {
 				user
 			}
 		},
-		{ status: 201 }
+		{ status: statusCode }
 	);
 	const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
 	const expires = new Date(Date.now() + timeInMs);
@@ -47,38 +37,20 @@ const createSendToken = (user: any, statusCode: any) => {
 	return response;
 };
 
-export async function POST(request: NextRequest) {
-	// const req = await request.json();
-	//
-
-	// const newUser = await User.create({
-	// 	name: req.body.name,
-	// 	email: req.body.email,
-	// 	password: req.body.password,
-	// 	role: req.body.role,
-
-	// 	dateOfBirth: req.body.dateOfBirth
-	// });
-	// const url = `${req.protocol}://${req.get('host')}/me`;
-	//   const url = `https://wealthtech.netlify.app/dashboard`
-
-	//   console.log(url)
-
-	//   await new Email(newUser, url).sendWelcome();
-	// await new Email(newUser, url).sendMyMail()
-
-	// createSendToken(newUser, 201, req, response);
-
+export async function POST(request: Request) {
 	try {
 		const req = await request.json();
+		console.log('Incoming Request:', req);
 
-		const checkIfUserExist = await User.findOne({ email: req.email });
-		if (checkIfUserExist) {
+		// Check user existence
+		const existingUser = await User.findOne({ email: req.email });
+		if (existingUser) {
 			return NextResponse.json(
 				{ error: 'Email is already in use' },
 				{ status: 400 }
 			);
 		}
+
 		const business = await Business.create({
 			businessName: req.businessName,
 			registrationId: req.registrationId,
@@ -89,69 +61,27 @@ export async function POST(request: NextRequest) {
 			businessCreator: req.name
 		});
 
-		console.log('Business', business);
+		if (!business) {
+			return NextResponse.json(
+				{ error: 'Business could not be created' },
+				{ status: 404 }
+			);
+		}
+		// Create User
 
 		const newUser = await User.create({
 			name: req.name,
 			email: req.email,
-			businessId: business._id,
+			business: business.id,
 			password: req.password,
-			role: 'ADMIN'
+			role: ROLES.admin
 		});
-		console.log('User', newUser);
-
-		//send verification email
 
 		return createSendToken(newUser, 201);
-	} catch (error: any) {
-		return NextResponse.json({ error: error.message }, { status: 500 });
+	} catch (error) {
+		return NextResponse.json(
+			{ error: 'Server error occurred' },
+			{ status: 500 }
+		);
 	}
-
-	// try {
-	// 	const reqBody = await request.json();
-	// 	const { email, password } = reqBody;
-	// 	console.log(reqBody);
-
-	// 	//check if user exists
-	// 	const user = await User.findOne({ email });
-	// 	if (!user) {
-	// 		return NextResponse.json(
-	// 			{ error: 'User does not exist' },
-	// 			{ status: 400 }
-	// 		);
-	// 	}
-	// 	console.log('user exists');
-
-	// 	//check if password is correct
-	// 	const validPassword = await bcryptjs.compare(password, user.password);
-	// 	if (!validPassword) {
-	// 		return NextResponse.json(
-	// 			{ error: 'Invalid password' },
-	// 			{ status: 400 }
-	// 		);
-	// 	}
-	// 	console.log(user);
-
-	// 	//create token data
-	// 	const tokenData = {
-	// 		id: user._id,
-	// 		username: user.username,
-	// 		email: user.email
-	// 	};
-	// 	//create token
-	// 	const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET!, {
-	// 		expiresIn: '1d'
-	// 	});
-
-	// 	const response = NextResponse.json({
-	// 		message: 'Login successful',
-	// 		success: true
-	// 	});
-	// 	response.cookies.set('token', token, {
-	// 		httpOnly: true
-	// 	});
-	// 	return response;
-	// } catch (error: any) {
-	// 	return NextResponse.json({ error: error.message }, { status: 500 });
-	// }
 }

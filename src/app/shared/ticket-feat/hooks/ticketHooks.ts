@@ -19,7 +19,7 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
 		onSuccess: () => {
 			toast.success('Maintenance Request successfully created...');
 			queryClient.invalidateQueries({
-				queryKey: ['requests']
+				queryKey: ['tickets']
 			});
 
 			// close();
@@ -36,7 +36,7 @@ export function useFetchTickets<T>(
 	limit: number = 10
 ): IListResponse<T> {
 	const { isLoading, data, error, isRefetching } = useQuery({
-		queryKey: ['requests', status],
+		queryKey: ['tickets', status],
 		queryFn: () => fetchTickets(status, page, limit)
 	});
 
@@ -55,7 +55,7 @@ export function useDeleteTicket() {
 		onSuccess: () => {
 			toast.success('Maintenance Request successfully deleted');
 			queryClient.invalidateQueries({
-				queryKey: ['requests']
+				queryKey: ['tickets']
 			});
 		},
 		onError: (err: ApiError) => toast.error(err.message)

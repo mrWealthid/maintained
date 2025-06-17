@@ -36,8 +36,7 @@ const ticketSchema = new mongoose.Schema({
 	}
 });
 
-const Ticket =
-	mongoose.models.Request || mongoose.model('Ticket', ticketSchema);
+const Ticket = mongoose.models.Ticket || mongoose.model('Ticket', ticketSchema);
 
 // Make.init().then((x) => console.log(x));
 module.exports = Ticket;

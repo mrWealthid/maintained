@@ -10,7 +10,7 @@ export class Emails {
 		this.firstName = user.name.split(',')[0];
 		this.url = url;
 		this.business = business.businessName;
-		this.from = `onboarding@resend.dev`;
+		this.from = 'wealthtech.website';
 		this;
 	}
 

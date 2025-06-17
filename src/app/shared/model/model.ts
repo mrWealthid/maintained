@@ -121,8 +121,7 @@ export interface ManageUserFormProps {
 }
 
 export interface ManageUserForm {
-	firstName: string;
-	lastName: string;
+	name: string;
 	email: string;
 	role: ROLES;
 }

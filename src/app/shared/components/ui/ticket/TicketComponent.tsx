@@ -27,7 +27,7 @@ const TicketComponent: FC = () => {
 		<>
 			<Tabs status={status} handleClick={handleClick} />
 			<section className='grid md:grid-cols-3  grid-cols-1 gap-2'>
-				{data.map((ticket: Ticket) => (
+				{data?.map((ticket: Ticket) => (
 					<TicketCard key={ticket._id} {...ticket} />
 				))}
 			</section>

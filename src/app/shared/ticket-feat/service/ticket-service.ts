@@ -1,7 +1,7 @@
-import { TICKET_STATUS } from '@/utils/enums';
 import axios from 'axios';
-import { TicketStatus } from '../model/ticket.model';
+import { TICKET_STATUS } from '@/utils/enums';
 import { CreateTicketPayload } from '../../model/model';
+import { API_ROUTES } from '../../routes/apiRoutes';
 
 export async function createTicket(
 	data: CreateTicketPayload,
@@ -10,8 +10,14 @@ export async function createTicket(
 ) {
 	try {
 		const res = isEditing
-			? await axios.patch(`/api/maintenance/request/${requestId}`, data)
-			: await axios.post(`/api/maintenance/request`, data);
+			? await axios.patch(
+					`${API_ROUTES.ticketManagement.ticketById}/${requestId}`,
+					data
+				)
+			: await axios.post(
+					`${API_ROUTES.ticketManagement.create_ticket}`,
+					data
+				);
 
 		const resData = await res.data;
 		return resData;
@@ -27,8 +33,8 @@ export async function createTicket(
 
 export async function fetchTicketCategory(query: string | null) {
 	const url = query
-		? `/api/maintenance/category?name=${query}`
-		: `/api/maintenance/category`;
+		? `${API_ROUTES.ticketManagement.get_categories}?name=${query}`
+		: `${API_ROUTES.ticketManagement.get_categories}`;
 	try {
 		const response = await axios(url);
 
@@ -53,8 +59,8 @@ export async function fetchTickets(
 
 	const url =
 		status === TICKET_STATUS.all
-			? `/api/maintenance/request?limit=${limit}&page=${page}`
-			: `/api/maintenance/request?limit=${limit}&page=${page}&status=${status}`;
+			? `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}`
+			: `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}&status=${status}`;
 	try {
 		const response = await axios(url);
 		const data = await response.data;
@@ -76,8 +82,8 @@ export async function fetchTicketList(
 	query: string | null
 ) {
 	const url = query
-		? `/api/maintenance/request?limit=${limit}&page=${page}&${query}`
-		: `/api/maintenance/request?limit=${limit}&page=${page}`;
+		? `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}&${query}`
+		: `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}`;
 	try {
 		const response = await axios(url);
 		const data = await response.data;
@@ -94,7 +100,9 @@ export async function fetchTicketList(
 
 export async function deleteTicket(id: string) {
 	try {
-		const res = await axios.delete(`/api/maintenance/request/${id}`);
+		const res = await axios.delete(
+			`${API_ROUTES.ticketManagement.ticketById}/${id}`
+		);
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {

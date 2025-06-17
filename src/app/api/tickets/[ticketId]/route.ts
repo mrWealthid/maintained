@@ -60,12 +60,12 @@ export async function PATCH(
 
 		if (!updatedRequest) {
 			return NextResponse.json(
-				{ error: 'No cabin found with ID' },
+				{ error: 'No ticket found with id' },
 				{ status: 404 }
 			);
 		}
 		const response = NextResponse.json({
-			message: 'Request Updated Successfully',
+			message: 'Ticket Updated Successfully',
 			success: true,
 			data: updatedRequest
 		});

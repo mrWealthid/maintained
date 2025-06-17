@@ -84,7 +84,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					title='Delete Maintenance Ticket'
 					description='Request ticket will be deleted permanently'>
 					<ConfirmationPage
-						handler={(onCloseModal: any) => {
+						handler={(onCloseModal) => {
 							handleDelete(onCloseModal);
 						}}
 						isLoading={isDeleting}

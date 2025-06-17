@@ -1,3 +1,4 @@
+'use client';
 import { RiHomeLine, RiUserReceivedLine } from 'react-icons/ri';
 import { CiSettings, CiUser } from 'react-icons/ci';
 import { Routes } from '../model/model';
@@ -5,7 +6,7 @@ import { Routes } from '../model/model';
 const ROUTES_DEFINITION = {
 	DASHBOARD: {
 		OVERVIEW: '/dashboard',
-		TICKETS: '/dashboard/tickets',
+		TICKETS: '/dashboard/ticket-management',
 		CHAT: '/dashboard/chat'
 	}
 };
@@ -13,7 +14,7 @@ const ROUTES_DEFINITION = {
 const ADMIN_ROUTES_DEFINITION = {
 	DASHBOARD: {
 		OVERVIEW: '/admin/dashboard',
-		TICKETS: '/admin/dashboard/tickets',
+		TICKETS: '/admin/dashboard/ticket-management',
 		CHAT: '/admin/dashboard/chat',
 		USERS: '/admin/dashboard/users',
 		SETTINGS: '/admin/dashboard/settings'

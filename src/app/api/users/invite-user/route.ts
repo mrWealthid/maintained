@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
 		console.log(user);
 		let inviteURL =
 			process.env.NODE_ENV === 'development'
-				? `http://localhost:3000/auth/onboard-user/${inviteToken}`
-				: `https://hotel-app-blush-beta.vercel.app/auth/onboard-user/${inviteToken}`;
+				? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${inviteToken}`
+				: `${process.env.PRODUCTION_URL}/auth/onboard-user/${inviteToken}`;
 
 		await new Emails(user, inviteURL, adminUser.business).sendInviteUser();
 

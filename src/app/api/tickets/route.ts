@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
 
 		// console.log(transformedQuery);
 
+		console.log(filter);
 		const requestQuery = Ticket.find(filter).populate([
 			{
 				path: 'category',

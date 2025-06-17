@@ -5,7 +5,7 @@ import TicketRowActions from './TicketRowActions';
 function RequestRow({ data }: TicketRowProps) {
 	return (
 		<>
-			{data?.map((row: any, i: any) => {
+			{data?.map((row, i) => {
 				return (
 					<tr
 						key={i}

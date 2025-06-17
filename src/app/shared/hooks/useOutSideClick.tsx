@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 // import { useEffect, useRef } from 'react';
 
 // export const useOutsideClick = (handler: any, listenCapturing = true) => {

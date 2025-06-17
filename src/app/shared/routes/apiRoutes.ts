@@ -2,7 +2,7 @@ const base = '/api';
 const resourceById = (resource: string) => (id: string) =>
 	`${base}/${resource}/${id}`;
 
-const API_ROUTES = {
+export const API_ROUTES = {
 	auth: {
 		login: `${base}/auth/login`,
 		register: `${base}/auth/register`,
@@ -15,8 +15,8 @@ const API_ROUTES = {
 	userManagement: {
 		get_users: `${base}/users`,
 		get_user: `${base}/users/me`,
-		invite_user: `${base}/users/invite-user`
-		// userById: resourceById('users')
+		invite_user: `${base}/users/invite-user`,
+		userById: resourceById('users')
 	},
 	ticketManagement: {
 		get_tickets: `${base}/tickets`,
