@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { Emails } from '@/utils/email-resend';
+import { INVITE_STATUS } from '@/utils/enums';
 // import { Emails } from '@/utils/email-resend';
 
 connect();
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 			dateOfBirth: body.dateOfBirth,
 			role: body.role,
 			name: body.name,
-			status: 'INVITED',
+			status: INVITE_STATUS.invited,
 			businessName: adminUser.business.businessName
 		});
 

@@ -2,7 +2,7 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import { redirect } from 'next/navigation';
 import Header from '../shared/components/header/Header';
 import SideBar from '../shared/components/sidebar/SideBarComponent';
-import { adminRoutes } from '../shared/routes';
+import { adminRoutes } from '../shared/routes/routes';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout

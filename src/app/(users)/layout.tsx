@@ -1,7 +1,7 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
 import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { redirect } from 'next/navigation';
-import { routes } from '../shared/routes';
+import { routes } from '../shared/routes/routes';
 import Header from '../shared/components/header/Header';
 
 export default function DashboardLayout({
