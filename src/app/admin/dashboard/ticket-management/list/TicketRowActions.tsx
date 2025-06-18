@@ -85,7 +85,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					description='Request ticket will be deleted permanently'>
 					<ConfirmationPage
 						handler={(onCloseModal) => {
-							handleDelete(onCloseModal);
+							handleDelete(onCloseModal ?? (() => {}));
 						}}
 						isLoading={isDeleting}
 						modalText={

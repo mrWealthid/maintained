@@ -15,7 +15,7 @@ import { LoginForm } from '../model/model';
 const LoginComponent = () => {
 	const { register, handleSubmit, formState } = useForm<LoginForm>({
 		mode: 'onChange',
-		defaultValues: { email: 'tela@mailsac.com', password: '12345678' }
+		defaultValues: { email: 'teraps@yopmail.com', password: '12345678' }
 	});
 
 	const router = useRouter();

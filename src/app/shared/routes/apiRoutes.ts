@@ -16,12 +16,12 @@ export const API_ROUTES = {
 		get_users: `${base}/users`,
 		get_user: `${base}/users/me`,
 		invite_user: `${base}/users/invite-user`,
-		userById: resourceById('users')
+		userById: (id: string) => resourceById('users')(id)
 	},
 	ticketManagement: {
 		get_tickets: `${base}/tickets`,
-		ticketById: resourceById('tickets'),
-		get_categories: `${base}/categories`,
+		ticketById: (id: string) => resourceById('tickets')(id),
+		get_categories: `${base}/tickets/categories`,
 		create_ticket: `${base}/tickets`
 	}
 };

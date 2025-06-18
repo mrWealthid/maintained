@@ -91,16 +91,16 @@ export async function DELETE(
 		}
 		const ticketId = params.ticketId;
 
-		const maintenanceRequest = await Ticket.findByIdAndDelete(ticketId);
+		const ticket = await Ticket.findByIdAndDelete(ticketId);
 
-		if (!maintenanceRequest) {
+		if (!ticket) {
 			return NextResponse.json(
 				{ error: 'No request found with id' },
 				{ status: 404 }
 			);
 		}
 		const response = NextResponse.json({
-			message: 'Request Deleted Successfully',
+			message: 'Ticket deleted Successfully',
 			success: true
 		});
 

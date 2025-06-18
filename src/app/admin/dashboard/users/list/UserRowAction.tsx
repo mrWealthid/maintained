@@ -12,8 +12,8 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 	const { isDeleting, deleteUser } = useDeleteUser();
 
 	function handleDelete(onCloseModal: () => void) {
-		if (!user.id) return;
-		deleteUser(user.id, {
+		if (!user._id) return;
+		deleteUser(user._id, {
 			onSuccess: () => onCloseModal()
 		});
 	}
@@ -76,7 +76,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 								<div className='px-1 py-1'>
 									<Menu.Item>
 										{({ active }) => (
-											<Modal.Open opens='confirm-modal'>
+											<Modal.Open opens='delete-user'>
 												<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
 													{active ? (
 														<HiTrash color='red' />

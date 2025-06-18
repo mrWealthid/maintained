@@ -141,15 +141,13 @@ const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
 								</div>
 							</TextInput> */}
 
-							<section className=' '>
-								<ButtonComponent
-									styles='rounded-3xl 2xl:w-1/5'
-									btnText='Submit'
-									loading={isLoading}
-									type='submit'
-									disabled={!isValid || isLoading}
-								/>
-							</section>
+							<ButtonComponent
+								styles='w-full mt-4'
+								btnText='Submit'
+								loading={isLoading}
+								type='submit'
+								disabled={!isValid || isLoading}
+							/>
 
 							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
 								Need An Account ?

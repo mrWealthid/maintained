@@ -1,17 +1,20 @@
 'use client';
-import { RiHomeLine, RiUserReceivedLine } from 'react-icons/ri';
+import { RiHomeLine } from 'react-icons/ri';
 import { CiSettings, CiUser } from 'react-icons/ci';
 import { Routes } from '../model/model';
+import { GrVmMaintenance } from 'react-icons/gr';
+import { HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
 
-const ROUTES_DEFINITION = {
+export const ROUTES_DEFINITION = {
 	DASHBOARD: {
 		OVERVIEW: '/dashboard',
 		TICKETS: '/dashboard/ticket-management',
+		MANAGE_TICKET: '/dashboard/ticket-management/manage',
 		CHAT: '/dashboard/chat'
 	}
 };
 
-const ADMIN_ROUTES_DEFINITION = {
+export const ADMIN_ROUTES_DEFINITION = {
 	DASHBOARD: {
 		OVERVIEW: '/admin/dashboard',
 		TICKETS: '/admin/dashboard/ticket-management',
@@ -30,10 +33,14 @@ export const routes: Routes[] = [
 	{
 		name: 'Tickets',
 		path: ROUTES_DEFINITION.DASHBOARD.TICKETS,
-		icon: RiUserReceivedLine
+		icon: GrVmMaintenance
 	},
 
-	{ name: 'Chat', path: ROUTES_DEFINITION.DASHBOARD.CHAT, icon: CiUser }
+	{
+		name: 'Chat',
+		path: ROUTES_DEFINITION.DASHBOARD.CHAT,
+		icon: HiOutlineChatBubbleLeftRight
+	}
 ];
 
 export const adminRoutes: Routes[] = [
@@ -45,7 +52,7 @@ export const adminRoutes: Routes[] = [
 	{
 		name: 'Tickets',
 		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
-		icon: RiUserReceivedLine
+		icon: GrVmMaintenance
 	},
 
 	{
@@ -56,7 +63,7 @@ export const adminRoutes: Routes[] = [
 	{
 		name: 'Chat',
 		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.CHAT,
-		icon: CiUser
+		icon: HiOutlineChatBubbleLeftRight
 	},
 	{
 		name: 'Settings',

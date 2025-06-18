@@ -16,6 +16,7 @@ import TextInput from '../../components/form-elements/Text-Input';
 import AutoComplete from '../../components/auto-complete/AutoComplete';
 import FileUpload from '../../components/form-elements/File-Upload';
 import ButtonComponent from '../../components/form-elements/Button';
+import { ROUTES_DEFINITION } from '../../routes/routes';
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const isEditing = !!ticket?._id;
@@ -67,7 +68,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 		handleCreateTicket(payload, {
 			onSuccess: () => {
-				router.push('/dashboard/maintenance-request');
+				router.push(ROUTES_DEFINITION.DASHBOARD.TICKETS);
 			}
 		});
 	}
@@ -174,7 +175,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	return (
 		<div className='lg:w-2/3  flex flex-col gap-4 lg:container-text'>
 			<section className='flex justify-between items-center'>
-				<h3>Request Maintenance</h3>
+				<h3>Create Maintenance Ticket</h3>
 			</section>
 
 			<form
@@ -267,7 +268,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								label={'Upload Images'}
 								onFileSelect={handleImageSelect}
 								multiple={true}
-								accept={'image/jpeg, image/png, image/gif'}
+								accept={'image/*'}
 								icon={<IoIosCloudUpload />}
 								selectedFiles={selectedImages}
 								uploadProgress={uploadProgress}
@@ -280,7 +281,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								label={'Upload Videos'}
 								onFileSelect={handleVideoSelect}
 								multiple={true}
-								accept={'video/mp4,video/x-m4v,video/*'}
+								accept={'video/*'}
 								icon={<RiVideoUploadLine />}
 								selectedFiles={selectedVideo}
 								uploadProgress={uploadProgress}
@@ -301,7 +302,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${
-								isEditing ? 'Update' : 'Submit'
+								isEditing ? 'Update' : 'Create'
 							} Request`}></ButtonComponent>
 					</section>
 				</section>

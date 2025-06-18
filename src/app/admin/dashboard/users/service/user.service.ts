@@ -32,9 +32,9 @@ export async function handleCreateUser(
 	userId?: string
 ) {
 	try {
-		const response = isEditing
+		const response = userId
 			? await axios.patch(
-					`${API_ROUTES.userManagement.userById}/${userId}`,
+					`${API_ROUTES.userManagement.userById(userId)}`,
 					payload
 				)
 			: await axios.post(
@@ -59,7 +59,7 @@ export async function handleCreateUser(
 export async function handleDeleteUser(id: string) {
 	try {
 		const res = await axios.delete(
-			`${API_ROUTES.userManagement.userById}/${id}`
+			`${API_ROUTES.userManagement.userById(id)}`
 		);
 
 		const data = await res.data;

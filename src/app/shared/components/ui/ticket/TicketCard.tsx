@@ -10,6 +10,8 @@ import ConfirmationPage from '../ConfirmationPage';
 import { useDeleteTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { Ticket } from '@/app/shared/model/model';
 import Modal from '../../modal/Modal';
+import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
+import { TfiMore } from 'react-icons/tfi';
 
 const TicketCard: FC<Ticket> = ({
 	title,
@@ -27,14 +29,7 @@ const TicketCard: FC<Ticket> = ({
 			onSuccess: () => onCloseModal()
 		});
 	}
-	// function handleCheckout(onCloseModal: any) {
-	// 	checkOutBooking(
-	// 		{ checkStatus: 'CHECKED_OUT' },
-	// 		{
-	// 			onSuccess: () => onCloseModal()
-	// 		}
-	// 	);
-	// }
+
 	return (
 		<section className='request-card w-full'>
 			<div className='flex items-center justify-between w-full text-xs'>
@@ -84,7 +79,7 @@ const TicketCard: FC<Ticket> = ({
 					<span>View</span>
 					<span>{<FaEye className='text-primary' />}</span>
 				</section> */}
-				<section className='flex request-card__details gap-2 items-center text-xs'>
+				<section className='flex gap-2 items-center text-xs'>
 					<Modal>
 						<Menu
 							as='div'
@@ -97,7 +92,7 @@ const TicketCard: FC<Ticket> = ({
 
 		  ${open ? 'ring-1 ring-primary ring-offset-1 bg-gray-50 ' : ''}
 		`}>
-											<CgMenuGridO />
+											<TfiMore />
 										</Menu.Button>
 									</div>
 									<Transition
@@ -128,7 +123,11 @@ const TicketCard: FC<Ticket> = ({
 												<Menu.Item>
 													{({ active }) => (
 														<Link
-															href={`/dashboard/maintenance-request/manage/${id}`}
+															href={
+																ROUTES_DEFINITION
+																	.DASHBOARD
+																	.MANAGE_TICKET
+															}
 															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
 															{active ? (
 																<HiPencil color='green' />
@@ -166,7 +165,7 @@ const TicketCard: FC<Ticket> = ({
 							title='Delete Maintenance Ticket'
 							description='Request ticket will be deleted permanently'>
 							<ConfirmationPage
-								handler={(onCloseModal: any) => {
+								handler={(onCloseModal: () => void) => {
 									handleDelete(onCloseModal);
 								}}
 								isLoading={isDeleting}
@@ -188,8 +187,8 @@ const TicketCard: FC<Ticket> = ({
 				</Modal.Window> */}
 					</Modal>
 
-					<span>View</span>
-					<span>{<FaEye className='text-primary' />}</span>
+					{/* <span>View</span>
+					<span>{<FaEye className='text-primary' />}</span> */}
 				</section>
 			</div>
 		</section>

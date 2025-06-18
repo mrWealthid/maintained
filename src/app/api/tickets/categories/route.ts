@@ -40,12 +40,12 @@ export async function POST(request: NextRequest) {
 	try {
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		if (!verify.isUserAuthenticated) {
-			return NextResponse.json(
-				{ error: 'Unauthorized access' },
-				{ status: 401 }
-			);
-		}
+		// if (!verify.isUserAuthenticated) {
+		// 	return NextResponse.json(
+		// 		{ error: 'Unauthorized access' },
+		// 		{ status: 401 }
+		// 	);
+		// }
 
 		const body = await request.json();
 
