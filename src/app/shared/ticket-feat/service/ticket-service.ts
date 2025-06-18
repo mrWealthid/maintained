@@ -101,7 +101,7 @@ export async function fetchTicketList(
 export async function deleteTicket(id: string) {
 	try {
 		const res = await axios.delete(
-			`${API_ROUTES.ticketManagement.ticketById}/${id}`
+			`${API_ROUTES.ticketManagement.ticketById(id)}`
 		);
 		const data = await res.data;
 		return data;
