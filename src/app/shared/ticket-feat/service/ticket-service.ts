@@ -68,11 +68,11 @@ export async function fetchTickets(
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {
 			throw new Error(
-				`Requests could not be loaded Status: ${err.response.status}`
+				`Ticket could not be loaded Status: ${err.response.status}`
 			);
 		}
 
-		throw new Error('Requests could not be loaded');
+		throw new Error('Ticket could not be loaded');
 	}
 }
 
@@ -91,10 +91,10 @@ export async function fetchTicketList(
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {
 			throw new Error(
-				`Requests could not be loaded Status: ${err.response.status}`
+				`Ticket could not be loaded Status: ${err.response.status}`
 			);
 		}
-		throw new Error('Requests could not be loaded');
+		throw new Error('Ticket could not be loaded');
 	}
 }
 
@@ -108,9 +108,9 @@ export async function deleteTicket(id: string) {
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {
 			throw new Error(
-				`Request could not be deleted Status: ${err.response.status}`
+				`Ticket could not be deleted Status: ${err.response.status}`
 			);
 		}
-		throw new Error(`Request could not be deleted`);
+		throw new Error(`Ticket could not be deleted`);
 	}
 }

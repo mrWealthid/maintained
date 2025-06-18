@@ -123,11 +123,10 @@ const TicketCard: FC<Ticket> = ({
 												<Menu.Item>
 													{({ active }) => (
 														<Link
-															href={
-																ROUTES_DEFINITION
-																	.DASHBOARD
-																	.MANAGE_TICKET
-															}
+															href={`
+																${ROUTES_DEFINITION.DASHBOARD.MANAGE_TICKET}/
+																${id}
+															`}
 															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
 															{active ? (
 																<HiPencil color='green' />
