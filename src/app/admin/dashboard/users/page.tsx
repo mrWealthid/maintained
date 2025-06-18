@@ -1,10 +1,8 @@
-import React from 'react';
+import React, { FC } from 'react';
 import UserList from './list/UserList';
 import AddUser from './AddUser';
 
-const page = async () => {
-	// axios('')
-
+const page: FC = () => {
 	return (
 		<div className='w-full flex flex-col gap-3'>
 			<div className='flex items-center  justify-between'>

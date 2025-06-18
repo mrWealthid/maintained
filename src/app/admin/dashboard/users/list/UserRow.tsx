@@ -1,32 +1,14 @@
-import { formatCurrency, getStatusColor } from '@/utils/helper';
-import { REQUEST_STATUS } from '@/utils/enums';
+import { UserRowProps } from '@/app/shared/model/model';
 import UserRowAction from './UserRowAction';
+import Modal from '@/app/shared/components/modal/Modal';
 
-function UserRow({ data }: any) {
-	// function getStatusColor(val: string): string {
-	// 	let style = '';
-	// 	if (val === REQUEST_STATUS.pending) {
-	// 		style = 'bg-pending text-white';
-	// 	}
-	// 	if (val === REQUEST_STATUS.assigned) {
-	// 		style = 'bg-success text-white';
-	// 	}
-	// 	if (val === 'CHECKED_OUT') {
-	// 		style = 'bg-gray-300';
-	// 	}
-
-	// 	if (val === REQUEST_STATUS.completed) {
-	// 		style = 'bg-success text-white';
-	// 	}
-	// 	return style;
-	// }
-
+function UserRow({ data }: UserRowProps) {
 	return (
 		<>
-			{data?.map((row: any, i: any) => {
+			{data?.map((row, i) => {
 				return (
 					<tr
-						key={i}
+						key={row._id}
 						className='dark:border-none dark:text-white text-secondary relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
@@ -94,8 +76,9 @@ function UserRow({ data }: any) {
 								{row.role}
 							</span>
 						</td>
-
-						<UserRowAction rowData={row} />
+						<Modal>
+							<UserRowAction user={row} />
+						</Modal>
 					</tr>
 				);
 			})}

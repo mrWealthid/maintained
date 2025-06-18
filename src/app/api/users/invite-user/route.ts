@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { Emails } from '@/utils/email-resend';
+import { INVITE_STATUS } from '@/utils/enums';
 // import { Emails } from '@/utils/email-resend';
 
 connect();
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 			dateOfBirth: body.dateOfBirth,
 			role: body.role,
 			name: body.name,
-			status: 'INVITED',
+			status: INVITE_STATUS.invited,
 			businessName: adminUser.business.businessName
 		});
 
@@ -62,8 +63,8 @@ export async function POST(request: NextRequest) {
 		console.log(user);
 		let inviteURL =
 			process.env.NODE_ENV === 'development'
-				? `http://localhost:3000/auth/onboard-user/${inviteToken}`
-				: `https://hotel-app-blush-beta.vercel.app/auth/onboard-user/${inviteToken}`;
+				? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${inviteToken}`
+				: `${process.env.PRODUCTION_URL}/auth/onboard-user/${inviteToken}`;
 
 		await new Emails(user, inviteURL, adminUser.business).sendInviteUser();
 

@@ -1,7 +1,5 @@
 'use client';
-import EmailInput from '@/components/shared/form-elements/Email-Input';
-import TextInput from '@/components/shared/form-elements/Text-Input';
-import ButtonComponent from '@/components/shared/form-elements/Button';
+
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -9,18 +7,22 @@ import { useForm } from 'react-hook-form';
 import { useRegister } from '../hooks/useAuth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Link from 'next/link';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import { RegisterForm } from '../model/model';
 
 const SignupComponent = () => {
-	const { register, handleSubmit, getValues, formState } = useForm({
+	const { register, handleSubmit, formState } = useForm<RegisterForm>({
 		mode: 'onChange'
 	});
 
 	const router = useRouter();
 
 	const { isLoading, registering } = useRegister();
-	const { errors, isSubmitting } = formState;
+	const { errors, isValid } = formState;
 
-	async function onSubmit(data: any) {
+	async function onSubmit(data: RegisterForm) {
 		const { firstName, lastName, ...rest } = data;
 
 		const payload = {
@@ -28,8 +30,6 @@ const SignupComponent = () => {
 			...rest
 		};
 
-		console.log(payload);
-		// registering(payload, { onSuccess: () => router.push('/dashboard') });
 		registering(payload, { onSuccess: () => console.log('success') });
 	}
 
@@ -283,7 +283,7 @@ const SignupComponent = () => {
 							btnText='Register'
 							type='submit'
 							loading={isLoading}
-							disabled={!formState.isValid || isLoading}
+							disabled={!isValid || isLoading}
 							// afterIcon="/assets/send.svg"
 						/>
 						<p className='text-sm text-primary dark:text-label-color flex gap-2'>

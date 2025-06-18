@@ -1,0 +1,65 @@
+import { toast } from 'react-hot-toast';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+	createTicket,
+	deleteTicket,
+	fetchTickets
+} from '../service/ticket-service';
+import { TicketStatus } from '../model/ticket.model';
+import { CreateTicketPayload } from '../../model/model';
+import { ApiError } from 'next/dist/server/api-utils';
+import { IListResponse } from '../../components/table/models/table.model';
+import { TICKET_STATUS } from '@/utils/enums';
+
+export function useCreateTicket(isEditing: boolean, ticketId?: string) {
+	const queryClient = useQueryClient();
+	const { isPending: isCreating, mutate: handleCreateTicket } = useMutation({
+		mutationFn: (payload: CreateTicketPayload) =>
+			createTicket(payload, isEditing, ticketId),
+		onSuccess: () => {
+			toast.success('Maintenance Request successfully created...');
+			queryClient.invalidateQueries({
+				queryKey: ['tickets']
+			});
+
+			// close();
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isCreating, handleCreateTicket };
+}
+
+export function useFetchTickets<T>(
+	status: TICKET_STATUS,
+	page: number = 1,
+	limit: number = 10
+): IListResponse<T> {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['tickets', status],
+		queryFn: () => fetchTickets(status, page, limit)
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		...data
+	};
+}
+
+export function useDeleteTicket() {
+	const queryClient = useQueryClient();
+	const { isPending: isDeleting, mutate: handleDeleteTicket } = useMutation({
+		mutationFn: (id: string) => deleteTicket(id),
+		onSuccess: () => {
+			toast.success('Maintenance Request successfully deleted');
+			queryClient.invalidateQueries({
+				queryKey: ['tickets']
+			});
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isDeleting, handleDeleteTicket };
+}

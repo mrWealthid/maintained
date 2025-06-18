@@ -1,10 +1,8 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
-import SideBar from './SideBarComponent';
-
-import LoginComponent from '@/app/auth/login/page';
-import { NextRequest, NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
-import Header from '@/components/shared/header/Header';
+import Header from '../shared/components/header/Header';
+import SideBar from '../shared/components/sidebar/SideBarComponent';
+import { adminRoutes } from '../shared/routes/routes';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -20,7 +18,7 @@ export default function DashboardLayout({
 				<Header />
 			</header>
 			<section>
-				<SideBar />
+				<SideBar routes={adminRoutes} />
 			</section>
 
 			<section className=' sm:ml-64 flex flex-col h-screen gap-6 '>
