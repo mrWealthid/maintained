@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { TICKET_STATUS } from '@/utils/enums';
-import { CreateTicketPayload } from '../../model/model';
+import { ApiResponse, CreateTicketPayload } from '../../model/model';
 import { API_ROUTES } from '../../routes/apiRoutes';
 
 export async function createTicket(
@@ -31,7 +31,9 @@ export async function createTicket(
 	}
 }
 
-export async function fetchTicketCategory(query: string | null) {
+export async function fetchTicketCategory<T>(
+	query: string | null
+): Promise<ApiResponse<T[]>> {
 	const url = query
 		? `${API_ROUTES.ticketManagement.get_categories}?name=${query}`
 		: `${API_ROUTES.ticketManagement.get_categories}`;
