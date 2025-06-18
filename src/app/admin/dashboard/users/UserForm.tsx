@@ -72,22 +72,6 @@ const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 								placeholder='johndoe@gmail.com'
 							/>
 						</EmailInput>
-
-						{/*
-						<TextInput
-							name={'lastName'}
-							label='Last Name'
-							error={errors?.['lastName']?.message?.toString()}>
-							<input
-								{...register('lastName', {
-									required: 'This field is required'
-								})}
-								className='input-style'
-								type='text'
-								id='lastName'
-								placeholder='Enter Last Name'
-							/>
-						</TextInput> */}
 					</div>
 
 					<div className='w-full flex gap-4'>

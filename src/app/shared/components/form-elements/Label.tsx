@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { RiAsterisk } from 'react-icons/ri';
 
-const Label: FC<ILabel> = ({ name, text, required }) => {
+const Label: FC<LabelProps> = ({ name, text, required }) => {
 	return (
 		<label htmlFor={name} className='block cursor-pointer text-xs'>
 			<span className='text-primary flex gap-1 items-center dark:text-white  capitalize'>
@@ -14,7 +14,7 @@ const Label: FC<ILabel> = ({ name, text, required }) => {
 
 export default Label;
 
-interface ILabel {
+interface LabelProps {
 	name: string;
 	text: string;
 	required: boolean;
