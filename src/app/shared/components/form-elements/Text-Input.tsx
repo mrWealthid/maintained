@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { FC } from 'react';
 import Label from './Label';
 import ErrorMessage from './ErrorMessage';
 
-const TextInput = ({
+const TextInput: FC<TextInputProps> = ({
 	label,
 	placeholder,
 	type = 'text',
@@ -11,7 +11,7 @@ const TextInput = ({
 	error,
 	children,
 	required = true
-}: ITextInput) => {
+}) => {
 	return (
 		<div className='w-full'>
 			{label && <Label name={name} text={label} required={required} />}
@@ -31,7 +31,7 @@ const TextInput = ({
 	);
 };
 
-interface ITextInput {
+interface TextInputProps {
 	label?: string;
 	name: string;
 	placeholder?: string;
@@ -41,7 +41,5 @@ interface ITextInput {
 	children?: React.ReactNode;
 	required?: boolean;
 }
-
-// interface IFormErrors {}
 
 export default TextInput;
