@@ -33,7 +33,7 @@ interface EmailInputProps {
 	error?: string;
 	children?: React.ReactNode;
 	style?: string;
-	required: boolean;
+	required?: boolean;
 }
 
 export default EmailInput;

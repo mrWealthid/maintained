@@ -1,9 +1,7 @@
 'use client';
-
 import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { IoIosCloudUpload } from 'react-icons/io';
-
 import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
@@ -225,6 +223,78 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							initialValue={ticket?.category}
 							handler={handleAutoCompleteValues}
 						/>
+						{/* Autocomplete usage with static data */}
+						{/* <AutoComplete<Category>
+							queryKey='category'
+							// service={fetchTicketCategory}
+							label={'Category'}
+							optionKey={'_id'}
+							// custom={'regularPrice'}
+							displayValue={'name'}
+							initialValue={ticket?.category}
+							handler={handleAutoCompleteValues}
+							staticData={[
+								{
+									_id: '2222y2y22',
+									id: '2222y2y22',
+									name: 'Electrical',
+									description:
+										'Issues related to electrical wiring, lighting, and power outlets.'
+								},
+								{
+									_id: '2222y2y223',
+									id: '2222y2y223',
+
+									name: 'Plumbing',
+									description:
+										'Problems with water supply, drainage, leaks, and pipes.'
+								},
+								{
+									_id: '2222y2y228',
+									id: '2222y2y228',
+									name: 'HVAC',
+									description:
+										'Heating, ventilation, and air conditioning system repairs.'
+								},
+								{
+									_id: '2222y2y2290',
+									id: '2222y2y2290',
+
+									name: 'Carpentry',
+									description:
+										'Woodwork repairs, doors, windows, and furniture.'
+								},
+								{
+									_id: '2222y2y22qw',
+									id: '2222y2y22qw',
+									name: 'Appliance',
+									description:
+										'Repairs for household or office appliances.'
+								},
+								{
+									_id: '2222y2y22op',
+									id: '2222y2y22op',
+									name: 'Painting',
+									description:
+										'Wall, ceiling, or surface painting and touch-ups.'
+								},
+								{
+									_id: '2222y242',
+									id: '2222y242',
+									name: 'Pest Control',
+									description:
+										'Issues with insects, rodents, or other pests.'
+								},
+								{
+									_id: '2239222',
+									id: '2239222',
+									name: 'General Maintenance',
+									description:
+										'Other maintenance requests not covered by specific categories.'
+								}
+							]}
+						/> */}
+
 						<div className='hidden'>
 							<TextInput
 								name={'category'}
