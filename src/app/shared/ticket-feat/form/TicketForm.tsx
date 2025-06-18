@@ -247,8 +247,8 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					</div>
 
 					<TextInput
-						name={'Area'}
-						placeholder='Enter Title'
+						name={'area'}
+						placeholder='Enter Area'
 						label='Area (Ex. Kitchen)'
 						error={errors?.['area']?.message?.toString()}>
 						<input

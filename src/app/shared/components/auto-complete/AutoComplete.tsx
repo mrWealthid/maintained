@@ -159,6 +159,7 @@ interface AutoCompleteProps<T> {
 	handler: (value: Record<string, unknown>) => void;
 	custom?: keyof T;
 	initialValue?: T | null;
+	required?: boolean;
 }
 
 export default function AutoComplete<T>({
@@ -169,6 +170,7 @@ export default function AutoComplete<T>({
 	displayValue,
 	handler,
 	custom,
+	required = true,
 	initialValue
 }: AutoCompleteProps<T>) {
 	const [selected, setSelected] = useState<T | null>(initialValue ?? null);
@@ -190,13 +192,14 @@ export default function AutoComplete<T>({
 
 	return (
 		<div className=' w-full'>
-			<Label name={''} text={label} />
+			<Label name={queryKey} text={label} required={required} />
 			<Combobox
 				value={selected}
 				onChange={(selected: T) => handleChangeEvent(selected)}>
 				<div className='relative mt-1'>
 					<div className=''>
 						<Combobox.Input
+							id={queryKey}
 							className='w-full dark:border-none input-style  py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0'
 							displayValue={(result: T) =>
 								result ? (result[displayValue] as string) : ''

@@ -1,18 +1,19 @@
-import React, { ChangeEvent, useState } from 'react';
-
+import React, { ChangeEvent, ReactNode, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import Image from 'next/image';
 import { FileUploadPreview } from '../../model/model';
+import { RiAsterisk } from 'react-icons/ri';
 
 interface FileUploadProps {
 	label: string;
 	accept: string;
 	multiple: boolean;
 	id: string;
-	icon: any;
+	icon: ReactNode;
 	onFileSelect: (files: FileList) => void; // Callback function to pass the selected files to the parent component
 	selectedFiles?: FileList | null;
 	uploadProgress?: Record<string, number>;
+	required?: boolean;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -22,7 +23,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	multiple,
 	id,
 	icon,
-	uploadProgress
+	uploadProgress,
+	required = false
 }) => {
 	const [selected, setSelected] = useState<FileList | null>(null);
 	const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
@@ -96,6 +98,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				htmlFor={id}
 				className='bg-gray-100 p-4 flex flex-col gap-2 cursor-pointer rounded-lg justify-center items-center h-32'>
 				<span className='glass p-4  rounded-full'>{icon}</span>
+				{required && <RiAsterisk color='red' />}
 				{/* <small>Single/Multiple Selection</small> */}
 			</label>
 			<input
