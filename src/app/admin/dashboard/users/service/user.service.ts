@@ -1,20 +1,23 @@
-import { CreateUserPayload } from '@/app/shared/model/model';
+import {
+	ApiPaginatedResponse,
+	CreateUserPayload
+} from '@/app/shared/model/model';
 import { API_ROUTES } from '@/app/shared/routes/apiRoutes';
 import axios from 'axios';
+import { UserListFilter } from '../model/user.model';
+import { buildQueryString } from '@/utils/helpers';
+import { ListQueryParams } from '@/app/shared/ticket-feat/model/ticket.model';
 
-export async function fetchUsers(
-	page: number,
-	limit: number,
-	search: string | null
-) {
-	const url = !search
-		? `${API_ROUTES.userManagement.get_users}?limit=${limit}&page=${page}`
-		: `${API_ROUTES.userManagement.get_users}?limit=${limit}&page=${page}&${search}`;
+export async function fetchUsers<T>({
+	limit = 10,
+	page = 1,
+	search
+}: ListQueryParams<UserListFilter>): Promise<ApiPaginatedResponse<T[]>> {
+	const queryString = buildQueryString({ limit, page, ...search });
+	const url = `${API_ROUTES.userManagement.get_users}?${queryString}`;
 	try {
 		const response = await axios(url);
-
 		const data = await response.data;
-
 		return data;
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {

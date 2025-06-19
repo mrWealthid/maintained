@@ -47,13 +47,7 @@ const RequestsList: FC = () => {
 	return (
 		<div className='h-80'>
 			<Table<Ticket>
-				service={
-					fetchTicketList<{
-						limit: number;
-						page: number;
-						search: TicketListFilter;
-					}>
-				}
+				service={fetchTicketList}
 				queryKey='tickets'
 				defaultParams={{ status: TICKET_STATUS.pending }}
 				headerActions={<TicketHeaderActions />}

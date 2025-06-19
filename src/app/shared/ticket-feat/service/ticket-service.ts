@@ -87,9 +87,10 @@ export async function fetchTicketList<T>({
 	limit = 10,
 	page = 1,
 	search
-}: ListQueryParams<TicketListFilter>): Promise<ApiResponse<T[]>> {
+}: ListQueryParams<TicketListFilter>): Promise<ApiPaginatedResponse<T[]>> {
 	const queryString = buildQueryString({ limit, page, ...search });
 	const url = `${API_ROUTES.ticketManagement.get_tickets}?${queryString}`;
+
 	try {
 		const response = await axios(url);
 		const data = await response.data;
