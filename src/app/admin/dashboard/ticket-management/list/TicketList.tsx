@@ -49,6 +49,7 @@ const RequestsList: FC = () => {
 			<Table<Ticket>
 				service={fetchTicketList}
 				queryKey='tickets'
+				searchKey='title'
 				defaultParams={{ status: TICKET_STATUS.pending }}
 				headerActions={<TicketHeaderActions />}
 				columns={columns}>

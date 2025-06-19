@@ -9,7 +9,7 @@ const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
 	data
 }) => {
 	return (
-		<section className='flex items-center -space-x-4 flex-wrap justify-end'>
+		<section className='flex flex-1 items-center -space-x-4 flex-wrap justify-end'>
 			{data.map((tab) => (
 				<div
 					key={tab.label}
