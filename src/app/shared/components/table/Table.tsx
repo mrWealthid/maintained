@@ -25,6 +25,8 @@ import Image from 'next/image';
 import TextInput from '../form-elements/Text-Input';
 import Modal from '../modal/Modal';
 import ButtonComponent from '../form-elements/Button';
+import Search from '../search/Search';
+import { useDebounce } from '@uidotdev/usehooks';
 
 const TableContext = createContext({});
 
@@ -37,7 +39,8 @@ function Table<T>({
 	limit: limitVal,
 	actionable = true,
 	isDownloadable = true,
-	defaultParams
+	defaultParams,
+	searchKey
 }: ITable) {
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(limitVal || 5);
@@ -140,7 +143,8 @@ function Table<T>({
 				queryKey,
 				isDownloadable,
 				isRefetching,
-				search
+				search,
+				searchKey
 			}}>
 			<div className=' overflow-x-auto    card p-2'>
 				<TableHeaderAction handleFilter={handleFilter}>
@@ -395,13 +399,34 @@ function TableHeader() {
 	);
 }
 export function TableHeaderAction({ children }: any) {
-	const { handleFilter, tableRef, queryKey, isDownloadable }: any =
-		useContext(TableContext);
-	return (
-		<div className='flex flex-col flex-wrap items-center  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
-			<div className='flex items-center gap-2 mt-4'></div>
+	const {
+		handleFilter,
+		tableRef,
+		queryKey,
+		isDownloadable,
+		searchKey,
+		search
+	}: any = useContext(TableContext);
 
-			<div className='flex py-1 flex-wrap items-center gap-3 mt-2 md:gap-2'>
+	const [searchValue, setSearchValue] = useState('');
+	const debouncedSearchValue = useDebounce(searchValue, 500);
+
+	useEffect(() => {
+		if (debouncedSearchValue !== '') {
+			handleFilter({ ...search, [searchKey]: debouncedSearchValue });
+		} else {
+			handleFilter({ ...search, [searchKey]: undefined });
+		}
+	}, [debouncedSearchValue]);
+
+	return (
+		<div className='flex flex-col flex-wrap items-center gap-6  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
+			<Search
+				placeHolder={`Search by ${searchKey}`}
+				handleSearch={(val) => setSearchValue(val)}
+			/>
+
+			<div className='flex py-1 flex-wrap items-center gap-3  my-2 md:gap-2'>
 				<TableFilter />
 
 				{cloneElement(children, { handleFilter })}

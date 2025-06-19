@@ -61,11 +61,13 @@ export async function fetchTicketCategory<T>(
 export async function fetchTickets<T>({
 	limit = 10,
 	page = 1,
+	search,
 	status
 }: ListQueryParams<TicketListFilter>): Promise<ApiPaginatedResponse<T[]>> {
 	const queryString = buildQueryString({
 		limit,
 		page,
+		...search,
 		...(status !== TICKET_STATUS.all && { status })
 	});
 

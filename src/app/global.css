@@ -11,7 +11,7 @@
 	--success-color: green;
 	--input-label: white;
 	--error-color: rgb(220, 38, 38);
-	--pending-color: #F7CB73;
+	--pending-color: #f7cb73;
 	--light-blue: blue;
 	--background-color: #eceef1;
 	--text-color: #0000004d;
@@ -30,7 +30,9 @@
 } */
 
 body {
-	transition: color 0.3s, background-color 0.3s;
+	transition:
+		color 0.3s,
+		background-color 0.3s;
 }
 
 @layer components {
@@ -81,8 +83,7 @@ body {
 }
 
 input::placeholder {
-	@apply text-xs;
-
+	@apply text-xs capitalize;
 }
 
 .input-error-msg {

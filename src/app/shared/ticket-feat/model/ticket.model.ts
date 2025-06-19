@@ -50,10 +50,10 @@ export type ListQueryParams<T> = {
 
 export interface TicketListFilter {
 	title?: string;
-	status?: TICKET_STATUS
+	status?: TICKET_STATUS;
 	createdAt?: string;
 	user?: string;
 	area?: string;
-	category: string;
+	category?: string;
 	id?: string;
 }

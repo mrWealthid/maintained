@@ -5,7 +5,11 @@ import {
 	deleteTicket,
 	fetchTickets
 } from '../service/ticket-service';
-import { TicketStatus } from '../model/ticket.model';
+import {
+	ListQueryParams,
+	TicketListFilter,
+	TicketStatus
+} from '../model/ticket.model';
 import { CreateTicketPayload } from '../../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
 import { IListResponse } from '../../components/table/models/table.model';
@@ -32,12 +36,13 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
 
 export function useFetchTickets<T>(
 	status: TICKET_STATUS,
+	search: TicketListFilter,
 	page: number = 1,
 	limit: number = 10
 ) {
 	const { isLoading, data, error, isRefetching } = useQuery({
-		queryKey: ['tickets', status],
-		queryFn: () => fetchTickets<T>({ page, limit, status })
+		queryKey: ['tickets', status, search],
+		queryFn: () => fetchTickets<T>({ page, limit, status, search })
 	});
 
 	return {

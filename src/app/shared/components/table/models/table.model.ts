@@ -8,6 +8,7 @@ export interface ITable {
 	actionable?: boolean;
 	isDownloadable?: boolean;
 	defaultParams?: IsearchParams;
+	searchKey?: string;
 }
 
 export interface IsearchParams {
