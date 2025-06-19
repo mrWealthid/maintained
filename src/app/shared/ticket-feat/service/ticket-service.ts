@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { TICKET_STATUS } from '@/utils/enums';
-import { ApiResponse, CreateTicketPayload } from '../../model/model';
+import {
+	ApiPaginatedResponse,
+	ApiResponse,
+	CreateTicketPayload
+} from '../../model/model';
 import { API_ROUTES } from '../../routes/apiRoutes';
+import { ListQueryParams, TicketListFilter } from '../model/ticket.model';
+import { buildQueryString } from '@/utils/helpers';
 
 export async function createTicket(
 	data: CreateTicketPayload,
@@ -52,40 +58,38 @@ export async function fetchTicketCategory<T>(
 	}
 }
 
-export async function fetchTickets(
-	status: TICKET_STATUS,
-	page: number = 1,
-	limit: number = 10
-) {
-	// const calcDate = new Date(new Date().setDate(new Date().getDate() - days));
+export async function fetchTickets<T>({
+	limit = 10,
+	page = 1,
+	status
+}: ListQueryParams<TicketListFilter>): Promise<ApiPaginatedResponse<T[]>> {
+	const queryString = buildQueryString({
+		limit,
+		page,
+		...(status !== TICKET_STATUS.all && { status })
+	});
 
-	const url =
-		status === TICKET_STATUS.all
-			? `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}`
-			: `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}&status=${status}`;
+	const url = `${API_ROUTES.ticketManagement.get_tickets}?${queryString}`;
 	try {
 		const response = await axios(url);
-		const data = await response.data;
-		return data;
+		return response.data;
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {
 			throw new Error(
-				`Ticket could not be loaded Status: ${err.response.status}`
+				`Ticket could not be loaded. Status: ${err.response.status}`
 			);
 		}
-
 		throw new Error('Ticket could not be loaded');
 	}
 }
 
-export async function fetchTicketList(
-	page: number,
-	limit: number,
-	query: string | null
-) {
-	const url = query
-		? `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}&${query}`
-		: `${API_ROUTES.ticketManagement.get_tickets}?limit=${limit}&page=${page}`;
+export async function fetchTicketList<T>({
+	limit = 10,
+	page = 1,
+	search
+}: ListQueryParams<TicketListFilter>): Promise<ApiResponse<T[]>> {
+	const queryString = buildQueryString({ limit, page, ...search });
+	const url = `${API_ROUTES.ticketManagement.get_tickets}?${queryString}`;
 	try {
 		const response = await axios(url);
 		const data = await response.data;
@@ -93,10 +97,10 @@ export async function fetchTicketList(
 	} catch (err: unknown) {
 		if (axios.isAxiosError(err) && err.response) {
 			throw new Error(
-				`Ticket could not be loaded Status: ${err.response.status}`
+				`Ticket list could not be loaded Status: ${err.response.status}`
 			);
 		}
-		throw new Error('Ticket could not be loaded');
+		throw new Error('Ticket list could not be loaded');
 	}
 }
 

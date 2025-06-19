@@ -40,8 +40,8 @@ export interface IselectOptions {
 }
 export interface IListResponse<T> {
 	isLoading: boolean;
-	error: any;
-	data: T[];
+	error: Error | null;
+	data: T[] | undefined;
 	totalRecords: number;
 	results: number;
 	isRefetching: boolean;

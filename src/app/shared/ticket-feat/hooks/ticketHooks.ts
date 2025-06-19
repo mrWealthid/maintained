@@ -34,10 +34,10 @@ export function useFetchTickets<T>(
 	status: TICKET_STATUS,
 	page: number = 1,
 	limit: number = 10
-): IListResponse<T> {
+) {
 	const { isLoading, data, error, isRefetching } = useQuery({
 		queryKey: ['tickets', status],
-		queryFn: () => fetchTickets(status, page, limit)
+		queryFn: () => fetchTickets<T>({ page, limit, status })
 	});
 
 	return {

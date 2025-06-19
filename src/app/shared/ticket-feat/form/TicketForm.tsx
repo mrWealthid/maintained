@@ -184,6 +184,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						name={'title'}
 						placeholder='Enter Title'
 						label='Title'
+						required={true}
 						error={errors?.['title']?.message?.toString()}>
 						<input
 							{...register('title', {
@@ -200,6 +201,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						name={'description'}
 						placeholder='Kindly describe'
 						label='Description'
+						required={true}
 						error={errors?.['description']?.message?.toString()}>
 						<textarea
 							className='input-style'
@@ -319,6 +321,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					<TextInput
 						name={'area'}
 						placeholder='Enter Area'
+						required={true}
 						label='Area (Ex. Kitchen)'
 						error={errors?.['area']?.message?.toString()}>
 						<input

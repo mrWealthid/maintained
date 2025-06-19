@@ -33,3 +33,27 @@ export type TicketQueryprops = {
 export type TicketFilterQuery = {
 	status?: TICKET_STATUS;
 };
+
+export type ListQueryParams<T> = {
+	status?: string;
+	page?: number;
+	limit?: number;
+	search?: T;
+};
+// export type FetchTicketsListParams = {
+// 	status?: TICKET_STATUS;
+// 	page?: number;
+// 	limit?: number;
+// 	search?: { [key: string]: any };
+// 	// [key: string]: any; // to allow future extension
+// };
+
+export interface TicketListFilter {
+	title?: string;
+	status?: TICKET_STATUS
+	createdAt?: string;
+	user?: string;
+	area?: string;
+	category: string;
+	id?: string;
+}

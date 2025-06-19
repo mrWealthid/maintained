@@ -1,4 +1,4 @@
-import TicketComponent from "@/app/shared/components/ui/ticket/TicketComponent";
+import TicketComponent from '@/app/shared/ticket-feat/pages/TicketComponent';
 
 export default function Home() {
 	return (
