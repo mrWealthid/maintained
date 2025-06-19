@@ -36,3 +36,17 @@ export function fileToBase64(file: File): Promise<string> {
 }
 
 export default fileToBase64;
+
+// --- Add this helper at the top or in a utils file ---
+export function buildQueryString(params: Record<string, any>): string {
+	return Object.entries(params)
+		.filter(
+			([_, value]) =>
+				value !== undefined && value !== null && value !== ''
+		)
+		.map(
+			([key, value]) =>
+				`${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+		)
+		.join('&');
+}

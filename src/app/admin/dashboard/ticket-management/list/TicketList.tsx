@@ -1,16 +1,22 @@
 'use client';
 import { Icolumn } from '@/app/shared/components/table/models/table.model';
-import RequestHeaderActions from './TicketHeaderActions';
 import RequestRow from './TicketRow';
 import { TICKET_STATUS } from '@/utils/enums';
 import { FC } from 'react';
 import { fetchTicketList } from '@/app/shared/ticket-feat/service/ticket-service';
 import Table from '@/app/shared/components/table/Table';
-import { Ticket } from '@/app/shared/model/model';
+import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
+import TicketHeaderActions from './TicketHeaderActions';
+import { TicketListFilter } from '@/app/shared/ticket-feat/model/ticket.model';
 
 const RequestsList: FC = () => {
 	const columns: Icolumn[] = [
-		{ header: 'Title', accessor: 'title', searchType: 'TEXT' },
+		{
+			header: 'Title',
+			accessor: 'title',
+			filterKey: 'title',
+			searchType: 'TEXT'
+		},
 		{
 			header: 'user',
 			accessor: 'user.name',
@@ -42,8 +48,9 @@ const RequestsList: FC = () => {
 		<div className='h-80'>
 			<Table<Ticket>
 				service={fetchTicketList}
-				queryKey='requests'
-				headerActions={<RequestHeaderActions />}
+				queryKey='tickets'
+				defaultParams={{ status: TICKET_STATUS.pending }}
+				headerActions={<TicketHeaderActions />}
 				columns={columns}>
 				<Table.TableHeader />
 				<Table.TableRow customRow={true}>

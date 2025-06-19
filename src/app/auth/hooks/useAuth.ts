@@ -33,12 +33,12 @@ export function useLogin() {
 		onSuccess: (data) => {
 			console.time('start');
 			const userInfo = decode(data.token) as IToken;
-			// const tt = new MiddlewareFeatures().userInfo;
-			// console.log(tt);
 
-			console.timeEnd('end');
-			if (userInfo.role === ROLES.user) router.push('/dashboard');
-			if (userInfo.role === ROLES.admin) router.push('/admin/dashboard');
+			if (userInfo.role === ROLES.user) {
+				router.push('/dashboard');
+			} else if (userInfo.role === ROLES.admin) {
+				router.push('/admin/dashboard');
+			}
 		},
 		onError: (err: ApiError) => toast.error(err.message)
 	});

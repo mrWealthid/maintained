@@ -11,8 +11,8 @@ export function useTable<T>(
 ): IListResponse<T> {
 	const { isLoading, data, error, isRefetching } = useQuery({
 		queryKey: [queryKey, limit, page, search],
-		queryFn: () => service(page, limit, search),
-		placeholderData: undefined
+		queryFn: () => service({ page, limit, search })
+		// placeholderData: undefined
 	});
 
 	return {

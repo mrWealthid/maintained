@@ -1,4 +1,4 @@
-import TicketComponent from '@/app/shared/components/ui/ticket/TicketComponent';
+import TicketComponent from '@/app/shared/ticket-feat/pages/TicketComponent';
 import Link from 'next/link';
 import { CiCirclePlus } from 'react-icons/ci';
 

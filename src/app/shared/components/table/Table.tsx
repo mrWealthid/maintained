@@ -15,11 +15,8 @@ import {
 	IselectOptions
 } from './models/table.model';
 import { formatCurrency } from '@/utils/helper';
-
 import { useTable } from './hooks/useTable';
-
 import { useForm } from 'react-hook-form';
-
 import { FcFilledFilter } from 'react-icons/fc';
 import { CiFilter } from 'react-icons/ci';
 import { DownloadTableExcel } from 'react-export-table-to-excel';
@@ -40,15 +37,14 @@ function Table<T>({
 	limit: limitVal,
 	actionable = true,
 	isDownloadable = true,
-	defaultParams = {}
+	defaultParams
 }: ITable) {
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(limitVal || 5);
-	const [search, setSearch] = useState<string | null>(
-		objectToQueryParams(defaultParams!)
+	const [search, setSearch] = useState<IsearchParams | null>(
+		defaultParams ?? null
 	);
-
-	const [filterIsActive, setfilterIsActive] = useState(false);
+	const [filterIsActive, setfilterIsActive] = useState(search ?? false);
 
 	const {
 		isLoading,
@@ -67,9 +63,11 @@ function Table<T>({
 			return;
 		}
 
-		transformedSearchQuery = objectToQueryParams(val);
+		// transformedSearchQuery = buildQueryString(val);
 
-		setSearch(transformedSearchQuery);
+		// transformedSearchQuery = objectToQueryParams(val);
+
+		setSearch((search) => ({ ...search, ...val }));
 		setPage(1);
 
 		setfilterIsActive(true);
@@ -141,7 +139,8 @@ function Table<T>({
 				tableRef,
 				queryKey,
 				isDownloadable,
-				isRefetching
+				isRefetching,
+				search
 			}}>
 			<div className=' overflow-x-auto    card p-2'>
 				<TableHeaderAction handleFilter={handleFilter}>
@@ -178,16 +177,18 @@ function Table<T>({
 }
 
 function TableFilterForm({ column, onCloseModal }: any) {
-	const { handleFilter, cancelFilter }: any = useContext(TableContext);
+	const { handleFilter, cancelFilter, search }: any =
+		useContext(TableContext);
 	const { register, handleSubmit, formState } = useForm({
-		mode: 'onChange'
+		mode: 'onChange',
+		defaultValues: { ...search }
 	});
 	// const { errors, isSubmitting } = formState;
 
 	const { columns, isRefetching }: any = useContext(TableContext);
 
 	async function onSubmit(data: any, onCloseModal: any) {
-		handleFilter(data);
+		handleFilter({ ...search, ...data });
 
 		onCloseModal();
 		// console.log(objectToQueryParams(data));
@@ -316,7 +317,6 @@ function TableFilterForm({ column, onCloseModal }: any) {
 				<ButtonComponent
 					type='submit'
 					loading={isRefetching}
-					// handleClick={onCloseModal}
 					styles='rounded-3xl'
 					disabled={!formState.isValid}
 					btnText={`Search
@@ -348,7 +348,10 @@ function TableFilter() {
 					</button>
 				</Modal.Open>
 
-				<Modal.Window title='Manage Filters' name='filter-form'>
+				<Modal.Window
+					title='Manage filters'
+					description='Quickly find table records using available filters'
+					name='filter-form'>
 					<TableFilterForm />
 				</Modal.Window>
 			</Modal>
@@ -692,7 +695,7 @@ function Paginator() {
 								}}
 								className={`${
 									maxNumPage <= page
-										? 'cursor-not-allowed '
+										? 'cursor-not-allowed'
 										: ''
 								} flex items-center  justify-center px-4 h-10 leading-tight text-gray-500 bg-white dark:glass border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700  dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
 								<span className='sr-only'>Next</span>

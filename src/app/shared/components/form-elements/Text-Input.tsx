@@ -10,7 +10,7 @@ const TextInput: FC<TextInputProps> = ({
 	style,
 	error,
 	children,
-	required = true
+	required = false
 }) => {
 	return (
 		<div className='w-full'>

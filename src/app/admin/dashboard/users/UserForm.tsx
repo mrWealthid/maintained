@@ -78,13 +78,14 @@ const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 						<TextInput
 							name={'role'}
 							label='Role'
+							required={true}
 							error={errors?.['role']?.message?.toString()}>
 							<select
-								className='input-style'
+								className='input-style cursor-pointer'
 								{...register('role', {
 									required: 'This field is required'
 								})}>
-								<option> Select Role</option>
+								<option value=''>Select Role</option>
 								<option> {ROLES.user}</option>
 								<option> {ROLES.admin}</option>
 							</select>

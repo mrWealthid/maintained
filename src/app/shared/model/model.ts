@@ -1,4 +1,4 @@
-import { INVITE_STATUS, ROLES } from '@/utils/enums';
+import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/utils/enums';
 
 export interface Category {
 	id: string;
@@ -48,11 +48,29 @@ export interface ApiResponse<T> {
 	message: string;
 	data: T;
 }
+export interface ApiPaginatedResponse<T> {
+	status: string;
+	message: string;
+	data: T;
+	totalRecords: number;
+	results: number;
+}
 
 export interface ITab {
 	title: string;
 	order: number;
 	icon: React.ReactNode;
+}
+
+export interface ButtonGroupTabsProps<T = string> {
+	handleClick: (type: TICKET_STATUS) => void;
+	status: TICKET_STATUS;
+	data: TabData<T>[];
+}
+
+interface TabData<T> {
+	label: string;
+	value: T;
 }
 
 export type Routes = {
