@@ -88,6 +88,7 @@ const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 								<option value=''>Select Role</option>
 								<option> {ROLES.user}</option>
 								<option> {ROLES.admin}</option>
+								<option> {ROLES.technician}</option>
 							</select>
 						</TextInput>
 					</div>
