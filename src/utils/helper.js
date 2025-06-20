@@ -1,4 +1,4 @@
-import { TICKET_STATUS } from './enums';
+import { TICKET_STATUS } from '../app/shared/enums/enums';
 export const convertTime = (time) => {
 	const options = {
 		hour: 'numeric',
@@ -127,6 +127,3 @@ export const isImage = (filename) => {
 	}
 	return false;
 };
-
-
-

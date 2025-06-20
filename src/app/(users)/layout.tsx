@@ -15,15 +15,15 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='dashboard-header sticky top-0 w-full'>
+			<header className='dashboard-header fixed top-0 w-full'>
 				<Header />
 			</header>
 			<section>
 				<SideBar routes={routes} />
 			</section>
 
-			<section className=' sm:ml-64 flex flex-col h-screen gap-6 '>
-				<section className='container-text mt-5 '>{isUser}</section>
+			<section className='sm:ml-64 flex flex-col dashboard-body gap-6 '>
+				<section className='container-text mt-2'>{isUser}</section>
 			</section>
 		</section>
 	);

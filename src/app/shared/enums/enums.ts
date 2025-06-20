@@ -12,5 +12,7 @@ export enum INVITE_STATUS {
 }
 export enum ROLES {
 	admin = 'ADMIN',
-	user = 'USER'
+	user = 'USER',
+	technician = 'TECHNICIAN',
+	owner = 'OWNER'
 }

@@ -1,4 +1,4 @@
-import { INVITE_STATUS } from '@/utils/enums';
+import { INVITE_STATUS } from '@/app/shared/enums/enums';
 
 export interface UserListFilter {
 	title?: string;

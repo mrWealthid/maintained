@@ -4,7 +4,7 @@ import React from 'react';
 import { fetchUsers } from '../service/user.service';
 import UserHeaderActions from './UserHeaderActions';
 import UserRow from './UserRow';
-import { INVITE_STATUS, ROLES } from '@/utils/enums';
+import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
 import { Icolumn } from '@/app/shared/components/table/models/table.model';
 import Table from '@/app/shared/components/table/Table';
 import { User } from '@/app/shared/model/model';

@@ -1,6 +1,6 @@
 'use client';
 import React, { FC } from 'react';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { ButtonGroupTabsProps } from '@/app/shared/model/model';
 
 const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({

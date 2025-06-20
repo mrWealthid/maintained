@@ -2,7 +2,7 @@
 
 import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { GetColorObject } from '@/utils/helper';
 import {
 	TicketFilterQuery,

@@ -1,4 +1,4 @@
-import { ROLES } from '@/utils/enums';
+import { ROLES } from '@/app/shared/enums/enums';
 
 export interface IUpdatePassword {
 	newPassword: string;

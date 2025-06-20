@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import {
 	ApiPaginatedResponse,
 	ApiResponse,

@@ -1,7 +1,7 @@
 'use client';
 import { Icolumn } from '@/app/shared/components/table/models/table.model';
 import RequestRow from './TicketRow';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { FC } from 'react';
 import { fetchTicketList } from '@/app/shared/ticket-feat/service/ticket-service';
 import Table from '@/app/shared/components/table/Table';
