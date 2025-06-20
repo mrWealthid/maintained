@@ -20,7 +20,7 @@ import {
 	OnboardUser
 } from '../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
-import { ROLES } from '@/utils/enums';
+import { ROLES } from '@/app/shared/enums/enums';
 
 export function useLogin() {
 	const router = useRouter();
@@ -31,9 +31,7 @@ export function useLogin() {
 	} = useMutation({
 		mutationFn: (payload: ILogin) => handleLogin(payload),
 		onSuccess: (data) => {
-			console.time('start');
 			const userInfo = decode(data.token) as IToken;
-
 			if (userInfo.role === ROLES.user) {
 				router.push('/dashboard');
 			} else if (userInfo.role === ROLES.admin) {
@@ -43,7 +41,6 @@ export function useLogin() {
 		onError: (err: ApiError) => toast.error(err.message)
 	});
 
-	// console.log(data);
 	return {
 		isLoading,
 		login,

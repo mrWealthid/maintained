@@ -21,8 +21,8 @@ const LoginComponent = () => {
 	const router = useRouter();
 	const { isLoading, login } = useLogin();
 
-	async function onSubmit(payload: any) {
-		login(payload, { onSuccess: () => router.push('/dashboard') });
+	async function onSubmit(payload: LoginForm) {
+		login(payload);
 	}
 
 	const { errors, isValid } = formState;

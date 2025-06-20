@@ -1,4 +1,4 @@
-import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/utils/enums';
+import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 
 export interface Category {
 	id: string;
@@ -11,7 +11,7 @@ export interface Category {
 export interface Ticket {
 	title: string;
 	description: string;
-	status: 'PENDING' | 'ASSIGNED' | 'DECLINED' | 'COMPLETED';
+	status: TICKET_STATUS;
 	_id: string;
 	createdAt: string;
 	images?: string[];
@@ -27,7 +27,7 @@ export interface CreateTicketPayload
 		Ticket,
 		'_id' | 'createdAt' | 'id' | 'category' | 'user' | 'status'
 	> {
-	status?: 'PENDING' | 'ASSIGNED' | 'DECLINED' | 'COMPLETED';
+	status?: TICKET_STATUS;
 	category: string;
 }
 
@@ -87,17 +87,14 @@ export interface User {
 	name: string;
 	email: string;
 	photo?: string;
-	role: ROLES.admin | ROLES.user;
+	role: ROLES.admin | ROLES.user | ROLES.technician;
 	business: Pick<Business, 'country' | 'businessName'>;
 	createdAt?: Date;
 	dateOfBirth?: Date;
 	inviteToken?: string;
 
 	active?: boolean;
-	status?:
-		| INVITE_STATUS.invited
-		| INVITE_STATUS.activated
-		| INVITE_STATUS.declined;
+	status?: INVITE_STATUS;
 }
 
 export interface Business {
@@ -141,7 +138,7 @@ export interface ManageUserFormProps {
 export interface ManageUserForm {
 	name: string;
 	email: string;
-	role: ROLES;
+	role: ROLES.admin | ROLES.user | ROLES.technician;
 }
 
 export type CreateUserPayload = Pick<User, 'name' | 'email' | 'role'>;

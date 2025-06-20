@@ -5,7 +5,7 @@ import { useCreateUser } from './hooks/userHooks';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import EmailInput from '@/app/shared/components/form-elements/Email-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import { ROLES } from '@/utils/enums';
+import { ROLES } from '@/app/shared/enums/enums';
 import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
 
 const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
@@ -88,6 +88,7 @@ const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 								<option value=''>Select Role</option>
 								<option> {ROLES.user}</option>
 								<option> {ROLES.admin}</option>
+								<option> {ROLES.technician}</option>
 							</select>
 						</TextInput>
 					</div>

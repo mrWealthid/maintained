@@ -1,7 +1,7 @@
 'use client';
 import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
-import { INVITE_STATUS } from '@/utils/enums';
+import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
 
 const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {

@@ -13,7 +13,7 @@ import {
 import { CreateTicketPayload } from '../../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
 import { IListResponse } from '../../components/table/models/table.model';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 
 export function useCreateTicket(isEditing: boolean, ticketId?: string) {
 	const queryClient = useQueryClient();

@@ -1,7 +1,7 @@
 'use client';
 import React, { FC, useState } from 'react';
 import TicketCard from './TicketCard';
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { useFetchTickets } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { Ticket } from '@/app/shared/model/model';
 import { tabData } from '../data/data';

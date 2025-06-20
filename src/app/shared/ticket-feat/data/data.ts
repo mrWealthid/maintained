@@ -1,4 +1,4 @@
-import { TICKET_STATUS } from '@/utils/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 
 export const tabData = [
 	{
