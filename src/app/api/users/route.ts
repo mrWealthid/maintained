@@ -1,12 +1,9 @@
 import { connect } from '@/dbConfig/dbConfig';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
-
-import jwt, { VerifyErrors, verify } from 'jsonwebtoken';
 import APIFeatures from '@/utils/apiFeatures';
 import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
-import { Types } from 'mongoose';
 
 connect();
 
@@ -17,20 +14,19 @@ export async function GET(request: NextRequest) {
 		const verify = new MiddlewareFeatures().verifyToken();
 		if (!verify?.isUserAuthenticated) {
 			return NextResponse.json(
-				{ error: 'UnAuthorized' },
+				{ error: 'Unauthorized' },
 				{ status: 401 }
 			);
 		}
 
 		if (verify.isAdminRole) {
 			const user = await User.findById(verify.userId);
-			console.log('business', user.business);
-			filter = { business: new Types.ObjectId(user.business) };
+			filter = { business: user.business };
 		}
 
 		if (verify.isUserRole) {
 			return NextResponse.json(
-				{ error: 'UnAuthorized' },
+				{ error: 'Unauthorized' },
 				{ status: 401 }
 			);
 		}
@@ -38,27 +34,34 @@ export async function GET(request: NextRequest) {
 		const query: any = request.nextUrl.searchParams;
 		const transformedQuery = mapToObject(query);
 
-		const userQuery = User.find(filter).populate([
-			{
-				path: 'business',
-				select: 'businessName country'
-			}
-		]);
+		//This is added for fields that should resolve with partial search
+		if (transformedQuery.name) {
+			const regex = new RegExp(transformedQuery.name, 'i'); // 'i' for case-insensitive
+			filter = { ...filter, name: { $regex: regex } };
+			delete transformedQuery.name; // Remove name from transformedQuery so it doesn't get double-filtered
+		}
+
+		const userQuery = User.find(filter);
 
 		const features = new APIFeatures(userQuery, transformedQuery)
 			.filter()
 			.sort()
 			.limitFields()
-			.paginate();
+			.paginate()
+			.populate([
+				{
+					path: 'business',
+					select: 'businessName country'
+				}
+			]);
 
 		const users = await features.query;
 
 		let count;
 
-		// console.log( await Model.find(req.query))
-
 		//I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
 		console.log('Query', Object.values(transformedQuery).length);
+		console.log('Query', Object.values(transformedQuery));
 		if (Object.values(transformedQuery).length > 0) {
 			const excludedFields = ['page', 'sort', 'limit', 'fields'];
 			excludedFields.forEach((el) => delete transformedQuery[el]);
@@ -68,8 +71,6 @@ export async function GET(request: NextRequest) {
 		} else {
 			count = await User.countDocuments(filter);
 		}
-
-		// const user = await User.findOne({ _id: userId });
 
 		const response = NextResponse.json({
 			status: 'success',

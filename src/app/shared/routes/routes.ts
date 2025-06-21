@@ -1,9 +1,10 @@
 'use client';
 import { RiHomeLine } from 'react-icons/ri';
-import { CiSettings, CiUser } from 'react-icons/ci';
+import { CiSettings } from 'react-icons/ci';
 import { Routes } from '../model/model';
 import { GrVmMaintenance } from 'react-icons/gr';
 import { HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
+import { PiUsersThree } from 'react-icons/pi';
 
 export const ROUTES_DEFINITION = {
 	DASHBOARD: {
@@ -58,7 +59,7 @@ export const adminRoutes: Routes[] = [
 	{
 		name: 'User Management',
 		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.USERS,
-		icon: CiUser
+		icon: PiUsersThree
 	},
 	{
 		name: 'Chat',

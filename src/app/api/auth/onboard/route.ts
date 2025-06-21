@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 // import { Emails } from '@/utils/email-resend';
 import crypto from 'crypto';
+import { INVITE_STATUS } from '@/app/shared/enums/enums';
 
 connect();
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 		}
 		user.password = password;
 		user.passwordConfirm = password;
-		user.status = undefined;
+		user.status = INVITE_STATUS.activated;
 		user.inviteToken = undefined;
 		user.inviteTokenExpires = undefined;
 		await user.save();

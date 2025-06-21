@@ -59,6 +59,13 @@ class APIFeatures {
 		this.query = this.query.skip(skip).limit(limit);
 		return this;
 	}
+
+	populate(populateOptions) {
+		if (populateOptions) {
+			this.query = this.query.populate(populateOptions);
+		}
+		return this;
+	}
 }
 
 export default APIFeatures;

@@ -30,7 +30,7 @@ const SignupComponent = () => {
 			...rest
 		};
 
-		registering(payload, { onSuccess: () => console.log('success') });
+		registering(payload);
 	}
 
 	function onError(err: any) {
