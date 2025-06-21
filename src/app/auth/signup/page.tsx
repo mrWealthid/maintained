@@ -104,7 +104,7 @@ const SignupComponent = () => {
 
 							<div className='w-full flex gap-4'>
 								<EmailInput
-									name={'email'}
+									name={'businessEmail'}
 									label='Email'
 									error={errors?.[
 										'businessEmail'
@@ -156,7 +156,7 @@ const SignupComponent = () => {
 										})}
 										className='input-style'
 										type='text'
-										id='address'
+										id='businessAddress'
 										placeholder='Enter Address'
 									/>
 								</TextInput>
@@ -241,7 +241,7 @@ const SignupComponent = () => {
 								</EmailInput>
 
 								<TextInput
-									name={'password'}
+									name={'psw'}
 									placeholder='Enter Password'
 									label='Password'
 									error={errors?.[

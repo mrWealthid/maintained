@@ -57,7 +57,7 @@ const ResetPasswordComponent = () => {
 									})}
 									className='input-style'
 									type='email'
-									id='name'
+									id='email'
 								/>
 							</EmailInput>
 

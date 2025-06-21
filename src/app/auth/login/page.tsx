@@ -71,11 +71,11 @@ const LoginComponent = () => {
 									})}
 									className='input-style'
 									type='email'
-									id='name'
+									id='email'
 								/>
 							</EmailInput>
 							<TextInput
-								name={'password'}
+								name={'psw'}
 								placeholder='Enter Password'
 								label='Password'
 								error={errors?.[

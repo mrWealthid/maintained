@@ -54,7 +54,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 							action=''
 							className='w-full flex flex-col justify-center gap-2 items-center'>
 							<TextInput
-								name={'password'}
+								name={'psw'}
 								label='Password'
 								error={errors?.[
 									'password'
@@ -86,7 +86,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 								</div>
 							</TextInput>
 							<TextInput
-								name={'password'}
+								name={'newpsw'}
 								label='Password'
 								error={errors?.[
 									'password'
@@ -100,13 +100,13 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 										{...register('newPassword', {
 											required: 'This field is required'
 										})}
-										id='newPassword'
+										id='newpsw'
 										placeholder='Enter New  Password'
 									/>
 								</div>
 							</TextInput>
 							<TextInput
-								name={'password'}
+								name={'confirmPassword'}
 								label='Password'
 								error={errors?.[
 									'password'
@@ -129,7 +129,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 							<section className=' '>
 								<ButtonComponent
 									styles='rounded-3xl 2xl:w-1/5'
-									btnText='Submit'
+									btnText='Update'
 									loading={isLoading}
 									type='submit'
 									disabled={!isValid || isLoading}
