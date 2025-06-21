@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import Header from '../shared/components/header/Header';
 import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { adminRoutes } from '../shared/routes/routes';
+import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
+import { adminCrumbLabelMap } from '../shared/data/data';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -22,7 +24,10 @@ export default function DashboardLayout({
 			</section>
 
 			<section className='sm:ml-64 flex flex-col dashboard-body gap-6 '>
-				<section className='container-text mt-2'>{isAdmin}</section>
+				<section className='container-text mt-2'>
+					<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
+					{isAdmin}
+				</section>
 			</section>
 		</section>
 	);

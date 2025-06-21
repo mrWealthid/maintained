@@ -3,6 +3,8 @@ import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { redirect } from 'next/navigation';
 import { routes } from '../shared/routes/routes';
 import Header from '../shared/components/header/Header';
+import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
+import { crumbLabelMap } from '../shared/data/data';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -23,7 +25,11 @@ export default function DashboardLayout({
 			</section>
 
 			<section className='sm:ml-64 flex flex-col dashboard-body gap-6 '>
-				<section className='container-text mt-2'>{isUser}</section>
+				<section className='container-text mt-2'>
+					<Breadcrumbs crumbLabelMap={crumbLabelMap} />
+
+					{isUser}
+				</section>
 			</section>
 		</section>
 	);

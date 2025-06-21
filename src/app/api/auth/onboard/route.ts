@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 // import { Emails } from '@/utils/email-resend';
 import crypto from 'crypto';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
+import { Emails } from '@/utils/email-resend';
 
 connect();
 
@@ -44,6 +45,12 @@ export async function POST(request: NextRequest) {
 			message: 'New User onboarded sucessfully, Kindly Login',
 			data: user
 		});
+
+		// await new Emails(
+		// 	user,
+		// 	'wealthtech.website',
+		// 	user.businessName
+		// ).notifyNewUserActivation(user.name);
 
 		return response;
 	} catch (error: any) {

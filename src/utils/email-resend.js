@@ -11,7 +11,7 @@ export class Emails {
 		this.url = url;
 		this.business = business.businessName;
 		this.from = 'support@wealthtech.website';
-		this;
+
 	}
 
 	async send(template, subject) {
@@ -27,7 +27,11 @@ export class Emails {
 	}
 
 	async sendWelcome() {
-		await this.send('welcome', 'Welcome to the Wealth_Wallet');
+		await this.send('welcome', `Welcome to ${this.business}`);
+	}
+
+	async notifyNewUserActivation(newUser) {
+		await this.send('notification', `Welcome to ${this.business}`);
 	}
 
 	async sendPasswordReset() {
