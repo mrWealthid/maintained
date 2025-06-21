@@ -44,7 +44,7 @@ const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
 				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center text-primary dark:text-label-color font-bold text-2xl'>
-						Update Password
+						Activate User
 					</p>
 
 					<section className='w-full'>
@@ -65,11 +65,12 @@ const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
 									className='input-style'
 									type='date'
 									id='dateOfBirth'
+									autoFocus
 								/>
 							</TextInput>
 
 							<TextInput
-								name={'password'}
+								name={'psw'}
 								label='Password'
 								error={errors?.[
 									'password'

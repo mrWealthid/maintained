@@ -40,6 +40,7 @@ const ResetPasswordComponent = () => {
 
 					<section className='w-full'>
 						<form
+							autoFocus
 							onSubmit={handleSubmit(onSubmit, onError)}
 							action=''
 							className='w-full flex flex-col justify-center gap-2 items-center'>
@@ -57,7 +58,8 @@ const ResetPasswordComponent = () => {
 									})}
 									className='input-style'
 									type='email'
-									id='name'
+									id='email'
+									autoFocus
 								/>
 							</EmailInput>
 

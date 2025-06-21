@@ -44,12 +44,15 @@ export async function POST(request: NextRequest) {
 
 		//create the user but will be assigned a
 
+		const capitalize = (str: string) =>
+			str.replace(/\b\w/g, char => char.toUpperCase());
+
 		const user = await new User({
 			email: body.email,
 			business: adminUser.business.id,
 			dateOfBirth: body.dateOfBirth,
 			role: body.role,
-			name: body.name,
+			name: capitalize(body.name),
 			status: INVITE_STATUS.invited,
 			businessName: adminUser.business.businessName
 		});

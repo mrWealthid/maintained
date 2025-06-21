@@ -8,14 +8,12 @@ export default function Home() {
 			<h1 className='title'> Maintenance Requests </h1>{' '}
 			<section className='flex w-full justify-end'>
 				<div>
-					<button
-						type='button'
-						className='btn-primary flex items-center gap-1 rounded-3xl'>
+					<Link
+						className='btn-primary flex items-center gap-1 rounded-3xl'
+						href={'ticket-management/manage'}>
 						<CiCirclePlus size={18} />
-						<Link href={'ticket-management/manage'}>
-							Create Ticket
-						</Link>
-					</button>
+						Create Ticket
+					</Link>
 				</div>
 			</section>
 			<TicketComponent />
