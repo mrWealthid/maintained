@@ -142,3 +142,11 @@ export interface ManageUserForm {
 }
 
 export type CreateUserPayload = Pick<User, 'name' | 'email' | 'role'>;
+
+export interface CrumbLabelMap {
+	[segment: string]: {
+		label: string;
+		// icon?: ReactNode; // Optional: if you want icons later
+		hide?: boolean; // 🔍 used to omit from breadcrumbs
+	};
+}
