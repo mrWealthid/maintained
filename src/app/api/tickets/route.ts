@@ -9,13 +9,6 @@ import User from '@/model/userModel';
 
 connect();
 
-// export const config = {
-// 	api: {
-// 		bodyParser: false
-// 	}
-// };
-// const verify = new MiddlewareFeatures().verifyToken();
-
 export async function GET(request: NextRequest) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
@@ -44,29 +37,33 @@ export async function GET(request: NextRequest) {
 
 		const transformedQuery = mapToObject(query);
 
-		// console.log(transformedQuery);
+		if (transformedQuery.title) {
+			const regex = new RegExp(transformedQuery.title, 'i'); // 'i' for case-insensitive
+			filter = { ...filter, title: { $regex: regex } };
+			delete transformedQuery.title; // Remove name from transformedQuery so it doesn't get double-filtered
+		}
 
-		console.log(filter);
-		const requestQuery = Ticket.find(filter).populate([
-			{
-				path: 'category',
-				select: 'name '
-			},
-			{
-				path: 'user',
-				select: 'name'
-			},
-			{
-				path: 'business',
-				select: 'businessName'
-			}
-		]);
+		const requestQuery = Ticket.find(filter);
 
 		const features = new APIFeatures(requestQuery, transformedQuery)
 			.filter()
 			.sort()
 			.limitFields()
-			.paginate();
+			.paginate()
+			.populate([
+				{
+					path: 'category',
+					select: 'name '
+				},
+				{
+					path: 'user',
+					select: 'name'
+				},
+				{
+					path: 'business',
+					select: 'businessName'
+				}
+			]);
 		const requests = await features.query;
 
 		let count;

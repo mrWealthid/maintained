@@ -47,6 +47,7 @@ const UserList = () => {
 			headerActions={<UserHeaderActions />}
 			service={fetchUsers}
 			defaultParams={{ status: INVITE_STATUS.invited }}
+			searchKey='name'
 			queryKey='Users'
 			columns={columns}>
 			<Table.TableHeader />

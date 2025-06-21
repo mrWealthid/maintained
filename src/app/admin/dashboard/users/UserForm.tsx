@@ -49,7 +49,7 @@ const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 								className='input-style'
 								type='text'
 								id='name'
-								placeholder='Enter full name'
+								placeholder='Enter Full Name'
 							/>
 						</TextInput>
 					</div>

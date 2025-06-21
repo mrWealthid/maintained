@@ -48,8 +48,11 @@ export function useLogin() {
 	};
 }
 export function useRegister() {
+	const router = useRouter();
 	const { isPending: isLoading, mutate: registering } = useMutation({
 		mutationFn: (payload: IRegister) => handleRegister(payload),
+		onSuccess: () => router.push('/admin/dashboard'),
+
 		onError: (err: ApiError) => toast.error(err.message)
 	});
 
