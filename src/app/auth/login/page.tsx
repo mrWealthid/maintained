@@ -55,6 +55,7 @@ const LoginComponent = () => {
 
 					<section className='w-full'>
 						<form
+							autoFocus
 							onSubmit={handleSubmit(onSubmit, onError)}
 							className='w-full flex flex-col justify-center gap-2 items-center'>
 							<EmailInput
@@ -72,6 +73,7 @@ const LoginComponent = () => {
 									className='input-style'
 									type='email'
 									id='email'
+									autoFocus
 								/>
 							</EmailInput>
 							<TextInput

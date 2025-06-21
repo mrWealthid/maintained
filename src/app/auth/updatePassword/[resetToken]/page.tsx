@@ -70,6 +70,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 										})}
 										id='psw'
 										placeholder='Enter Password'
+										autoFocus
 									/>
 
 									{!showPassword ? (

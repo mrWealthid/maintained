@@ -65,6 +65,7 @@ const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
 									className='input-style'
 									type='date'
 									id='dateOfBirth'
+									autoFocus
 								/>
 							</TextInput>
 

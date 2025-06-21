@@ -82,6 +82,7 @@ const SignupComponent = () => {
 										type='text'
 										id='businessName'
 										placeholder='Enter Business Name'
+										autoFocus
 									/>
 								</TextInput>
 								<TextInput
