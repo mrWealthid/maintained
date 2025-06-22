@@ -15,9 +15,9 @@ export async function createTicket(
 	requestId?: string
 ) {
 	try {
-		const res = isEditing
+		const res = requestId
 			? await axios.patch(
-					`${API_ROUTES.ticketManagement.ticketById}/${requestId}`,
+					`${API_ROUTES.ticketManagement.ticketById(requestId)}`,
 					data
 				)
 			: await axios.post(

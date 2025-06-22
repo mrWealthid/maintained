@@ -27,8 +27,30 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const [uploadProgress, setUploadProgress] = useState<
 		Record<string, number>
 	>({});
+	const [isUploading, setIsUploading] = useState(false);
 
-	const { register, handleSubmit, getValues, setValue, formState } =
+	const initialImageFiles =
+		isEditing && Array.isArray(ticket?.images)
+			? ticket.images.map((url) => ({
+					url,
+					type: 'image/',
+					id: url
+				}))
+			: [];
+
+	const initialVideoFiles =
+		isEditing && Array.isArray(ticket?.videos)
+			? ticket.videos.map((url) => ({
+					url,
+					type: 'video/',
+					id: url
+				}))
+			: [];
+	const [remainingImages, setRemainingImages] = useState(initialImageFiles);
+	const [remainingVideos, setRemainingVideos] = useState(initialVideoFiles);
+	const router = useRouter();
+
+	const { register, handleSubmit, setValue, formState } =
 		useForm<ManageTicketForm>({
 			mode: 'all',
 			defaultValues: isEditing
@@ -41,16 +63,53 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					}
 				: {}
 		});
-
-	const router = useRouter();
 	const { errors, isValid, isDirty } = formState;
 	const { isCreating, handleCreateTicket } = useCreateTicket(
 		isEditing,
-		ticket?.id
+		ticket?._id
 	);
 
-	const [isUploading, setIsUploading] = useState(false);
 	const isSubmitting = isUploading || isCreating;
+
+	// const handleRemoveInitialImage = (file: { url: string }) => {
+	// 	setRemainingImages((prev) => prev.filter((f) => f.url !== file.url));
+	// };
+	// const handleRemoveInitialVideo = (file: { url: string }) => {
+	// 	setRemainingVideos((prev) => prev.filter((f) => f.url !== file.url));
+	// };
+	function getCloudinaryPublicId(url: string) {
+		const matches = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
+		return matches ? matches[1] : '';
+	}
+
+	const handleRemoveInitialImage = async (file: { url: string }) => {
+		const publicId = getCloudinaryPublicId(file.url);
+
+		try {
+			await fetch('/api/cloudinary', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ publicId, resourceType: 'image' })
+			});
+		} catch (err) {
+			console.error('Failed to delete image from Cloudinary', err);
+		}
+		setRemainingImages((prev) => prev.filter((f) => f.url !== file.url));
+	};
+
+	const handleRemoveInitialVideo = async (file: { url: string }) => {
+		const publicId = getCloudinaryPublicId(file.url);
+		try {
+			await fetch('/api/cloudinary', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ publicId, resourceType: 'video' })
+			});
+		} catch (err) {
+			console.error('Failed to delete video from Cloudinary', err);
+		}
+		setRemainingVideos((prev) => prev.filter((f) => f.url !== file.url));
+	};
 
 	function handleAutoCompleteValues(values: any) {
 		setAutoCompleteValue({ ...autoCompleteValue, ...values });
@@ -76,10 +135,23 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		imgUrls?: string[],
 		videoUrls?: string[]
 	): CreateTicketPayload {
+		let images: string[] = [];
+		let videos: string[] = [];
+
+		if (isEditing) {
+			const existingImages = remainingImages.map((f) => f.url);
+			const existingVideos = remainingVideos.map((f) => f.url);
+			images = [...existingImages, ...(imgUrls || [])];
+			videos = [...existingVideos, ...(videoUrls || [])];
+		} else {
+			images = imgUrls || [];
+			videos = videoUrls || [];
+		}
+
 		return {
 			...data,
-			images: imgUrls,
-			videos: videoUrls,
+			images,
+			videos,
 			...(isEditing && {
 				status: ticket?.status
 			})
@@ -90,6 +162,43 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		console.log(err);
 	}
 
+	// function batchUpload(
+	// 	fileList: FileList,
+	// 	type: 'video' | 'image',
+	// 	setProgress?: (fileName: string, percent: number) => void
+	// ) {
+	// 	return Array.from(fileList).map(async (file) => {
+	// 		const formData = new FormData();
+	// 		formData.append(
+	// 			'upload_preset',
+	// 			type === 'image'
+	// 				? process.env.IMG_PRESET!
+	// 				: process.env.VIDEO_PRESET!
+	// 		);
+	// 		formData.append('file', file);
+
+	// 		try {
+	// 			const response = await axios.post(
+	// 				`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
+	// 				formData,
+	// 				{
+	// 					onUploadProgress: (event) => {
+	// 						const percent = Math.round(
+	// 							(event.loaded * 100) / (event.total ?? 1)
+	// 						);
+	// 						if (setProgress) setProgress(file.name, percent);
+	// 					}
+	// 				}
+	// 			);
+
+	// 			return response.data.url;
+	// 		} catch (error) {
+	// 			console.error('Upload error:', error);
+	// 			throw error;
+	// 		}
+	// 	});
+	// }
+
 	function batchUpload(
 		fileList: FileList,
 		type: 'video' | 'image',
@@ -97,29 +206,23 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	) {
 		return Array.from(fileList).map(async (file) => {
 			const formData = new FormData();
-			formData.append(
-				'upload_preset',
-				type === 'image'
-					? process.env.IMG_PRESET!
-					: process.env.VIDEO_PRESET!
-			);
 			formData.append('file', file);
+			formData.append('resourceType', type);
 
 			try {
-				const response = await axios.post(
-					`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
-					formData,
-					{
-						onUploadProgress: (event) => {
-							const percent = Math.round(
-								(event.loaded * 100) / (event.total ?? 1)
-							);
-							if (setProgress) setProgress(file.name, percent);
-						}
+				const response = await axios.post('/api/cloudinary', formData, {
+					onUploadProgress: (event) => {
+						const percent = Math.round(
+							(event.loaded * 100) / (event.total ?? 1)
+						);
+						if (setProgress) setProgress(file.name, percent);
+					},
+					headers: {
+						'Content-Type': 'multipart/form-data'
 					}
-				);
+				});
 
-				return response.data.url;
+				return response.data.secure_url || response.data.url;
 			} catch (error) {
 				console.error('Upload error:', error);
 				throw error;
@@ -144,14 +247,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 			setIsUploading(false); // upload ended
 		}
 	}
-
-	// async function uploader(formData: FormData, type: 'video' | 'image') {
-	// 	const uploadResponse = await axios.post(
-	// 		`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
-	// 		formData
-	// 	);
-	// 	return uploadResponse.data.url;
-	// }
 
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
@@ -345,6 +440,8 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								icon={<IoIosCloudUpload />}
 								selectedFiles={selectedImages}
 								uploadProgress={uploadProgress}
+								initialFiles={initialImageFiles}
+								onRemoveInitialFile={handleRemoveInitialImage}
 							/>
 						</div>
 
@@ -358,6 +455,8 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								icon={<RiVideoUploadLine />}
 								selectedFiles={selectedVideo}
 								uploadProgress={uploadProgress}
+								initialFiles={initialVideoFiles}
+								onRemoveInitialFile={handleRemoveInitialVideo}
 							/>
 						</div>
 					</section>
@@ -371,7 +470,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 						<ButtonComponent
 							type='submit'
-							styles=' w-1/3'
+							styles=' w-1/2 md:w-1/3'
 							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${

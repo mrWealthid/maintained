@@ -7,12 +7,14 @@ import Link from 'next/link';
 import { HiEye, HiPencil, HiTrash } from 'react-icons/hi2';
 import ConfirmationPage from '../../components/ui/ConfirmationPage';
 import { useDeleteTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
-import { Ticket } from '@/app/shared/model/model';
+import { Ticket, TicketCardProps } from '@/app/shared/model/model';
 import Modal from '../../components/modal/Modal';
 import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 import { TfiMore } from 'react-icons/tfi';
+import { ROLES } from '../../enums/enums';
+// import MiddlewareFeatures from '@/middlewareFeatures';
 
-const TicketCard: FC<Ticket> = ({
+const TicketCard: FC<TicketCardProps> = ({
 	title,
 	description,
 	status,
@@ -20,7 +22,8 @@ const TicketCard: FC<Ticket> = ({
 	createdAt,
 	user,
 	area,
-	category
+	category,
+	role
 }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
 	function handleDelete(onCloseModal: () => void) {
@@ -28,6 +31,8 @@ const TicketCard: FC<Ticket> = ({
 			onSuccess: () => onCloseModal()
 		});
 	}
+
+	// const verify = new MiddlewareFeatures().verifyToken();
 
 	return (
 		<section className='request-card w-full'>
@@ -119,23 +124,25 @@ const TicketCard: FC<Ticket> = ({
 													)}
 												</Menu.Item>
 
-												<Menu.Item>
-													{({ active }) => (
-														<Link
-															href={`
+												{role === ROLES.user && (
+													<Menu.Item>
+														{({ active }) => (
+															<Link
+																href={`
 																${ROUTES_DEFINITION.DASHBOARD.MANAGE_TICKET}/
 																${id}
 															`}
-															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
-															{active ? (
-																<HiPencil color='green' />
-															) : (
-																<HiPencil color='green' />
-															)}
-															Edit Details
-														</Link>
-													)}
-												</Menu.Item>
+																className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+																{active ? (
+																	<HiPencil color='green' />
+																) : (
+																	<HiPencil color='green' />
+																)}
+																Edit Details
+															</Link>
+														)}
+													</Menu.Item>
+												)}
 
 												<Menu.Item>
 													{({ active }) => (

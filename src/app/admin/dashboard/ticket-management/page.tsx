@@ -1,4 +1,4 @@
-import RequestsList from './list/TicketList';
+import TicketList from './list/TicketList';
 
 export default function Home() {
 	return (
@@ -6,7 +6,7 @@ export default function Home() {
 			<div className='flex items-center justify-between'>
 				<h1 className='title'> All Requests </h1>
 			</div>
-			<RequestsList />
+			<TicketList />
 		</div>
 	);
 }

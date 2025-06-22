@@ -1,7 +1,7 @@
 'use client';
 import React, { FC, useState } from 'react';
 import TicketCard from './TicketCard';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { useFetchTickets } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { Ticket } from '@/app/shared/model/model';
 import { tabData } from '../data/data';
@@ -9,7 +9,7 @@ import FilterTabs from '../../components/tabs/FilterTabs';
 import Search from '../../components/search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
 
-const TicketComponent: FC = () => {
+const TicketComponent: FC<{ role: ROLES }> = ({ role }) => {
 	const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.pending);
 	const [search, setSearch] = useState<string>('');
 
@@ -38,7 +38,7 @@ const TicketComponent: FC = () => {
 			</div>
 			<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
 				{data?.map((ticket: Ticket) => (
-					<TicketCard key={ticket._id} {...ticket} />
+					<TicketCard role={role} key={ticket._id} {...ticket} />
 				))}
 			</section>
 		</>
