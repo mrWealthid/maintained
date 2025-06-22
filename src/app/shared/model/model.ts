@@ -22,6 +22,10 @@ export interface Ticket {
 	id: string;
 }
 
+export interface TicketCardProps extends Ticket {
+	role: ROLES;
+}
+
 export interface CreateTicketPayload
 	extends Omit<
 		Ticket,

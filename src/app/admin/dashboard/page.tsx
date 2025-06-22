@@ -1,6 +1,9 @@
 import TicketComponent from '@/app/shared/ticket-feat/pages/TicketComponent';
+import MiddlewareFeatures from '@/middlewareFeatures';
 
 export default function Home() {
+	const verify = new MiddlewareFeatures().verifyToken();
+	console.log(verify);
 	return (
 		<main className='flex min-h-screen gap-6 flex-col'>
 			<section className='flex w-full justify-between'>
@@ -8,7 +11,7 @@ export default function Home() {
 					Maintained
 				</p>
 			</section>
-			<TicketComponent />
+			<TicketComponent role={verify.userInfo.role} />
 		</main>
 	);
 }
