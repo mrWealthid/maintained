@@ -371,7 +371,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 						<ButtonComponent
 							type='submit'
-							styles=' w-1/3'
+							styles=' w-1/2 md:w-1/3'
 							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${
