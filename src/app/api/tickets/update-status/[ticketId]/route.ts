@@ -2,61 +2,70 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import Ticket from '@/model/ticketModel';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
-) {
-	try {
-		// const verify = new MiddlewareFeatures().verifyToken();
+// export async function GET(
+//     request: NextRequest,
+//     { params }: { params: { ticketId: string } }
+// ) {
+//     try {
+//         // const verify = new MiddlewareFeatures().verifyToken();
 
-		// if (!verify.isUserAuthenticated) {
-		// 	return NextResponse.json(
-		// 		{ error: 'Unauthorized access' },
-		// 		{ status: 401 }
-		// 	);
-		// }
+//         // if (!verify.isUserAuthenticated) {
+//         // 	return NextResponse.json(
+//         // 		{ error: 'Unauthorized access' },
+//         // 		{ status: 401 }
+//         // 	);
+//         // }
 
-		const ticketId = params.ticketId;
+//         const ticketId = params.ticketId;
 
-		const maintenanceRequest = await Ticket.findOne({
-			_id: ticketId
-		}).populate({
-			path: 'category',
-			select: 'name '
-		});
+//         const maintenanceRequest = await Ticket.findOne({
+//             _id: ticketId
+//         }).populate({
+//             path: 'category',
+//             select: 'name '
+//         });
 
-		const response = NextResponse.json({
-			status: 'success',
-			data: maintenanceRequest
-		});
+//         const response = NextResponse.json({
+//             status: 'success',
+//             data: maintenanceRequest
+//         });
 
-		return response;
-	} catch (error: any) {
-		return NextResponse.json({ error: error.message }, { status: 500 });
-	}
-}
+//         return response;
+//     } catch (error: any) {
+//         return NextResponse.json({ error: error.message }, { status: 500 });
+//     }
+// }
 
 export async function PATCH(
 	request: NextRequest,
 	{ params }: { params: { ticketId: string } }
 ) {
 	try {
+		const ticketId = params.ticketId;
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify.isUserAuthenticated || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const { status, ...rest } = await request.json();
-		const ticketId = params.ticketId;
+		const { status } = await request.json();
+		const payload = {
+			actionedBy: verify.userId,
+			status
+		};
 
-		const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
-			new: true,
-			runValidators: true
-		});
+		const updatedRequest = await Ticket.findByIdAndUpdate(
+			ticketId,
+			payload,
+			{
+				new: true,
+				runValidators: true,
+				context: 'query'
+			}
+		);
 
 		if (!updatedRequest) {
 			return NextResponse.json(
@@ -89,6 +98,7 @@ export async function DELETE(
 				{ status: 401 }
 			);
 		}
+
 		const ticketId = params.ticketId;
 
 		const ticket = await Ticket.findByIdAndDelete(ticketId);

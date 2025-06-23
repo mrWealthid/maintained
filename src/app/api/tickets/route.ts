@@ -23,11 +23,17 @@ export async function GET(request: NextRequest) {
 		let filter = {};
 		if (verify.isAdminRole) {
 			const user = await User.findById(verify.userId);
-			filter = { business: new Types.ObjectId(user.business) };
+			if (!user) {
+				return NextResponse.json(
+					{ error: 'User not found' },
+					{ status: 404 }
+				);
+			}
+			filter = { business: user.business };
 		}
 
 		if (verify.isUserRole) {
-			filter = { user: new Types.ObjectId(verify.userId) };
+			filter = { user: verify.userId };
 		}
 
 		// console.log(isAuthUser);
@@ -62,6 +68,10 @@ export async function GET(request: NextRequest) {
 				{
 					path: 'business',
 					select: 'businessName'
+				},
+				{
+					path: 'actionedBy',
+					select: 'name'
 				}
 			]);
 		const requests = await features.query;
@@ -108,8 +118,14 @@ export async function POST(request: NextRequest, { params }: any) {
 				{ status: 401 }
 			);
 		}
-
 		const user = await User.findById(verify.userId);
+
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'User not found' },
+				{ status: 404 }
+			);
+		}
 		const body = await request.json();
 
 		const data = await Ticket.create({

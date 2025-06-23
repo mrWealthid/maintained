@@ -28,6 +28,13 @@ export async function POST(request: NextRequest) {
 			}
 		]);
 
+		if (!adminUser) {
+			return NextResponse.json(
+				{ error: 'Admin user not found' },
+				{ status: 404 }
+			);
+		}
+
 		const body = await request.json();
 
 		//3) Check if user with email exists
@@ -45,7 +52,7 @@ export async function POST(request: NextRequest) {
 		//create the user but will be assigned a
 
 		const capitalize = (str: string) =>
-			str.replace(/\b\w/g, char => char.toUpperCase());
+			str.replace(/\b\w/g, (char) => char.toUpperCase());
 
 		const user = await new User({
 			email: body.email,
@@ -53,8 +60,8 @@ export async function POST(request: NextRequest) {
 			dateOfBirth: body.dateOfBirth,
 			role: body.role,
 			name: capitalize(body.name),
-			status: INVITE_STATUS.invited,
-			businessName: adminUser.business.businessName
+			status: INVITE_STATUS.invited
+			// businessName: adminUser.business.businessName
 		});
 
 		const inviteToken = user.createUserInviteToken();

@@ -21,6 +21,12 @@ export async function GET(request: NextRequest) {
 
 		if (verify.isAdminRole) {
 			const user = await User.findById(verify.userId);
+			if (!user) {
+				return NextResponse.json(
+					{ error: 'User not found' },
+					{ status: 404 }
+				);
+			}
 			filter = { business: user.business };
 		}
 
