@@ -58,18 +58,22 @@ export const formatDate = (date) => {
 
 export function GetColorObject() {
 	return {
-		[TICKET_STATUS.pending]: '#F7CB73',
-		[TICKET_STATUS.completed]: 'green',
-		[TICKET_STATUS.assigned]: '9AD9EB',
-		[TICKET_STATUS.declined]: 'red'
+		[TICKET_STATUS.pending]: '#F7CB73', // Soft yellow (pending)
+		[TICKET_STATUS.processing]: '#F6C23E', // Stronger yellow/orange (processing)
+		[TICKET_STATUS.completed]: '#38B000', // Green (completed)
+		[TICKET_STATUS.assigned]: '#36A2EB', // Blue (assigned)
+		[TICKET_STATUS.scheduled]: '#6C63FF', // Indigo (scheduled)
+		[TICKET_STATUS.declined]: '#E74C3C'
 	};
 }
 export function getStatusColor(val) {
 	const colorObj = {
-		[TICKET_STATUS.pending]: '#F7CB73',
-		[TICKET_STATUS.completed]: 'green',
-		[TICKET_STATUS.assigned]: '9AD9EB',
-		[TICKET_STATUS.declined]: 'red'
+		[TICKET_STATUS.pending]: '#F7CB73', // Soft yellow (pending)
+		[TICKET_STATUS.processing]: '#F6C23E', // Stronger yellow/orange (processing)
+		[TICKET_STATUS.completed]: '#38B000', // Green (completed)
+		[TICKET_STATUS.assigned]: '#36A2EB', // Blue (assigned)
+		[TICKET_STATUS.scheduled]: '#6C63FF', // Indigo (scheduled)
+		[TICKET_STATUS.declined]: '#E74C3C'
 	};
 
 	return colorObj[val];

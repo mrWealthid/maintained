@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import Business from './businessModel';
 
-export interface IUser extends Document {
+interface IUser extends Document {
 	name: string;
 	email: string;
 	photo?: string;

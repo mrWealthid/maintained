@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-export interface ITicketCategory extends Document {
+ interface ITicketCategory extends Document {
     name: string;
     description?: string;
     createdAt: Date;

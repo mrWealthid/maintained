@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import validator from 'validator';
 
-export interface IBusiness extends Document {
+ interface IBusiness extends Document {
 	businessName: string;
 	registrationId: string;
 	businessContact: string;

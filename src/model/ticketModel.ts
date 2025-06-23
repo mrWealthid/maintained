@@ -4,22 +4,29 @@ import Business from './businessModel';
 import User from './userModel';
 import Category from './ticketCategoryModel';
 
-export interface ITicket extends Document {
+interface ITicket extends Document {
 	title: string;
 	area: string;
 	description: string;
 	category: ObjectId;
-	status: 'PENDING' | 'ASSIGNED' | 'DECLINED' | 'COMPLETED';
+	status:
+		| 'PENDING'
+		| 'PROCESSING'
+		| 'ASSIGNED'
+		| 'DECLINED'
+		| 'COMPLETED'
+		| 'SCHEDULED';
 	videos: string[];
 	images: string[];
 	createdAt: Date;
 	user: ObjectId;
 	business: ObjectId;
+	actionedBy: ObjectId;
 }
 
 const allowedTransitions: Record<string, string[]> = {
 	PENDING: ['PROCESSING', 'DECLINED'],
-	PROCESSING: ['ASSIGNED', 'DECLINED'],
+	PROCESSING: ['ASSIGNED', 'PENDING', 'DECLINED'],
 	ASSIGNED: ['SCHEDULED', 'DECLINED'],
 	SCHEDULED: ['COMPLETED', 'DECLINED'],
 	DECLINED: [],
@@ -63,37 +70,61 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: Business,
 			required: [true, 'Request must belong to a business']
+		},
+		actionedBy: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: User
 		}
 	},
 	{ timestamps: false }
 );
 
-TicketSchema.pre<ITicket>('save', async function (next) {
-	if (!this.isModified('status')) return next();
+// TicketSchema.pre<ITicket>('save', async function (next) {
+// 	if (!this.isModified('status')) return next();
 
-	if (!this.isNew) {
-		const original = await (this.constructor as Model<ITicket>).findById(
-			this._id
+// 	if (!this.isNew) {
+// 		const original = await (this.constructor as Model<ITicket>).findById(
+// 			this._id
+// 		);
+// 		const oldStatus = original?.status;
+// 		const newStatus = this.status;
+
+// 		const allowed =
+// 			allowedTransitions[oldStatus as keyof typeof allowedTransitions] ||
+// 			[];
+
+// 		if (!allowed.includes(newStatus)) {
+// 			return next(
+// 				new Error(
+// 					`Invalid status transition from '${oldStatus}' to '${newStatus}'`
+// 				)
+// 			);
+// 		}
+// 	}
+
+// 	next();
+// });
+
+TicketSchema.pre('findOneAndUpdate', async function (next) {
+	const update = this.getUpdate() as any;
+	if (!update.status) return next();
+
+	const docToUpdate = await this.model.findOne(this.getQuery());
+	const oldStatus = docToUpdate?.status;
+	const newStatus = update.status;
+
+	const allowed =
+		allowedTransitions[oldStatus as keyof typeof allowedTransitions] || [];
+
+	if (!allowed.includes(newStatus)) {
+		return next(
+			new Error(
+				`Invalid status transition from '${oldStatus}' to '${newStatus}'`
+			)
 		);
-		const oldStatus = original?.status;
-		const newStatus = this.status;
-
-		const allowed =
-			allowedTransitions[oldStatus as keyof typeof allowedTransitions] ||
-			[];
-
-		if (!allowed.includes(newStatus)) {
-			return next(
-				new Error(
-					`Invalid status transition from '${oldStatus}' to '${newStatus}'`
-				)
-			);
-		}
 	}
-
 	next();
 });
-
 const Ticket =
 	(mongoose.models.Ticket as Model<ITicket>) ||
 	mongoose.model<ITicket>('Ticket', TicketSchema);

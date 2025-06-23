@@ -41,24 +41,29 @@ export async function PATCH(
 	{ params }: { params: { ticketId: string } }
 ) {
 	try {
+		const ticketId = params.ticketId;
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify.isUserAuthenticated || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const { status, ...rest } = await request.json();
-		const ticketId = params.ticketId;
+		const { status } = await request.json();
+		const payload = {
+			actionedBy: verify.userId,
+			status
+		};
 
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
-			status,
+			payload,
 			{
 				new: true,
-				runValidators: true
+				runValidators: true,
+				context: 'query'
 			}
 		);
 
@@ -93,6 +98,7 @@ export async function DELETE(
 				{ status: 401 }
 			);
 		}
+
 		const ticketId = params.ticketId;
 
 		const ticket = await Ticket.findByIdAndDelete(ticketId);

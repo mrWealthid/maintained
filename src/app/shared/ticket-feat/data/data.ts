@@ -10,8 +10,16 @@ export const tabData = [
 		value: TICKET_STATUS.pending
 	},
 	{
+		label: 'Processing',
+		value: TICKET_STATUS.processing
+	},
+	{
 		label: 'Assigned',
 		value: TICKET_STATUS.assigned
+	},
+	{
+		label: 'Scheduled',
+		value: TICKET_STATUS.scheduled
 	},
 	{
 		label: 'Declined',

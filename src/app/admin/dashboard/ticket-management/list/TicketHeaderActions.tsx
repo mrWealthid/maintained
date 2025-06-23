@@ -55,6 +55,20 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 			<div className=''>
 				<button
 					onClick={() =>
+						handleClick({ status: TICKET_STATUS.processing })
+					}
+					type='button'
+					className={`${
+						query?.status === TICKET_STATUS.processing &&
+						'!bg-primary text-white'
+					} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl  bg-gray-50  dark:glass dark:border-none font-light text-black border btn`}>
+					<FaCircle color={colorObj[TICKET_STATUS.processing]} />
+					Processing
+				</button>
+			</div>
+			<div className=''>
+				<button
+					onClick={() =>
 						handleClick({
 							status: TICKET_STATUS.assigned
 						})
@@ -66,6 +80,20 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 					} w-full flex gap-1 items-center  text-xs px-6 py-2 rounded-3xl  dark:glass dark:border-none bg-gray-50 font-light text-black border btn`}>
 					<FaCircle color={colorObj[TICKET_STATUS.assigned]} />
 					Assigned
+				</button>
+			</div>
+			<div className=''>
+				<button
+					onClick={() =>
+						handleClick({ status: TICKET_STATUS.scheduled })
+					}
+					type='button'
+					className={`${
+						query?.status === TICKET_STATUS.scheduled &&
+						'!bg-primary text-white'
+					} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl  bg-gray-50  dark:glass dark:border-none font-light text-black border btn`}>
+					<FaCircle color={colorObj[TICKET_STATUS.scheduled]} />
+					Processing
 				</button>
 			</div>
 
