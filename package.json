@@ -18,7 +18,7 @@
 		"@tanstack/react-query-next-experimental": "^5.25.0",
 		"@uidotdev/usehooks": "^2.4.1",
 		"axios": "^1.6.7",
-		"bcryptjs": "^2.4.3",
+		"bcryptjs": "^3.0.2",
 		"cloudinary": "^2.0.3",
 		"datauri": "^4.1.0",
 		"date-fns": "^3.3.1",

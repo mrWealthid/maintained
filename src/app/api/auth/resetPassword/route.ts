@@ -28,7 +28,15 @@ export async function POST(request: NextRequest) {
 
 		console.log('User', user);
 
-		// 2 Check if current the password is correct
+		// 2) If token has not expired and there is a user, set the new password
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'Token is invalid or has expired' },
+				{ status: 400 }
+			);
+		}
+
+		// 3 Check if current the password is correct
 		if (!(await user.correctPassword(currentPassword, user.password))) {
 			return NextResponse.json(
 				{ error: 'Your current password is wrong' },
@@ -36,18 +44,10 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		//3 Check if the current password and the new password is the same
+		//4 Check if the current password and the new password is the same
 		if (currentPassword === newPassword) {
 			return NextResponse.json(
 				{ error: "You can't use your old password" },
-				{ status: 400 }
-			);
-		}
-
-		//2) If token has not expired and there is a user, set the new password
-		if (!user) {
-			return NextResponse.json(
-				{ error: 'Token is invalid or has expired' },
 				{ status: 400 }
 			);
 		}

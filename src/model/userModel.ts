@@ -27,6 +27,7 @@ interface IUser extends Document {
 	): Promise<boolean>;
 	createPasswordResetToken(): string;
 	createUserInviteToken(): string;
+	passwordConfirm: string;
 }
 
 const userSchema = new Schema<IUser>({

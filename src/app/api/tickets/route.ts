@@ -23,11 +23,17 @@ export async function GET(request: NextRequest) {
 		let filter = {};
 		if (verify.isAdminRole) {
 			const user = await User.findById(verify.userId);
-			filter = { business: new Types.ObjectId(user.business) };
+			if (!user) {
+				return NextResponse.json(
+					{ error: 'User not found' },
+					{ status: 404 }
+				);
+			}
+			filter = { business: user.business };
 		}
 
 		if (verify.isUserRole) {
-			filter = { user: new Types.ObjectId(verify.userId) };
+			filter = { user: verify.userId };
 		}
 
 		// console.log(isAuthUser);
