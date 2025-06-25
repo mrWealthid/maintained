@@ -7,24 +7,14 @@ import { useProfile } from '@/app/shared/components/profile/hooks/useProfile';
 import { SidebarProps } from './model/sidebar.model';
 import { User } from '../../model/model';
 import useClickOutside from '../../hooks/ClickOutside';
+import { useSidebarContext } from './SidebarContext';
 
-const SideBar: FC<SidebarProps> = ({ routes }) => {
-	const pathname = usePathname();
-	const [isOpen, setIsOpen] = useState(false);
-	const ref = useRef(null);
-
-	function handleClose() {
-		if (!setIsOpen) return;
-		setIsOpen(false);
-	}
-
-	useClickOutside(ref, () => {
-		handleClose();
-	});
-	const { data, isLoading, error } = useProfile<User>();
+const SideBar = ({ children }: { children: React.ReactNode }) => {
+	const { isOpen, setIsOpen, sidebarRef, toggleSidebar } =
+		useSidebarContext();
 
 	return (
-		<section ref={ref} className='flex'>
+		<>
 			{!isOpen && (
 				<button
 					type='button'
@@ -50,13 +40,14 @@ const SideBar: FC<SidebarProps> = ({ routes }) => {
 					!isOpen ? '-translate-x-full' : ''
 				} sm:translate-x-0`}>
 				<div className='flex flex-col  min-h-screen  bg-primary dark:glass text-white py-4'>
-					<p className='flex first-letter:text-blue-700 first-letter:text-xl border-gray-50 p-2 rounded-lg justify-center space-x-4 text-white'>
+					{children}
+					{/* <p className='flex first-letter:text-blue-700 first-letter:text-xl border-gray-50 p-2 rounded-lg justify-center space-x-4 text-white'>
 						{data?.business.businessName}
 					</p>
 					<small className='italic text-center text-xs'>
 						...Maintenance at its best...
-					</small>
-					<section className='flex flex-col  gap-3  mt-10 px-4'>
+					</small> */}
+					{/* <section className='flex flex-col  gap-3  mt-10 px-4'>
 						{routes.map((link) => {
 							const isActive = pathname === link.path;
 
@@ -77,10 +68,10 @@ const SideBar: FC<SidebarProps> = ({ routes }) => {
 								</Link>
 							);
 						})}
-					</section>
+					</section> */}
 				</div>
 			</aside>
-		</section>
+		</>
 	);
 };
 
