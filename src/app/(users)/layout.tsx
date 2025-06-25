@@ -5,6 +5,17 @@ import { routes } from '../shared/routes/routes';
 import Header from '../shared/components/header/Header';
 import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
 import { crumbLabelMap } from '../shared/data/data';
+import {
+	SideBarBody,
+	SideBarFooter,
+	SideBarHeader,
+	SideBarLinks,
+	SidebarProvider
+} from '../shared/components/sidebar/SidebarContext';
+import {
+	LayoutBody,
+	LayoutProvider
+} from '../shared/contexts/LayoutContextProvider';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -20,17 +31,24 @@ export default function DashboardLayout({
 			<header className='dashboard-header fixed top-0 w-full'>
 				<Header />
 			</header>
-			<section>
-				<SideBar routes={routes} />
-			</section>
+			<LayoutProvider>
+				<SidebarProvider>
+					<SideBarHeader />
 
-			<section className='sm:ml-64 flex flex-col dashboard-body gap-6 '>
-				<section className='container-text mt-2'>
-					<Breadcrumbs crumbLabelMap={crumbLabelMap} />
+					<SideBarBody>
+						<SideBarLinks routes={routes}></SideBarLinks>
+					</SideBarBody>
 
-					{isUser}
-				</section>
-			</section>
+					<SideBarFooter />
+				</SidebarProvider>
+
+				<LayoutBody>
+					<section className='container-text lg:ml-4 mt-2'>
+						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
+						{isUser}
+					</section>
+				</LayoutBody>
+			</LayoutProvider>
 		</section>
 	);
 }

@@ -9,12 +9,13 @@ const Logout = () => {
 	const router = useRouter();
 	const { isLoading, loggingOut } = useLogout(router);
 	return (
-		<div
-			className=" flex items-center gap-1 cursor-pointer"
+		<button
+			className='flex items-center gap-1 cursor-pointer'
 			onClick={() => loggingOut()}>
 			<GoSignOut />
-			{isLoading && <PiSpinnerGapLight />}
-		</div>
+			<span>Logout</span>
+			<span>{isLoading && <PiSpinnerGapLight />}</span>
+		</button>
 	);
 };
 
