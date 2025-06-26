@@ -5,8 +5,17 @@ import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { adminRoutes } from '../shared/routes/routes';
 import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
 import { adminCrumbLabelMap } from '../shared/data/data';
-import { LayoutBody, LayoutProvider } from '../shared/contexts/LayoutContextProvider';
-import { SideBarBody, SideBarFooter, SideBarHeader, SideBarLinks, SidebarProvider } from '../shared/components/sidebar/SidebarContext';
+import {
+	LayoutBody,
+	LayoutProvider
+} from '../shared/contexts/LayoutContextProvider';
+import {
+	SideBarBody,
+	SideBarFooter,
+	SideBarHeader,
+	SideBarLinks,
+	SidebarProvider
+} from '../shared/components/sidebar/SidebarContext';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -29,11 +38,8 @@ export default function DashboardLayout({
 						<SideBarLinks routes={adminRoutes}></SideBarLinks>
 					</SideBarBody>
 
-					<SideBarFooter/>
-
+					<SideBarFooter />
 				</SidebarProvider>
-
-
 
 				<LayoutBody>
 					<section className='container-text lg:ml-4 mt-2'>
