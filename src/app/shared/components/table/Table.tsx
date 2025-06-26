@@ -124,6 +124,43 @@ function Table<T>({
 	}
 	const tableRef = useRef(null);
 
+	const CardContent = (
+		<div className='overflow-x-auto card p-2'>
+			<TableHeaderAction handleFilter={handleFilter}>
+				{headerActions}
+			</TableHeaderAction>
+
+			{isLoading && (
+				<section className='flex justify-center items-center'>
+					<Image
+						width={100}
+						height={100}
+						alt='spinner'
+						src='/images/spinner.svg'
+					/>
+				</section>
+			)}
+
+			{!isLoading && !data.length && (
+				<section className='flex justify-center items-center'>
+					<Empty />
+				</section>
+			)}
+
+			{!isLoading && data.length > 0 && (
+				<table ref={tableRef} className='w-full text-sm text-gray-500'>
+					{children}
+				</table>
+			)}
+
+			{data.length > 0 && (
+				<div className='mt-3 text-xs'>
+					<Paginator />
+				</div>
+			)}
+		</div>
+	); // Render it conditionally with/without animation return
+
 	return (
 		<TableContext.Provider
 			value={{
@@ -148,83 +185,10 @@ function Table<T>({
 				search,
 				searchKey
 			}}>
-			{isLoading && (
-				<AnimatedBorderWrapper>
-					<div className=' overflow-x-auto    card p-2'>
-						<TableHeaderAction handleFilter={handleFilter}>
-							{headerActions}
-						</TableHeaderAction>
-						{isLoading && (
-							<section className='flex justify-center items-center'>
-								<Image
-									width={100}
-									height={100}
-									alt='spinner'
-									src='/images/spinner.svg'
-								/>
-
-								{/* <Empty /> */}
-							</section>
-						)}
-
-						{!isLoading && !data.length && (
-							<section className='flex justify-center items-center'>
-								<Empty />
-							</section>
-						)}
-						{!isLoading && data.length > 0 && (
-							<table
-								ref={tableRef}
-								className='w-full   text-sm  text-gray-500 '>
-								{children}
-							</table>
-						)}
-
-						{data.length > 0 && (
-							<div className='mt-3 text-xs'>
-								<Paginator />
-							</div>
-						)}
-					</div>
-				</AnimatedBorderWrapper>
-			)}
-			{!isLoading && (
-				<div className=' overflow-x-auto    card p-2'>
-					<TableHeaderAction handleFilter={handleFilter}>
-						{headerActions}
-					</TableHeaderAction>
-					{isLoading && (
-						<section className='flex justify-center items-center'>
-							<Image
-								width={100}
-								height={100}
-								alt='spinner'
-								src='/images/spinner.svg'
-							/>
-
-							{/* <Empty /> */}
-						</section>
-					)}
-
-					{!isLoading && !data.length && (
-						<section className='flex justify-center items-center'>
-							<Empty />
-						</section>
-					)}
-					{!isLoading && data.length > 0 && (
-						<table
-							ref={tableRef}
-							className='w-full   text-sm  text-gray-500 '>
-							{children}
-						</table>
-					)}
-
-					{data.length > 0 && (
-						<div className='mt-3 text-xs'>
-							<Paginator />
-						</div>
-					)}
-				</div>
+			{isLoading ? (
+				<AnimatedBorderWrapper>{CardContent}</AnimatedBorderWrapper>
+			) : (
+				CardContent
 			)}
 		</TableContext.Provider>
 	);
