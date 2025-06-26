@@ -1,8 +1,4 @@
 import React from 'react';
-import Profile from '../profile/Profile';
-import Link from 'next/link';
-
-import Logout from './Logout';
 import SwitchToggle from '../switch/SwitchToggle';
 
 const Header = async () => {
@@ -11,7 +7,7 @@ const Header = async () => {
 			{/* <Profile /> */}
 			<SwitchToggle />
 			{/* <Link href={'/dashboard/account'}>Account</Link> */}
-			<Logout />
+			{/* <Logout /> */}
 		</div>
 	);
 };

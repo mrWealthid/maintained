@@ -7,14 +7,15 @@ import Link from 'next/link';
 import { HiEye, HiPencil, HiTrash } from 'react-icons/hi2';
 import ConfirmationPage from '../../components/ui/ConfirmationPage';
 import { useDeleteTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
-import { Ticket, TicketCardProps } from '@/app/shared/model/model';
+import { Ticket } from '@/app/shared/model/model';
 import Modal from '../../components/modal/Modal';
 import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 import { TfiMore } from 'react-icons/tfi';
 import { ROLES } from '../../enums/enums';
+import { useLayoutContext } from '../../contexts/LayoutContextProvider';
 // import MiddlewareFeatures from '@/middlewareFeatures';
 
-const TicketCard: FC<TicketCardProps> = ({
+const TicketCard: FC<Ticket> = ({
 	title,
 	description,
 	status,
@@ -22,10 +23,11 @@ const TicketCard: FC<TicketCardProps> = ({
 	createdAt,
 	user,
 	area,
-	category,
-	role
+	category
 }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
+
+	const { data: currentUser } = useLayoutContext();
 	function handleDelete(onCloseModal: () => void) {
 		handleDeleteTicket(id, {
 			onSuccess: () => onCloseModal()
@@ -124,7 +126,8 @@ const TicketCard: FC<TicketCardProps> = ({
 													)}
 												</Menu.Item>
 
-												{role === ROLES.user && (
+												{currentUser?.role ===
+													ROLES.user && (
 													<Menu.Item>
 														{({ active }) => (
 															<Link

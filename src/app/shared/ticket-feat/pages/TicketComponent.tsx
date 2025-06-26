@@ -9,7 +9,7 @@ import FilterTabs from '../../components/tabs/FilterTabs';
 import Search from '../../components/search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
 
-const TicketComponent: FC<{ role: ROLES }> = ({ role }) => {
+const TicketComponent: FC = () => {
 	const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.pending);
 	const [search, setSearch] = useState<string>('');
 
@@ -24,7 +24,7 @@ const TicketComponent: FC<{ role: ROLES }> = ({ role }) => {
 
 	return (
 		<>
-			<div className='flex w-full justify-between flex-wrap items-center'>
+			<div className='flex w-full mb-3 justify-between flex-wrap items-center'>
 				<Search
 					placeHolder='Enter title'
 					handleSearch={(val) => setSearch(val)}
@@ -38,7 +38,7 @@ const TicketComponent: FC<{ role: ROLES }> = ({ role }) => {
 			</div>
 			<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
 				{data?.map((ticket: Ticket) => (
-					<TicketCard role={role} key={ticket._id} {...ticket} />
+					<TicketCard key={ticket._id} {...ticket} />
 				))}
 			</section>
 		</>

@@ -240,7 +240,7 @@ export const SideBarFooter = ({ children }: { children?: React.ReactNode }) => {
 								leave='transition ease-in duration-75'
 								leaveFrom='transform opacity-100 scale-100'
 								leaveTo='transform opacity-0 scale-95'>
-								<Menu.Items className='absolute text-black dark:text-white z-50 origin-top-left left-full top-0  ml-6  w-56  divide-y divide-gray-100 rounded-md glass shadow-lg ring-1 ring-black/5 focus:outline-none'>
+								<Menu.Items className='absolute text-black dark:text-white z-50 origin-top-left left-full top-0  ml-6  w-3/4  divide-y divide-gray-100 rounded-md glass shadow-lg ring-1 ring-black/5 focus:outline-none'>
 									<div className='py-3 px-2'>
 										<Menu.Item>
 											{({ active }) => <Logout />}
