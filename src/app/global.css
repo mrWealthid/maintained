@@ -41,12 +41,13 @@ body {
 
 .dashboard-header {
 	height: var(--dashboard-header-height);
-	z-index: 20;
+	/* z-index: 20; */
 }
 
 .dashboard-body {
 	margin-top: var(--dashboard-header-height);
 	height: calc(100vh - var(--dashboard-header-height));
+	transition: 0.2s ease-in
 }
 
 @layer components {

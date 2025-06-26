@@ -24,7 +24,7 @@ interface SidebarContextType {
 	toggleSidebar: () => void;
 	toggleCollapsible: () => void;
 	sidebarRef: React.RefObject<HTMLElement>;
-	collapsible: boolean;
+	// collapsed: boolean;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -33,15 +33,13 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
 	children
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const [collapsible, setCollapsible] = useState(false);
 	const sidebarRef = useRef<HTMLElement>(null);
 
 	const toggleSidebar = () => setIsOpen((prev) => !prev);
 	const closeSidebar = () => setIsOpen(false);
-	const { width, updateWidth } = useLayoutContext();
+	const { width, updateIsCollapsed, isCollapsed } = useLayoutContext();
 	const toggleCollapsible = () => {
-		setCollapsible((prev) => !prev);
-		collapsible ? updateWidth(256) : updateWidth(65);
+		updateIsCollapsed(!isCollapsed);
 	};
 
 	useClickOutside(sidebarRef, closeSidebar);
@@ -52,7 +50,7 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
 				setIsOpen,
 				toggleSidebar,
 				sidebarRef,
-				collapsible,
+				// collapsed,
 				toggleCollapsible
 			}}>
 			<section ref={sidebarRef} className='flex'>
@@ -60,7 +58,7 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
 					<button
 						type='button'
 						onClick={() => setIsOpen(!isOpen)}
-						className='shadow  z-40 fixed top-2 bg-white dark:glass items-center p-2 w-8 h-8 flex mt-1   ml-3 text-sm text-gray-500 justify-center  rounded-full sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600'>
+						className='shadow  z-50 fixed top-2 bg-white dark:glass items-center p-2 w-8 h-8 flex mt-1   ml-3 text-sm text-gray-500 justify-center  rounded-full sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600'>
 						<span className='sr-only'>Open sidebar</span>
 						<svg
 							className='w-4 h-6'
@@ -133,18 +131,20 @@ export const useSidebarContext = () => {
 };
 
 export const SideBarHeader = ({ children }: { children?: React.ReactNode }) => {
-	const { collapsible, toggleCollapsible, isOpen } = useSidebarContext();
-	const { data: user } = useLayoutContext();
+	const { toggleCollapsible, isOpen } = useSidebarContext();
+	const { data: user, isCollapsed } = useLayoutContext();
 
 	return (
 		<header
-			className={`px-4 flex items-center ${collapsible ? 'justify-center' : 'justify-between'}   pb-2
-     border-b border-white/10`}>
+			className={`px-4 flex items-center border-b border-white/10 pb-2 ${
+				isCollapsed ? 'justify-center' : 'justify-between'
+			}`}>
+			{/* Show custom children if provided */}
 			{children
 				? children
-				: !collapsible && (
-						<div className='flex flex-col '>
-							<p className='flex first-letter:text-blue-700 first-letter:text-xl border-gray-50 p-2 rounded-lg justify-center space-x-4 text-white'>
+				: !isCollapsed && (
+						<div className='flex flex-col'>
+							<p className='flex justify-center text-white p-2 rounded-lg border-gray-50 first-letter:text-blue-700 first-letter:text-xl'>
 								{user?.business?.businessName}
 							</p>
 							<small className='italic text-center text-xs'>
@@ -152,35 +152,38 @@ export const SideBarHeader = ({ children }: { children?: React.ReactNode }) => {
 							</small>
 						</div>
 					)}
-			{!isOpen && (
-				<button
-					onClick={toggleCollapsible}
-					aria-label='Close sidebar'
-					title='Close sidebar'>
-					{!collapsible ? (
-						<LuPanelLeftClose size={22} />
-					) : (
-						<LuPanelRightClose size={22} />
-					)}
-				</button>
-			)}
+
+			{/* Toggle button only if sidebar is closed (mobile?) */}
+
+			<button
+				onClick={toggleCollapsible}
+				aria-label='Toggle sidebar'
+				title='Toggle sidebar'
+				className='hidden md:flex  ml-auto'>
+				{isCollapsed ? (
+					<LuPanelRightClose size={22} />
+				) : (
+					<LuPanelLeftClose size={22} />
+				)}
+			</button>
 		</header>
 	);
 };
 
 export const SideBarBody = ({ children }: { children: React.ReactNode }) => {
-	const { collapsible } = useSidebarContext();
+	const { isCollapsed } = useLayoutContext();
 
 	return (
 		<section
-			className={`flex flex-col flex-1 ${collapsible ? 'items-center' : ''} gap-3  px-4`}>
+			className={`flex flex-col flex-1 ${isCollapsed ? 'items-center' : ''} gap-3  px-4`}>
 			{children}
 		</section>
 	);
 };
 export const SideBarLinks = ({ routes }: { routes: Routes[] }) => {
 	const pathname = usePathname();
-	const { toggleSidebar, collapsible } = useSidebarContext();
+	const { toggleSidebar } = useSidebarContext();
+	const { isCollapsed } = useLayoutContext();
 	return (
 		<nav className='flex flex-col  gap-3  mt-10'>
 			{routes.map((link) => {
@@ -200,7 +203,7 @@ export const SideBarLinks = ({ routes }: { routes: Routes[] }) => {
 							React.createElement(link.icon, {
 								className: 'text-xl w-5 h-5'
 							})}
-						{!collapsible && link.name}
+						{!isCollapsed && link.name}
 					</Link>
 				);
 			})}
@@ -209,10 +212,10 @@ export const SideBarLinks = ({ routes }: { routes: Routes[] }) => {
 };
 
 export const SideBarFooter = ({ children }: { children?: React.ReactNode }) => {
-	const { collapsible } = useSidebarContext();
+	const { isCollapsed } = useLayoutContext();
 	return (
 		<footer
-			className={`${collapsible ? 'px-3' : 'px-1'} pt-2 border-t border-white/10 text-xs text-center text-gray-300`}>
+			className={`${isCollapsed ? 'px-3' : 'px-1'} pt-2 border-t border-white/10 text-xs text-center text-gray-300`}>
 			{!children ? (
 				<Menu
 					as='div'
@@ -224,7 +227,7 @@ export const SideBarFooter = ({ children }: { children?: React.ReactNode }) => {
 
                   ${open ? 'glass ' : ''}
                 `}>
-								<Profile collapsible={collapsible} />
+								<Profile collapsed={isCollapsed} />
 
 								<TfiAngleRight />
 							</Menu.Button>

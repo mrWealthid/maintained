@@ -34,14 +34,12 @@ export default function DashboardLayout({
 			<LayoutProvider>
 				<SidebarProvider>
 					<SideBarHeader />
-
 					<SideBarBody>
 						<SideBarLinks routes={routes}></SideBarLinks>
 					</SideBarBody>
 
 					<SideBarFooter />
 				</SidebarProvider>
-
 				<LayoutBody>
 					<section className='container-text lg:ml-4 mt-2'>
 						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
