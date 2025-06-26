@@ -9,7 +9,7 @@ import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
 import TicketHeaderActions from './TicketHeaderActions';
 import { TicketListFilter } from '@/app/shared/ticket-feat/model/ticket.model';
 
-const RequestsList: FC = () => {
+const TicketList: FC = () => {
 	const columns: Icolumn[] = [
 		{
 			header: 'Title',
@@ -62,4 +62,4 @@ const RequestsList: FC = () => {
 	);
 };
 
-export default RequestsList;
+export default TicketList;

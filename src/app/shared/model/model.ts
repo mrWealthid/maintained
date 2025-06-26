@@ -22,9 +22,9 @@ export interface Ticket {
 	id: string;
 }
 
-export interface TicketCardProps extends Ticket {
-	role: ROLES;
-}
+// export interface TicketCardProps extends Ticket {
+// 	role: ROLES;
+// }
 
 export interface CreateTicketPayload
 	extends Omit<
@@ -91,7 +91,7 @@ export interface User {
 	name: string;
 	email: string;
 	photo?: string;
-	role: ROLES.admin | ROLES.user | ROLES.technician;
+	role: ROLES;
 	business: Pick<Business, 'country' | 'businessName'>;
 	createdAt?: Date;
 	dateOfBirth?: Date;
