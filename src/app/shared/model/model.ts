@@ -142,7 +142,7 @@ export interface ManageUserFormProps {
 export interface ManageUserForm {
 	name: string;
 	email: string;
-	role: ROLES.admin | ROLES.user | ROLES.technician;
+	role: ROLES;
 }
 
 export type CreateUserPayload = Pick<User, 'name' | 'email' | 'role'>;
