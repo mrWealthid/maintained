@@ -159,7 +159,7 @@ export const SideBarHeader = ({ children }: { children?: React.ReactNode }) => {
 				onClick={toggleCollapsible}
 				aria-label='Toggle sidebar'
 				title='Toggle sidebar'
-				className='hidden md:flex  ml-auto'>
+				className='hidden md:flex'>
 				{isCollapsed ? (
 					<LuPanelRightClose size={22} />
 				) : (

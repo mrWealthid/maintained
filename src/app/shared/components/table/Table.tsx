@@ -27,6 +27,8 @@ import Modal from '../modal/Modal';
 import ButtonComponent from '../form-elements/Button';
 import Search from '../search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
+import Empty from '../empty/Empty';
+import AnimatedBorderWrapper from '../animation/AnimatedBorder';
 
 const TableContext = createContext({});
 
@@ -52,7 +54,7 @@ function Table<T>({
 	const {
 		isLoading,
 		error,
-		data,
+		data = [],
 		totalRecords,
 		results,
 		isRefetching
@@ -146,36 +148,84 @@ function Table<T>({
 				search,
 				searchKey
 			}}>
-			<div className=' overflow-x-auto    card p-2'>
-				<TableHeaderAction handleFilter={handleFilter}>
-					{headerActions}
-				</TableHeaderAction>
-				{isLoading && (
-					<section className='flex justify-center items-center'>
-						{' '}
-						<Image
-							width={100}
-							height={100}
-							alt='spinner'
-							src='/images/spinner.svg'
-						/>
-					</section>
-				)}
-				{!isLoading && (
-					<table
-						ref={tableRef}
-						className='w-full   text-sm  text-gray-500 '>
-						{children}
-					</table>
-				)}
+			{isLoading && (
+				<AnimatedBorderWrapper>
+					<div className=' overflow-x-auto    card p-2'>
+						<TableHeaderAction handleFilter={handleFilter}>
+							{headerActions}
+						</TableHeaderAction>
+						{isLoading && (
+							<section className='flex justify-center items-center'>
+								<Image
+									width={100}
+									height={100}
+									alt='spinner'
+									src='/images/spinner.svg'
+								/>
 
-				<div className='mt-3 text-xs'>
-					<Paginator
+								{/* <Empty /> */}
+							</section>
+						)}
 
-					// handlePaginate={handlePaginate}
-					/>
+						{!isLoading && !data.length && (
+							<section className='flex justify-center items-center'>
+								<Empty />
+							</section>
+						)}
+						{!isLoading && data.length > 0 && (
+							<table
+								ref={tableRef}
+								className='w-full   text-sm  text-gray-500 '>
+								{children}
+							</table>
+						)}
+
+						{data.length > 0 && (
+							<div className='mt-3 text-xs'>
+								<Paginator />
+							</div>
+						)}
+					</div>
+				</AnimatedBorderWrapper>
+			)}
+			{!isLoading && (
+				<div className=' overflow-x-auto    card p-2'>
+					<TableHeaderAction handleFilter={handleFilter}>
+						{headerActions}
+					</TableHeaderAction>
+					{isLoading && (
+						<section className='flex justify-center items-center'>
+							<Image
+								width={100}
+								height={100}
+								alt='spinner'
+								src='/images/spinner.svg'
+							/>
+
+							{/* <Empty /> */}
+						</section>
+					)}
+
+					{!isLoading && !data.length && (
+						<section className='flex justify-center items-center'>
+							<Empty />
+						</section>
+					)}
+					{!isLoading && data.length > 0 && (
+						<table
+							ref={tableRef}
+							className='w-full   text-sm  text-gray-500 '>
+							{children}
+						</table>
+					)}
+
+					{data.length > 0 && (
+						<div className='mt-3 text-xs'>
+							<Paginator />
+						</div>
+					)}
 				</div>
-			</div>
+			)}
 		</TableContext.Provider>
 	);
 }
