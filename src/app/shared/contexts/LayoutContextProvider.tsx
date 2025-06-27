@@ -35,8 +35,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 	// 	});
 	// }
 	function updateIsCollapsed(val: boolean) {
-		setIsCollapsed(val); // ✅ just set it
-		setWidth(val ? 65 : 256); // ✅ update width based on value
+		setIsCollapsed(val);
+		setWidth(val ? 65 : 256);
 	}
 
 	return (
@@ -70,7 +70,7 @@ export function LayoutBody({ children }: { children: ReactNode }) {
 	return (
 		<section
 			style={{ marginLeft }}
-			className=' flex  flex-col dashboard-body overflow-x-hidden gap-6'>
+			className=' flex flex-col dashboard-body lg:overflow-x-hidden gap-6'>
 			{children}
 		</section>
 	);
