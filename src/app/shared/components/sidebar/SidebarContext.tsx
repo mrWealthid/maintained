@@ -17,6 +17,7 @@ import Profile from '../profile/Profile';
 import { TfiAngleRight } from 'react-icons/tfi';
 import { LuPanelLeftClose, LuPanelRightClose } from 'react-icons/lu';
 import { useLayoutContext } from '../../contexts/LayoutContextProvider';
+import { SidebarPosition } from './model/sidebar.model';
 
 interface SidebarContextType {
 	isOpen: boolean;
@@ -54,72 +55,58 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
 				toggleCollapsible
 			}}>
 			<section ref={sidebarRef} className='flex'>
-				{!isOpen && (
-					<button
-						type='button'
-						onClick={() => setIsOpen(!isOpen)}
-						className='shadow  z-50 fixed top-2 bg-white dark:glass items-center p-2 w-8 h-8 flex mt-1   ml-3 text-sm text-gray-500 justify-center  rounded-full sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600'>
-						<span className='sr-only'>Open sidebar</span>
-						<svg
-							className='w-4 h-6'
-							aria-hidden='true'
-							fill='currentColor'
-							viewBox='0 0 20 20'
-							xmlns='http://www.w3.org/2000/svg'>
-							<path
-								clipRule='evenodd'
-								fillRule='evenodd'
-								d='M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z'></path>
-						</svg>
-					</button>
-				)}
-
-				<aside
-					style={{
-						width: `${width}px`,
-						transition: 'width 0.3s ease, transform 0.3s ease'
-					}}
-					className={`fixed top-0 left-0 z-30  h-screen transition-transform ${
-						!isOpen ? '-translate-x-full' : ''
-					} sm:translate-x-0`}>
-					<div className='flex flex-col  min-h-screen  bg-primary dark:glass text-white py-4'>
-						{children}
-						{/* <p className='flex first-letter:text-blue-700 first-letter:text-xl border-gray-50 p-2 rounded-lg justify-center space-x-4 text-white'>
-						{data?.business.businessName}
-					</p>
-					<small className='italic text-center text-xs'>
-						...Maintenance at its best...
-					</small> */}
-						{/* <section className='flex flex-col  gap-3  mt-10 px-4'>
-						{routes.map((link) => {
-							const isActive = pathname === link.path;
-
-							return (
-								<Link
-									onClick={handleClose}
-									href={link.path}
-									key={link.name}
-									className={`hover:translate-x-1  rounded-lg text-sm transition-all duration-500 flex items-center gap-2 ${
-										isActive
-											? 'px-3   py-2 border-none  glass  text-white'
-											: ''
-									}`}>
-									{link.icon &&
-										React.createElement(link.icon)}
-
-									{link.name}
-								</Link>
-							);
-						})}
-					</section> */}
-					</div>
-				</aside>
-
-				{/* {children} */}
+				{children}
 			</section>
 		</SidebarContext.Provider>
 	);
 };
+
+export function Sidebar({
+	children,
+	side = SidebarPosition.left
+}: {
+	children: ReactNode;
+	side?: SidebarPosition;
+}) {
+	const { isOpen, setIsOpen, sidebarRef } = useSidebarContext();
+	const { width } = useLayoutContext();
+	return (
+		<>
+			{!isOpen && (
+				<button
+					type='button'
+					onClick={() => setIsOpen(!isOpen)}
+					className='shadow  z-50 fixed top-2 bg-white dark:glass items-center p-2 w-8 h-8 flex mt-1   ml-3 text-sm text-gray-500 justify-center  rounded-full sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600'>
+					<span className='sr-only'>Open sidebar</span>
+					<svg
+						className='w-4 h-6'
+						aria-hidden='true'
+						fill='currentColor'
+						viewBox='0 0 20 20'
+						xmlns='http://www.w3.org/2000/svg'>
+						<path
+							clipRule='evenodd'
+							fillRule='evenodd'
+							d='M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z'></path>
+					</svg>
+				</button>
+			)}
+
+			<aside
+				style={{
+					width: `${width}px`,
+					transition: 'width 0.3s ease, transform 0.3s ease'
+				}}
+				className={`fixed top-0  ${side === 'right' ? 'right-0' : 'left-0'} z-30  h-screen transition-transform ${
+					!isOpen ? '-translate-x-full' : ''
+				} sm:translate-x-0`}>
+				<div className='flex flex-col  min-h-screen  bg-primary dark:glass text-white py-4'>
+					{children}
+				</div>
+			</aside>
+		</>
+	);
+}
 
 export const useSidebarContext = () => {
 	const context = useContext(SidebarContext);

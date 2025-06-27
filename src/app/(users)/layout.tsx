@@ -1,11 +1,11 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
-import SideBar from '../shared/components/sidebar/SideBarComponent';
 import { redirect } from 'next/navigation';
 import { routes } from '../shared/routes/routes';
 import Header from '../shared/components/header/Header';
 import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
 import { crumbLabelMap } from '../shared/data/data';
 import {
+	Sidebar,
 	SideBarBody,
 	SideBarFooter,
 	SideBarHeader,
@@ -28,20 +28,22 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='dashboard-header fixed top-0 w-full'>
+			<header className='fixed  top-0 w-full'>
 				<Header />
 			</header>
 			<LayoutProvider>
 				<SidebarProvider>
-					<SideBarHeader />
-					<SideBarBody>
-						<SideBarLinks routes={routes}></SideBarLinks>
-					</SideBarBody>
-
-					<SideBarFooter />
+					<Sidebar>
+						<SideBarHeader />
+						<SideBarBody>
+							<SideBarLinks routes={routes}></SideBarLinks>
+						</SideBarBody>
+						<SideBarFooter />
+					</Sidebar>
 				</SidebarProvider>
+
 				<LayoutBody>
-					<section className='container-text lg:ml-4 mt-2'>
+					<section className='container-text  lg:ml-4 mt-8'>
 						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
 						{isUser}
 					</section>
