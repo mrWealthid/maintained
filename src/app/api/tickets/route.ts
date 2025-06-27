@@ -6,6 +6,7 @@ import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { Types } from 'mongoose';
 import User from '@/model/userModel';
+import { TicketActivity } from '@/model/ticketActivity';
 
 connect();
 
@@ -128,10 +129,24 @@ export async function POST(request: NextRequest, { params }: any) {
 		}
 		const body = await request.json();
 
+		//create Ticket
 		const data = await Ticket.create({
 			...body,
 			user: verify.userId,
 			business: user.business
+		});
+
+		//Log Ticket Activity
+		await TicketActivity.create({
+			ticket: data._id,
+			action: 'created',
+			description: `Ticket created with title: "${data.title}"`,
+			changedBy: user.id,
+			metadata: {
+				field: 'assignedTo',
+				previous: null,
+				current: user.id
+			}
 		});
 
 		const response = NextResponse.json(
