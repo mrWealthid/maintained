@@ -10,6 +10,7 @@ import {
 	LayoutProvider
 } from '../shared/contexts/LayoutContextProvider';
 import {
+	Sidebar,
 	SideBarBody,
 	SideBarFooter,
 	SideBarHeader,
@@ -27,18 +28,20 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='dashboard-header fixed top-0 w-full'>
+			<header className=' fixed top-0 w-full'>
 				<Header />
 			</header>
 			<LayoutProvider>
 				<SidebarProvider>
-					<SideBarHeader />
+					<Sidebar>
+						<SideBarHeader />
 
-					<SideBarBody>
-						<SideBarLinks routes={adminRoutes}></SideBarLinks>
-					</SideBarBody>
+						<SideBarBody>
+							<SideBarLinks routes={adminRoutes}></SideBarLinks>
+						</SideBarBody>
 
-					<SideBarFooter />
+						<SideBarFooter />
+					</Sidebar>
 				</SidebarProvider>
 
 				<LayoutBody>

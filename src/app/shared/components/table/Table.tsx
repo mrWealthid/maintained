@@ -130,7 +130,7 @@ function Table<T>({
 				{headerActions}
 			</TableHeaderAction>
 
-			{isLoading && (
+			{/* {isLoading && (
 				<section className='flex justify-center items-center'>
 					<Image
 						width={100}
@@ -139,7 +139,7 @@ function Table<T>({
 						src='/images/spinner.svg'
 					/>
 				</section>
-			)}
+			)} */}
 
 			{!isLoading && !data.length && (
 				<section className='flex justify-center items-center'>
@@ -185,11 +185,9 @@ function Table<T>({
 				search,
 				searchKey
 			}}>
-			{isLoading ? (
-				<AnimatedBorderWrapper>{CardContent}</AnimatedBorderWrapper>
-			) : (
-				CardContent
-			)}
+			<AnimatedBorderWrapper loading={isLoading}>
+				{CardContent}
+			</AnimatedBorderWrapper>
 		</TableContext.Provider>
 	);
 }

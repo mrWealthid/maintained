@@ -8,6 +8,9 @@ import { tabData } from '../data/data';
 import FilterTabs from '../../components/tabs/FilterTabs';
 import Search from '../../components/search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
+import Empty from '../../components/empty/Empty';
+import AnimatedBorderWrapper from '../../components/animation/AnimatedBorder';
+import TicketCardLoader from '../loaders/TicketCardLoader';
 
 const TicketComponent: FC = () => {
 	const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.pending);
@@ -23,7 +26,7 @@ const TicketComponent: FC = () => {
 	}
 
 	return (
-		<>
+		<section>
 			<div className='flex w-full mb-3 justify-between flex-wrap items-center'>
 				<Search
 					placeHolder='Enter title'
@@ -36,12 +39,26 @@ const TicketComponent: FC = () => {
 					data={tabData}
 				/>
 			</div>
-			<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
-				{data?.map((ticket: Ticket) => (
-					<TicketCard key={ticket._id} {...ticket} />
-				))}
-			</section>
-		</>
+
+			{isLoading && (
+				<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
+					{Array.from({ length: 9 }).map((_, i) => (
+						<AnimatedBorderWrapper key={i} loading={isLoading}>
+							<TicketCardLoader key={i} />
+						</AnimatedBorderWrapper>
+					))}
+				</section>
+			)}
+
+			{data && data?.length > 0 && (
+				<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
+					{data?.map((ticket: Ticket) => (
+						<TicketCard key={ticket._id} {...ticket} />
+					))}
+				</section>
+			)}
+			{data?.length === 0 && !isLoading && <Empty />}
+		</section>
 	);
 };
 
