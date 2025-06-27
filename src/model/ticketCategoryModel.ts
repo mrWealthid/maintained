@@ -5,7 +5,8 @@ interface ITicketCategory extends Document {
 	name: string;
 	description?: string;
 	createdAt: Date;
-	business: mongoose.Types.ObjectId;
+	business?: mongoose.Types.ObjectId;
+	isDefault?: boolean;
 }
 
 const ticketCategorySchema = new Schema<ITicketCategory>({
@@ -20,7 +21,12 @@ const ticketCategorySchema = new Schema<ITicketCategory>({
 	business: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: Business,
-		required: [true, 'User must belong to a business']
+		required: false
+		// required: [true, 'User must belong to a business']
+	},
+	isDefault: {
+		type: Boolean,
+		default: false
 	}
 });
 

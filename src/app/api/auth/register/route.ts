@@ -4,6 +4,7 @@ import Business from '@/model/businessModel';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { ROLES } from '@/app/shared/enums/enums';
+import TicketCategory from '@/model/ticketCategoryModel';
 
 connect();
 
@@ -67,8 +68,21 @@ export async function POST(request: Request) {
 				{ status: 404 }
 			);
 		}
-		// Create User
 
+		//create default categories
+		const defaultCategories = await TicketCategory.find({
+			isDefault: true
+		});
+
+		const cloned = defaultCategories.map((cat) => ({
+			name: cat.name,
+			description: cat.description,
+			business: business._id
+		}));
+
+		await TicketCategory.insertMany(cloned);
+
+		// Create User
 		const newUser = await User.create({
 			name: req.name,
 			email: req.email,
