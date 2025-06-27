@@ -1,5 +1,7 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
+import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
+import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
 // export async function GET(
@@ -52,11 +54,30 @@ export async function PATCH(
 		}
 
 		const { status } = await request.json();
+
+		const user = await User.findById(verify.userId);
+
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'User not found' },
+				{ status: 404 }
+			);
+		}
+
 		const payload = {
 			actionedBy: verify.userId,
 			status
 		};
 
+		// 1. Get current (pre-update) ticket — for comparison/logging
+		const previous = await Ticket.findById(ticketId);
+
+		if (!previous) {
+			return NextResponse.json(
+				{ error: 'No ticket found with id' },
+				{ status: 404 }
+			);
+		}
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			payload,
@@ -67,12 +88,19 @@ export async function PATCH(
 			}
 		);
 
-		if (!updatedRequest) {
-			return NextResponse.json(
-				{ error: 'No ticket found with id' },
-				{ status: 404 }
-			);
-		}
+		//Log Ticket Activity --if it's an admin
+		await TicketActivity.create({
+			ticket: ticketId,
+			action: 'status-changed',
+			description: `Assigned to ${user.name}`,
+			changedBy: user._id,
+			metadata: {
+				field: 'status',
+				previous: previous.status,
+				current: updatedRequest?.status
+			}
+		});
+
 		const response = NextResponse.json({
 			message: 'Ticket Updated Successfully',
 			success: true,
