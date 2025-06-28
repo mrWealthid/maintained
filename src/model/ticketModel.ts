@@ -22,6 +22,7 @@ interface ITicket extends Document {
 	user: ObjectId;
 	business: ObjectId;
 	actionedBy: ObjectId;
+	relatedTo?: ObjectId;
 }
 
 const allowedTransitions: Record<string, string[]> = {
@@ -74,6 +75,10 @@ const TicketSchema = new Schema<ITicket>(
 		actionedBy: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
+		},
+		relatedTo: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: this
 		}
 	},
 	{ timestamps: false }
