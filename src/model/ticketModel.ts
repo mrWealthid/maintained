@@ -76,10 +76,10 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
 		},
-		relatedTo: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: this
-		}
+		// relatedTo: {
+		// 	type: mongoose.Schema.Types.ObjectId,
+		// 	ref: this
+		// }
 	},
 	{ timestamps: false }
 );
