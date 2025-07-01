@@ -1,6 +1,7 @@
 import { toast } from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+	assignTicket,
 	createTicket,
 	deleteTicket,
 	fetchTickets
@@ -10,7 +11,7 @@ import {
 	TicketListFilter,
 	TicketStatus
 } from '../model/ticket.model';
-import { CreateTicketPayload } from '../../model/model';
+import { CreateTicketPayload, Ticket } from '../../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
 import { IListResponse } from '../../components/table/models/table.model';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
@@ -67,4 +68,20 @@ export function useDeleteTicket() {
 	});
 
 	return { isDeleting, handleDeleteTicket };
+}
+export function useAssignTicket(id: string) {
+	const queryClient = useQueryClient();
+	const { isPending: isUpdating, mutate: handleAssignTicket } = useMutation({
+		mutationFn: (payload: Pick<Ticket, 'status'>) =>
+			assignTicket(id, payload),
+		onSuccess: () => {
+			toast.success('Ticket successfully assigned');
+			queryClient.invalidateQueries({
+				queryKey: ['tickets']
+			});
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isUpdating, handleAssignTicket };
 }

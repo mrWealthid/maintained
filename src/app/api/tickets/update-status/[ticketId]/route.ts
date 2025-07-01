@@ -78,6 +78,7 @@ export async function PATCH(
 				{ status: 404 }
 			);
 		}
+		
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			payload,

@@ -54,10 +54,10 @@ const Window = ({ name, children, title, description }: WindowProps) => {
 					openName === name
 						? 'visible scale-100 opacity-100'
 						: 'invisible scale-50  opacity-0'
-				} overflow-y-auto w-full backdrop overflow-x-hidden  fixed bg-gray-900 top-0  bg-opacity-80 left-0 z-50 md:inset-0 h-modal h-full justify-center items-center flex transition-all ease-in-out duration-1500`}
+				} overflow-y-auto w-full backdrop overflow-x-hidden   fixed bg-gray-800  top-0  bg-opacity-70 left-0 z-50 md:inset-0 h-modal h-full justify-center items-center flex transition-all ease-in-out duration-1500`}
 				id='popup-modal'>
-				<div ref={modalRef} className={`${size} relative p-6 h-auto`}>
-					<div className='card flex flex-col gap-6 skin rounded-2xl shadow p-6'>
+				<div ref={modalRef} className={`${size} relative  p-6 h-auto`}>
+					<div className='card flex flex-col gap-6 border rounded-2xl shadow p-6'>
 						<div className='flex justify-between'>
 							<section className='flex flex-col gap-1'>
 								<h3>{title}</h3>
@@ -68,7 +68,7 @@ const Window = ({ name, children, title, description }: WindowProps) => {
 
 							<div>
 								<button
-									className=' bg-primary text-white z-50 hover:bg-primary hover:text-white rounded-lg text-sm p-1.5 dark:hover:bg-primary dark:hover:text-white'
+									className=' z-50  hover:text-white rounded-lg text-sm p-1.5  '
 									data-modal-toggle='popup-modal'
 									type='button'>
 									<svg

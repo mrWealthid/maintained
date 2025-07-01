@@ -96,7 +96,7 @@ const TicketCard: FC<Ticket> = ({
 										<Menu.Button
 											className={`inline-flex  w-full justify-center rounded-full border p-3 text-sm font-medium
 
-		  ${open ? 'ring-1 ring-primary ring-offset-1  ' : ''}
+		  ${open ? 'ring-1 ring-button-primary ring-offset-1  ' : ''}
 		`}>
 											<TfiMore />
 										</Menu.Button>

@@ -4,16 +4,29 @@ import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 
 import { HiEye, HiTrash } from 'react-icons/hi2';
-import { CgMenuGridO } from 'react-icons/cg';
 import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
-import { useDeleteTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
+import {
+	useAssignTicket,
+	useDeleteTicket
+} from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import Modal from '@/app/shared/components/modal/Modal';
 import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { MdOutlineAssignmentInd } from 'react-icons/md';
+import { TfiMore } from 'react-icons/tfi';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
+	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
+
 	function handleDelete(onCloseModal: () => void) {
 		handleDeleteTicket(ticket._id, {
+			onSuccess: () => onCloseModal()
+		});
+	}
+	function handleAssign(onCloseModal: () => void) {
+		const payload = { status: TICKET_STATUS.processing };
+		handleAssignTicket(payload, {
 			onSuccess: () => onCloseModal()
 		});
 	}
@@ -26,11 +39,11 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						<>
 							<div>
 								<Menu.Button
-									className={`inline-flex  w-full justify-center rounded-full border p-3 text-sm font-medium
+									className={`inline-flex  w-full justify-center  rounded-full border p-3 text-sm font-medium
 
-          ${open ? 'ring-1 ring-primary ring-offset-1  ' : ''}
-        `}>
-									<CgMenuGridO />
+										  ${open ? 'ring-1 ring-button-primary ring-offset-1  ' : ''}
+										`}>
+									<TfiMore />
 								</Menu.Button>
 							</div>
 							<Transition
@@ -57,6 +70,20 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 												</Link>
 											)}
 										</Menu.Item>
+
+										{ticket.status ===
+											TICKET_STATUS.pending && (
+											<Menu.Item>
+												{({ active }) => (
+													<Modal.Open opens='self-assign'>
+														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
+															<MdOutlineAssignmentInd color='#1849aa' />
+															Assign to me
+														</button>
+													</Modal.Open>
+												)}
+											</Menu.Item>
+										)}
 
 										<Menu.Item>
 											{({ active }) => (
@@ -91,6 +118,21 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						modalText={
 							'Are you sure you want to delete this ticket'
 						}
+					/>
+				</Modal.Window>
+				<Modal.Window
+					name='self-assign'
+					title='Assign Ticket'
+					description='Request ticket will be assigned to you'>
+					<ConfirmationPage
+						handler={(onCloseModal) => {
+							handleAssign(onCloseModal ?? (() => {}));
+						}}
+						isLoading={isUpdating}
+						modalText={
+							'Are you sure you want to assign this ticket'
+						}
+						reason='confirm'
 					/>
 				</Modal.Window>
 			</Modal>

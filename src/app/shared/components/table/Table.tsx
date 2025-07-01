@@ -648,7 +648,7 @@ function Paginator() {
 					<span>{totalRecords}</span> results
 				</p>
 				<hr />
-				<div>
+				<div className='font-semibold'>
 					Total: {totalRecords} | Size: {limit} | Page: {page}
 				</div>
 			</section>
@@ -671,7 +671,7 @@ function Paginator() {
 							id='sort'
 							name='sort'
 							title='sortdropdown'
-							className='text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded'>
+							className='text-xs font-light bg-card p-1  focus-within:ring-0 focus-within:border-none border border-gray-300  rounded'>
 							<option value={5}>5</option>
 							<option value={10}>10</option>
 							<option value={15}>15</option>
@@ -687,7 +687,7 @@ function Paginator() {
 							<a
 								className={`${
 									page === 1 && 'cursor-not-allowed'
-								} flex items-center justify-center px-4 h-10 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:glass dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
+								} flex items-center justify-center px-4 h-10 ml-0 leading-tight   border border-gray-300 rounded-l-lg   `}>
 								<span className='sr-only'>Previous</span>
 								<svg
 									className='w-3 h-3'
@@ -715,10 +715,8 @@ function Paginator() {
 									key={val}>
 									<a
 										className={`${
-											val === page
-												? '!bg-primary  text-white'
-												: 'bg-white hover:bg-gray-100 dark:hover:text-primary'
-										} flex items-center  dark:glass dark:border-none   rounded-3xl justify-center px-4 h-10 leading-tight text-primary dark:text-white cursor-pointer  border border-gray-300 `}>
+											val === page ? '!bg-primary  ' : ''
+										} flex items-center      rounded-3xl justify-center px-4 h-10 leading-tight   cursor-pointer  border border-gray-300 `}>
 										{val}
 									</a>
 								</li>
@@ -734,7 +732,7 @@ function Paginator() {
 									maxNumPage <= page
 										? 'cursor-not-allowed'
 										: ''
-								} flex items-center  justify-center px-4 h-10 leading-tight text-gray-500 bg-white dark:glass border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700  dark:border-none dark:text-white dark:hover:bg-gray-700 dark:hover:text-white`}>
+								} flex items-center  justify-center px-4 h-10 leading-tight   border border-gray-300 rounded-r-lg hover:text-gray-700  dark:border-none  `}>
 								<span className='sr-only'>Next</span>
 								<svg
 									className='w-3 h-3'

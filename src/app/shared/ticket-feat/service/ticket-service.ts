@@ -3,7 +3,8 @@ import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import {
 	ApiPaginatedResponse,
 	ApiResponse,
-	CreateTicketPayload
+	CreateTicketPayload,
+	Ticket
 } from '../../model/model';
 import { API_ROUTES } from '../../routes/apiRoutes';
 import { ListQueryParams, TicketListFilter } from '../model/ticket.model';
@@ -121,5 +122,25 @@ export async function deleteTicket(id: string) {
 			);
 		}
 		throw new Error(`Ticket could not be deleted`);
+	}
+}
+export async function assignTicket(
+	id: string,
+	payload: Pick<Ticket, 'status'>
+) {
+	try {
+		const res = await axios.patch(
+			`${API_ROUTES.ticketManagement.update_status(id)}`,
+			payload
+		);
+		const data = await res.data;
+		return data;
+	} catch (err: unknown) {
+		if (axios.isAxiosError(err) && err.response) {
+			throw new Error(
+				`Ticket could not be updated Status: ${err.response.status}`
+			);
+		}
+		throw new Error(`Ticket could not be updated`);
 	}
 }
