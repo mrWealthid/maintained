@@ -33,8 +33,8 @@ const ResetPasswordComponent = () => {
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
-					<p className='text-center text-primary dark:text-label-color font-bold text-2xl'>
+				<section className='border bg-card w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
+					<p className='text-center  font-bold text-2xl'>
 						Reset Password
 					</p>
 
@@ -71,7 +71,7 @@ const ResetPasswordComponent = () => {
 								disabled={!isValid || isLoading}
 							/>
 
-							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
+							<p className='flex gap-3 text-sm'>
 								Need An Account ?
 								<Link
 									href={'/auth/signup'}

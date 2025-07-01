@@ -26,9 +26,9 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						<>
 							<div>
 								<Menu.Button
-									className={`inline-flex card w-full justify-center rounded-full border p-3 text-sm font-medium text-primary dark:text-white
+									className={`inline-flex  w-full justify-center rounded-full border p-3 text-sm font-medium
 
-          ${open ? 'ring-1 ring-primary ring-offset-1 bg-gray-50 ' : ''}
+          ${open ? 'ring-1 ring-primary ring-offset-1  ' : ''}
         `}>
 									<CgMenuGridO />
 								</Menu.Button>
@@ -41,13 +41,13 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 								leave='transition ease-in duration-75'
 								leaveFrom='transform opacity-100 scale-100'
 								leaveTo='transform opacity-0 scale-95'>
-								<Menu.Items className='absolute text-black z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none'>
+								<Menu.Items className='absolute bg-card border  z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black/5 focus:outline-none'>
 									<div className='px-1 py-1'>
 										<Menu.Item>
 											{({ active }) => (
 												<Link
 													href={`bookings/${ticket.id}`}
-													className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+													className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
 													{active ? (
 														<HiEye />
 													) : (
@@ -61,7 +61,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 										<Menu.Item>
 											{({ active }) => (
 												<Modal.Open opens='delete-ticket'>
-													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
 														{active ? (
 															<HiTrash color='red' />
 														) : (

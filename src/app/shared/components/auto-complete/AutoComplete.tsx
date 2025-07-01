@@ -73,7 +73,7 @@ export default function AutoComplete<T>({
 					<div className=''>
 						<Combobox.Input
 							id={queryKey}
-							className='w-full dark:border-none input-style  py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0'
+							className='w-full  input-style  py-2 pl-3 pr-10 text-sm leading-5 '
 							displayValue={(result: T) =>
 								result ? (result[displayValue] as string) : ''
 							}
@@ -81,10 +81,10 @@ export default function AutoComplete<T>({
 						/>
 						<Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
 							{isRefetching ? (
-								<ImSpinner9 className='h-3 w-3 animate-spin text-primary' />
+								<ImSpinner9 className='h-3 w-3 animate-spin' />
 							) : (
 								<SelectorIcon
-									className='h-5 w-5 text-gray-400'
+									className='h-5 w-5 '
 									aria-hidden='true'
 								/>
 							)}
@@ -96,9 +96,9 @@ export default function AutoComplete<T>({
 						leaveFrom='opacity-100'
 						leaveTo='opacity-0'
 						afterLeave={() => setQuery('')}>
-						<Combobox.Options className='absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
+						<Combobox.Options className='absolute bg-card z-50 mt-1 max-h-60 w-full overflow-auto rounded-md  py-1  shadow-lg ring-1   focus:outline-none sm:text-sm'>
 							{options?.length === 0 && query !== '' ? (
-								<div className='relative cursor-default select-none py-2 px-4 text-gray-700'>
+								<div className='relative cursor-default select-none py-2 px-4'>
 									Nothing found.
 								</div>
 							) : (
@@ -113,9 +113,7 @@ export default function AutoComplete<T>({
 											active: boolean;
 										}) =>
 											`relative z-50 cursor-pointer select-none py-2 pl-10 pr-4 ${
-												active
-													? 'bg-primary text-white'
-													: 'text-gray-900'
+												active ? 'bg-secondary' : ''
 											}`
 										}
 										value={result}>
@@ -157,10 +155,10 @@ export default function AutoComplete<T>({
 
 												{selected ? (
 													<span
-														className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+														className={`absolute inset-y-0 left-0  text-green-700 flex items-center pl-3 ${
 															active
-																? 'text-white'
-																: 'text-teal-600'
+																? 'bg-secondary '
+																: ''
 														}`}>
 														<CheckIcon
 															className='h-5 w-5'

@@ -24,9 +24,9 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 
 	function renderStyle(tab: { label: string; value: TICKET_STATUS }) {
 		if (tab.value === TICKET_STATUS.all && !query) {
-			return `!bg-primary text-white`;
+			return `bg-background`;
 		} else if (query?.status === tab.value) {
-			return `!bg-primary text-white`;
+			return `bg-background`;
 		}
 	}
 
@@ -45,7 +45,7 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 						type='button'
 						className={`${renderStyle(
 							tab
-						)} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl  bg-gray-50  dark:glass dark:border-none font-light text-black border btn`}>
+						)} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl   font-light  border btn`}>
 						<FaCircle
 							size={10}
 							color={getStatusColor([tab.value])}
@@ -54,7 +54,6 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 					</button>
 				</div>
 			))}
-
 
 			{/*
 			<select

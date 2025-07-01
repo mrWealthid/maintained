@@ -9,7 +9,7 @@ function RequestRow({ data }: TicketRowProps) {
 				return (
 					<tr
 						key={i}
-						className=' dark:border-none dark:text-white text-secondary relative border-b  '>
+						className=' dark:border-none  relative border-b  '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"

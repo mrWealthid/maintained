@@ -62,7 +62,7 @@ const FooterComponent = () => {
 				</form>
 			</section>
 
-			<section className='pb-0 bg-primary-300  container-text text-secondary md:pb-10'>
+			<section className='pb-0 bg-primary-300  container-text  md:pb-10'>
 				<div className='pt-8 md:pt-16 flex-wrap flex flex-col md:flex-row justify-between'>
 					<div className='md:mt-2 mt-0'>
 						<p className='mb-0 text-sm md:text-lg md:mb-20 font-medium'>

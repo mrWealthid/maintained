@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { User } from '../../model/model';
 
-function Profile({ collapsed }: { collapsed: boolean }) {
+function Profile() {
 	const { data, isLoading, error } = useProfile<User>();
 	const router = useRouter();
 
@@ -20,7 +20,7 @@ function Profile({ collapsed }: { collapsed: boolean }) {
 				src={'/images/default.jpg'}
 			/>
 
-			{!collapsed && <span className='capitalize'>{data?.name}</span>}
+			{<span className='capitalize'>{data?.name}</span>}
 		</div>
 	);
 }

@@ -148,7 +148,7 @@ function Table<T>({
 			)}
 
 			{!isLoading && data.length > 0 && (
-				<table ref={tableRef} className='w-full text-sm text-gray-500'>
+				<table ref={tableRef} className='w-full text-sm'>
 					{children}
 				</table>
 			)}
@@ -354,7 +354,7 @@ function TableFilter() {
 							filterIsActive
 								? 'ring-1  ring-offset-2 text-success  ring-success'
 								: ''
-						} w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl  bg-gray-50 font-light text-black border btn`}>
+						} w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl   font-light  border btn`}>
 						{filterIsActive ? (
 							<FcFilledFilter size={15} color='green' />
 						) : (
@@ -378,7 +378,7 @@ function TableFilter() {
 function TableHeader() {
 	const { columns, actionable }: any = useContext(TableContext);
 	return (
-		<thead className='text-xs text-left wheat-light bg-primary   text-white w-full uppercase'>
+		<thead className='text-xs text-left     w-full uppercase'>
 			<tr>
 				{/* <th className="px-2 py-4 uppercase">
 					<input
@@ -489,7 +489,7 @@ function TableRow({ children, customRow }: any) {
 						return (
 							<tr
 								key={i}
-								className='text-left dark:border-none dark:text-white text-secondary px-2 py-1 relative border-b  '>
+								className='text-left dark:border-none  px-2 py-1 relative border-b  '>
 								{/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"

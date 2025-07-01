@@ -12,7 +12,7 @@ import Modal from '../../components/modal/Modal';
 import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 import { TfiMore } from 'react-icons/tfi';
 import { ROLES } from '../../enums/enums';
-import { useLayoutContext } from '../../contexts/LayoutContextProvider';
+// import { useLayoutContext } from '../../contexts/LayoutContextProvider';
 // import MiddlewareFeatures from '@/middlewareFeatures';
 
 const TicketCard: FC<Ticket> = ({
@@ -27,7 +27,7 @@ const TicketCard: FC<Ticket> = ({
 }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
 
-	const { data: currentUser } = useLayoutContext();
+	// const { data: currentUser } = useLayoutContext();
 	function handleDelete(onCloseModal: () => void) {
 		handleDeleteTicket(id, {
 			onSuccess: () => onCloseModal()
@@ -61,10 +61,10 @@ const TicketCard: FC<Ticket> = ({
 			<div className='group'>
 				<h3
 					title={title}
-					className='mt-3 text-lg font-semibold title leading-6  dark:text-gray-400 text-primary dark:group-hover:text-white group-hover:text-gray-600'>
+					className='mt-3 text-lg font-semibold title leading-6   dark:group-hover:text-white '>
 					{title}
 				</h3>
-				<p className='mt-5 line-clamp-3 description text-sm leading-6 text-gray-600  dark:text-gray-400'>
+				<p className='mt-5 line-clamp-3 description text-sm leading-6 '>
 					{description}
 				</p>
 			</div>
@@ -89,14 +89,14 @@ const TicketCard: FC<Ticket> = ({
 					<Modal>
 						<Menu
 							as='div'
-							className='relative inline-block text-left'>
+							className='relative  inline-block text-left'>
 							{({ open }) => (
 								<>
 									<div>
 										<Menu.Button
-											className={`inline-flex card w-full justify-center rounded-full border p-3 text-sm font-medium text-primary dark:text-white
+											className={`inline-flex  w-full justify-center rounded-full border p-3 text-sm font-medium
 
-		  ${open ? 'ring-1 ring-primary ring-offset-1 bg-gray-50 ' : ''}
+		  ${open ? 'ring-1 ring-primary ring-offset-1  ' : ''}
 		`}>
 											<TfiMore />
 										</Menu.Button>
@@ -109,13 +109,13 @@ const TicketCard: FC<Ticket> = ({
 										leave='transition ease-in duration-75'
 										leaveFrom='transform opacity-100 scale-100'
 										leaveTo='transform opacity-0 scale-95'>
-										<Menu.Items className='absolute text-black z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none'>
+										<Menu.Items className='absolute  bg-card border z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md  shadow-lg ring-1 ring-black/5 focus:outline-none'>
 											<div className='px-1 py-1'>
 												<Menu.Item>
 													{({ active }) => (
 														<Link
 															href={`bookings/`}
-															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+															className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
 															{active ? (
 																<HiEye />
 															) : (
@@ -126,8 +126,7 @@ const TicketCard: FC<Ticket> = ({
 													)}
 												</Menu.Item>
 
-												{currentUser?.role ===
-													ROLES.user && (
+												{'USER' === ROLES.user && (
 													<Menu.Item>
 														{({ active }) => (
 															<Link
@@ -135,7 +134,7 @@ const TicketCard: FC<Ticket> = ({
 																${ROUTES_DEFINITION.DASHBOARD.MANAGE_TICKET}/
 																${id}
 															`}
-																className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+																className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary    items-center rounded-md px-2 py-2 text-sm'>
 																{active ? (
 																	<HiPencil color='green' />
 																) : (
@@ -150,7 +149,7 @@ const TicketCard: FC<Ticket> = ({
 												<Menu.Item>
 													{({ active }) => (
 														<Modal.Open opens='delete-ticket'>
-															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-gray-100   items-center rounded-md px-2 py-2 text-sm'>
+															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
 																{active ? (
 																	<HiTrash color='red' />
 																) : (

@@ -38,8 +38,8 @@ const LoginComponent = () => {
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3  p-10 flex gap-4 flex-col items-center justify-center'>
-					<p className='text-center text-primary dark:text-label-color font-bold text-2xl'>
+				<section className='border bg-card w-5/6 md:w-4/6 lg:w-1/3  p-10 flex gap-4 flex-col items-center justify-center'>
+					<p className='text-center font-bold text-2xl'>
 						Sign In to Get Started
 					</p>
 					{/*
@@ -83,9 +83,9 @@ const LoginComponent = () => {
 								error={errors?.[
 									'password'
 								]?.message?.toString()}>
-								<div className='input-style !p-0 !pr-2 !overflow-hidden'>
+								<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
 									<input
-										className='w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 '
+										className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
 										type={
 											showPassword ? 'text' : 'password'
 										}
@@ -97,12 +97,12 @@ const LoginComponent = () => {
 
 									{!showPassword ? (
 										<FaEyeSlash
-											className='text-primary cursor-pointer'
+											className='cursor-pointer'
 											onClick={togglePassword}
 										/>
 									) : (
 										<FaEye
-											className='text-primary cursor-pointer'
+											className='cursor-pointer'
 											onClick={togglePassword}
 										/>
 									)}
@@ -117,7 +117,7 @@ const LoginComponent = () => {
 								disabled={!isValid || isLoading}
 							/>
 
-							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
+							<p className='flex gap-3 text-sm '>
 								Forgot Password ?
 								<Link
 									href={'/auth/resetPassword'}
@@ -125,7 +125,7 @@ const LoginComponent = () => {
 									Reset
 								</Link>
 							</p>
-							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
+							<p className='flex gap-3 text-sm '>
 								Need An Account ?
 								<Link
 									href={'/auth/signup'}

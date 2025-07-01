@@ -26,9 +26,7 @@ export default function Breadcrumbs({ crumbLabelMap }: BreadcrumbsProps) {
 		.filter((crumb) => !crumb.hide); // 👈 exclude hidden segments
 
 	return (
-		<nav
-			aria-label='breadcrumb'
-			className='text-sm sm:text-xs   text-gray-600 mb-4'>
+		<nav aria-label='breadcrumb' className='text-sm sm:text-xs    mb-4'>
 			<ol className='flex items-center flex-wrap space-x-1'>
 				<li className='flex gap-1 items-center'>
 					<RiHomeLine />
@@ -42,7 +40,7 @@ export default function Breadcrumbs({ crumbLabelMap }: BreadcrumbsProps) {
 							<PiCaretDoubleRightThin />
 						</span>
 						{idx === pathLinks.length - 1 ? (
-							<span className='font-medium capitalize text-gray-800'>
+							<span className='font-medium capitalize '>
 								{crumb.label}
 							</span>
 						) : (

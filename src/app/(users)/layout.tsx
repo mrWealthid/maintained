@@ -4,18 +4,9 @@ import { routes } from '../shared/routes/routes';
 import Header from '../shared/components/header/Header';
 import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
 import { crumbLabelMap } from '../shared/data/data';
-import {
-	Sidebar,
-	SideBarBody,
-	SideBarFooter,
-	SideBarHeader,
-	SideBarLinks,
-	SidebarProvider
-} from '../shared/components/sidebar/SidebarContext';
-import {
-	LayoutBody,
-	LayoutProvider
-} from '../shared/contexts/LayoutContextProvider';
+
+import { AppSidebar } from './AppSidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout
@@ -28,27 +19,19 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='fixed  top-0 w-full'>
-				<Header />
-			</header>
-			<LayoutProvider>
-				<SidebarProvider>
-					<Sidebar>
-						<SideBarHeader />
-						<SideBarBody>
-							<SideBarLinks routes={routes}></SideBarLinks>
-						</SideBarBody>
-						<SideBarFooter />
-					</Sidebar>
-				</SidebarProvider>
-
-				<LayoutBody>
-					<section className='container-text  lg:ml-4 mt-8'>
+			<SidebarProvider>
+				<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
+					<SidebarTrigger />
+					<Header />
+				</header>
+				<AppSidebar routes={routes} />
+				<section className='flex flex-col dashboard-body w-full gap-6'>
+					<section className='container-text mt-14'>
 						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
 						{isUser}
 					</section>
-				</LayoutBody>
-			</LayoutProvider>
+				</section>
+			</SidebarProvider>
 		</section>
 	);
 }
