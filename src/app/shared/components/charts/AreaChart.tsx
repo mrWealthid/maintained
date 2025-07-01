@@ -12,10 +12,10 @@ import {
 // import { useDarkMode } from '../Context/DarkModeContext';
 
 import { subDays } from 'date-fns';
-import useDarkMode from '../../hooks/useDarkMode';
+import { useDarkMode } from '../../hooks/useDarkMode';
 
 const AreaCharts = ({ bookings, numDays }: any) => {
-	const { isDark }: any = useDarkMode();
+	const { enabled } = useDarkMode();
 	// const { isDarkMode }: any =
 	// const data = [
 	// 	{ label: 'Jan 09', totalSales: 480, extrasSales: 320 - 300 },
@@ -49,7 +49,7 @@ const AreaCharts = ({ bookings, numDays }: any) => {
 	// 	{ label: 'Feb 06', totalSales: 1450, extrasSales: 900 - 500 }
 	// ];
 
-	const colors = isDark
+	const colors = enabled
 		? {
 				totalSales: { stroke: '#4f46e5', fill: '#4f46e5' },
 				extrasSales: { stroke: '#22c55e', fill: '#22c55e' },

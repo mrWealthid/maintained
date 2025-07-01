@@ -8,42 +8,6 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 
 export default function SwitchToggle() {
 	const { enabled, toggleDarkMode } = useDarkMode();
-	// const [enabled, setEnabled] = useState(false);
-	// let isDarkMode = false;
-
-	// useEffect(() => {
-	// 	updateTheme();
-	// }, []);
-
-	// function toggleTheme(theme: string): void {
-	// 	localStorage['theme'] = theme;
-	// 	updateTheme();
-	// }
-
-	// function updateTheme() {
-	// 	if (
-	// 		localStorage['theme'] === 'dark' ||
-	// 		(!('theme' in localStorage) &&
-	// 			window.matchMedia('(prefers-color-scheme: dark)').matches)
-	// 	) {
-	// 		document.documentElement.classList.add('dark');
-
-	// 		// document.body.style.setProperty('--background-color', '#192734');
-	// 		isDarkMode = true;
-	// 		setEnabled(true);
-	// 	} else {
-	// 		document.documentElement.classList.remove('dark');
-	// 		// document.body.style.setProperty('--background-color', '#eceef1');
-
-	// 		isDarkMode = false;
-	// 		setEnabled(false);
-	// 	}
-	// }
-
-	// function handleChange(val: any) {
-	// 	setEnabled(val);
-	// 	toggleTheme(val ? 'dark' : 'light');
-	// }
 
 	return (
 		<div className='flex items-center gap-1 p-0'>

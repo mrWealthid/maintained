@@ -47,12 +47,12 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 	return (
 		<Sidebar className='flex flex-col h-screen' collapsible='icon'>
 			<SidebarHeader>
-				<div className='flex px-2 justify-between '>
+				<div className='flex px-2 justify-between'>
 					{open && (
 						<section className='flex  flex-col gap-1 group-data-[collapsible=icon]:hidden'>
 							<h3>{data?.business.businessName}</h3>
 							<span className='font-light text-xs italic'>
-								Maintenance at it's best
+								Maintenance at it&apos;s best
 							</span>
 						</section>
 					)}
