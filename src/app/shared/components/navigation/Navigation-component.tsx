@@ -15,8 +15,8 @@ const NavigationComponent = (props: any) => {
 				return (
 					<Link
 						className={`
-                        cursor-pointer text-secondary text-sm
-							${isActive ? ' px-3   py-2 border-none  glass rounded-full text-secondary' : ''}
+                        cursor-pointer  text-sm
+							${isActive ? ' px-3   py-2 border-none  glass rounded-full ' : ''}
 						`}
 						href={link.path}
 						key={link.name}>

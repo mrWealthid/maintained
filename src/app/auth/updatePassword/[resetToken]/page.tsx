@@ -43,8 +43,8 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='bg-white dark:glass w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
-					<p className='text-center text-primary dark:text-label-color font-bold text-2xl'>
+				<section className='border w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
+					<p className='text-center font-bold text-2xl'>
 						Update Password
 					</p>
 
@@ -59,17 +59,16 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 								error={errors?.[
 									'password'
 								]?.message?.toString()}>
-								<div className='input-style !p-0 !pr-2 !overflow-hidden'>
+								<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
 									<input
-										className='w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 '
+										className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
 										type={
 											showPassword ? 'text' : 'password'
 										}
-										{...register('currentPassword', {
+										{...register('password', {
 											required: 'This field is required'
 										})}
 										id='psw'
-										placeholder='Enter Password'
 										autoFocus
 									/>
 
@@ -137,7 +136,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 								/>
 							</section>
 
-							<p className='flex gap-3 text-sm text-primary dark:text-label-color'>
+							<p className='flex gap-3 text-sm'>
 								Need An Account ?
 								<Link
 									href={'/auth/signup'}

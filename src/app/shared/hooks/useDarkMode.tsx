@@ -1,40 +1,31 @@
-import React, { useEffect, useState } from 'react';
+'use client';
 
-const useDarkMode = () => {
-	let isDarkMode = false;
+import { useEffect, useState } from 'react';
 
-	const [isDark, setIsDark] = useState(false);
+export function useDarkMode() {
+	const [enabled, setEnabled] = useState(false);
 
 	useEffect(() => {
-		updateTheme();
-	}, []);
-
-	function toggleTheme(theme: string): void {
-		localStorage['theme'] = theme;
-		updateTheme();
-	}
-
-	function updateTheme() {
-		if (
-			localStorage['theme'] === 'dark' ||
-			(!('theme' in localStorage) &&
-				window.matchMedia('(prefers-color-scheme: dark)').matches)
-		) {
+		const stored = localStorage.getItem('theme');
+		if (stored === 'dark') {
 			document.documentElement.classList.add('dark');
-
-			// document.body.style.setProperty('--background-color', '#192734');
-
-			setIsDark(true);
+			setEnabled(true);
 		} else {
 			document.documentElement.classList.remove('dark');
-			// document.body.style.setProperty('--background-color', '#eceef1');
-
-			isDarkMode = false;
-			setIsDark(false);
+			setEnabled(false);
 		}
-	}
+	}, []);
 
-	return { isDark };
-};
+	const toggleDarkMode = (enabled: boolean) => {
+		if (enabled) {
+			document.documentElement.classList.add('dark');
+			localStorage.setItem('theme', 'dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+			localStorage.setItem('theme', 'light');
+		}
+		setEnabled(enabled);
+	};
 
-export default useDarkMode;
+	return { enabled, toggleDarkMode };
+}

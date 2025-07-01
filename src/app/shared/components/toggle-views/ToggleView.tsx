@@ -12,8 +12,8 @@ const ToggleView: FC<{
 				onClick={() => handleChangeView(false)}
 				aria-label='Toggle Grid View'
 				title='Toggle View'
-				className={`p-2  text-primary dark:text-white rounded-full transition-all ${
-					!isList ? 'glass ' : 'text-gray-500'
+				className={`p-2    rounded-full transition-all ${
+					!isList ? 'bg-secondary' : ''
 				}`}>
 				<TfiViewGrid />
 			</button>
@@ -21,8 +21,8 @@ const ToggleView: FC<{
 				onClick={() => handleChangeView(true)}
 				aria-label='Toggle List View'
 				title='Toggle View'
-				className={`p-2 text-primary dark:text-white rounded-full transition-all ${
-					isList ? 'glass ' : 'text-gray-500'
+				className={`p-2   rounded-full transition-all ${
+					isList ? 'bg-secondary' : ''
 				}`}>
 				<CiViewTable />
 			</button>

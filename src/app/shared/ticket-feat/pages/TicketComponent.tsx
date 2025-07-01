@@ -11,13 +11,6 @@ import { useDebounce } from '@uidotdev/usehooks';
 import Empty from '../../components/empty/Empty';
 import AnimatedBorderWrapper from '../../components/animation/AnimatedBorder';
 import TicketCardLoader from '../loaders/TicketCardLoader';
-import {
-	Sidebar,
-	SideBarBody,
-	SideBarFooter,
-	SideBarHeader,
-	useSidebarContext
-} from '../../components/sidebar/SidebarContext';
 
 const TicketComponent: FC = () => {
 	const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.pending);
@@ -31,8 +24,6 @@ const TicketComponent: FC = () => {
 	function handleClick(val: TICKET_STATUS) {
 		setStatus(val);
 	}
-
-	const { isOpen, setIsOpen, sidebarRef } = useSidebarContext();
 
 	return (
 		<section>
@@ -48,19 +39,6 @@ const TicketComponent: FC = () => {
 					data={tabData}
 				/>
 			</div>
-
-			<button onClick={() => setIsOpen(!isOpen)}>Open Sidebar</button>
-
-			{isOpen && (
-				<Sidebar>
-					<SideBarHeader />
-					<SideBarBody>
-						<p>Test</p>
-						{/* <SideBarLinks routes={routes}></SideBarLinks> */}
-					</SideBarBody>
-					<SideBarFooter />
-				</Sidebar>
-			)}
 
 			{isLoading && (
 				<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>

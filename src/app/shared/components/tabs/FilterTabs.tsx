@@ -16,8 +16,10 @@ const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
 						onClick={() => handleClick(tab.value)}
 						type='button'
 						className={`${
-							status === tab.value && '!bg-primary text-white '
-						} w-full  text-xs px-6 py-2 rounded-3xl  dark:border-none   transition-all duration-500 bg-gray-50 dark:glass font-light text-black  dark:text-white border btn`}>
+							status === tab.value
+								? 'bg-primary font-semibold'
+								: ''
+						} w-full  text-xs px-6 py-2 rounded-3xl  transition-all duration-500 border btn`}>
 						{tab.label}
 					</button>
 				</div>

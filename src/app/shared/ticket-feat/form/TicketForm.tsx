@@ -430,7 +430,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						/>
 					</TextInput>
 					<section className='w-full items-start flex-col lg:flex-row flex gap-10'>
-						<div className=' w-full lg:w-1/2  bg-gray-50  p-2 rounded-2xl'>
+						<div className=' w-full lg:w-1/2  border  p-2 rounded-2xl'>
 							<FileUpload
 								id='image'
 								label={'Upload Images'}
@@ -445,7 +445,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							/>
 						</div>
 
-						<div className='w-full lg:w-1/2 bg-gray-50  p-2 rounded-2xl'>
+						<div className='w-full lg:w-1/2 border  p-2 rounded-2xl'>
 							<FileUpload
 								id='video'
 								label={'Upload Videos'}
@@ -462,7 +462,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					</section>
 
 					<hr className='-mx-6 my-3' />
-					<section className='flex justify-end  gap-4'>
+					<section className='flex justify-end   gap-4'>
 						{/* <ButtonComponent
                             type='reset'
                             styles='rounded-3xl'
@@ -470,12 +470,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 						<ButtonComponent
 							type='submit'
-							styles=' w-1/2 md:w-1/3'
+							styles='w-1/2 md:w-1/3  '
 							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${
 								isEditing ? 'Update' : 'Create'
-							} Request`}></ButtonComponent>
+							}`}></ButtonComponent>
 					</section>
 				</section>
 			</form>

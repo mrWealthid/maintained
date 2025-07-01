@@ -4,7 +4,7 @@ import { RiAsterisk } from 'react-icons/ri';
 const Label: FC<LabelProps> = ({ name, text, required }) => {
 	return (
 		<label htmlFor={name} className='block cursor-pointer text-xs'>
-			<span className='text-primary flex gap-1 items-center dark:text-white  capitalize'>
+			<span className=' flex gap-1 items-center   capitalize'>
 				<span>{text}</span>
 				{required && <RiAsterisk color='red' />}
 			</span>
