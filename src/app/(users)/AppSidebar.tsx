@@ -113,7 +113,10 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 								{/* <DropdownMenuLabel className='p-0 font-normal'></DropdownMenuLabel> */}
 
 								{/* <DropdownMenuGroup> */}
-								<DropdownMenuItem>
+								<DropdownMenuItem
+									onSelect={(e) => {
+										e.preventDefault(); // ✅ keeps the dropdown open
+									}}>
 									<Logout />
 								</DropdownMenuItem>
 
