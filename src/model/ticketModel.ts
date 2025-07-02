@@ -22,7 +22,14 @@ interface ITicket extends Document {
 	user: ObjectId;
 	business: ObjectId;
 	actionedBy: ObjectId;
+	assignedTo?: ObjectId;
 	relatedTo?: ObjectId;
+	type: ObjectId;
+	technicianResponse?: {
+		response: 'ACCEPTED' | 'DECLINED' | 'INSPECTION_REQUESTED';
+		message: string;
+		respondedAt: Date;
+	};
 }
 
 const allowedTransitions: Record<string, string[]> = {
@@ -76,11 +83,26 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
 		},
-		// relatedTo: {
-		// 	type: mongoose.Schema.Types.ObjectId,
-		// 	ref: this
-		// }
+		assignedTo: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: User
+		},
+		type: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'TicketType',
+			required: true
+		},
+		technicianResponse: {
+			response: {
+				type: String,
+				enum: ['accepted', 'declined', 'inspection-requested'],
+				required: true
+			},
+			message: String,
+			respondedAt: Date
+		}
 	},
+
 	{ timestamps: false }
 );
 

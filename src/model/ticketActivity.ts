@@ -8,7 +8,8 @@ export interface ITicketActivity extends Document {
 		| 'assigned'
 		| 'commented'
 		| 'completed'
-		| 'status-changed';
+		| 'status-changed'
+		| 'type-changed';
 	description?: string;
 	changedBy: Types.ObjectId; // user
 	timestamp: Date;
@@ -26,7 +27,9 @@ const ticketActivitySchema = new Schema<ITicketActivity>({
 			'assigned',
 			'commented',
 			'completed',
-			'status-changed'
+			'status-changed',
+			'type-changed'
+		
 		]
 	},
 	description: { type: String },
