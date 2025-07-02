@@ -1,0 +1,80 @@
+import { ROLES } from '@/app/shared/enums/enums';
+import MiddlewareFeatures from '@/middlewareFeatures';
+import { TicketActivity } from '@/model/ticketActivity';
+import Ticket from '@/model/ticketModel';
+import User from '@/model/userModel';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function PATCH(
+	request: NextRequest,
+	{ params }: { params: { ticketId: string } }
+) {
+	try {
+		const ticketId = params.ticketId;
+		const verify = new MiddlewareFeatures().verifyToken();
+
+		if (!verify.isUserAuthenticated || verify.isUserRole) {
+			return NextResponse.json(
+				{ error: 'Unauthorized access' },
+				{ status: 401 }
+			);
+		}
+
+		const { technicianId } = await request.json();
+
+		const adminUser = await User.findById(verify.userId);
+		if (!adminUser) {
+			return NextResponse.json(
+				{ error: 'Admin user not found' },
+				{ status: 404 }
+			);
+		}
+
+		const technician = await User.findById(technicianId);
+		if (!technician || technician.role !== ROLES.technician) {
+			return NextResponse.json(
+				{ error: 'Invalid technician' },
+				{ status: 400 }
+			);
+		}
+
+		const previous = await Ticket.findById(ticketId);
+		if (!previous) {
+			return NextResponse.json(
+				{ error: 'No ticket found with id' },
+				{ status: 404 }
+			);
+		}
+
+		// Assign technician
+		const updatedRequest = await Ticket.findByIdAndUpdate(
+			ticketId,
+			{
+				actionedBy: adminUser._id,
+				assignedTo: technicianId,
+				status: 'assigned'
+			},
+			{ new: true, runValidators: true, context: 'query' }
+		);
+
+		await TicketActivity.create({
+			ticket: ticketId,
+			action: 'status-changed',
+			description: `Ticket assigned to ${technician.name}`,
+			changedBy: adminUser._id,
+			metadata: {
+				field: 'assignedTo',
+				previous: previous.assignedTo || null,
+				current: technicianId
+			}
+		});
+
+		return NextResponse.json({
+			message: 'Technician assigned successfully',
+			success: true,
+			data: updatedRequest
+		});
+	} catch (error: any) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+}
