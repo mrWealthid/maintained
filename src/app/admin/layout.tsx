@@ -6,7 +6,7 @@ import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
 import { adminCrumbLabelMap } from '../shared/data/data';
 
 import { AppSidebar } from '../(users)/AppSidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { adminRoutes } from '../shared/routes/routes';
 
 export default function DashboardLayout({
@@ -20,6 +20,7 @@ export default function DashboardLayout({
 	return (
 		<section className='min-h-screen'>
 			<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
+				<SidebarTrigger />
 				<Header />
 			</header>
 			<SidebarProvider>
