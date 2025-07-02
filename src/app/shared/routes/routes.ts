@@ -15,6 +15,15 @@ export const ROUTES_DEFINITION = {
 	}
 };
 
+export const TECHNICIAN_ROUTES_DEFINITION = {
+	DASHBOARD: {
+		OVERVIEW: '/technician/dashboard',
+		TICKETS: '/technician/dashboard/ticket-management'
+		// MANAGE_TICKET: '/dashboard/ticket-management/manage',
+		// CHAT: '/dashboard/chat'
+	}
+};
+
 export const ADMIN_ROUTES_DEFINITION = {
 	DASHBOARD: {
 		OVERVIEW: '/admin/dashboard',
@@ -34,6 +43,24 @@ export const routes: Routes[] = [
 	{
 		name: 'Tickets',
 		path: ROUTES_DEFINITION.DASHBOARD.TICKETS,
+		icon: GrVmMaintenance
+	},
+
+	{
+		name: 'Chat',
+		path: ROUTES_DEFINITION.DASHBOARD.CHAT,
+		icon: HiOutlineChatBubbleLeftRight
+	}
+];
+export const technicianRoutes: Routes[] = [
+	{
+		name: 'Overview',
+		path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
+		icon: RiHomeLine
+	},
+	{
+		name: 'Tickets',
+		path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
 		icon: GrVmMaintenance
 	},
 

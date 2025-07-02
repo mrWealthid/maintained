@@ -8,6 +8,7 @@ class MiddlewareFeatures {
 	private isAdmin: boolean;
 	private isUser: boolean;
 	private isSuperAdmin: boolean;
+	private isTechnician: boolean;
 
 	constructor() {
 		this.token = cookies().get('token');
@@ -16,6 +17,7 @@ class MiddlewareFeatures {
 		this.isAdmin = false;
 		this.isUser = false;
 		this.isSuperAdmin = false;
+		this.isTechnician = false;
 	}
 
 	get isUserAuthenticated() {
@@ -30,6 +32,9 @@ class MiddlewareFeatures {
 	}
 	get isSuperAdminRole() {
 		return this.isSuperAdmin;
+	}
+	get isTechnicianRole() {
+		return this.isTechnician;
 	}
 
 	get userId() {
@@ -52,6 +57,7 @@ class MiddlewareFeatures {
 			this.isAdmin = false;
 			this.isUser = false;
 			this.isSuperAdmin = false;
+			this.isTechnician = false;
 		}
 		return this;
 	}
@@ -61,6 +67,7 @@ class MiddlewareFeatures {
 		this.isAdmin = /ADMIN/.test(role);
 		this.isUser = /USER/.test(role);
 		this.isSuperAdmin = /SUPER_ADMIN/.test(role);
+		this.isTechnician = /TECHNICIAN/.test(role);
 	}
 }
 

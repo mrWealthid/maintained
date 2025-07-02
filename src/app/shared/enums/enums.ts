@@ -10,11 +10,18 @@ export enum TICKET_STATUS {
 export enum INVITE_STATUS {
 	invited = 'INVITED',
 	activated = 'ACTIVATED',
-	declined = 'DECLINED'
+	declined = 'DECLINED',
+	all = 'ALL'
 }
 export enum ROLES {
 	admin = 'ADMIN',
 	user = 'USER',
 	technician = 'TECHNICIAN',
 	owner = 'OWNER'
+}
+
+export enum TECHNICIAN_RESPONSE {
+	accepted = 'ACCEPTED',
+	declined = 'DECLINED',
+	inspection_requested = 'INSPECTION_REQUESTED'
 }
