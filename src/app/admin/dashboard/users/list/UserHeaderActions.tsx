@@ -3,6 +3,7 @@ import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
+import { userListFilter } from '@/app/shared/ticket-feat/data/data';
 
 const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<UserFilterQuery | null>({
@@ -16,9 +17,39 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 		}
 	}
 
+	function renderStyle(tab: { label: string; value: INVITE_STATUS }) {
+		if (tab.value === INVITE_STATUS.all && !query) {
+			return `bg-background`;
+		} else if (query?.status === tab.value) {
+			return `bg-background`;
+		}
+	}
+
 	return (
 		<>
-			<div className=''>
+			{userListFilter.map((tab) => (
+				<div key={tab.label}>
+					<button
+						onClick={() =>
+							handleClick(
+								tab.value === INVITE_STATUS.all
+									? null
+									: { status: tab.value }
+							)
+						}
+						type='button'
+						className={`${renderStyle(
+							tab
+						)} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl   font-light  border btn`}>
+						{/* <FaCircle
+							size={10}
+							color={getStatusColor([tab.value])}
+						/> */}
+						{tab.label}
+					</button>
+				</div>
+			))}
+			{/* <div className=''>
 				<button
 					onClick={() => handleClick(null)}
 					type='button'
@@ -27,7 +58,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 					} w-full  text-xs px-6 py-2 rounded-3xl   dark:glass dark:border-none bg-gray-50 font-light text-black border btn`}>
 					All
 				</button>
-			</div>
+			</div> */}
 
 			<div className=''>
 				<button
@@ -60,7 +91,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 				</button>
 			</div> */}
 
-			<div className=''>
+			{/* <div className=''>
 				<button
 					onClick={() =>
 						handleClick({
@@ -92,7 +123,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 					<FaCircle color='red' />
 					Declined
 				</button>
-			</div>
+			</div> */}
 			{/*
 			<select
 				id="sort"

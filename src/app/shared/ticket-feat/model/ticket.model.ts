@@ -1,4 +1,4 @@
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { Ticket } from '../../model/model';
 
 export type TicketStatus =
@@ -9,6 +9,10 @@ export type TicketStatus =
 
 export interface ManageTicketFormProps {
 	ticket?: Ticket | undefined;
+}
+export interface DeclineTicketFormProps {
+	ticket: Ticket;
+	onCloseModal: () => void;
 }
 
 export interface ManageTicketForm {
@@ -56,4 +60,9 @@ export interface TicketListFilter {
 	area?: string;
 	category?: string;
 	id?: string;
+}
+
+export interface ProcessRequest {
+	response: TECHNICIAN_RESPONSE;
+	reason?: string;
 }

@@ -11,3 +11,8 @@ export const adminCrumbLabelMap: CrumbLabelMap = {
 	'ticket-management': { label: 'Ticket Management' },
 	users: { label: 'Users' }
 };
+export const technicianCrumbLabelMap: CrumbLabelMap = {
+	technician: { label: '', hide: true },
+	dashboard: { label: 'Dashboard' },
+	'ticket-management': { label: 'Ticket Management' }
+};

@@ -7,11 +7,11 @@ import { GoSignOut } from 'react-icons/go';
 
 const Logout = () => {
 	const router = useRouter();
-	const { isLoading, loggingOut } = useLogout(router);
+	const { isLoading, logOut } = useLogout(router);
 	return (
 		<button
-			className='flex items-center gap-1 cursor-pointer'
-			onClick={() => loggingOut()}>
+			className='flex w-full items-center gap-1 cursor-pointer'
+			onClick={() => logOut()}>
 			<GoSignOut />
 			<span>Logout</span>
 			<span>{isLoading && <PiSpinnerGapLight />}</span>

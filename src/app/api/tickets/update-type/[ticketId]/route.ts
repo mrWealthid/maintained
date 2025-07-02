@@ -4,40 +4,6 @@ import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
-// export async function GET(
-//     request: NextRequest,
-//     { params }: { params: { ticketId: string } }
-// ) {
-//     try {
-//         // const verify = new MiddlewareFeatures().verifyToken();
-
-//         // if (!verify.isUserAuthenticated) {
-//         // 	return NextResponse.json(
-//         // 		{ error: 'Unauthorized access' },
-//         // 		{ status: 401 }
-//         // 	);
-//         // }
-
-//         const ticketId = params.ticketId;
-
-//         const maintenanceRequest = await Ticket.findOne({
-//             _id: ticketId
-//         }).populate({
-//             path: 'category',
-//             select: 'name '
-//         });
-
-//         const response = NextResponse.json({
-//             status: 'success',
-//             data: maintenanceRequest
-//         });
-
-//         return response;
-//     } catch (error: any) {
-//         return NextResponse.json({ error: error.message }, { status: 500 });
-//     }
-// }
-
 export async function PATCH(
 	request: NextRequest,
 	{ params }: { params: { ticketId: string } }
@@ -46,14 +12,18 @@ export async function PATCH(
 		const ticketId = params.ticketId;
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (
+			!verify.isUserAuthenticated ||
+			!verify.isTechnicianRole ||
+			!verify.isSuperAdminRole
+		) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const { status } = await request.json();
+		const { type } = await request.json();
 
 		const user = await User.findById(verify.userId);
 
@@ -66,7 +36,7 @@ export async function PATCH(
 
 		const payload = {
 			actionedBy: verify.userId,
-			status
+			type
 		};
 
 		// 1. Get current (pre-update) ticket — for comparison/logging
@@ -92,18 +62,18 @@ export async function PATCH(
 		//Log Ticket Activity --if it's an admin
 		await TicketActivity.create({
 			ticket: ticketId,
-			action: 'status-changed',
+			action: 'type-changed',
 			description: `Assigned to ${user.name}`,
 			changedBy: user._id,
 			metadata: {
-				field: 'status',
-				previous: previous.status,
-				current: updatedRequest?.status
+				field: 'type',
+				previous: previous.type,
+				current: updatedRequest?.type
 			}
 		});
 
 		const response = NextResponse.json({
-			message: 'Ticket Updated Successfully',
+			message: 'Ticket Type Updated Successfully',
 			success: true,
 			data: updatedRequest
 		});

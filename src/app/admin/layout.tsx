@@ -19,7 +19,7 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='fixed top-0 w-full'>
+			<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
 				<Header />
 			</header>
 			<SidebarProvider>

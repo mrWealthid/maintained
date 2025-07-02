@@ -2,6 +2,7 @@
 import React, { FC } from 'react';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { ButtonGroupTabsProps } from '@/app/shared/model/model';
+import { ticketListFilter } from '../../ticket-feat/data/data';
 
 const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
 	handleClick,
@@ -10,7 +11,7 @@ const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
 }) => {
 	return (
 		<section className='flex flex-1 items-center -space-x-4 flex-wrap justify-end'>
-			{data.map((tab) => (
+			{ticketListFilter.map((tab) => (
 				<div key={tab.label}>
 					<button
 						onClick={() => handleClick(tab.value)}

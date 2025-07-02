@@ -1,6 +1,6 @@
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 
-export const tabData = [
+export const ticketListFilter = [
 	{
 		label: 'All',
 		value: TICKET_STATUS.all

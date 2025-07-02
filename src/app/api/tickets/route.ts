@@ -37,8 +37,13 @@ export async function GET(request: NextRequest) {
 			filter = { user: verify.userId };
 		}
 
-		// console.log(isAuthUser);
-		// let cookie = request.cookies.get('token')?.value || '';
+		if (verify.isTechnicianRole) {
+			// Only allow tickets assigned to this technician with specific statuses
+			filter = {
+				assignedTo: verify.userId,
+				status: { $in: ['assigned', 'scheduled', 'completed'] }
+			};
+		}
 
 		const query: any = request.nextUrl.searchParams;
 

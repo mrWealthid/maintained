@@ -3,11 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	assignTicket,
 	createTicket,
+	declineRequest,
 	deleteTicket,
 	fetchTickets
 } from '../service/ticket-service';
 import {
 	ListQueryParams,
+	ProcessRequest,
 	TicketListFilter,
 	TicketStatus
 } from '../model/ticket.model';
@@ -84,4 +86,23 @@ export function useAssignTicket(id: string) {
 	});
 
 	return { isUpdating, handleAssignTicket };
+}
+export function useDeclineRequest(id: string, close: () => void) {
+	const queryClient = useQueryClient();
+	const { isPending: isDeclining, mutate: handleDeclineTicket } = useMutation(
+		{
+			mutationFn: (payload: ProcessRequest) =>
+				declineRequest(id, payload),
+			onSuccess: () => {
+				toast.success('Ticket successfully declined');
+				queryClient.invalidateQueries({
+					queryKey: ['tickets']
+				});
+				close();
+			},
+			onError: (err: ApiError) => toast.error(err.message)
+		}
+	);
+
+	return { isDeclining, handleDeclineTicket };
 }

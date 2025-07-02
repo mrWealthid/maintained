@@ -36,6 +36,8 @@ export function useLogin() {
 				router.push('/dashboard');
 			} else if (userInfo.role === ROLES.admin) {
 				router.push('/admin/dashboard');
+			} else if (userInfo.role === ROLES.technician) {
+				router.push('/technician/dashboard');
 			}
 		},
 		onError: (err: ApiError) => toast.error(err.message)
@@ -62,7 +64,7 @@ export function useRegister() {
 	};
 }
 export function useLogout(router: any) {
-	const { isPending: isLoading, mutate: loggingOut } = useMutation({
+	const { isPending: isLoading, mutate: logOut } = useMutation({
 		mutationFn: () => handleLogout(),
 		onSuccess: () => router.push('/auth/login'),
 		onError: (err: ApiError) => toast.error(err.message)
@@ -70,7 +72,7 @@ export function useLogout(router: any) {
 
 	return {
 		isLoading,
-		loggingOut
+		logOut
 	};
 }
 export function useResetPassword() {

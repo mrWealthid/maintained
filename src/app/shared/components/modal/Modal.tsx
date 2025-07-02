@@ -68,7 +68,7 @@ const Window = ({ name, children, title, description }: WindowProps) => {
 
 							<div>
 								<button
-									className=' z-50  hover:text-white rounded-lg text-sm p-1.5  '
+									className=' z-50   rounded-lg text-sm p-1.5  '
 									data-modal-toggle='popup-modal'
 									type='button'>
 									<svg

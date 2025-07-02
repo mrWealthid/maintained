@@ -4,7 +4,7 @@ import TicketCard from './TicketCard';
 import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { useFetchTickets } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { Ticket } from '@/app/shared/model/model';
-import { tabData } from '../data/data';
+import { ticketListFilter } from '../data/data';
 import FilterTabs from '../../components/tabs/FilterTabs';
 import Search from '../../components/search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
@@ -36,7 +36,7 @@ const TicketComponent: FC = () => {
 				<FilterTabs
 					status={status}
 					handleClick={handleClick}
-					data={tabData}
+					data={ticketListFilter}
 				/>
 			</div>
 
