@@ -50,7 +50,7 @@ export async function PATCH(
 			);
 		}
 
-		const { status, ...rest } = await request.json();
+		const { status, type, ...rest } = await request.json();
 		const ticketId = params.ticketId;
 
 		const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
