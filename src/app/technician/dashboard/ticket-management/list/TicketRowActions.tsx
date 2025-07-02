@@ -14,6 +14,9 @@ import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { MdOutlineAssignmentInd } from 'react-icons/md';
 import { TfiMore } from 'react-icons/tfi';
+import DeclineForm from '../declineForm';
+import { IoCheckmarkDoneOutline } from 'react-icons/io5';
+import { RxCross2 } from 'react-icons/rx';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -75,7 +78,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 											{({ active }) => (
 												<Modal.Open opens='accept-request'>
 													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-														<MdOutlineAssignmentInd color='#1849aa' />
+														<IoCheckmarkDoneOutline color='green' />
 														Accept
 													</button>
 												</Modal.Open>
@@ -84,9 +87,9 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 										<Menu.Item>
 											{({ active }) => (
-												<Modal.Open opens='decline-request'>
+												<Modal.Open opens='decline-ticket'>
 													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-														<MdOutlineAssignmentInd color='#1849aa' />
+														<RxCross2 color='red' />
 														Decline
 													</button>
 												</Modal.Open>
@@ -116,16 +119,8 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				<Modal.Window
 					name='decline-ticket'
 					title='Decline Maintenance Ticket'
-					description='Request ticket will be deleted permanently'>
-					<ConfirmationPage
-						handler={(onCloseModal) => {
-							handleDelete(onCloseModal ?? (() => {}));
-						}}
-						isLoading={isDeleting}
-						modalText={
-							'Are you sure you want to delete this ticket'
-						}
-					/>
+					description='Request ticket will be declined'>
+					<DeclineForm ticket={ticket} />
 				</Modal.Window>
 				<Modal.Window
 					name='accept-request'

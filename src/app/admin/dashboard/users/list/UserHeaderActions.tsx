@@ -3,7 +3,7 @@ import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
-import { userListFilter } from '@/app/shared/ticket-feat/data/data';
+import { userListFilter } from '../data/user.data';
 
 const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<UserFilterQuery | null>({
@@ -60,7 +60,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 				</button>
 			</div> */}
 
-			<div className=''>
+			{/* <div className=''>
 				<button
 					onClick={() =>
 						handleClick({ status: INVITE_STATUS.invited })
@@ -73,7 +73,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 					<FaCircle color='yellow' />
 					Invited
 				</button>
-			</div>
+			</div> */}
 			{/* <div className=''>
 				<button
 					onClick={() =>

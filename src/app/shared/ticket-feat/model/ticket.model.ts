@@ -12,7 +12,7 @@ export interface ManageTicketFormProps {
 }
 export interface DeclineTicketFormProps {
 	ticket: Ticket;
-	onCloseModal: () => void;
+	onCloseModal?: () => void;
 }
 
 export interface ManageTicketForm {

@@ -87,7 +87,7 @@ export function useAssignTicket(id: string) {
 
 	return { isUpdating, handleAssignTicket };
 }
-export function useDeclineRequest(id: string, close: () => void) {
+export function useDeclineRequest(id: string, close?: () => void) {
 	const queryClient = useQueryClient();
 	const { isPending: isDeclining, mutate: handleDeclineTicket } = useMutation(
 		{
@@ -98,7 +98,7 @@ export function useDeclineRequest(id: string, close: () => void) {
 				queryClient.invalidateQueries({
 					queryKey: ['tickets']
 				});
-				close();
+				close?.();
 			},
 			onError: (err: ApiError) => toast.error(err.message)
 		}
