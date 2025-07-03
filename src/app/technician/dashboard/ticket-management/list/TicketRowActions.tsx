@@ -2,31 +2,34 @@
 import React, { FC, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
-
-import { HiEye, HiTrash } from 'react-icons/hi2';
+import { HiEye } from 'react-icons/hi2';
 import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
-	useDeleteTicket
+	useDeleteTicket,
+	useProcessTechnicianResponse
 } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import Modal from '@/app/shared/components/modal/Modal';
 import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
-import { MdOutlineAssignmentInd } from 'react-icons/md';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { TfiMore } from 'react-icons/tfi';
-import DeclineForm from '../declineForm';
 import { IoCheckmarkDoneOutline } from 'react-icons/io5';
 import { RxCross2 } from 'react-icons/rx';
+import DeclineForm from '../DeclineForm';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
-	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
 	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
 
-	function handleDelete(onCloseModal: () => void) {
-		handleDeleteTicket(ticket._id, {
+	const { isProcessing, processResponse } = useProcessTechnicianResponse(
+		ticket._id
+	);
+	function handleProcessResponse(onCloseModal: () => void) {
+		const payload = { response: TECHNICIAN_RESPONSE.accepted };
+		processResponse(payload, {
 			onSuccess: () => onCloseModal()
 		});
 	}
+
 	function handleAssign(onCloseModal: () => void) {
 		const payload = { status: TICKET_STATUS.processing };
 		handleAssignTicket(payload, {
@@ -127,10 +130,10 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					title='Accept Maintenance Ticket'
 					description='Request ticket will be assigned to you'>
 					<ConfirmationPage
-						handler={(onCloseModal) => {
-							handleDelete(onCloseModal ?? (() => {}));
+						handler={(onCloseModal: () => void) => {
+							handleProcessResponse(onCloseModal);
 						}}
-						isLoading={isDeleting}
+						isLoading={isProcessing}
 						modalText={
 							'Are you sure you want to accept this ticket'
 						}
@@ -143,7 +146,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					description='Request ticket will be assigned to you'>
 					<ConfirmationPage
 						handler={(onCloseModal) => {
-							handleAssign(onCloseModal ?? (() => {}));
+							handleAssign(onCloseModal);
 						}}
 						isLoading={isUpdating}
 						modalText={

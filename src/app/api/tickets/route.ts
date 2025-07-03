@@ -39,10 +39,10 @@ export async function GET(request: NextRequest) {
 
 		if (verify.isTechnicianRole) {
 			// Only allow tickets assigned to this technician with specific statuses
-			// filter = {
-			// 	assignedTo: verify.userId,
-			// 	status: { $in: ['assigned', 'scheduled', 'completed'] }
-			// };
+			filter = {
+				assignedTo: verify.userId,
+				status: { $in: ['assigned', 'scheduled', 'completed'] }
+			};
 		}
 
 		const query: any = request.nextUrl.searchParams;

@@ -7,6 +7,7 @@ import {
 	IUpdatePassword,
 	OnboardUser
 } from '../model/model';
+import { ApiErrorHandler } from '@/utils/apiError';
 
 export async function handleLogin(payload: ILogin) {
 	try {
@@ -14,12 +15,7 @@ export async function handleLogin(payload: ILogin) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Login could not be completed Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Login could not be completed');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 // export async function handleCreateBusiness(payload: IBusiness) {
@@ -43,12 +39,7 @@ export async function handleRegister(payload: IRegister) {
 
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be registered Status: ${err.response.status}`
-			);
-		}
-		throw new Error('User could not be registered');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function handleForgetPassword(payload: IResetPassword) {
@@ -57,12 +48,7 @@ export async function handleForgetPassword(payload: IResetPassword) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be found Status: ${err.response.status}`
-			);
-		}
-		throw new Error('User could not be found');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function handleUpdatePassword(payload: IUpdatePassword) {
@@ -73,12 +59,7 @@ export async function handleUpdatePassword(payload: IUpdatePassword) {
 
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Password could not be updated Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Password could not be updated');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function handleResetPassword(payload: IUpdatePassword) {
@@ -87,12 +68,7 @@ export async function handleResetPassword(payload: IUpdatePassword) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Password could not be updated Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Password could not be updated');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function handleOnboardUser(payload: OnboardUser) {
@@ -101,21 +77,13 @@ export async function handleOnboardUser(payload: OnboardUser) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be onboarded Status: ${err.response.status}`
-			);
-		}
-		throw new Error('User could not be onboarded');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function handleLogout() {
 	try {
 		await axios(`/api/auth/logout`);
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(`Logout failed : ${err.response.status}`);
-		}
-		throw new Error('Logout failed');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }

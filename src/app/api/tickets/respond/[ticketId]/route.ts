@@ -12,6 +12,7 @@ export async function PATCH(
 	try {
 		const ticketId = params.ticketId;
 		const verify = new MiddlewareFeatures().verifyToken();
+		const { response: ticketResponse, reason } = await request.json();
 
 		if (!verify.isUserAuthenticated || verify.isUserRole) {
 			return NextResponse.json(
@@ -20,7 +21,6 @@ export async function PATCH(
 			);
 		}
 
-		const { response: ticketResponse, reason } = await request.json();
 		const user = await User.findById(verify.userId);
 
 		if (!user) {
@@ -39,6 +39,12 @@ export async function PATCH(
 			);
 		}
 
+		if (existingTicket.assignedTo !== verify.userId) {
+			return NextResponse.json(
+				{ error: 'No assigned Ticket  found' },
+				{ status: 404 }
+			);
+		}
 		// Prepare changes based on technician response
 		let updatedFields: any = {
 			technicianResponse: {

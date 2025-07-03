@@ -7,6 +7,7 @@ import axios from 'axios';
 import { UserListFilter } from '../model/user.model';
 import { buildQueryString } from '@/utils/helpers';
 import { ListQueryParams } from '@/app/shared/ticket-feat/model/ticket.model';
+import { ApiErrorHandler } from '@/utils/apiError';
 
 export async function fetchUsers<T>({
 	limit = 10,
@@ -20,12 +21,7 @@ export async function fetchUsers<T>({
 		const data = await response.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be fetched Status: ${err.response.status}`
-			);
-		}
-		throw new Error('User could not be fetched');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -48,14 +44,7 @@ export async function handleCreateUser(
 		const data = await response.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be ${isEditing ? 'updated' : 'created'} Status: ${err.response.status}`
-			);
-		}
-		throw new Error(
-			`User could not be ${isEditing ? 'updated' : 'created'} `
-		);
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -68,11 +57,6 @@ export async function handleDeleteUser(id: string) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`User could not be deleted Status: ${err.response.status}`
-			);
-		}
-		throw new Error('User could not be deleted');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }

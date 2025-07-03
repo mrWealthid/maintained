@@ -82,6 +82,7 @@ export async function PATCH(
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			payload,
+	
 			{
 				new: true,
 				runValidators: true,

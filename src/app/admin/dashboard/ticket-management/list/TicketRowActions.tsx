@@ -14,6 +14,8 @@ import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { MdOutlineAssignmentInd } from 'react-icons/md';
 import { TfiMore } from 'react-icons/tfi';
+import { TbUserCog } from 'react-icons/tb';
+import AssignTechnicianForm from '../AssignTechnicianForm';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -77,8 +79,22 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 												{({ active }) => (
 													<Modal.Open opens='self-assign'>
 														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-															<MdOutlineAssignmentInd color='#1849aa' />
+															<MdOutlineAssignmentInd />
 															Assign to me
+														</button>
+													</Modal.Open>
+												)}
+											</Menu.Item>
+										)}
+
+										{ticket.status ===
+											TICKET_STATUS.processing && (
+											<Menu.Item>
+												{({ active }) => (
+													<Modal.Open opens='assign-technician'>
+														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
+															<TbUserCog />
+															Assign
 														</button>
 													</Modal.Open>
 												)}
@@ -134,6 +150,13 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						}
 						reason='confirm'
 					/>
+				</Modal.Window>
+
+				<Modal.Window
+					name='assign-technician'
+					title='Assign Maintenance Ticket'
+					description='Request ticket will be Assigned To Technician'>
+					<AssignTechnicianForm ticket={ticket} />
 				</Modal.Window>
 			</Modal>
 		</td>

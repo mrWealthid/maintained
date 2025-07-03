@@ -19,11 +19,11 @@ export default function DashboardLayout({
 
 	return (
 		<section className='min-h-screen'>
-			<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
-				<SidebarTrigger />
-				<Header />
-			</header>
 			<SidebarProvider>
+				<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
+					<SidebarTrigger />
+					<Header />
+				</header>
 				<AppSidebar routes={adminRoutes} />
 
 				<section className='mt-10 flex flex-col dashboard-body w-full gap-6'>

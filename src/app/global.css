@@ -64,7 +64,7 @@ body {
 	}
 
 	.request-card__details {
-		@apply rounded-full flex gap-1 items-center bg-card border px-3 py-1.5 text-xs;
+		@apply rounded-full flex gap-1 capitalize items-center bg-card border px-3 py-1.5 text-xs;
 	}
 
 	.container-text {
@@ -226,9 +226,11 @@ input:not([type="email"])::placeholder {
 		--sidebar-accent-foreground: 240 4.8% 95.9%;
 		--sidebar-border: 240 3.7% 15.9%;
 		--sidebar-ring: 217.2 91.2% 59.8%;
-		--button-primary: 215 27.9% 16.9%;
-		--button-primary-foreground: 39.09 50% 87.03%;
-		--button-accent: 215 27.9% 4.9%;
+		--button-primary: 0, 0%, 100%;
+		--button-primary-foreground: 0, 0%, 0%;
+		--button-accent: 0,
+			0%,
+			100%
 	}
 }
 

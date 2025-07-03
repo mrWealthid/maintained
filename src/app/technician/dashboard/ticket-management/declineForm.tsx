@@ -2,15 +2,9 @@
 import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import EmailInput from '@/app/shared/components/form-elements/Email-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import {
-	ROLES,
-	TECHNICIAN_RESPONSE,
-	TICKET_STATUS
-} from '@/app/shared/enums/enums';
-import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
-import { useDeclineRequest } from '@/app/shared/ticket-feat/hooks/ticketHooks';
+import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
+import { useProcessTechnicianResponse } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { DeclineTicketFormProps } from '@/app/shared/ticket-feat/model/ticket.model';
 
 const DeclineForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
@@ -19,14 +13,14 @@ const DeclineForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 	});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
-	const { isDeclining, handleDeclineTicket } = useDeclineRequest(
+	const { isProcessing, processResponse } = useProcessTechnicianResponse(
 		ticket.id,
 		onCloseModal
 	);
 
 	async function onSubmit(data: { reason: string }) {
 		const payload = { response: TECHNICIAN_RESPONSE.declined, ...data };
-		handleDeclineTicket(payload);
+		processResponse(payload);
 	}
 
 	function onError(err: unknown) {
@@ -69,7 +63,7 @@ const DeclineForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 							type='submit'
 							styles='rounded-3xl'
 							disabled={!isValid || isSubmitting || !isDirty}
-							loading={isDeclining}
+							loading={isProcessing}
 							btnText={`Submit
 							`}></ButtonComponent>
 					</section>

@@ -20,6 +20,8 @@ export interface Ticket {
 	area: string;
 	category: Category;
 	id: string;
+	assignedTo?: User;
+	actionedBy?: string;
 }
 
 // export interface TicketCardProps extends Ticket {

@@ -14,6 +14,14 @@ export interface DeclineTicketFormProps {
 	ticket: Ticket;
 	onCloseModal?: () => void;
 }
+export interface AssignTechnicianFormProps {
+	ticket: Ticket;
+	onCloseModal?: () => void;
+}
+
+export interface AssignTechnicianFormControls {
+	assignedTo: string;
+}
 
 export interface ManageTicketForm {
 	title: string;

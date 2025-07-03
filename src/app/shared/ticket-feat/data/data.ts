@@ -14,6 +14,10 @@ export const ticketListFilter = [
 		value: TICKET_STATUS.processing
 	},
 	{
+		label: 'Pending Assigment',
+		value: TICKET_STATUS.pending_assignment
+	},
+	{
 		label: 'Assigned',
 		value: TICKET_STATUS.assigned
 	},

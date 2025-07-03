@@ -70,6 +70,7 @@ export function getStatusColor(val) {
 	const colorObj = {
 		[TICKET_STATUS.pending]: '#F7CB73', // Soft yellow (pending)
 		[TICKET_STATUS.processing]: '#F6C23E', // Stronger yellow/orange (processing)
+		[TICKET_STATUS.pending_assignment]: '#F6C23E', // Stronger yellow/orange (processing)
 		[TICKET_STATUS.completed]: '#38B000', // Green (completed)
 		[TICKET_STATUS.assigned]: '#36A2EB', // Blue (assigned)
 		[TICKET_STATUS.scheduled]: '#6C63FF', // Indigo (scheduled)

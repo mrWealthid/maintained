@@ -23,6 +23,9 @@ export const API_ROUTES = {
 		ticketById: (id: string) => resourceById('tickets')(id),
 		get_categories: `${base}/tickets/categories`,
 		create_ticket: `${base}/tickets`,
-		update_status: (id: string) => resourceById('tickets/update-status')(id)
+		update_status: (id: string) =>
+			resourceById('tickets/update-status')(id),
+		assign_technician: (id: string) => resourceById('tickets/assign')(id),
+		process_technician_response: (id: string) => resourceById('tickets/respond')(id)
 	}
 };

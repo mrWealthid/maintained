@@ -1,6 +1,7 @@
 export enum TICKET_STATUS {
 	pending = 'PENDING',
 	assigned = 'ASSIGNED',
+	pending_assignment = 'PENDING_ASSIGNMENT',
 	processing = 'PROCESSING',
 	scheduled = 'SCHEDULED',
 	declined = 'DECLINED',

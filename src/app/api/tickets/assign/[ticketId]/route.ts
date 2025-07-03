@@ -1,4 +1,4 @@
-import { ROLES } from '@/app/shared/enums/enums';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
@@ -20,7 +20,7 @@ export async function PATCH(
 			);
 		}
 
-		const { technicianId } = await request.json();
+		const { assignedTo } = await request.json();
 
 		const adminUser = await User.findById(verify.userId);
 		if (!adminUser) {
@@ -30,7 +30,7 @@ export async function PATCH(
 			);
 		}
 
-		const technician = await User.findById(technicianId);
+		const technician = await User.findById(assignedTo);
 		if (!technician || technician.role !== ROLES.technician) {
 			return NextResponse.json(
 				{ error: 'Invalid technician' },
@@ -46,13 +46,13 @@ export async function PATCH(
 			);
 		}
 
-		// Assign technician
+		// send assignment technician request
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			{
 				actionedBy: adminUser._id,
-				assignedTo: technicianId,
-				status: 'assigned'
+				assignedTo,
+				status: TICKET_STATUS.pending_assignment
 			},
 			{ new: true, runValidators: true, context: 'query' }
 		);
@@ -65,7 +65,7 @@ export async function PATCH(
 			metadata: {
 				field: 'assignedTo',
 				previous: previous.assignedTo || null,
-				current: technicianId
+				current: assignedTo
 			}
 		});
 

@@ -3,6 +3,7 @@ import type { ObjectId } from 'mongoose';
 import Business from './businessModel';
 import User from './userModel';
 import Category from './ticketCategoryModel';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
 
 interface ITicket extends Document {
 	title: string;
@@ -26,7 +27,7 @@ interface ITicket extends Document {
 	relatedTo?: ObjectId;
 	type: ObjectId;
 	technicianResponse?: {
-		response: 'ACCEPTED' | 'DECLINED' | 'INSPECTION_REQUESTED';
+		response: TECHNICIAN_RESPONSE;
 		message: string;
 		respondedAt: Date;
 	};
@@ -34,7 +35,8 @@ interface ITicket extends Document {
 
 const allowedTransitions: Record<string, string[]> = {
 	PENDING: ['PROCESSING', 'DECLINED'],
-	PROCESSING: ['ASSIGNED', 'PENDING', 'DECLINED'],
+	PROCESSING: ['PENDING_ASSIGNMENT', 'PENDING', 'DECLINED'],
+	PENDING_ASSIGNMENT: ['ASSIGNED', 'PROCESSING', 'DECLINED'],
 	ASSIGNED: ['SCHEDULED', 'DECLINED'],
 	SCHEDULED: ['COMPLETED', 'DECLINED'],
 	DECLINED: [],
@@ -53,14 +55,7 @@ const TicketSchema = new Schema<ITicket>(
 		},
 		status: {
 			type: String,
-			enum: [
-				'PENDING',
-				'PROCESSING',
-				'ASSIGNED',
-				'SCHEDULED',
-				'DECLINED',
-				'COMPLETED'
-			],
+			enum:TICKET_STATUS,
 			default: 'PENDING'
 		},
 		videos: [{ type: String }],
@@ -95,7 +90,7 @@ const TicketSchema = new Schema<ITicket>(
 		technicianResponse: {
 			response: {
 				type: String,
-				enum: ['accepted', 'declined', 'inspection-requested'],
+				enum: TECHNICIAN_RESPONSE,
 				required: true
 			},
 			message: String,

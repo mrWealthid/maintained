@@ -44,25 +44,25 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
 					<g id='SVGRepo_bgCarrier' stroke-width='0'></g>
 					<g
 						id='SVGRepo_tracerCarrier'
-						stroke-linecap='round'
-						stroke-linejoin='round'></g>
+						strokeLinecap='round'
+						strokeLinejoin='round'></g>
 					<g id='SVGRepo_iconCarrier'>
 						{' '}
 						<path
 							d='M1.5 12.5L5.57574 16.5757C5.81005 16.8101 6.18995 16.8101 6.42426 16.5757L9 14'
 							stroke=''
-							stroke-width='1.5'
-							stroke-linecap='round'></path>{' '}
+							strokeWidth='1.5'
+							strokeLinecap='round'></path>{' '}
 						<path
 							d='M16 7L12 11'
 							stroke=''
-							stroke-width='1.5'
-							stroke-linecap='round'></path>{' '}
+							strokeWidth='1.5'
+							strokeLinecap='round'></path>{' '}
 						<path
 							d='M7 12L11.5757 16.5757C11.8101 16.8101 12.1899 16.8101 12.4243 16.5757L22 7'
 							stroke=''
-							stroke-width='1.5'
-							stroke-linecap='round'></path>{' '}
+							strokeWidth='1.5'
+							strokeLinecap='round'></path>{' '}
 					</g>
 				</svg>
 			)}
@@ -71,7 +71,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
 				onClick={() => handler(onCloseModal ?? (() => {}))}
 				data-modal-hide='popup-modal'
 				type='button'
-				className=' bg-primary  focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-2xl text-sm inline-flex items-center px-5 py-2.5 text-center mr-2'>
+				className='btn-primary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-2xl text-sm inline-flex items-center px-5 py-2.5 text-center mr-2'>
 				Yes, I&apos;m sure
 				{isLoading && (
 					<svg
@@ -97,7 +97,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
 				onClick={onCloseModal}
 				data-modal-hide='popup-modal'
 				type='button'
-				className='text-red-500   focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-2xl border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600'>
+				className=' text-red-500    focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-2xl border border-gray-200 text-sm font-medium px-5 py-2.5  focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600'>
 				No, cancel
 			</button>
 		</div>

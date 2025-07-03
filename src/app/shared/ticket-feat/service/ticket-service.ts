@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import {
 	ApiPaginatedResponse,
 	ApiResponse,
@@ -7,8 +7,13 @@ import {
 	Ticket
 } from '../../model/model';
 import { API_ROUTES } from '../../routes/apiRoutes';
-import { ListQueryParams, ProcessRequest, TicketListFilter } from '../model/ticket.model';
+import {
+	ListQueryParams,
+	ProcessRequest,
+	TicketListFilter
+} from '../model/ticket.model';
 import { buildQueryString } from '@/utils/helpers';
+import { ApiErrorHandler } from '@/utils/apiError';
 
 export async function createTicket(
 	data: CreateTicketPayload,
@@ -29,12 +34,7 @@ export async function createTicket(
 		const resData = await res.data;
 		return resData;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Request could not be created Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Request could not be created');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -50,12 +50,21 @@ export async function fetchTicketCategory<T>(
 		const data = await response.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Category could not be loaded Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Category could not be loaded');
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
+export async function fetchTechnicians<T>(
+	query: string | null
+): Promise<ApiResponse<T[]>> {
+	const url = query
+		? `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&name=${query}`
+		: `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}`;
+	try {
+		const response = await axios(url);
+		const data = await response.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -77,12 +86,7 @@ export async function fetchTickets<T>({
 		const response = await axios(url);
 		return response.data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Ticket could not be loaded. Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Ticket could not be loaded');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -99,12 +103,7 @@ export async function fetchTicketList<T>({
 		const data = await response.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Ticket list could not be loaded Status: ${err.response.status}`
-			);
-		}
-		throw new Error('Ticket list could not be loaded');
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 
@@ -116,12 +115,7 @@ export async function deleteTicket(id: string) {
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Ticket could not be deleted Status: ${err.response.status}`
-			);
-		}
-		throw new Error(`Ticket could not be deleted`);
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
 export async function assignTicket(
@@ -136,28 +130,36 @@ export async function assignTicket(
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Ticket could not be updated Status: ${err.response.status}`
-			);
-		}
-		throw new Error(`Ticket could not be updated`);
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
-export async function declineRequest(id: string, payload: ProcessRequest) {
+export async function ProcessTechnicianResponse(
+	id: string,
+	payload: ProcessRequest
+) {
 	try {
 		const res = await axios.patch(
-			`${API_ROUTES.ticketManagement.update_status(id)}`,
+			`${API_ROUTES.ticketManagement.process_technician_response(id)}`,
 			payload
 		);
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {
-		if (axios.isAxiosError(err) && err.response) {
-			throw new Error(
-				`Ticket could not be updated Status: ${err.response.status}`
-			);
-		}
-		throw new Error(`Ticket could not be updated`);
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
+export async function assignTechnician(
+	id: string,
+	payload: { assignedTo: string }
+) {
+	try {
+		const res = await axios.patch(
+			`${API_ROUTES.ticketManagement.assign_technician(id)}`,
+			payload
+		);
+		const data = await res.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
 	}
 }

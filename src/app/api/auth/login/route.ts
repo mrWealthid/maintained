@@ -25,10 +25,6 @@ export async function POST(request: NextRequest) {
 			email
 		}).select('+password');
 
-		// if(!user) {
-		//   return next(new AppError("User does not exit", 401));
-		// }
-
 		if (!user || !(await user.correctPassword(password, user.password))) {
 			return NextResponse.json(
 				{ error: 'Incorrect email or password' },
@@ -67,7 +63,6 @@ export async function POST(request: NextRequest) {
 			token
 		});
 
-		console.log('cookie exp', process.env.JWT_COOKIE_EXPIRES_IN);
 		const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
 		const expires = new Date(Date.now() + timeInMs);
 		response.cookies.set('token', token, {

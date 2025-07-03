@@ -1,11 +1,12 @@
 import { toast } from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+	assignTechnician,
 	assignTicket,
 	createTicket,
-	declineRequest,
 	deleteTicket,
-	fetchTickets
+	fetchTickets,
+	ProcessTechnicianResponse
 } from '../service/ticket-service';
 import {
 	ListQueryParams,
@@ -87,22 +88,38 @@ export function useAssignTicket(id: string) {
 
 	return { isUpdating, handleAssignTicket };
 }
-export function useDeclineRequest(id: string, close?: () => void) {
+export function useProcessTechnicianResponse(id: string, close?: () => void) {
 	const queryClient = useQueryClient();
-	const { isPending: isDeclining, mutate: handleDeclineTicket } = useMutation(
-		{
-			mutationFn: (payload: ProcessRequest) =>
-				declineRequest(id, payload),
+	const { isPending: isProcessing, mutate: processResponse } = useMutation({
+		mutationFn: (payload: ProcessRequest) =>
+			ProcessTechnicianResponse(id, payload),
+		onSuccess: () => {
+			toast.success('Ticket successfully updated');
+			queryClient.invalidateQueries({
+				queryKey: ['tickets']
+			});
+			close?.();
+		},
+		onError: (err: ApiError) => toast.error(err.message)
+	});
+
+	return { isProcessing, processResponse };
+}
+export function useAssignTechnician(id: string, close?: () => void) {
+	const queryClient = useQueryClient();
+	const { isPending: isAssigning, mutate: handleAssignTechnician } =
+		useMutation({
+			mutationFn: (payload: { assignedTo: string }) =>
+				assignTechnician(id, payload),
 			onSuccess: () => {
-				toast.success('Ticket successfully declined');
+				toast.success('Ticket successfully assigned');
 				queryClient.invalidateQueries({
 					queryKey: ['tickets']
 				});
 				close?.();
 			},
 			onError: (err: ApiError) => toast.error(err.message)
-		}
-	);
+		});
 
-	return { isDeclining, handleDeclineTicket };
+	return { isAssigning, handleAssignTechnician };
 }
