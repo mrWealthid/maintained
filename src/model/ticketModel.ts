@@ -55,7 +55,7 @@ const TicketSchema = new Schema<ITicket>(
 		},
 		status: {
 			type: String,
-			enum:TICKET_STATUS,
+			enum: TICKET_STATUS,
 			default: 'PENDING'
 		},
 		videos: [{ type: String }],
@@ -90,8 +90,7 @@ const TicketSchema = new Schema<ITicket>(
 		technicianResponse: {
 			response: {
 				type: String,
-				enum: TECHNICIAN_RESPONSE,
-				required: true
+				enum: TECHNICIAN_RESPONSE
 			},
 			message: String,
 			respondedAt: Date

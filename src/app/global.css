@@ -196,7 +196,7 @@ input:not([type="email"])::placeholder {
 	.dark {
 		--background: 224 71.4% 4.1%;
 		--foreground: 39.09 50% 87.03%;
-		--card: 240 5.9% 10%;
+		--card: 224 71.4% 4.1%;
 		--card-foreground: 210 20% 98%;
 		--popover: 224 71.4% 4.1%;
 		--popover-foreground: 210 20% 98%;
