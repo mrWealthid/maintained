@@ -125,7 +125,7 @@ function Table<T>({
 	const tableRef = useRef(null);
 
 	const CardContent = (
-		<div className='overflow-x-auto bg-white dark:bg-transparent  p-2'>
+		<div className='overflow-x-auto bg-card  p-2'>
 			<TableHeaderAction handleFilter={handleFilter}>
 				{headerActions}
 			</TableHeaderAction>
@@ -139,7 +139,7 @@ function Table<T>({
 			{!isLoading && data.length > 0 && (
 				<table
 					ref={tableRef}
-					className='w-full rounded-xl  border text-sm'>
+					className='w-full  rounded-xl  border text-sm'>
 					{children}
 				</table>
 			)}
