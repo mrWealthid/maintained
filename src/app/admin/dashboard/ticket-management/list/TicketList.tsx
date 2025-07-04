@@ -8,6 +8,7 @@ import Table from '@/app/shared/components/table/Table';
 import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
 import TicketHeaderActions from './TicketHeaderActions';
 import { TicketListFilter } from '@/app/shared/ticket-feat/model/ticket.model';
+import TableComponent from '@/app/shared/components/table/Table';
 
 const TicketList: FC = () => {
 	const columns: Icolumn[] = [
@@ -15,13 +16,15 @@ const TicketList: FC = () => {
 			header: 'Title',
 			accessor: 'title',
 			filterKey: 'title',
-			searchType: 'TEXT'
+			searchType: 'TEXT',
+			colspan: 3
 		},
 		{
 			header: 'user',
 			accessor: 'user.name',
 			searchType: 'TEXT',
-			filterKey: 'user'
+			filterKey: 'user',
+			colspan: 2
 		},
 		{ header: 'category', accessor: 'category.name', searchType: 'TEXT' },
 		{ header: 'area', accessor: 'area', searchType: 'TEXT' },
@@ -46,7 +49,7 @@ const TicketList: FC = () => {
 
 	return (
 		<div className='h-80'>
-			<Table<Ticket>
+			<TableComponent<Ticket>
 				service={fetchTicketList}
 				queryKey='tickets'
 				searchKey='title'
@@ -57,7 +60,7 @@ const TicketList: FC = () => {
 				<Table.TableRow customRow={true}>
 					<RequestRow />
 				</Table.TableRow>
-			</Table>
+			</TableComponent>
 		</div>
 	);
 };

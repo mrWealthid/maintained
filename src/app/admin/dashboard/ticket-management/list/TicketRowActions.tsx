@@ -16,6 +16,7 @@ import { MdOutlineAssignmentInd } from 'react-icons/md';
 import { TfiMore } from 'react-icons/tfi';
 import { TbUserCog } from 'react-icons/tb';
 import AssignTechnicianForm from '../AssignTechnicianForm';
+import { TableCell } from '@/components/ui/table';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -34,7 +35,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	}
 
 	return (
-		<td className='py-2 px-4  md:px-2 md:py-4 space-x-3'>
+		<TableCell className='md:px-2 py-2 space-x-3'>
 			<Modal>
 				<Menu as='div' className='relative inline-block text-left'>
 					{({ open }) => (
@@ -159,7 +160,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					<AssignTechnicianForm ticket={ticket} />
 				</Modal.Window>
 			</Modal>
-		</td>
+		</TableCell>
 	);
 };
 

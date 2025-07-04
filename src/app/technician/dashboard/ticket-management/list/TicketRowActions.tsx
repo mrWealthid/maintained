@@ -16,6 +16,7 @@ import { TfiMore } from 'react-icons/tfi';
 import { IoCheckmarkDoneOutline } from 'react-icons/io5';
 import { RxCross2 } from 'react-icons/rx';
 import DeclineForm from '../DeclineForm';
+import { TableCell } from '@/components/ui/table';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
@@ -38,7 +39,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	}
 
 	return (
-		<td className='py-2 px-4  md:px-2 md:py-4 space-x-3'>
+		<TableCell className='md:px-2 py-2 space-x-3'>
 			<Modal>
 				<Menu as='div' className='relative inline-block text-left'>
 					{({ open }) => (
@@ -160,7 +161,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					/>
 				</Modal.Window>
 			</Modal>
-		</td>
+		</TableCell>
 	);
 };
 

@@ -1,13 +1,15 @@
 import { UserRowProps } from '@/app/shared/model/model';
 import UserRowAction from './UserRowAction';
 import Modal from '@/app/shared/components/modal/Modal';
+import { TableCell, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 function UserRow({ data }: UserRowProps) {
 	return (
 		<>
 			{data?.map((row, i) => {
 				return (
-					<tr key={row._id} className='  relative border-b '>
+					<TableRow key={row._id} className='  relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
@@ -21,9 +23,9 @@ function UserRow({ data }: UserRowProps) {
 								#
 							</label>
 						</td> */}
-						<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
+						<TableCell className='font-medium  whitespace-nowrap'>
 							<span>{i + 1}.</span>
-						</td>
+						</TableCell>
 						{/* <td>
 							<span
 								title={row.title}
@@ -31,53 +33,51 @@ function UserRow({ data }: UserRowProps) {
 								{row.title}
 							</span>
 						</td> */}
-						<td>
+						<TableCell colSpan={2}>
 							<span
 								title={row.name}
 								className={
-									'text-sm font-semibold block ellipsis-overflow  mb-1  rounded-3xl'
+									'text-sm font-semibold block   mb-1  rounded-3xl'
 								}>
 								{row.name}
 							</span>
 							<span
 								title={row.business?.businessName}
-								className={'ellipsis-overflow text-xs block'}>
+								className={' text-xs block'}>
 								{row.business?.businessName}
 							</span>
-						</td>
+						</TableCell>
 
-						<td>
-							<span
-								title={row.email}
-								className='block  ellipsis-overflow'>
+						<TableCell>
+							<span title={row.email} className='block  '>
 								{row.email}
 							</span>
-						</td>
-						<td>
+						</TableCell>
+						<TableCell>
 							<span
 								className=' block ellipsis-overflow'
 								title={row.business.country}>
 								{row.business.country}
 							</span>
-						</td>
-						<td>
-							<span
-								className=' block ellipsis-overflow'
-								title={row.status}>
+						</TableCell>
+						<TableCell>
+							<Badge variant='outline'>
 								{row.status}
-							</span>
-						</td>
-						<td>
+								{/*
+								<IconLoader/> */}
+							</Badge>
+						</TableCell>
+						<TableCell>
 							<span
 								className=' block ellipsis-overflow'
 								title={row.role}>
 								{row.role}
 							</span>
-						</td>
+						</TableCell>
 						<Modal>
 							<UserRowAction user={row} />
 						</Modal>
-					</tr>
+					</TableRow>
 				);
 			})}
 		</>
