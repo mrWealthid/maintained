@@ -15,7 +15,7 @@ export default function SwitchToggle() {
 
 			<Switch
 				className={`
-        data-[state=checked]:bg-foreground
+         data-[state=checked]:bg-foreground
         relative inline-flex  items-center rounded-full
       `}
 				checked={enabled}

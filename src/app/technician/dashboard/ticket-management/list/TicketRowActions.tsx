@@ -77,28 +77,32 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 											)}
 										</Menu.Item>
 
-										<Menu.Item>
-											{({ active }) => (
-												<Modal.Open opens='accept-request'>
-													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-														<IoCheckmarkDoneOutline color='green' />
-														Accept
-													</button>
-												</Modal.Open>
-											)}
-										</Menu.Item>
+										{ticket.status ===
+											TICKET_STATUS.pending_assignment && (
+											<>
+												<Menu.Item>
+													{({ active }) => (
+														<Modal.Open opens='accept-request'>
+															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
+																<IoCheckmarkDoneOutline color='green' />
+																Accept
+															</button>
+														</Modal.Open>
+													)}
+												</Menu.Item>
 
-										<Menu.Item>
-											{({ active }) => (
-												<Modal.Open opens='decline-ticket'>
-													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-														<RxCross2 color='red' />
-														Decline
-													</button>
-												</Modal.Open>
-											)}
-										</Menu.Item>
-
+												<Menu.Item>
+													{({ active }) => (
+														<Modal.Open opens='decline-ticket'>
+															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
+																<RxCross2 color='red' />
+																Decline
+															</button>
+														</Modal.Open>
+													)}
+												</Menu.Item>
+											</>
+										)}
 										{/* {ticket.status ===
 											TICKET_STATUS.pending && (
 											<Menu.Item>

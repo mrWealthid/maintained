@@ -50,7 +50,7 @@ const TicketList: FC = () => {
 				service={fetchTicketList}
 				queryKey='tickets'
 				searchKey='title'
-				defaultParams={{ status: TICKET_STATUS.assigned }}
+				defaultParams={{ status: TICKET_STATUS.pending_assignment }}
 				headerActions={<TicketHeaderActions />}
 				columns={columns}>
 				<Table.TableHeader />

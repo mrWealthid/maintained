@@ -38,7 +38,7 @@ const LoginComponent = () => {
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='border bg-card w-5/6 md:w-4/6 lg:w-1/3  p-10 flex gap-4 flex-col items-center justify-center'>
+				<section className='border  w-5/6  lg:w-2/3  xl:w-1/3 p-10 flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center font-bold text-2xl'>
 						Sign In to Get Started
 					</p>

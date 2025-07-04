@@ -125,21 +125,10 @@ function Table<T>({
 	const tableRef = useRef(null);
 
 	const CardContent = (
-		<div className='overflow-x-auto card p-2'>
+		<div className='overflow-x-auto bg-white dark:bg-transparent  p-2'>
 			<TableHeaderAction handleFilter={handleFilter}>
 				{headerActions}
 			</TableHeaderAction>
-
-			{/* {isLoading && (
-				<section className='flex justify-center items-center'>
-					<Image
-						width={100}
-						height={100}
-						alt='spinner'
-						src='/images/spinner.svg'
-					/>
-				</section>
-			)} */}
 
 			{!isLoading && !data.length && (
 				<section className='flex justify-center items-center'>
@@ -148,13 +137,15 @@ function Table<T>({
 			)}
 
 			{!isLoading && data.length > 0 && (
-				<table ref={tableRef} className='w-full text-sm'>
+				<table
+					ref={tableRef}
+					className='w-full rounded-xl  border text-sm'>
 					{children}
 				</table>
 			)}
 
 			{data.length > 0 && (
-				<div className='mt-3 text-xs'>
+				<div className='mt-3 border  rounded-xl text-xs'>
 					<Paginator />
 				</div>
 			)}
@@ -203,7 +194,7 @@ function TableFilterForm({ column, onCloseModal }: any) {
 
 	const { columns, isRefetching }: any = useContext(TableContext);
 
-	async function onSubmit(data: any, onCloseModal: any) {
+	async function onSubmit(data: any, onCloseModal: () => void) {
 		handleFilter({ ...search, ...data });
 
 		onCloseModal();
@@ -433,12 +424,14 @@ export function TableHeaderAction({ children }: any) {
 
 	return (
 		<div className='flex flex-col flex-wrap items-center gap-6  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
-			<Search
-				placeHolder={`Search by ${searchKey}`}
-				handleSearch={(val) => setSearchValue(val)}
-			/>
+			<div className='flex-1'>
+				<Search
+					placeHolder={`Search by ${searchKey}`}
+					handleSearch={(val) => setSearchValue(val)}
+				/>
+			</div>
 
-			<div className='flex py-1 flex-wrap items-center gap-3  my-2 md:gap-2'>
+			<div className='flex flex-1 py-1 flex-wrap items-center gap-3  my-2 md:gap-2'>
 				<TableFilter />
 
 				{cloneElement(children, { handleFilter })}
@@ -450,7 +443,7 @@ export function TableHeaderAction({ children }: any) {
 						currentTableRef={tableRef.current}>
 						<button
 							type='button'
-							className='w-full  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center  bg-gray-50  dark:glass dark:border-none font-light text-black border btn'>
+							className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center   dark:border-none font-light  border'>
 							<IoCloudDownloadOutline /> Export
 						</button>
 					</DownloadTableExcel>

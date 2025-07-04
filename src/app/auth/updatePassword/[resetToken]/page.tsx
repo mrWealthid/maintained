@@ -9,7 +9,7 @@ import { IUpdatePassword } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 
-const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
+const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = ({
 	params
 }) => {
 	const { register, handleSubmit, formState } = useForm({
@@ -43,7 +43,7 @@ const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = async ({
 	return (
 		<>
 			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='border w-5/6 md:w-4/6 lg:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
+				<section className='border w-5/6 md:w-4/6 lg:w-1/3 xl:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center font-bold text-2xl'>
 						Update Password
 					</p>

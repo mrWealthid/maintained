@@ -60,7 +60,7 @@ body {
 	}
 
 	.request-card {
-		@apply flex bg-card rounded-2xl hover:shadow-md dark:hover:shadow-none duration-500 transition-shadow p-3 max-w-xl flex-col items-start justify-between dark:glass;
+		@apply flex rounded-2xl bg-card dark:bg-transparent hover:shadow-md dark:hover:shadow-none duration-500 transition-shadow p-3 border max-w-xl flex-col items-start justify-between;
 	}
 
 	.request-card__details {

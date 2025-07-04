@@ -12,7 +12,7 @@ import { ticketListFilter } from '@/app/shared/ticket-feat/data/data';
 
 const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<TicketFilterQuery | null>({
-		status: TICKET_STATUS.pending
+		status: TICKET_STATUS.pending_assignment
 	});
 
 	async function handleClick(query: TicketFilterQuery | null) {

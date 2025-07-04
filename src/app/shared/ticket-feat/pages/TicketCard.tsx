@@ -37,7 +37,7 @@ const TicketCard: FC<Ticket> = ({
 	// const verify = new MiddlewareFeatures().verifyToken();
 
 	return (
-		<section className='request-card w-full'>
+		<section className='request-card w-full border'>
 			<div className='flex items-center flex-wrap justify-between w-full text-xs'>
 				<section className='flex gap-5 items-center'>
 					<time className='text-gray-500 dark:text-white'>

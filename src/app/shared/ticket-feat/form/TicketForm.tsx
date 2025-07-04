@@ -269,7 +269,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		<div className='lg:w-2/3  flex flex-col gap-4'>
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
-				className='flex flex-1 p-6 rounded-lg card  items-center'>
+				className='flex flex-1 p-6 rounded-lg border items-center'>
 				<section className='flex-col flex gap-2 w-full'>
 					<section className='flex mb-5 justify-between items-center'>
 						<h3>Create Maintenance Ticket</h3>
