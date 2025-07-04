@@ -46,7 +46,7 @@ const SignupComponent = () => {
 	return (
 		<>
 			<section className='flex flex-col min-h-screen items-center justify-center'>
-				<section className='border lg:my-5 w-5/6 md:w-4/6 lg:w-2/3 py-10 px-6 flex gap-6 flex-col items-center justify-center'>
+				<section className='border bg-card lg:my-5 w-5/6 md:w-4/6 lg:w-2/3 py-10 px-6 flex gap-6 flex-col items-center justify-center'>
 					<p className='text-center   font-bold text-2xl'>Sign Up</p>
 
 					{/* <section className="flex flex-col gap-3 items-center justify-center w-full">
