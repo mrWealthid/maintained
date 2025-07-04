@@ -7,6 +7,7 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import { Types } from 'mongoose';
 import User from '@/model/userModel';
 import { TicketActivity } from '@/model/ticketActivity';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 
 connect();
 
@@ -41,7 +42,14 @@ export async function GET(request: NextRequest) {
 			// Only allow tickets assigned to this technician with specific statuses
 			filter = {
 				assignedTo: verify.userId,
-				status: { $in: ['assigned', 'scheduled', 'completed'] }
+				status: {
+					$in: [
+						TICKET_STATUS.pending_assignment,
+						TICKET_STATUS.assigned,
+						TICKET_STATUS.scheduled,
+						TICKET_STATUS.completed
+					]
+				}
 			};
 		}
 

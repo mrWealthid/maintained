@@ -39,9 +39,12 @@ export async function PATCH(
 			);
 		}
 
-		if (existingTicket.assignedTo !== verify.userId) {
+		//Verify this had been assigned to the loggedIn Technician
+		if (
+			existingTicket.assignedTo?.toString() !== verify.userId.toString()
+		) {
 			return NextResponse.json(
-				{ error: 'No assigned Ticket  found' },
+				{ error: 'No assigned Ticket found' },
 				{ status: 404 }
 			);
 		}
@@ -82,7 +85,7 @@ export async function PATCH(
 		}
 
 		updatedFields.status = newStatus;
-		updatedFields.actionedBy = verify.userId;
+		// updatedFields.actionedBy = verify.userId;
 
 		const updatedTicket = await Ticket.findByIdAndUpdate(
 			ticketId,
