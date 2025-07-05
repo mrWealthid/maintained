@@ -4,7 +4,7 @@ import RequestRow from './TicketRow';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { FC } from 'react';
 import { fetchTicketList } from '@/app/shared/ticket-feat/service/ticket-service';
-import Table from '@/app/shared/components/table/Table';
+import TableComponent from '@/app/shared/components/table/Table';
 import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
 import TicketHeaderActions from './TicketHeaderActions';
 import { TicketListFilter } from '@/app/shared/ticket-feat/model/ticket.model';
@@ -46,18 +46,18 @@ const TicketList: FC = () => {
 
 	return (
 		<div className='h-80'>
-			<Table<Ticket>
+			<TableComponent<Ticket>
 				service={fetchTicketList}
 				queryKey='tickets'
 				searchKey='title'
 				defaultParams={{ status: TICKET_STATUS.pending_assignment }}
 				headerActions={<TicketHeaderActions />}
 				columns={columns}>
-				<Table.TableHeader />
-				<Table.TableRow customRow={true}>
+				<TableComponent.TableHeader />
+				<TableComponent.TableRow customRow={true}>
 					<RequestRow />
-				</Table.TableRow>
-			</Table>
+				</TableComponent.TableRow>
+			</TableComponent>
 		</div>
 	);
 };

@@ -58,10 +58,13 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					<DropdownMenuItem>
 						<Link href={`bookings/${ticket.id}`}>View Details</Link>
 					</DropdownMenuItem>
+
+					{/* TODO:: This feat should be executed by an admin who
+					created the ticket only */}
 					{ticket.status === TICKET_STATUS.pending && (
 						<DropdownMenuItem>
 							<Modal.Open opens='self-assign'>
-								<button>Assign to me</button>
+								<button type='button'>Assign to me</button>
 							</Modal.Open>
 						</DropdownMenuItem>
 					)}
@@ -69,18 +72,20 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{ticket.status === TICKET_STATUS.processing && (
 						<DropdownMenuItem>
 							<Modal.Open opens='assign-technician'>
-								<button>Assign</button>
+								<button type='button'>Assign</button>
 							</Modal.Open>
 						</DropdownMenuItem>
 					)}
-
-					<DropdownMenuSeparator />
-
-					<DropdownMenuItem>
-						<Modal.Open opens='delete-ticket'>
-							<button>Delete</button>
-						</Modal.Open>
-					</DropdownMenuItem>
+					{/* <DropdownMenuSeparator /> */}
+					{/* TODO:: This feat should be executed by the user who
+					created the ticket only */}
+					{
+						<DropdownMenuItem>
+							<Modal.Open opens='delete-ticket'>
+								<button type='button'>Delete</button>
+							</Modal.Open>
+						</DropdownMenuItem>
+					}
 				</DropdownMenuContent>
 			</DropdownMenu>
 

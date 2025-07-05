@@ -48,78 +48,70 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 	return (
 		<TableCell className='md:px-2 py-2 space-x-3'>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						variant={'ghost'}
+						className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+						size='icon'>
+						<TfiMore />
+						<span className='sr-only'>Open menu</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align='end' className='w-32'>
+					<DropdownMenuItem>
+						<Link href={`bookings/${ticket.id}`}>View Details</Link>
+					</DropdownMenuItem>
+					{ticket.status === TICKET_STATUS.pending_assignment && (
+						<>
+							<DropdownMenuItem>
+								<Modal.Open opens='accept-request'>
+									<button type='button'>Accept</button>
+								</Modal.Open>
+							</DropdownMenuItem>
 
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							variant={'ghost'}
-							className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
-							size='icon'>
-							<TfiMore />
-							<span className='sr-only'>Open menu</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align='end' className='w-32'>
-						<DropdownMenuItem>
-							<Link href={`bookings/${ticket.id}`}>
-								View Details
-							</Link>
-						</DropdownMenuItem>
-						{ticket.status === TICKET_STATUS.pending_assignment && (
-							<>
-								<DropdownMenuItem>
-									<Modal.Open opens='accept-request'>
-										<button>Accept</button>
-									</Modal.Open>
-								</DropdownMenuItem>
+							<DropdownMenuItem>
+								<Modal.Open opens='decline-ticket'>
+									<button type='button'>Decline</button>
+								</Modal.Open>
+							</DropdownMenuItem>
+						</>
+					)}
+				</DropdownMenuContent>
+			</DropdownMenu>
 
-								<DropdownMenuItem>
-									<Modal.Open opens='decline-ticket'>
-										<button>Decline</button>
-									</Modal.Open>
-								</DropdownMenuItem>
-							</>
-						)}
-					</DropdownMenuContent>
-				</DropdownMenu>
-
-				<Modal.Window
-					name='decline-ticket'
-					title='Decline Maintenance Ticket'
-					description='Request ticket will be declined'>
-					<DeclineForm ticket={ticket} />
-				</Modal.Window>
-				<Modal.Window
-					name='accept-request'
-					title='Accept Maintenance Ticket'
-					description='Request ticket will be assigned to you'>
-					<ConfirmationPage
-						handler={(onCloseModal: () => void) => {
-							handleProcessResponse(onCloseModal);
-						}}
-						isLoading={isProcessing}
-						modalText={
-							'Are you sure you want to accept this ticket'
-						}
-						reason='confirm'
-					/>
-				</Modal.Window>
-				<Modal.Window
-					name='self-assign'
-					title='Assign Ticket'
-					description='Request ticket will be assigned to you'>
-					<ConfirmationPage
-						handler={(onCloseModal) => {
-							handleAssign(onCloseModal);
-						}}
-						isLoading={isUpdating}
-						modalText={
-							'Are you sure you want to assign this ticket'
-						}
-						reason='confirm'
-					/>
-				</Modal.Window>
-	
+			<Modal.Window
+				name='decline-ticket'
+				title='Decline Maintenance Ticket'
+				description='Request ticket will be declined'>
+				<DeclineForm ticket={ticket} />
+			</Modal.Window>
+			<Modal.Window
+				name='accept-request'
+				title='Accept Maintenance Ticket'
+				description='Request ticket will be assigned to you'>
+				<ConfirmationPage
+					handler={(onCloseModal: () => void) => {
+						handleProcessResponse(onCloseModal);
+					}}
+					isLoading={isProcessing}
+					modalText={'Are you sure you want to accept this ticket'}
+					reason='confirm'
+				/>
+			</Modal.Window>
+			<Modal.Window
+				name='self-assign'
+				title='Assign Ticket'
+				description='Request ticket will be assigned to you'>
+				<ConfirmationPage
+					handler={(onCloseModal) => {
+						handleAssign(onCloseModal);
+					}}
+					isLoading={isUpdating}
+					modalText={'Are you sure you want to assign this ticket'}
+					reason='confirm'
+				/>
+			</Modal.Window>
 		</TableCell>
 	);
 };

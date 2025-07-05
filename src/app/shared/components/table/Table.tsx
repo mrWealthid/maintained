@@ -644,8 +644,8 @@ function Paginator() {
 	}
 
 	return (
-		<section className='flex justify-between items-center'>
-			<section className='flex-col flex  p-2 gap-1'>
+		<section className='flex justify-between p-2 items-center'>
+			<section className='flex-col flex  gap-1'>
 				<strong>Summary</strong>
 				<p>
 					{' '}
