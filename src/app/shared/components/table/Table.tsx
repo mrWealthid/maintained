@@ -139,7 +139,7 @@ function Table<T>({
 			{!isLoading && data.length > 0 && (
 				<table
 					ref={tableRef}
-					className='w-full  rounded-xl  border text-sm'>
+					className='w-full overflow-hidden  rounded-xl  border text-sm'>
 					{children}
 				</table>
 			)}
@@ -369,7 +369,7 @@ function TableFilter() {
 function TableHeader() {
 	const { columns, actionable }: any = useContext(TableContext);
 	return (
-		<thead className='text-xs text-left     w-full uppercase'>
+		<thead className='text-xs  text-left bg-muted w-full capitalize'>
 			<tr>
 				{/* <th className="px-2 py-4 uppercase">
 					<input
@@ -385,18 +385,16 @@ function TableHeader() {
 					</label>
 				</th> */}
 
-				<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
+				<th className='p-2  md:px-2 py-3  whitespace-nowrap'>
 					<span>S/N</span>
-				</td>
+				</th>
 
 				{columns.map((col: Icolumn) => (
-					<th
-						key={col.header}
-						className='py-4 px-2  flex-grow uppercase'>
+					<th key={col.header} className=' px-2  py-3 flex-grow '>
 						{col.header}
 					</th>
 				))}
-				{actionable && <th className='px-2 py-4 uppercase'>Actions</th>}
+				{actionable && <th className='px-2 py-3  '>Actions</th>}
 			</tr>
 		</thead>
 	);
@@ -465,15 +463,15 @@ export function TableHeaderAction({ children }: any) {
 function TableRow({ children, customRow }: any) {
 	const { columns, data, actionable }: any = useContext(TableContext);
 
-	if (data?.length < 1) {
-		return (
-			<tbody className=' w-full h-5'>
-				<tr>
-					<td className='  block p-2 text-sm '>No data available</td>
-				</tr>
-			</tbody>
-		);
-	}
+	// if (data?.length < 1) {
+	// 	return (
+	// 		<tbody className=' w-full h-5'>
+	// 			<tr>
+	// 				<td className='  block p-2 text-sm '>No data available</td>
+	// 			</tr>
+	// 		</tbody>
+	// 	);
+	// }
 
 	return (
 		<tbody className=''>
@@ -482,7 +480,7 @@ function TableRow({ children, customRow }: any) {
 						return (
 							<tr
 								key={i}
-								className='text-left dark:border-none  px-2 py-1 relative border-b  '>
+								className='text-left  px-2 py-1 relative border-b '>
 								{/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"
@@ -496,7 +494,7 @@ function TableRow({ children, customRow }: any) {
 										#
 									</label>
 								</td> */}
-								<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
+								<td className='p-2 font-medium md:px-2  whitespace-nowrap'>
 									<span>{i + 1}.</span>
 								</td>
 
@@ -632,8 +630,8 @@ function Paginator() {
 	}
 
 	return (
-		<section className='flex justify-between items-center'>
-			<section className='flex-col flex  dark:border-t p-2 gap-1'>
+		<section className='flex p-2 justify-between items-center'>
+			<section className='flex-col flex   gap-1'>
 				<strong>Summary</strong>
 				<p>
 					{' '}

@@ -7,7 +7,7 @@ function UserRow({ data }: UserRowProps) {
 		<>
 			{data?.map((row, i) => {
 				return (
-					<tr key={row._id} className='  relative border-b '>
+					<tr key={row._id} className='relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
@@ -31,7 +31,7 @@ function UserRow({ data }: UserRowProps) {
 								{row.title}
 							</span>
 						</td> */}
-						<td>
+						<td className='w-1/3'>
 							<span
 								title={row.name}
 								className={

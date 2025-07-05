@@ -1,15 +1,14 @@
 import { TicketRowProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import { getStatusColor } from '@/utils/helper';
 import TicketRowActions from './TicketRowActions';
+import { Badge } from '@/components/ui/badge';
 
 function RequestRow({ data }: TicketRowProps) {
 	return (
 		<>
 			{data?.map((row, i) => {
 				return (
-					<tr
-						key={i}
-						className=' dark:border-none  relative border-b  '>
+					<tr key={row._id} className='relative border-b'>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
@@ -26,19 +25,13 @@ function RequestRow({ data }: TicketRowProps) {
 						<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
 							<span>{i + 1}.</span>
 						</td>
-						<td>
-							<span
-								title={row.title}
-								className='block  ellipsis-overflow'>
+						<td className='w-1/3'>
+							<span title={row.title} className='block'>
 								{row.title}
 							</span>
 						</td>
-						<td>
-							<span
-								title={row.user?.name}
-								className={
-									'text-sm font-semibold block ellipsis-overflow  mb-1  rounded-3xl'
-								}>
+						<td className='w-1/5'>
+							<span title={row.user?.name} className={' block '}>
 								{row.user?.name}
 							</span>
 							{/* <span
@@ -63,34 +56,23 @@ function RequestRow({ data }: TicketRowProps) {
 							</span>
 						</td>
 						<td>
-							<span
+							{/* <span
 								style={{
 									backgroundColor: getStatusColor(row.status)
 								}}
 								className='text-[8px] md:text-xs text-primary py-2 px-3 rounded-3xl inline-flex'>
 								{row.status}
-							</span>
+							</span> */}
+
+							<Badge variant={'outline'}>{row.status}</Badge>
 						</td>
 						<td>
 							<span className='flex justify-center gap-2 flex-col'>
-								{/* <span className='font-bold'>
-									{row.} Night(s)
-								</span> */}
-
 								<span
 									title={new Date(
 										row.createdAt
 									).toDateString()}
-									className='flex  text-xs  md:text-sm gap-1'>
-									{/* <span>
-										{new Date(row.startDate).toDateString()}{' '}
-										➡️
-									</span> */}
-
-									{/* <span>
-										{' '}
-										{new Date(row.endDate).toDateString()}
-									</span> */}
+									className='flex   gap-1'>
 									{new Date(row.createdAt).toDateString()}
 								</span>
 							</span>

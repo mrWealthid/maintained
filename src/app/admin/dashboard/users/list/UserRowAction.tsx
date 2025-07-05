@@ -19,7 +19,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 		});
 	}
 	return (
-		<td className='p-2 md:px-2 md:py-2 space-x-3'>
+		<td className='py-2 space-x-3'>
 			<Menu as='div' className='relative inline-block text-left'>
 				{({ open }) => (
 					<>
