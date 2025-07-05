@@ -1,5 +1,5 @@
 import React from 'react';
-import TicketCardLoader from '../shared/ticket-feat/loaders/TicketCardLoader';
+import TicketCardLoader from '@/shared/ticket-feat/loaders/TicketCardLoader';
 
 const loading = () => {
 	<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>

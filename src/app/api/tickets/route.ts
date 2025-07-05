@@ -7,7 +7,7 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import { Types } from 'mongoose';
 import User from '@/model/userModel';
 import { TicketActivity } from '@/model/ticketActivity';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TICKET_STATUS } from '@/shared/enums/enums';
 
 connect();
 

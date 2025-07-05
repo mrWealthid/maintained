@@ -7,9 +7,9 @@ import { useForm } from 'react-hook-form';
 import { useRegister } from '../hooks/useAuth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Link from 'next/link';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import EmailInput from '@/app/shared/components/form-elements/Email-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import TextInput from '@/shared/components/form-elements/Text-Input';
+import EmailInput from '@/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/shared/components/form-elements/Button';
 import { RegisterForm } from '../model/model';
 
 const SignupComponent = () => {

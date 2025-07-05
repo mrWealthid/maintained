@@ -1,17 +1,16 @@
 'use client';
-import { Icolumn } from '@/app/shared/components/table/models/table.model';
+import { TableColumn } from '@/shared/components/table/models/table.model';
 import RequestRow from './TicketRow';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TICKET_STATUS } from '@/shared/enums/enums';
 import { FC } from 'react';
-import { fetchTicketList } from '@/app/shared/ticket-feat/service/ticket-service';
-import Table from '@/app/shared/components/table/Table';
-import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
+import { fetchTicketList } from '@/shared/ticket-feat/service/ticket-service';
+import Table from '@/shared/components/table/Table';
+import { Ticket } from '@/shared/model/model';
 import TicketHeaderActions from './TicketHeaderActions';
-import { TicketListFilter } from '@/app/shared/ticket-feat/model/ticket.model';
-import TableComponent from '@/app/shared/components/table/Table';
+import TableComponent from '@/shared/components/table/Table';
 
 const TicketList: FC = () => {
-	const columns: Icolumn[] = [
+	const columns: TableColumn[] = [
 		{
 			header: 'Title',
 			accessor: 'title',
