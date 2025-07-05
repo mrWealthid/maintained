@@ -1,10 +1,9 @@
-import React, { FC, Fragment } from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import { HiPencil, HiSquare2Stack, HiTrash } from 'react-icons/hi2';
-import { UserRowActionsProps } from '@/shared/model/model';
-import Modal from '@/shared/components/modal/Modal';
-import { CgMenuGridO } from 'react-icons/cg';
-import ConfirmationPage from '@/shared/components/ui/ConfirmationPage';
+
+import React, { FC } from 'react';
+
+import { UserRowActionsProps } from '@/app/shared/model/model';
+import Modal from '@/app/shared/components/modal/Modal';
+import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { useDeleteUser } from '../hooks/userHooks';
 import UserForm from '../UserForm';
 import { TfiMore } from 'react-icons/tfi';
@@ -42,7 +41,9 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 				<DropdownMenuContent align='end' className='w-32'>
 					<DropdownMenuItem>
 						<Modal.Open opens='edit-user-form'>
-							<button>Edit</button>
+							<button type='button' className='w-full text-left'>
+								Edit
+							</button>
 						</Modal.Open>
 					</DropdownMenuItem>
 					{/* <DropdownMenuItem>Make a copy</DropdownMenuItem>
@@ -50,7 +51,9 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 					{/* <DropdownMenuSeparator /> */}
 					<DropdownMenuItem>
 						<Modal.Open opens='delete-user'>
-							<button>Delete</button>
+							<button type='button' className='w-full text-left'>
+								Delete
+							</button>
 						</Modal.Open>
 						{/* Delete */}
 					</DropdownMenuItem>

@@ -66,13 +66,21 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						<>
 							<DropdownMenuItem>
 								<Modal.Open opens='accept-request'>
-									<button type='button'>Accept</button>
+									<button
+										type='button'
+										className='w-full text-left'>
+										Accept
+									</button>
 								</Modal.Open>
 							</DropdownMenuItem>
 
 							<DropdownMenuItem>
 								<Modal.Open opens='decline-ticket'>
-									<button type='button'>Decline</button>
+									<button
+										type='button'
+										className='w-full text-left'>
+										Decline
+									</button>
 								</Modal.Open>
 							</DropdownMenuItem>
 						</>
