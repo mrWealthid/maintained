@@ -1,13 +1,13 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { redirect } from 'next/navigation';
-import Header from '../shared/components/header/Header';
+import Header from '@/shared/components/header/Header';
 
-import Breadcrumbs from '../shared/components/breadcrumbs/BreadCrumbs';
-import { adminCrumbLabelMap } from '../shared/data/data';
+import Breadcrumbs from '@/shared/components/breadcrumbs/BreadCrumbs';
+import { adminCrumbLabelMap } from '@/shared/data/data';
 
 import { AppSidebar } from '../(users)/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { adminRoutes } from '../shared/routes/routes';
+import { adminRoutes } from '@/shared/routes/routes';
 
 export default function DashboardLayout({
 	children // will be a page or nested layout

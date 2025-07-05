@@ -4,13 +4,13 @@ import React from 'react';
 import { fetchUsers } from '../service/user.service';
 import UserHeaderActions from './UserHeaderActions';
 import UserRow from './UserRow';
-import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
-import { Icolumn } from '@/app/shared/components/table/models/table.model';
-import { User } from '@/app/shared/model/model';
-import TableComponent from '@/app/shared/components/table/Table';
+import { INVITE_STATUS, ROLES } from '@/shared/enums/enums';
+import { TableColumn } from '@/shared/components/table/models/table.model';
+import { User } from '@/shared/model/model';
+import TableComponent from '@/shared/components/table/Table';
 
 const UserList = () => {
-	const columns: Icolumn[] = [
+	const columns: TableColumn[] = [
 		{
 			header: 'name',
 			accessor: 'name',

@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/app/shared/model/model';
+import { ApiResponse } from '@/shared/model/model';
 import { headers } from 'next/headers';
 
 export async function getData(url: any, tag?: any) {

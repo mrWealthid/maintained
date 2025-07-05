@@ -1,11 +1,11 @@
 'use client';
 import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
-import { useProcessTechnicianResponse } from '@/app/shared/ticket-feat/hooks/ticketHooks';
-import { DeclineTicketFormProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import TextInput from '@/shared/components/form-elements/Text-Input';
+import ButtonComponent from '@/shared/components/form-elements/Button';
+import { TECHNICIAN_RESPONSE } from '@/shared/enums/enums';
+import { useProcessTechnicianResponse } from '@/shared/ticket-feat/hooks/ticketHooks';
+import { DeclineTicketFormProps } from '@/shared/ticket-feat/model/ticket.model';
 
 const DeclineForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 	const { register, handleSubmit, formState } = useForm<{ reason: string }>({

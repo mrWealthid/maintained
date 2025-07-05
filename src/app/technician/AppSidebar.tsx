@@ -16,7 +16,7 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link'; // ✅ Correct import
 import React from 'react';
-import { Routes, User } from '../shared/model/model';
+import { Routes, User } from '@/shared/model/model';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,9 +26,9 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import Profile from '../shared/components/profile/Profile';
-import Logout from '../shared/components/header/Logout';
-import { useProfile } from '../shared/components/profile/hooks/useProfile';
+import Profile from '@/shared/components/profile/Profile';
+import Logout from '@/shared/components/header/Logout';
+import { useProfile } from '@/shared/components/profile/hooks/useProfile';
 
 export function AppSidebar({ routes }: { routes: Routes[] }) {
 	const pathname = usePathname();

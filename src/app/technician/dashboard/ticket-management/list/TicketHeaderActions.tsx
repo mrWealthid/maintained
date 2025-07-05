@@ -2,13 +2,13 @@
 
 import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TICKET_STATUS } from '@/shared/enums/enums';
 import { getStatusColor } from '@/utils/helper';
 import {
 	TicketFilterQuery,
 	TicketQueryprops
-} from '@/app/shared/ticket-feat/model/ticket.model';
-import { ticketListFilter } from '@/app/shared/ticket-feat/data/data';
+} from '@/shared/ticket-feat/model/ticket.model';
+import { ticketListFilter } from '@/shared/ticket-feat/data/data';
 
 const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<TicketFilterQuery | null>({

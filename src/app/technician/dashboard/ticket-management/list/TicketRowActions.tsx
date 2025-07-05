@@ -3,15 +3,15 @@ import React, { FC, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { HiEye } from 'react-icons/hi2';
-import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import { TicketRowActionsProps } from '@/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
 	useDeleteTicket,
 	useProcessTechnicianResponse
-} from '@/app/shared/ticket-feat/hooks/ticketHooks';
-import Modal from '@/app/shared/components/modal/Modal';
-import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
-import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
+} from '@/shared/ticket-feat/hooks/ticketHooks';
+import Modal from '@/shared/components/modal/Modal';
+import ConfirmationPage from '@/shared/components/ui/ConfirmationPage';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/shared/enums/enums';
 import { TfiMore } from 'react-icons/tfi';
 import { IoCheckmarkDoneOutline } from 'react-icons/io5';
 import { RxCross2 } from 'react-icons/rx';

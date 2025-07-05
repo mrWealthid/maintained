@@ -7,8 +7,8 @@ import { useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useOnboardUser } from '../../hooks/useAuth';
 import { OnboardUserForm } from '../../model/model';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import TextInput from '@/shared/components/form-elements/Text-Input';
+import ButtonComponent from '@/shared/components/form-elements/Button';
 
 const OnboardingComponent: FC<{ params: { inviteToken: string } }> = ({
 	params

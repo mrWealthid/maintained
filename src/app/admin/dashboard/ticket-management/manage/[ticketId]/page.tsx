@@ -1,5 +1,5 @@
-import { Ticket } from '@/app/shared/model/model';
-import TicketForm from '@/app/shared/ticket-feat/form/TicketForm';
+import { Ticket } from '@/shared/model/model';
+import TicketForm from '@/shared/ticket-feat/form/TicketForm';
 import { findData } from '@/utils/apiRequests';
 import { FC } from 'react';
 
