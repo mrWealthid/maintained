@@ -6,8 +6,8 @@ import UserHeaderActions from './UserHeaderActions';
 import UserRow from './UserRow';
 import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
 import { Icolumn } from '@/app/shared/components/table/models/table.model';
-import Table from '@/app/shared/components/table/Table';
 import { User } from '@/app/shared/model/model';
+import TableComponent from '@/app/shared/components/table/Table';
 
 const UserList = () => {
 	const columns: Icolumn[] = [
@@ -44,18 +44,18 @@ const UserList = () => {
 	];
 
 	return (
-		<Table<User>
+		<TableComponent<User>
 			headerActions={<UserHeaderActions />}
 			service={fetchUsers}
 			defaultParams={{ status: INVITE_STATUS.invited }}
 			searchKey='name'
 			queryKey='Users'
 			columns={columns}>
-			<Table.TableHeader />
-			<Table.TableRow customRow={true}>
+			<TableComponent.TableHeader />
+			<TableComponent.TableRow customRow={true}>
 				<UserRow />
-			</Table.TableRow>
-		</Table>
+			</TableComponent.TableRow>
+		</TableComponent>
 	);
 };
 
