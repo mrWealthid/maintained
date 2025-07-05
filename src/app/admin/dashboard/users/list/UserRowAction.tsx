@@ -48,7 +48,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 					{/* <DropdownMenuItem>Make a copy</DropdownMenuItem>
 					<DropdownMenuItem>Favorite</DropdownMenuItem> */}
 					{/* <DropdownMenuSeparator /> */}
-					<DropdownMenuItem variant='destructive'>
+					<DropdownMenuItem>
 						<Modal.Open opens='delete-user'>
 							<button>Delete</button>
 						</Modal.Open>
