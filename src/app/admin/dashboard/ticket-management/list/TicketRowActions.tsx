@@ -17,6 +17,14 @@ import { TfiMore } from 'react-icons/tfi';
 import { TbUserCog } from 'react-icons/tb';
 import AssignTechnicianForm from '../AssignTechnicianForm';
 import { TableCell } from '@/components/ui/table';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -36,130 +44,78 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 	return (
 		<TableCell className='md:px-2 py-2 space-x-3'>
-			<Modal>
-				<Menu as='div' className='relative inline-block text-left'>
-					{({ open }) => (
-						<>
-							<div>
-								<Menu.Button
-									className={`inline-flex  w-full justify-center  rounded-full border p-3 text-sm font-medium
-
-										  ${open ? 'ring-1 ring-button-primary ring-offset-1  ' : ''}
-										`}>
-									<TfiMore />
-								</Menu.Button>
-							</div>
-							<Transition
-								as={Fragment}
-								enter='transition ease-out duration-100'
-								enterFrom='transform opacity-0 scale-95'
-								enterTo='transform opacity-100 scale-100'
-								leave='transition ease-in duration-75'
-								leaveFrom='transform opacity-100 scale-100'
-								leaveTo='transform opacity-0 scale-95'>
-								<Menu.Items className='absolute bg-card border  z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black/5 focus:outline-none'>
-									<div className='px-1 py-1'>
-										<Menu.Item>
-											{({ active }) => (
-												<Link
-													href={`bookings/${ticket.id}`}
-													className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-													{active ? (
-														<HiEye />
-													) : (
-														<HiEye />
-													)}
-													View Details
-												</Link>
-											)}
-										</Menu.Item>
-
-										{ticket.status ===
-											TICKET_STATUS.pending && (
-											<Menu.Item>
-												{({ active }) => (
-													<Modal.Open opens='self-assign'>
-														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-															<MdOutlineAssignmentInd />
-															Assign to me
-														</button>
-													</Modal.Open>
-												)}
-											</Menu.Item>
-										)}
-
-										{ticket.status ===
-											TICKET_STATUS.processing && (
-											<Menu.Item>
-												{({ active }) => (
-													<Modal.Open opens='assign-technician'>
-														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-															<TbUserCog />
-															Assign
-														</button>
-													</Modal.Open>
-												)}
-											</Menu.Item>
-										)}
-
-										<Menu.Item>
-											{({ active }) => (
-												<Modal.Open opens='delete-ticket'>
-													<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-														{active ? (
-															<HiTrash color='red' />
-														) : (
-															<HiTrash color='red' />
-														)}
-														Delete
-													</button>
-												</Modal.Open>
-											)}
-										</Menu.Item>
-									</div>
-								</Menu.Items>
-							</Transition>
-						</>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						variant={'ghost'}
+						className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+						size='icon'>
+						<TfiMore />
+						<span className='sr-only'>Open menu</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align='end' className='w-32'>
+					<DropdownMenuItem>
+						<Link href={`bookings/${ticket.id}`}>View Details</Link>
+					</DropdownMenuItem>
+					{ticket.status === TICKET_STATUS.pending && (
+						<DropdownMenuItem>
+							<Modal.Open opens='self-assign'>
+								<button>Assign to me</button>
+							</Modal.Open>
+						</DropdownMenuItem>
 					)}
-				</Menu>
 
-				<Modal.Window
-					name='delete-ticket'
-					title='Delete Maintenance Ticket'
-					description='Request ticket will be deleted permanently'>
-					<ConfirmationPage
-						handler={(onCloseModal) => {
-							handleDelete(onCloseModal ?? (() => {}));
-						}}
-						isLoading={isDeleting}
-						modalText={
-							'Are you sure you want to delete this ticket'
-						}
-					/>
-				</Modal.Window>
-				<Modal.Window
-					name='self-assign'
-					title='Assign Ticket'
-					description='Request ticket will be assigned to you'>
-					<ConfirmationPage
-						handler={(onCloseModal) => {
-							handleAssign(onCloseModal ?? (() => {}));
-						}}
-						isLoading={isUpdating}
-						modalText={
-							'Are you sure you want to assign this ticket'
-						}
-						reason='confirm'
-					/>
-				</Modal.Window>
+					{ticket.status === TICKET_STATUS.processing && (
+						<DropdownMenuItem>
+							<Modal.Open opens='assign-technician'>
+								<button>Assign</button>
+							</Modal.Open>
+						</DropdownMenuItem>
+					)}
 
-				<Modal.Window
-					name='assign-technician'
-					title='Assign Maintenance Ticket'
-					description='Request ticket will be Assigned To Technician'>
-					<AssignTechnicianForm ticket={ticket} />
-				</Modal.Window>
-			</Modal>
+					<DropdownMenuSeparator />
+
+					<DropdownMenuItem>
+						<Modal.Open opens='delete-ticket'>
+							<button>Delete</button>
+						</Modal.Open>
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			<Modal.Window
+				name='delete-ticket'
+				title='Delete Maintenance Ticket'
+				description='Request ticket will be deleted permanently'>
+				<ConfirmationPage
+					handler={(onCloseModal) => {
+						handleDelete(onCloseModal ?? (() => {}));
+					}}
+					isLoading={isDeleting}
+					modalText={'Are you sure you want to delete this ticket'}
+				/>
+			</Modal.Window>
+			<Modal.Window
+				name='self-assign'
+				title='Assign Ticket'
+				description='Request ticket will be assigned to you'>
+				<ConfirmationPage
+					handler={(onCloseModal) => {
+						handleAssign(onCloseModal ?? (() => {}));
+					}}
+					isLoading={isUpdating}
+					modalText={'Are you sure you want to assign this ticket'}
+					reason='confirm'
+				/>
+			</Modal.Window>
+
+			<Modal.Window
+				name='assign-technician'
+				title='Assign Maintenance Ticket'
+				description='Request ticket will be Assigned To Technician'>
+				<AssignTechnicianForm ticket={ticket} />
+			</Modal.Window>
 		</TableCell>
 	);
 };

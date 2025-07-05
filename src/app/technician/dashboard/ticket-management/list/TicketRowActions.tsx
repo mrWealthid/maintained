@@ -17,6 +17,14 @@ import { IoCheckmarkDoneOutline } from 'react-icons/io5';
 import { RxCross2 } from 'react-icons/rx';
 import DeclineForm from '../DeclineForm';
 import { TableCell } from '@/components/ui/table';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
@@ -40,89 +48,40 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 	return (
 		<TableCell className='md:px-2 py-2 space-x-3'>
-			<Modal>
-				<Menu as='div' className='relative inline-block text-left'>
-					{({ open }) => (
-						<>
-							<div>
-								<Menu.Button
-									className={`inline-flex  w-full justify-center  rounded-full border p-3 text-sm font-medium
 
-										  ${open ? 'ring-1 ring-button-primary ring-offset-1  ' : ''}
-										`}>
-									<TfiMore />
-								</Menu.Button>
-							</div>
-							<Transition
-								as={Fragment}
-								enter='transition ease-out duration-100'
-								enterFrom='transform opacity-0 scale-95'
-								enterTo='transform opacity-100 scale-100'
-								leave='transition ease-in duration-75'
-								leaveFrom='transform opacity-100 scale-100'
-								leaveTo='transform opacity-0 scale-95'>
-								<Menu.Items className='absolute bg-card border  z-50 right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black/5 focus:outline-none'>
-									<div className='px-1 py-1'>
-										<Menu.Item>
-											{({ active }) => (
-												<Link
-													href={`bookings/${ticket.id}`}
-													className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-													{active ? (
-														<HiEye />
-													) : (
-														<HiEye />
-													)}
-													View Details
-												</Link>
-											)}
-										</Menu.Item>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant={'ghost'}
+							className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+							size='icon'>
+							<TfiMore />
+							<span className='sr-only'>Open menu</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align='end' className='w-32'>
+						<DropdownMenuItem>
+							<Link href={`bookings/${ticket.id}`}>
+								View Details
+							</Link>
+						</DropdownMenuItem>
+						{ticket.status === TICKET_STATUS.pending_assignment && (
+							<>
+								<DropdownMenuItem>
+									<Modal.Open opens='accept-request'>
+										<button>Accept</button>
+									</Modal.Open>
+								</DropdownMenuItem>
 
-										{ticket.status ===
-											TICKET_STATUS.pending_assignment && (
-											<>
-												<Menu.Item>
-													{({ active }) => (
-														<Modal.Open opens='accept-request'>
-															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-																<IoCheckmarkDoneOutline color='green' />
-																Accept
-															</button>
-														</Modal.Open>
-													)}
-												</Menu.Item>
-
-												<Menu.Item>
-													{({ active }) => (
-														<Modal.Open opens='decline-ticket'>
-															<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-																<RxCross2 color='red' />
-																Decline
-															</button>
-														</Modal.Open>
-													)}
-												</Menu.Item>
-											</>
-										)}
-										{/* {ticket.status ===
-											TICKET_STATUS.pending && (
-											<Menu.Item>
-												{({ active }) => (
-													<Modal.Open opens='self-assign'>
-														<button className='group gap-2 flex w-full  duration-700 transition-all hover:bg-secondary   items-center rounded-md px-2 py-2 text-sm'>
-															<MdOutlineAssignmentInd color='#1849aa' />
-															Assign to me
-														</button>
-													</Modal.Open>
-												)}
-											</Menu.Item>
-										)} */}
-									</div>
-								</Menu.Items>
-							</Transition>
-						</>
-					)}
-				</Menu>
+								<DropdownMenuItem>
+									<Modal.Open opens='decline-ticket'>
+										<button>Decline</button>
+									</Modal.Open>
+								</DropdownMenuItem>
+							</>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
 
 				<Modal.Window
 					name='decline-ticket'
@@ -160,7 +119,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						reason='confirm'
 					/>
 				</Modal.Window>
-			</Modal>
+	
 		</TableCell>
 	);
 };
