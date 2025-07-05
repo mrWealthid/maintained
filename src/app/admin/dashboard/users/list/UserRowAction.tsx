@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 
 import { UserRowActionsProps } from '@/app/shared/model/model';
 import Modal from '@/app/shared/components/modal/Modal';
-import { CgMenuGridO } from 'react-icons/cg';
 import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { useDeleteUser } from '../hooks/userHooks';
 import UserForm from '../UserForm';
