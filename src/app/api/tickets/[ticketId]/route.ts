@@ -7,18 +7,18 @@ export async function GET(
 	{ params }: { params: { ticketId: string } }
 ) {
 	try {
-		// const verify = new MiddlewareFeatures().verifyToken();
+		const verify = new MiddlewareFeatures().verifyToken();
 
-		// if (!verify.isUserAuthenticated) {
-		// 	return NextResponse.json(
-		// 		{ error: 'Unauthorized access' },
-		// 		{ status: 401 }
-		// 	);
-		// }
+		if (!verify.isUserAuthenticated) {
+			return NextResponse.json(
+				{ error: 'Unauthorized access' },
+				{ status: 401 }
+			);
+		}
 
 		const ticketId = params.ticketId;
 
-		const maintenanceRequest = await Ticket.findOne({
+		const ticket = await Ticket.findOne({
 			_id: ticketId
 		}).populate({
 			path: 'category',
@@ -27,7 +27,7 @@ export async function GET(
 
 		const response = NextResponse.json({
 			status: 'success',
-			data: maintenanceRequest
+			data: ticket
 		});
 
 		return response;
@@ -83,7 +83,7 @@ export async function DELETE(
 	try {
 		const verify = new MiddlewareFeatures().verifyToken();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify.isUserAuthenticated || !verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -99,6 +99,7 @@ export async function DELETE(
 				{ status: 404 }
 			);
 		}
+
 		const response = NextResponse.json({
 			message: 'Ticket deleted Successfully',
 			success: true
