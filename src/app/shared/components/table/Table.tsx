@@ -29,10 +29,19 @@ import Search from '../search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
 import Empty from '../empty/Empty';
 import AnimatedBorderWrapper from '../animation/AnimatedBorder';
+import {
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow
+} from '@/components/ui/table';
 
 const TableContext = createContext({});
 
-function Table<T>({
+function TableComponent<T>({
 	queryKey,
 	children,
 	columns,
@@ -137,11 +146,11 @@ function Table<T>({
 			)}
 
 			{!isLoading && data.length > 0 && (
-				<table
+				<Table
 					ref={tableRef}
-					className='w-full  rounded-xl  border text-sm'>
+					className='w-full overflow-hidden  rounded-xl  border text-xs'>
 					{children}
-				</table>
+				</Table>
 			)}
 
 			{data.length > 0 && (
@@ -366,11 +375,11 @@ function TableFilter() {
 	);
 }
 
-function TableHeader() {
+function TableHeaders() {
 	const { columns, actionable }: any = useContext(TableContext);
 	return (
-		<thead className='text-xs text-left     w-full uppercase'>
-			<tr>
+		<TableHeader className='bg-muted capitalize sticky  top-0'>
+			<TableRow>
 				{/* <th className="px-2 py-4 uppercase">
 					<input
 						title="check"
@@ -385,20 +394,23 @@ function TableHeader() {
 					</label>
 				</th> */}
 
-				<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
+				<TableHead className=' font-medium px-2  whitespace-nowrap'>
 					<span>S/N</span>
-				</td>
+				</TableHead>
 
 				{columns.map((col: Icolumn) => (
-					<th
+					<TableHead
+						colSpan={col.colspan}
 						key={col.header}
-						className='py-4 px-2  flex-grow uppercase'>
+						className=' px-2 flex-grow'>
 						{col.header}
-					</th>
+					</TableHead>
 				))}
-				{actionable && <th className='px-2 py-4 uppercase'>Actions</th>}
-			</tr>
-		</thead>
+				{actionable && (
+					<TableHead className='px-2  '>Actions</TableHead>
+				)}
+			</TableRow>
+		</TableHeader>
 	);
 }
 export function TableHeaderAction({ children }: any) {
@@ -443,7 +455,7 @@ export function TableHeaderAction({ children }: any) {
 						currentTableRef={tableRef.current}>
 						<button
 							type='button'
-							className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center   dark:border-none font-light  border'>
+							className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border'>
 							<IoCloudDownloadOutline /> Export
 						</button>
 					</DownloadTableExcel>
@@ -462,27 +474,27 @@ export function TableHeaderAction({ children }: any) {
 		</div>
 	);
 }
-function TableRow({ children, customRow }: any) {
+function TableRows({ children, customRow }: any) {
 	const { columns, data, actionable }: any = useContext(TableContext);
 
-	if (data?.length < 1) {
-		return (
-			<tbody className=' w-full h-5'>
-				<tr>
-					<td className='  block p-2 text-sm '>No data available</td>
-				</tr>
-			</tbody>
-		);
-	}
+	// if (data?.length < 1) {
+	// 	return (
+	// 		<tbody className=' w-full h-5'>
+	// 			<tr>
+	// 				<td className='  block p-2 text-sm '>No data available</td>
+	// 			</tr>
+	// 		</tbody>
+	// 	);
+	// }
 
 	return (
-		<tbody className=''>
+		<TableBody className=''>
 			{!customRow
 				? data?.map((row: any, i: any) => {
 						return (
-							<tr
+							<TableRow
 								key={i}
-								className='text-left dark:border-none  px-2 py-1 relative border-b  '>
+								className=' px-2  relative border-b  '>
 								{/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"
@@ -496,9 +508,9 @@ function TableRow({ children, customRow }: any) {
 										#
 									</label>
 								</td> */}
-								<td className='p-2 font-medium md:px-2 md:py-4 whitespace-nowrap'>
+								<TableCell className=' font-medium'>
 									<span>{i + 1}.</span>
-								</td>
+								</TableCell>
 
 								{columns.map((column: Icolumn, i: any) => {
 									//This logic helps check for more accessors; double items in a row cell
@@ -509,7 +521,7 @@ function TableRow({ children, customRow }: any) {
 									if (column.custom) {
 										if (column.custom.type === 'style') {
 											return (
-												<td
+												<TableCell
 													className={`${
 														column.custom.bolden &&
 														'font-semibold'
@@ -520,12 +532,12 @@ function TableRow({ children, customRow }: any) {
 														className='bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex'>
 														{value}
 													</span>
-												</td>
+												</TableCell>
 											);
 										}
 										if (column.custom.type === 'date') {
 											return (
-												<td
+												<TableCell
 													className={`${
 														column.custom.bolden &&
 														'font-semibold'
@@ -537,12 +549,12 @@ function TableRow({ children, customRow }: any) {
 													{new Date(
 														value
 													).toDateString()}
-												</td>
+												</TableCell>
 											);
 										}
 										if (column.custom.type === 'currency') {
 											return (
-												<td
+												<TableCell
 													className={`${
 														column.custom.bolden &&
 														'font-semibold'
@@ -555,12 +567,12 @@ function TableRow({ children, customRow }: any) {
 														className='ellipsis-overflow block'>
 														{formatCurrency(value)}
 													</span>
-												</td>
+												</TableCell>
 											);
 										}
 										if (column.custom.type === 'percent') {
 											return (
-												<td
+												<TableCell
 													className={`${
 														column.custom.bolden &&
 														'font-semibold'
@@ -568,12 +580,12 @@ function TableRow({ children, customRow }: any) {
 													title={value}
 													key={column.accessor + i}>
 													{value} %
-												</td>
+												</TableCell>
 											);
 										}
 										if (column.custom.type === 'sentence') {
 											return (
-												<td
+												<TableCell
 													className={`${
 														column.custom.bolden &&
 														'font-semibold'
@@ -581,28 +593,28 @@ function TableRow({ children, customRow }: any) {
 													key={column.accessor + i}>
 													{value} {''}{' '}
 													{column.custom.suffix}
-												</td>
+												</TableCell>
 											);
 										}
 									}
 									return (
-										<td key={column.accessor + i}>
+										<TableCell key={column.accessor + i}>
 											<span
 												title={value}
 												className='block ellipsis-overflow'>
 												{value}
 											</span>
-										</td>
+										</TableCell>
 									);
 								})}
 
 								{actionable &&
 									cloneElement(children, { rowData: row })}
-							</tr>
+							</TableRow>
 						);
 					})
 				: cloneElement(children, { data })}
-		</tbody>
+		</TableBody>
 	);
 }
 
@@ -633,7 +645,7 @@ function Paginator() {
 
 	return (
 		<section className='flex justify-between items-center'>
-			<section className='flex-col flex  dark:border-t p-2 gap-1'>
+			<section className='flex-col flex  p-2 gap-1'>
 				<strong>Summary</strong>
 				<p>
 					{' '}
@@ -750,7 +762,7 @@ function Paginator() {
 	);
 }
 
-Table.TableHeader = TableHeader;
-Table.TableRow = TableRow;
+TableComponent.TableHeader = TableHeaders;
+TableComponent.TableRow = TableRows;
 
-export default Table;
+export default TableComponent;

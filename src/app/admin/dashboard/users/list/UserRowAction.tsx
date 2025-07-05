@@ -8,6 +8,7 @@ import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { useDeleteUser } from '../hooks/userHooks';
 import UserForm from '../UserForm';
 import { TfiMore } from 'react-icons/tfi';
+import { TableCell } from '@/components/ui/table';
 
 const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 	const { isDeleting, deleteUser } = useDeleteUser();
@@ -19,7 +20,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 		});
 	}
 	return (
-		<td className='p-2 md:px-2 md:py-2 space-x-3'>
+		<TableCell className='md:px-2 py-2 space-x-3'>
 			<Menu as='div' className='relative inline-block text-left'>
 				{({ open }) => (
 					<>
@@ -120,7 +121,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 					}
 				/>
 			</Modal.Window>
-		</td>
+		</TableCell>
 	);
 };
 

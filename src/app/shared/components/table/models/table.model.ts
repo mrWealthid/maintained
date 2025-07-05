@@ -33,6 +33,7 @@ export interface Icolumn {
 	searchType?: 'TEXT' | 'DROPDOWN' | 'NUMBER';
 	selectOptions?: IselectOptions[];
 	filterKey?: string;
+	colspan?: number;
 }
 
 export interface IselectOptions {

@@ -15,7 +15,8 @@ const UserList = () => {
 			header: 'name',
 			accessor: 'name',
 			searchType: 'TEXT',
-			filterKey: 'name'
+			filterKey: 'name',
+			colspan: 2
 		},
 		{ header: 'email', accessor: 'email' },
 		{ header: 'Nationality', accessor: 'business.country' },
