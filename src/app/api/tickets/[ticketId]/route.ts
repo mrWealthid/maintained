@@ -19,11 +19,21 @@ export async function GET(
 		const ticketId = params.ticketId;
 
 		const ticket = await Ticket.findOne({
-			_id: ticketId
+			_id: ticketId,
+			user: verify.userId
 		}).populate({
 			path: 'category',
 			select: 'name '
 		});
+
+		if (!ticket) {
+			return NextResponse.json(
+				{
+					error: 'No ticket not found'
+				},
+				{ status: 403 }
+			);
+		}
 
 		const response = NextResponse.json({
 			status: 'success',
@@ -53,17 +63,26 @@ export async function PATCH(
 		const { status, type, ...rest } = await request.json();
 		const ticketId = params.ticketId;
 
-		const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
-			new: true,
-			runValidators: true
-		});
+		// const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
+		// 	new: true,
+		// 	runValidators: true
+		// });
+
+		const updatedRequest = await Ticket.findOneAndUpdate(
+			{ _id: ticketId, user: verify.userId }, // Ensure user is the owner
+			rest,
+			{ new: true, runValidators: true }
+		);
 
 		if (!updatedRequest) {
 			return NextResponse.json(
-				{ error: 'No ticket found with id' },
-				{ status: 404 }
+				{
+					error: 'You are not authorized to update this ticket or ticket not found'
+				},
+				{ status: 403 }
 			);
 		}
+
 		const response = NextResponse.json({
 			message: 'Ticket Updated Successfully',
 			success: true,
@@ -91,12 +110,17 @@ export async function DELETE(
 		}
 		const ticketId = params.ticketId;
 
-		const ticket = await Ticket.findByIdAndDelete(ticketId);
+		const ticket = await Ticket.findOneAndDelete({
+			_id: ticketId,
+			user: verify.userId // ← only delete if the user owns the ticket
+		});
 
 		if (!ticket) {
 			return NextResponse.json(
-				{ error: 'No request found with id' },
-				{ status: 404 }
+				{
+					error: 'Ticket not found or you are not authorized to delete this ticket'
+				},
+				{ status: 403 }
 			);
 		}
 
