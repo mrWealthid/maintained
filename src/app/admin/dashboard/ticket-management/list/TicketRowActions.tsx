@@ -64,7 +64,11 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{ticket.status === TICKET_STATUS.pending && (
 						<DropdownMenuItem>
 							<Modal.Open opens='self-assign'>
-								<button type='button'>Assign to me</button>
+								<button
+									type='button'
+									className='w-full text-left'>
+									Assign to me
+								</button>
 							</Modal.Open>
 						</DropdownMenuItem>
 					)}
@@ -72,7 +76,11 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{ticket.status === TICKET_STATUS.processing && (
 						<DropdownMenuItem>
 							<Modal.Open opens='assign-technician'>
-								<button type='button'>Assign</button>
+								<button
+									type='button'
+									className='w-full text-left'>
+									Assign
+								</button>
 							</Modal.Open>
 						</DropdownMenuItem>
 					)}
@@ -82,7 +90,11 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{
 						<DropdownMenuItem>
 							<Modal.Open opens='delete-ticket'>
-								<button type='button'>Delete</button>
+								<button
+									type='button'
+									className='w-full text-left'>
+									Delete
+								</button>
 							</Modal.Open>
 						</DropdownMenuItem>
 					}
