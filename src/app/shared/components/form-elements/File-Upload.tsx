@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import Image from 'next/image';
 import { FileUploadPreview } from '../../model/model';
 import { RiAsterisk } from 'react-icons/ri';
+import toast from 'react-hot-toast';
 
 interface FileUploadProps {
 	label: string;
@@ -37,6 +38,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	const [selected, setSelected] = useState<FileList | null>(null);
 	const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
 	const [existingFiles, setExistingFiles] = useState(initialFiles);
+	const [isDragging, setIsDragging] = useState(false);
 
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
@@ -107,6 +109,67 @@ const FileUpload: React.FC<FileUploadProps> = ({
 		);
 	}
 
+	//Drag and drop feature
+
+	const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+		event.preventDefault();
+		setIsDragging(true);
+	};
+
+	const handleDragLeave = () => {
+		setIsDragging(false);
+	};
+
+	const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+		event.preventDefault();
+		setIsDragging(false);
+		const files = Array.from(event.dataTransfer.files);
+
+		const allowedType = accept.split('/')[0]; // "image" or "video"
+
+		const validFiles = files.filter((file) =>
+			file.type.startsWith(allowedType)
+		);
+
+		if (validFiles.length === 0) {
+			toast.error(
+				`Only ${allowedType} files are allowed in this drop zone.`
+			);
+		}
+
+		onFileSelect(validFiles as unknown as FileList);
+		setSelected(validFiles as unknown as FileList);
+
+		const newPreviews: FileUploadPreview[] = validFiles.map((file, i) => ({
+			id: Date.now() + i,
+			url: URL.createObjectURL(file),
+			type: file.type,
+			file,
+			uploadProgress: 0
+		}));
+
+		setPreviews(newPreviews);
+	};
+
+	// const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+	// 	event.preventDefault();
+	// 	setIsDragging(false);
+	// 	const files = event.dataTransfer.files;
+	// 	if (!files) return;
+	// 	onFileSelect(files);
+	// 	setSelected(files);
+	// 	const newPreviews: FileUploadPreview[] = Array.from(files).map(
+	// 		(file, i) => ({
+	// 			id: Date.now() + i,
+	// 			url: URL.createObjectURL(file),
+	// 			type: file.type,
+	// 			file,
+	// 			uploadProgress: 0
+	// 		})
+	// 	);
+	// 	setPreviews(newPreviews);
+	// };
+
 	return (
 		<div>
 			<label htmlFor={id} className='text-xs cursor-pointer'>
@@ -114,9 +177,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
 			</label>
 			<label
 				htmlFor={id}
+				onDragOver={handleDragOver}
+				onDragLeave={handleDragLeave}
+				onDrop={handleDrop}
 				className=' p-4 flex flex-col gap-2 cursor-pointer border  rounded-lg justify-center items-center h-32'>
 				<span className='p-4  bg-secondary text-green-600 rounded-full'>
 					{icon}
+				</span>
+				<span className='text-xs text-gray-500'>
+					Select a file or drag and drop here
 				</span>
 				{required && <RiAsterisk color='red' />}
 			</label>

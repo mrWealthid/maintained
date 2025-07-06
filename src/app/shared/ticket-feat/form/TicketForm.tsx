@@ -7,7 +7,6 @@ import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import { fetchTicketCategory } from '../service/ticket-service';
 import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
-
 import { useCreateTicket } from '../hooks/ticketHooks';
 import { Category, CreateTicketPayload } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
@@ -28,6 +27,10 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		Record<string, number>
 	>({});
 	const [isUploading, setIsUploading] = useState(false);
+
+	const [uploadResults, setUploadResults] = useState<Record<string, string>>(
+		{}
+	);
 
 	const initialImageFiles =
 		isEditing && Array.isArray(ticket?.images)
@@ -162,6 +165,51 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		console.log(err);
 	}
 
+	function batchUpload(
+		fileList: FileList,
+		type: 'video' | 'image',
+		setProgress?: (fileName: string, percent: number) => void
+	) {
+		return Array.from(fileList).map(async (file) => {
+			// ✅ Check if already uploaded
+			if (uploadResults[file.name]) {
+				return uploadResults[file.name]; // reuse cached result
+			}
+
+			const formData = new FormData();
+			formData.append(
+				'upload_preset',
+				type === 'image'
+					? process.env.IMG_PRESET!
+					: process.env.VIDEO_PRESET!
+			);
+			formData.append('file', file);
+
+			try {
+				const response = await axios.post(
+					`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
+					formData,
+					{
+						onUploadProgress: (event) => {
+							const percent = Math.round(
+								(event.loaded * 100) / (event.total ?? 1)
+							);
+							if (setProgress) setProgress(file.name, percent);
+						}
+					}
+				);
+				const url = response.data.secure_url || response.data.url;
+
+				setUploadResults((prev) => ({ ...prev, [file.name]: url }));
+
+				return url;
+			} catch (error) {
+				console.error('Upload error:', error);
+				throw error;
+			}
+		});
+	}
+
 	// function batchUpload(
 	// 	fileList: FileList,
 	// 	type: 'video' | 'image',
@@ -169,66 +217,29 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	// ) {
 	// 	return Array.from(fileList).map(async (file) => {
 	// 		const formData = new FormData();
-	// 		formData.append(
-	// 			'upload_preset',
-	// 			type === 'image'
-	// 				? process.env.IMG_PRESET!
-	// 				: process.env.VIDEO_PRESET!
-	// 		);
 	// 		formData.append('file', file);
+	// 		formData.append('resourceType', type);
 
 	// 		try {
-	// 			const response = await axios.post(
-	// 				`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
-	// 				formData,
-	// 				{
-	// 					onUploadProgress: (event) => {
-	// 						const percent = Math.round(
-	// 							(event.loaded * 100) / (event.total ?? 1)
-	// 						);
-	// 						if (setProgress) setProgress(file.name, percent);
-	// 					}
+	// 			const response = await axios.post('/api/cloudinary', formData, {
+	// 				onUploadProgress: (event) => {
+	// 					const percent = Math.round(
+	// 						(event.loaded * 100) / (event.total ?? 1)
+	// 					);
+	// 					if (setProgress) setProgress(file.name, percent);
+	// 				},
+	// 				headers: {
+	// 					'Content-Type': 'multipart/form-data'
 	// 				}
-	// 			);
+	// 			});
 
-	// 			return response.data.url;
+	// 			return response.data.secure_url || response.data.url;
 	// 		} catch (error) {
 	// 			console.error('Upload error:', error);
 	// 			throw error;
 	// 		}
 	// 	});
 	// }
-
-	function batchUpload(
-		fileList: FileList,
-		type: 'video' | 'image',
-		setProgress?: (fileName: string, percent: number) => void
-	) {
-		return Array.from(fileList).map(async (file) => {
-			const formData = new FormData();
-			formData.append('file', file);
-			formData.append('resourceType', type);
-
-			try {
-				const response = await axios.post('/api/cloudinary', formData, {
-					onUploadProgress: (event) => {
-						const percent = Math.round(
-							(event.loaded * 100) / (event.total ?? 1)
-						);
-						if (setProgress) setProgress(file.name, percent);
-					},
-					headers: {
-						'Content-Type': 'multipart/form-data'
-					}
-				});
-
-				return response.data.secure_url || response.data.url;
-			} catch (error) {
-				console.error('Upload error:', error);
-				throw error;
-			}
-		});
-	}
 
 	async function handleMultipleUpload(
 		file: FileList,
@@ -406,7 +417,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 									className='input-style'
 									type='text'
 									hidden
-									readOnly
 									id='category'
 								/>
 							</TextInput>
@@ -429,7 +439,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							id='area'
 						/>
 					</TextInput>
-					<section className='w-full items-start flex-col lg:flex-row flex gap-10'>
+					<section className='w-full items-start flex-col mt-3 lg:flex-row flex gap-10'>
 						<div className=' w-full lg:w-1/2  border  p-2 rounded-2xl'>
 							<FileUpload
 								id='image'
@@ -470,12 +480,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 						<ButtonComponent
 							type='submit'
-							styles='w-1/2 md:w-1/3  '
+							styles='rounded-lg'
 							disabled={!isValid || isSubmitting || !isDirty}
 							loading={isSubmitting}
 							btnText={` ${
 								isEditing ? 'Update' : 'Create'
-							}`}></ButtonComponent>
+							} Ticket`}></ButtonComponent>
 					</section>
 				</section>
 			</form>
