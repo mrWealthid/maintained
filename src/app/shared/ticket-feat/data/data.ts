@@ -1,4 +1,4 @@
-import { TICKET_STATUS } from '@/shared/enums/enums';
+import { TICKET_STATUS } from '@/app/shared/enums/enums';
 
 export const ticketListFilter = [
 	{

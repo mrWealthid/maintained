@@ -1,7 +1,7 @@
 import { toast } from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { handleCreateUser, handleDeleteUser } from '../service/user.service';
-import { ApiError, CreateUserPayload } from '@/shared/model/model';
+import { ApiError, CreateUserPayload } from '@/app/shared/model/model';
 
 export function useCreateUser(
 	isEditing: boolean,

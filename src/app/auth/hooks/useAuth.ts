@@ -20,7 +20,7 @@ import {
 	OnboardUser
 } from '../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
-import { ROLES } from '@/shared/enums/enums';
+import { ROLES } from '@/app/shared/enums/enums';
 
 export function useLogin() {
 	const router = useRouter();

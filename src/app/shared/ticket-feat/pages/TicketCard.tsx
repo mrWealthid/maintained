@@ -5,13 +5,15 @@ import { CiUser } from 'react-icons/ci';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { HiEye, HiPencil, HiTrash } from 'react-icons/hi2';
-import ConfirmationPage from '@/shared/components/ui/ConfirmationPage';
-import { useDeleteTicket } from '@/shared/ticket-feat/hooks/ticketHooks';
-import { Ticket } from '@/shared/model/model';
-import Modal from '@/shared/components/modal/Modal';
-import { ROUTES_DEFINITION } from '@/shared/routes/routes';
+import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
+import { useDeleteTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
+import { Ticket } from '@/app/shared/model/model';
+import Modal from '@/app/shared/components/modal/Modal';
+import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 import { TfiMore } from 'react-icons/tfi';
 import { ROLES } from '../../enums/enums';
+// Ensure global styles are imported for Tailwind CSS classes
+
 // import { useLayoutContext } from '../../contexts/LayoutContextProvider';
 // import MiddlewareFeatures from '@/middlewareFeatures';
 

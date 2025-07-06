@@ -1,6 +1,6 @@
-import { UserRowProps } from '@/shared/model/model';
+import { UserRowProps } from '@/app/shared/model/model';
 import UserRowAction from './UserRowAction';
-import Modal from '@/shared/components/modal/Modal';
+import Modal from '@/app/shared/components/modal/Modal';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 

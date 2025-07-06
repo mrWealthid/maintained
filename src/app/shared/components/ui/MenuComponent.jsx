@@ -1,5 +1,5 @@
 import React, { useContext, createContext, useState } from 'react';
-import { useOutsideClick } from '@/shared/hooks/useOutSideClick';
+import { useOutsideClick } from '@/app/shared/hooks/useOutSideClick';
 import { createPortal } from 'react-dom';
 
 const MenusContext = createContext({});

@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLogin } from '../hooks/useAuth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import EmailInput from '@/shared/components/form-elements/Email-Input';
-import TextInput from '@/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/shared/components/form-elements/Button';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { LoginForm } from '../model/model';
 
 const LoginComponent = () => {

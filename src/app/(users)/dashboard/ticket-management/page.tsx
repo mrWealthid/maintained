@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import TicketList from '@/app/admin/dashboard/ticket-management/list/TicketList';
-import ToggleView from '@/shared/components/toggle-views/ToggleView';
-import TicketComponent from '@/shared/ticket-feat/pages/TicketComponent';
+import ToggleView from '@/app/shared/components/toggle-views/ToggleView';
+import TicketComponent from '@/app/shared/ticket-feat/pages/TicketComponent';
 import Link from 'next/link';
 import { CiCirclePlus } from 'react-icons/ci';
-import TransitionReveal from '@/shared/components/animation/TransitionReveal';
+import TransitionReveal from '@/app/shared/components/animation/TransitionReveal';
 
 export default function Home() {
 	const [isList, setIsList] = useState(false);

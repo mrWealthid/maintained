@@ -2,11 +2,11 @@
 import React, { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { useCreateUser } from './hooks/userHooks';
-import TextInput from '@/shared/components/form-elements/Text-Input';
-import EmailInput from '@/shared/components/form-elements/Email-Input';
-import ButtonComponent from '@/shared/components/form-elements/Button';
-import { ROLES } from '@/shared/enums/enums';
-import { ManageUserForm, ManageUserFormProps } from '@/shared/model/model';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import { ROLES } from '@/app/shared/enums/enums';
+import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
 
 const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 	const isEditing = !!user?._id;

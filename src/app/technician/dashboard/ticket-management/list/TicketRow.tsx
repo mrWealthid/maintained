@@ -1,8 +1,8 @@
-import { TicketRowProps } from '@/shared/ticket-feat/model/ticket.model';
+import { TicketRowProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import TicketRowActions from './TicketRowActions';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import Modal from '@/shared/components/modal/Modal';
+import Modal from '@/app/shared/components/modal/Modal';
 
 function RequestRow({ data }: TicketRowProps) {
 	return (

@@ -2,7 +2,7 @@
 import React, { FC } from 'react';
 import { CiCirclePlus } from 'react-icons/ci';
 import UserForm from './UserForm';
-import Modal from '@/shared/components/modal/Modal';
+import Modal from '@/app/shared/components/modal/Modal';
 
 const AddUser: FC = () => {
 	return (

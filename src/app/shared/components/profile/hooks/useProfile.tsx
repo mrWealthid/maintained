@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfile } from '../service/profile.service';
-import { ApiResponse } from '@/shared/model/model';
+import { ApiResponse } from '@/app/shared/model/model';
 
 export function useProfile<T>() {
 	const { isLoading, data, error } = useQuery({

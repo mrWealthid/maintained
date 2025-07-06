@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { Emails } from '@/utils/email-resend';
-import { INVITE_STATUS } from '@/shared/enums/enums';
+import { INVITE_STATUS } from '@/app/shared/enums/enums';
 // import { Emails } from '@/utils/email-resend';
 
 connect();

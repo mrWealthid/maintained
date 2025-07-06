@@ -1,4 +1,4 @@
-import { ROLES, TICKET_STATUS } from '@/shared/enums/enums';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';

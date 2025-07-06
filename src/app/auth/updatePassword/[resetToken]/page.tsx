@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useUpdatePassword } from '../../hooks/useAuth';
 import { IUpdatePassword } from '../../model/model';
-import TextInput from '@/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/shared/components/form-elements/Button';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
 
 const UpdatePasswordComponent: FC<{ params: { resetToken: string } }> = ({
 	params

@@ -10,10 +10,10 @@ import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
 
 import { useCreateTicket } from '../hooks/ticketHooks';
 import { Category, CreateTicketPayload } from '../../model/model';
-import TextInput from '@/shared/components/form-elements/Text-Input';
-import AutoComplete from '@/shared/components/auto-complete/AutoComplete';
-import FileUpload from '@/shared/components/form-elements/File-Upload';
-import ButtonComponent from '@/shared/components/form-elements/Button';
+import TextInput from '@/app/shared/components/form-elements/Text-Input';
+import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
+import FileUpload from '@/app/shared/components/form-elements/File-Upload';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { ROUTES_DEFINITION } from '../../routes/routes';
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {

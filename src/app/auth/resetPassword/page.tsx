@@ -4,8 +4,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useResetPassword } from '../hooks/useAuth';
-import EmailInput from '@/shared/components/form-elements/Email-Input';
-import ButtonComponent from '@/shared/components/form-elements/Button';
+import EmailInput from '@/app/shared/components/form-elements/Email-Input';
+import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { IResetPassword } from '../model/model';
 
 const ResetPasswordComponent = () => {

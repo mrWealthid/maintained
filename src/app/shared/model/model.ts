@@ -1,4 +1,4 @@
-import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/shared/enums/enums';
+import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 
 export interface Category {
 	id: string;

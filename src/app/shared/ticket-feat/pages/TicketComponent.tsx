@@ -1,15 +1,15 @@
 'use client';
 import React, { FC, useState } from 'react';
 import TicketCard from './TicketCard';
-import { ROLES, TICKET_STATUS } from '@/shared/enums/enums';
-import { useFetchTickets } from '@/shared/ticket-feat/hooks/ticketHooks';
-import { Ticket } from '@/shared/model/model';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
+import { useFetchTickets } from '@/app/shared/ticket-feat/hooks/ticketHooks';
+import { Ticket } from '@/app/shared/model/model';
 import { ticketListFilter } from '../data/data';
-import FilterTabs from '@/shared/components/tabs/FilterTabs';
-import Search from '@/shared/components/search/Search';
+import FilterTabs from '@/app/shared/components/tabs/FilterTabs';
+import Search from '@/app/shared/components/search/Search';
 import { useDebounce } from '@uidotdev/usehooks';
-import Empty from '@/shared/components/empty/Empty';
-import AnimatedBorderWrapper from '@/shared/components/animation/AnimatedBorder';
+import Empty from '@/app/shared/components/empty/Empty';
+import AnimatedBorderWrapper from '@/app/shared/components/animation/AnimatedBorder';
 import TicketCardLoader from '../loaders/TicketCardLoader';
 
 const TicketComponent: FC = () => {

@@ -3,7 +3,7 @@ import User from '@/model/userModel';
 import Business from '@/model/businessModel';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import { ROLES } from '@/shared/enums/enums';
+import { ROLES } from '@/app/shared/enums/enums';
 import TicketCategory from '@/model/ticketCategoryModel';
 
 connect();

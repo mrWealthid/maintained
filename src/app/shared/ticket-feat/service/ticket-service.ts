@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ROLES, TICKET_STATUS } from '@/shared/enums/enums';
+import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
 import {
 	ApiPaginatedResponse,
 	ApiResponse,

@@ -1,9 +1,9 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { redirect } from 'next/navigation';
-import { routes, technicianRoutes } from '@/shared/routes/routes';
-import Header from '@/shared/components/header/Header';
-import Breadcrumbs from '@/shared/components/breadcrumbs/BreadCrumbs';
-import { crumbLabelMap, technicianCrumbLabelMap } from '@/shared/data/data';
+import { routes, technicianRoutes } from '@/app/shared/routes/routes';
+import Header from '@/app/shared/components/header/Header';
+import Breadcrumbs from '@/app/shared/components/breadcrumbs/BreadCrumbs';
+import { crumbLabelMap, technicianCrumbLabelMap } from '@/app/shared/data/data';
 
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
