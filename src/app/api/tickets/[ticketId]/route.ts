@@ -7,20 +7,10 @@ export async function GET(
 	{ params }: { params: { ticketId: string } }
 ) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
-
-		if (!verify.isUserAuthenticated) {
-			return NextResponse.json(
-				{ error: 'Unauthorized access' },
-				{ status: 401 }
-			);
-		}
-
 		const ticketId = params.ticketId;
 
 		const ticket = await Ticket.findOne({
-			_id: ticketId,
-			user: verify.userId
+			_id: ticketId
 		}).populate({
 			path: 'category',
 			select: 'name '
@@ -45,6 +35,49 @@ export async function GET(
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }
+// export async function GET(
+// 	request: NextRequest,
+// 	{ params }: { params: { ticketId: string } }
+// ) {
+// 	try {
+// 		const verify = new MiddlewareFeatures().verifyToken();
+
+// 		if (!verify.isUserAuthenticated) {
+// 			return NextResponse.json(
+// 				{ error: 'Unauthorized access' },
+// 				{ status: 401 }
+// 			);
+// 		}
+
+// 		const ticketId = params.ticketId;
+
+// 		const ticket = await Ticket.findOne({
+// 			_id: ticketId,
+// 			user: verify.userId
+// 		}).populate({
+// 			path: 'category',
+// 			select: 'name '
+// 		});
+
+// 		if (!ticket) {
+// 			return NextResponse.json(
+// 				{
+// 					error: 'No ticket not found'
+// 				},
+// 				{ status: 403 }
+// 			);
+// 		}
+
+// 		const response = NextResponse.json({
+// 			status: 'success',
+// 			data: ticket
+// 		});
+
+// 		return response;
+// 	} catch (error: any) {
+// 		return NextResponse.json({ error: error.message }, { status: 500 });
+// 	}
+// }
 
 export async function PATCH(
 	request: NextRequest,

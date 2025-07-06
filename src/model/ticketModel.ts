@@ -82,11 +82,12 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
 		},
-		type: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'TicketType',
-			required: true
-		},
+		// type: {
+		// 	type: mongoose.Schema.Types.ObjectId,
+		// 	ref: 'TicketType',
+		// 	required: true
+		// },
+		// //Create and load data for ticket types... Repair, Installation etc
 		technicianResponse: {
 			response: {
 				type: String,
