@@ -12,15 +12,18 @@ interface FileUploadProps {
 	id: string;
 	icon: ReactNode;
 	onFileSelect: (files: FileList) => void;
-	selectedFiles?: FileList | null;
+	onPreviewFileRemove: (file: File) => void; // optional
 	uploadProgress?: Record<string, number>;
 	required?: boolean;
 	initialFiles?: { url: string; type: string; id?: string | number }[]; // <-- Add this
-	onRemoveInitialFile?: (file: {
-		url: string;
-		type: string;
-		id?: string | number;
-	}) => void; // optional
+	onRemoveInitialFile?: (
+		file: {
+			url: string;
+			type: string;
+			id?: string | number;
+		},
+		type: 'image' | 'video'
+	) => void; // optional
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -33,7 +36,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	uploadProgress,
 	required = false,
 	initialFiles = [],
-	onRemoveInitialFile
+	onRemoveInitialFile,
+	onPreviewFileRemove
 }) => {
 	const [selected, setSelected] = useState<FileList | null>(null);
 	const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
@@ -64,15 +68,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
 			if (toRemove) URL.revokeObjectURL(toRemove.url);
 			return prev.filter((p) => p.id !== id);
 		});
+		onPreviewFileRemove?.(previews.find((p) => p.id === id)?.file as File);
 	};
 
-	const handleRemoveExisting = (file: {
-		url: string;
-		type: string;
-		id?: string | number;
-	}) => {
+	const handleRemoveExisting = (
+		file: {
+			url: string;
+			type: string;
+			id?: string | number;
+		},
+		type: 'image' | 'video'
+	) => {
 		setExistingFiles((prev) => prev.filter((f) => f.url !== file.url));
-		onRemoveInitialFile?.(file);
+		onRemoveInitialFile?.(file, type);
 	};
 
 	function UploadFileIcon() {
@@ -207,7 +215,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
 							key={file.id || file.url}
 							className='relative rounded-md border p-1'>
 							<button
-								onClick={() => handleRemoveExisting(file)}
+								onClick={() =>
+									handleRemoveExisting(
+										file,
+										file.type.startsWith('image/')
+											? 'image'
+											: 'video'
+									)
+								}
 								className='absolute top-1 cursor-pointer z-10 right-1  rounded-full p-1 shadow '
 								title='Remove'>
 								<FaTimes size={16} />

@@ -25,7 +25,9 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
 		mutationFn: (payload: CreateTicketPayload) =>
 			createTicket(payload, isEditing, ticketId),
 		onSuccess: () => {
-			toast.success('Maintenance Request successfully created...');
+			toast.success(
+				`Maintenance Request successfully ${isEditing ? 'updated' : 'created'}...`
+			);
 			queryClient.invalidateQueries({
 				queryKey: ['tickets']
 			});

@@ -14,20 +14,19 @@ import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
 import FileUpload from '@/app/shared/components/form-elements/File-Upload';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { ROUTES_DEFINITION } from '../../routes/routes';
+import toast from 'react-hot-toast';
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const isEditing = !!ticket?._id;
 	const [autoCompleteValue, setAutoCompleteValue] = useState<{
 		category: Category;
 	} | null>(null);
-
 	const [selectedImages, setSelectedImages] = useState<FileList | null>(null);
 	const [selectedVideo, setSelectedVideo] = useState<FileList | null>(null);
 	const [uploadProgress, setUploadProgress] = useState<
 		Record<string, number>
 	>({});
 	const [isUploading, setIsUploading] = useState(false);
-
 	const [uploadResults, setUploadResults] = useState<Record<string, string>>(
 		{}
 	);
@@ -49,10 +48,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					id: url
 				}))
 			: [];
+
 	const [remainingImages, setRemainingImages] = useState(initialImageFiles);
 	const [remainingVideos, setRemainingVideos] = useState(initialVideoFiles);
 	const router = useRouter();
 
+	//form controls
 	const { register, handleSubmit, setValue, formState } =
 		useForm<ManageTicketForm>({
 			mode: 'all',
@@ -67,6 +68,14 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 				: {}
 		});
 	const { errors, isValid, isDirty } = formState;
+
+	// Handle auto-complete values
+	function handleAutoCompleteValues(values: any) {
+		setAutoCompleteValue({ ...autoCompleteValue, ...values });
+		if (values.category) setValue('category', values.category._id);
+	}
+
+	// Create ticket mutation
 	const { isCreating, handleCreateTicket } = useCreateTicket(
 		isEditing,
 		ticket?._id
@@ -74,50 +83,44 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const isSubmitting = isUploading || isCreating;
 
-	// const handleRemoveInitialImage = (file: { url: string }) => {
-	// 	setRemainingImages((prev) => prev.filter((f) => f.url !== file.url));
-	// };
-	// const handleRemoveInitialVideo = (file: { url: string }) => {
-	// 	setRemainingVideos((prev) => prev.filter((f) => f.url !== file.url));
-	// };
 	function getCloudinaryPublicId(url: string) {
 		const matches = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
 		return matches ? matches[1] : '';
 	}
 
-	const handleRemoveInitialImage = async (file: { url: string }) => {
+	const handleRemoveInitialAsset = async (
+		file: { url: string },
+		resourceType: 'image' | 'video'
+	) => {
 		const publicId = getCloudinaryPublicId(file.url);
 
 		try {
 			await fetch('/api/cloudinary', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ publicId, resourceType: 'image' })
+				body: JSON.stringify({ publicId, resourceType })
 			});
+
+			resourceType === 'image'
+				? setRemainingImages((prev) =>
+						prev.filter((f) => f.url !== file.url)
+					)
+				: setRemainingVideos((prev) =>
+						prev.filter((f) => f.url !== file.url)
+					);
+			toast.success(`${resourceType} deleted successfully`);
 		} catch (err) {
-			console.error('Failed to delete image from Cloudinary', err);
+			toast.error(`Failed to delete ${resourceType} ${err}`);
 		}
-		setRemainingImages((prev) => prev.filter((f) => f.url !== file.url));
 	};
 
-	const handleRemoveInitialVideo = async (file: { url: string }) => {
-		const publicId = getCloudinaryPublicId(file.url);
-		try {
-			await fetch('/api/cloudinary', {
-				method: 'DELETE',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ publicId, resourceType: 'video' })
-			});
-		} catch (err) {
-			console.error('Failed to delete video from Cloudinary', err);
-		}
-		setRemainingVideos((prev) => prev.filter((f) => f.url !== file.url));
-	};
-
-	function handleAutoCompleteValues(values: any) {
-		setAutoCompleteValue({ ...autoCompleteValue, ...values });
-		if (values.category) setValue('category', values.category._id);
-	}
+	/* @Param {ManageTicketForm} data - The form data submitted by the user.
+  		@returns {Promise<void>} - A promise that resolves when the ticket is successfully created or updated.
+  		@description - This function handles the form submission for creating or updating a maintenance ticket.
+  		It uploads any selected images and videos to Cloudinary, builds the request payload with the form data and uploaded URLs, and then calls the `handleCreateTicket` function to perform the actual ticket creation or update operation.
+  		If the operation is successful, it redirects the user to the tickets dashboard.
+  		If there is an error during the upload or ticket creation process, it logs the error to the console.
+	*/
 
 	async function onSubmit(data: ManageTicketForm) {
 		console.log('Submitting form:', data);
@@ -132,6 +135,17 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 			}
 		});
 	}
+
+	/* @Param {ManageTicketForm} data - The form data submitted by the user.
+		  		@Param {string[]} imgUrls - An optional array of image URLs to include in the ticket payload.
+		  		@Param {string[]} videoUrls - An optional array of video URLs to include in the ticket payload.
+		  		@returns {CreateTicketPayload} - The constructed payload for creating or updating a ticket.
+		  		@description - This function builds the request payload for creating or updating a maintenance ticket.
+		  		It combines the form data with any uploaded image and video URLs, ensuring that existing images and videos are preserved if the ticket is being edited.
+		  		If the ticket is being edited, it merges the existing images and videos with any new uploads.
+		  		If the ticket is being created, it simply uses the provided image and video URLs.
+		  		The function also includes the current ticket status if the ticket is being edited.
+				*/
 
 	function BuildRequestPayload(
 		data: ManageTicketForm,
@@ -164,6 +178,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	function onError(err: any) {
 		console.log(err);
 	}
+
+	/* 	@Param {FileList} fileList - The list of files to be uploaded.
+		@Param {string} type - The type of files being uploaded, either 'video' or 'image'.
+		@Param {function} setProgress - An optional callback function to update the upload progress for each file.
+		@returns {Promise<string[]>} - A promise that resolves to an array of URLs for the successfully uploaded files.
+	*/
 
 	function batchUpload(
 		fileList: FileList,
@@ -210,6 +230,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		});
 	}
 
+	// I prefered to keep the above because it gave me accurate progress updates from cloudinary,
+	// but this is an alternative approach that uses the server-side API route
+	// to handle uploads (downside: you progress upload  when it it's your server not cloudinary ). It can be useful if you want to avoid direct client-side uploads
+	// to Cloudinary and manage uploads through your own backend.
+	// This approach is commented out but can be used if needed.
+
 	// function batchUpload(
 	// 	fileList: FileList,
 	// 	type: 'video' | 'image',
@@ -241,6 +267,17 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	// 	});
 	// }
 
+	/* @Param {FileList} file - The list of files to be uploaded.
+		@Param {string} type - The type of files being uploaded, either 'video' or 'image'.
+		@Param {function} setProgress - A callback function to update the upload progress for each file.
+		@returns {Promise<string[]>} - A promise that resolves to an array of URLs for the successfully uploaded files.
+		@description - This function handles the upload of multiple files to Cloudinary.
+		It first checks if the file list is empty and sets the uploading state to false if so.
+		Then, it sets the uploading state to true and initiates the upload process using the `batchUpload` function.
+		After all uploads are completed, it returns the array of URLs for the uploaded files.
+		If any upload fails, it catches the error, logs it to the console, and rethrows the error.
+		Finally, it resets the uploading state to false to indicate that the upload process has ended.
+	*/
 	async function handleMultipleUpload(
 		file: FileList,
 		type: 'video' | 'image'
@@ -259,6 +296,13 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		}
 	}
 
+	const updateProgress = (fileName: string, percent: number) => {
+		setUploadProgress((prev) => ({
+			...prev,
+			[fileName]: percent
+		}));
+	};
+
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
 		setSelectedImages(files);
@@ -269,12 +313,34 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		setSelectedVideo(files);
 	};
 
-	const updateProgress = (fileName: string, percent: number) => {
-		setUploadProgress((prev) => ({
-			...prev,
-			[fileName]: percent
-		}));
+	/* @Param {File} file - The file to be removed from the preview.
+		@description - This function handles the removal of a file from the preview section.
+		It checks the type of the file (image or video) and updates the corresponding state (selectedImages or selectedVideo) by filtering out the removed file.
+		If there are no remaining files after the removal, it sets the state to null.
+	*/
+
+	const onPreviewFileRemove = (file: File) => {
+		if (file.type.startsWith('image/')) {
+			setSelectedImages((prev) => {
+				if (!prev) return prev;
+				const filesArray = Array.from(prev).filter((f) => f !== file);
+				return filesArray.length ? FileListFromArray(filesArray) : null;
+			});
+		} else {
+			setSelectedVideo((prev) => {
+				if (!prev) return prev;
+				const filesArray = Array.from(prev).filter((f) => f !== file);
+				return filesArray.length ? FileListFromArray(filesArray) : null;
+			});
+		}
 	};
+
+	// Helper to create a FileList from an array of File objects
+	function FileListFromArray(files: File[]): FileList {
+		const dataTransfer = new DataTransfer();
+		files.forEach((file) => dataTransfer.items.add(file));
+		return dataTransfer.files;
+	}
 
 	return (
 		<div className='lg:w-2/3  flex flex-col gap-4'>
@@ -448,10 +514,11 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								multiple={true}
 								accept={'image/*'}
 								icon={<IoIosCloudUpload />}
-								selectedFiles={selectedImages}
+								onPreviewFileRemove={onPreviewFileRemove}
+								// selectedFiles={selectedImages}
 								uploadProgress={uploadProgress}
 								initialFiles={initialImageFiles}
-								onRemoveInitialFile={handleRemoveInitialImage}
+								onRemoveInitialFile={handleRemoveInitialAsset}
 							/>
 						</div>
 
@@ -463,10 +530,11 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								multiple={true}
 								accept={'video/*'}
 								icon={<RiVideoUploadLine />}
-								selectedFiles={selectedVideo}
+								onPreviewFileRemove={onPreviewFileRemove}
+								// selectedFiles={selectedVideo}
 								uploadProgress={uploadProgress}
 								initialFiles={initialVideoFiles}
-								onRemoveInitialFile={handleRemoveInitialVideo}
+								onRemoveInitialFile={handleRemoveInitialAsset}
 							/>
 						</div>
 					</section>
