@@ -3,8 +3,7 @@ import { connect } from '@/dbConfig/dbConfig';
 import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
-import { TicketType } from '@/model/ticketTypeModel';
-
+import TicketType from '@/model/ticketTypeModel';
 connect();
 
 export async function GET(request: NextRequest) {
@@ -26,20 +25,19 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
+		let filter = {};
 		const query: any = request.nextUrl.searchParams;
-
 		const transformedQuery = mapToObject(query);
+		filter = {
+			$or: [{ business: { $in: user.business } }, { isDefault: true }]
+		};
 
-		const regex = new RegExp(transformedQuery.name, 'i'); // 'i' for case-insensitive
-
-		await TicketType.find({
-			$or: [
-				{ business: user.business }, // business-specific
-				{ isDefault: true } // system defaults
-			],
-			name: { $regex: regex }
-		});
-		const results = await TicketType.find({ name: { $regex: regex } });
+		if (transformedQuery.name) {
+			const regex = new RegExp(transformedQuery.name, 'i'); // 'i' for case-insensitive
+			filter = { ...filter, name: { $regex: regex } };
+			delete transformedQuery.name; // Remove name from transformedQuery so it doesn't get double-filtered
+		}
+		const results = await TicketType.find(filter);
 
 		const response = NextResponse.json({
 			status: 'success',

@@ -5,6 +5,7 @@ import {
 	assignTicket,
 	createTicket,
 	deleteTicket,
+	fetchRequestType,
 	fetchTickets,
 	ProcessTechnicianResponse
 } from '../service/ticket-service';
@@ -49,6 +50,19 @@ export function useFetchTickets<T>(
 	const { isLoading, data, error, isRefetching } = useQuery({
 		queryKey: ['tickets', status, search],
 		queryFn: () => fetchTickets<T>({ page, limit, status, search })
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		...data
+	};
+}
+export function useFetchTicketType<T>(page: number = 1, limit: number = 50) {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['ticket-type'],
+		queryFn: () => fetchRequestType<T>()
 	});
 
 	return {

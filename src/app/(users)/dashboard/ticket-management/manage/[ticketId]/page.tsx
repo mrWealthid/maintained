@@ -11,6 +11,8 @@ const Page: FC<{ params: { ticketId: string } }> = async ({ params }) => {
 		ticketId
 	);
 
+	console.log('Ticket response:', response?.data);
+
 	return (
 		<>
 			<TicketForm ticket={response?.data} />

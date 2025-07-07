@@ -1,20 +1,30 @@
 'use client';
 import React, { FC, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { IoIosCloudUpload } from 'react-icons/io';
 import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import { fetchTicketCategory } from '../service/ticket-service';
 import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
-import { useCreateTicket } from '../hooks/ticketHooks';
-import { Category, CreateTicketPayload } from '../../model/model';
+import { useCreateTicket, useFetchTicketType } from '../hooks/ticketHooks';
+import { Category, CreateTicketPayload, TicketType } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
 import FileUpload from '@/app/shared/components/form-elements/File-Upload';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { ROUTES_DEFINITION } from '../../routes/routes';
 import toast from 'react-hot-toast';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue
+} from '@/components/ui/select';
+import Label from '../../components/form-elements/Label';
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const isEditing = !!ticket?._id;
@@ -49,10 +59,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const [remainingImages, setRemainingImages] = useState(initialImageFiles);
 	const [remainingVideos, setRemainingVideos] = useState(initialVideoFiles);
+
 	const router = useRouter();
+	const { data } = useFetchTicketType<TicketType>();
 
 	//form controls
-	const { register, handleSubmit, setValue, formState, getValues } =
+	const { register, handleSubmit, control, setValue, formState, getValues } =
 		useForm<ManageTicketForm>({
 			mode: 'all',
 			defaultValues: isEditing
@@ -60,6 +72,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						title: ticket.title,
 						description: ticket.description,
 						area: ticket.area,
+						type: ticket.type,
 						category:
 							typeof ticket.category === 'object'
 								? ticket.category._id
@@ -542,6 +555,38 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							id='area'
 						/>
 					</TextInput>
+
+					<Label
+						text={'Specify Request Type'}
+						name={'ticketType'}
+						required={true}
+					/>
+					<Controller
+						name='type'
+						control={control}
+						rules={{ required: 'Please select a ticket type' }}
+						render={({ field }) => (
+							<Select
+								value={field.value}
+								onValueChange={field.onChange}>
+								<SelectTrigger className='py-3 h-fit'>
+									<SelectValue placeholder='Select a ticket type' />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Ticket Types</SelectLabel>
+										{data?.map((type) => (
+											<SelectItem
+												key={type._id}
+												value={type._id}>
+												{type.name}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						)}
+					/>
 					<section className='w-full items-start flex-col mt-3 lg:flex-row flex gap-10'>
 						<div className=' w-full lg:w-1/2  border   p-2 rounded-2xl'>
 							<FileUpload

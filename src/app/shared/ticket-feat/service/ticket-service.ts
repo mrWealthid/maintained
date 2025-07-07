@@ -53,6 +53,17 @@ export async function fetchTicketCategory<T>(
 		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
+export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
+	const url = `${API_ROUTES.ticketManagement.get_request_types}`;
+	try {
+		const response = await axios(url);
+
+		const data = await response.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
 export async function fetchTechnicians<T>(
 	query: string | null
 ): Promise<ApiResponse<T[]>> {

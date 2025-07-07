@@ -30,6 +30,7 @@ export interface ManageTicketForm {
 	category: string;
 	images?: FileList | null;
 	videos?: FileList | null;
+	type: string;
 }
 
 export type TicketRowActionsProps = {

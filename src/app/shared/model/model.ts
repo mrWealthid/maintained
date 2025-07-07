@@ -7,6 +7,13 @@ export interface Category {
 	createdAt?: Date;
 	_id: string;
 }
+export interface TicketType {
+	id: string;
+	name: string;
+	description?: string;
+	createdAt?: Date;
+	_id: string;
+}
 
 export interface Ticket {
 	title: string;
@@ -22,6 +29,7 @@ export interface Ticket {
 	id: string;
 	assignedTo?: User;
 	actionedBy?: string;
+	type: string;
 }
 
 // export interface TicketCardProps extends Ticket {

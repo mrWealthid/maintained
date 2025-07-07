@@ -22,10 +22,12 @@ export const API_ROUTES = {
 		get_tickets: `${base}/tickets`,
 		ticketById: (id: string) => resourceById('tickets')(id),
 		get_categories: `${base}/tickets/categories`,
+		get_request_types: `${base}/tickets/types`,
 		create_ticket: `${base}/tickets`,
 		update_status: (id: string) =>
 			resourceById('tickets/update-status')(id),
 		assign_technician: (id: string) => resourceById('tickets/assign')(id),
-		process_technician_response: (id: string) => resourceById('tickets/respond')(id)
+		process_technician_response: (id: string) =>
+			resourceById('tickets/respond')(id)
 	}
 };

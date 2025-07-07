@@ -7,6 +7,7 @@ interface ITicketCategory extends Document {
 	createdAt: Date;
 	business?: mongoose.Types.ObjectId;
 	isDefault?: boolean;
+	isActive: boolean;
 }
 
 const ticketCategorySchema = new Schema<ITicketCategory>({
@@ -26,8 +27,9 @@ const ticketCategorySchema = new Schema<ITicketCategory>({
 	},
 	isDefault: {
 		type: Boolean,
-		default: false
-	}
+		default: true
+	},
+	isActive: { type: Boolean, default: true }
 });
 
 const TicketCategory: Model<ITicketCategory> =

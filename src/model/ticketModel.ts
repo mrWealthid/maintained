@@ -82,12 +82,11 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
 		},
-		// type: {
-		// 	type: mongoose.Schema.Types.ObjectId,
-		// 	ref: 'TicketType',
-		// 	required: true
-		// },
-		// //Create and load data for ticket types... Repair, Installation etc
+		type: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'TicketType',
+			required: true
+		},
 		technicianResponse: {
 			response: {
 				type: String,
@@ -100,32 +99,6 @@ const TicketSchema = new Schema<ITicket>(
 
 	{ timestamps: false }
 );
-
-// TicketSchema.pre<ITicket>('save', async function (next) {
-// 	if (!this.isModified('status')) return next();
-
-// 	if (!this.isNew) {
-// 		const original = await (this.constructor as Model<ITicket>).findById(
-// 			this._id
-// 		);
-// 		const oldStatus = original?.status;
-// 		const newStatus = this.status;
-
-// 		const allowed =
-// 			allowedTransitions[oldStatus as keyof typeof allowedTransitions] ||
-// 			[];
-
-// 		if (!allowed.includes(newStatus)) {
-// 			return next(
-// 				new Error(
-// 					`Invalid status transition from '${oldStatus}' to '${newStatus}'`
-// 				)
-// 			);
-// 		}
-// 	}
-
-// 	next();
-// });
 
 TicketSchema.pre('findOneAndUpdate', async function (next) {
 	const update = this.getUpdate() as any;
