@@ -117,7 +117,7 @@ input:not([type="email"])::placeholder {
 
 
 .btn-primary:disabled {
-	@apply cursor-not-allowed text-muted-foreground
+	@apply cursor-not-allowed text-muted
 }
 
 .ellipsis-overflow {
