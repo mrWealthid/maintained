@@ -68,13 +68,13 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 
 								return (
 									<SidebarMenuItem key={link.name}>
-										<SidebarMenuButton asChild>
+										<SidebarMenuButton
+											onClick={() => {
+												if (isMobile) setOpenMobile(false);
+											}}
+											asChild>
 											<Link
 												href={link.path}
-												onClick={() => {
-													if (isMobile)
-														setOpen(false);
-												}}
 												className={`hover:translate-x-1  rounded-lg text-sm transition-all duration-500 flex items-center gap-2 ${
 													isActive
 														? 'bg-sidebar-accent'
