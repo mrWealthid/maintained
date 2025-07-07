@@ -28,6 +28,8 @@ export interface ManageTicketForm {
 	description: string;
 	area: string;
 	category: string;
+	images?: FileList | null;
+	videos?: FileList | null;
 }
 
 export type TicketRowActionsProps = {

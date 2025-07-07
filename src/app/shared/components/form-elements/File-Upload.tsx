@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { FileUploadPreview } from '../../model/model';
 import { RiAsterisk } from 'react-icons/ri';
 import toast from 'react-hot-toast';
+import { LiaTimesSolid } from 'react-icons/lia';
 
 interface FileUploadProps {
 	label: string;
@@ -188,8 +189,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
-				className=' p-4 flex flex-col gap-2 cursor-pointer border  rounded-lg justify-center items-center h-32'>
-				<span className='p-4  bg-secondary text-green-600 rounded-full'>
+				className=' p-4 flex flex-col gap-2 cursor-pointer border    rounded-lg justify-center items-center h-32'>
+				<span className='p-4  shadow border bg-secondary text-green-600 rounded-full'>
 					{icon}
 				</span>
 				<span className='text-xs text-gray-500'>
@@ -215,6 +216,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 							key={file.id || file.url}
 							className='relative rounded-md border p-1'>
 							<button
+								type='button'
 								onClick={() =>
 									handleRemoveExisting(
 										file,
@@ -223,9 +225,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
 											: 'video'
 									)
 								}
-								className='absolute top-1 cursor-pointer z-10 right-1  rounded-full p-1 shadow '
+								className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
 								title='Remove'>
-								<FaTimes size={16} />
+								<LiaTimesSolid color='red' size={12} />
 							</button>
 							{file.type.startsWith('image/') ? (
 								<Image
@@ -256,9 +258,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
 								className='relative rounded-md border p-1'>
 								<button
 									onClick={() => handleRemovePreview(file.id)}
-									className='absolute top-1 cursor-pointer z-10 right-1 rounded-full p-1 shadow'
+									className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
 									title='Remove'>
-									<FaTimes size={16} />
+									<LiaTimesSolid color='red' size={12} />
 								</button>
 								{file.type.startsWith('image/') ? (
 									<Image

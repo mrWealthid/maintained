@@ -21,8 +21,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const [autoCompleteValue, setAutoCompleteValue] = useState<{
 		category: Category;
 	} | null>(null);
-	const [selectedImages, setSelectedImages] = useState<FileList | null>(null);
-	const [selectedVideo, setSelectedVideo] = useState<FileList | null>(null);
 	const [uploadProgress, setUploadProgress] = useState<
 		Record<string, number>
 	>({});
@@ -54,16 +52,20 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const router = useRouter();
 
 	//form controls
-	const { register, handleSubmit, setValue, formState } =
+	const { register, handleSubmit, setValue, formState, getValues } =
 		useForm<ManageTicketForm>({
 			mode: 'all',
 			defaultValues: isEditing
 				? {
-						...ticket,
+						title: ticket.title,
+						description: ticket.description,
+						area: ticket.area,
 						category:
 							typeof ticket.category === 'object'
 								? ticket.category._id
-								: ticket.category
+								: ticket.category,
+						images: undefined,
+						videos: undefined
 					}
 				: {}
 		});
@@ -101,18 +103,52 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 				body: JSON.stringify({ publicId, resourceType })
 			});
 
-			resourceType === 'image'
-				? setRemainingImages((prev) =>
-						prev.filter((f) => f.url !== file.url)
+			const updateState = {
+				image: setRemainingImages,
+				video: setRemainingVideos
+			};
+
+			const formFieldKey = {
+				image: 'images',
+				video: 'videos'
+			} as const;
+
+			// Remove from component state
+			updateState[resourceType]((prev) =>
+				prev.filter((f) => f.url !== file.url)
+			);
+
+			// Update form state
+			const currentValue = getValues()[formFieldKey[resourceType]];
+			const updated = currentValue
+				? Array.from(currentValue).filter(
+						(f: any) => f.url !== file.url
 					)
-				: setRemainingVideos((prev) =>
-						prev.filter((f) => f.url !== file.url)
-					);
+				: [];
+
+			const updatedFileList =
+				updated.length > 0 && updated[0] instanceof File
+					? fileArrayToFileList(updated)
+					: null;
+
+			setValue(formFieldKey[resourceType], updatedFileList, {
+				shouldDirty: true,
+				shouldValidate: true,
+				shouldTouch: true
+			});
+
 			toast.success(`${resourceType} deleted successfully`);
 		} catch (err) {
 			toast.error(`Failed to delete ${resourceType} ${err}`);
 		}
 	};
+
+	// Convert File[] to FileList if needed
+	function fileArrayToFileList(files: File[]): FileList {
+		const dataTransfer = new DataTransfer();
+		files.forEach((file) => dataTransfer.items.add(file));
+		return dataTransfer.files;
+	}
 
 	/* @Param {ManageTicketForm} data - The form data submitted by the user.
   		@returns {Promise<void>} - A promise that resolves when the ticket is successfully created or updated.
@@ -124,8 +160,14 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	async function onSubmit(data: ManageTicketForm) {
 		console.log('Submitting form:', data);
-		const imgUrls = await handleMultipleUpload(selectedImages!, 'image');
-		const videoUrls = await handleMultipleUpload(selectedVideo!, 'video');
+		const imgUrls = await handleMultipleUpload(
+			getValues().images!,
+			'image'
+		);
+		const videoUrls = await handleMultipleUpload(
+			getValues().videos!,
+			'video'
+		);
 
 		const payload = BuildRequestPayload(data, imgUrls, videoUrls);
 
@@ -136,7 +178,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		});
 	}
 
-	/* @Param {ManageTicketForm} data - The form data submitted by the user.
+	/* 			@Param {ManageTicketForm} data - The form data submitted by the user.
 		  		@Param {string[]} imgUrls - An optional array of image URLs to include in the ticket payload.
 		  		@Param {string[]} videoUrls - An optional array of video URLs to include in the ticket payload.
 		  		@returns {CreateTicketPayload} - The constructed payload for creating or updating a ticket.
@@ -305,12 +347,15 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
-		setSelectedImages(files);
+		// setSelectedImages(files);
+
+		setValue('images', files, { shouldDirty: true });
 	};
 	const handleVideoSelect = (files: FileList) => {
 		if (files.length < 1) return;
 
-		setSelectedVideo(files);
+		// setSelectedVideo(files);
+		setValue('videos', files);
 	};
 
 	/* @Param {File} file - The file to be removed from the preview.
@@ -321,26 +366,18 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const onPreviewFileRemove = (file: File) => {
 		if (file.type.startsWith('image/')) {
-			setSelectedImages((prev) => {
-				if (!prev) return prev;
-				const filesArray = Array.from(prev).filter((f) => f !== file);
-				return filesArray.length ? FileListFromArray(filesArray) : null;
-			});
+			setValue('images', null); // Clear the images field in the form
 		} else {
-			setSelectedVideo((prev) => {
-				if (!prev) return prev;
-				const filesArray = Array.from(prev).filter((f) => f !== file);
-				return filesArray.length ? FileListFromArray(filesArray) : null;
-			});
+			setValue('videos', null);
 		}
 	};
 
-	// Helper to create a FileList from an array of File objects
-	function FileListFromArray(files: File[]): FileList {
-		const dataTransfer = new DataTransfer();
-		files.forEach((file) => dataTransfer.items.add(file));
-		return dataTransfer.files;
-	}
+	// // Helper to create a FileList from an array of File objects
+	// function FileListFromArray(files: File[]): FileList {
+	// 	const dataTransfer = new DataTransfer();
+	// 	files.forEach((file) => dataTransfer.items.add(file));
+	// 	return dataTransfer.files;
+	// }
 
 	return (
 		<div className='lg:w-2/3  flex flex-col gap-4'>
@@ -506,7 +543,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						/>
 					</TextInput>
 					<section className='w-full items-start flex-col mt-3 lg:flex-row flex gap-10'>
-						<div className=' w-full lg:w-1/2  border  p-2 rounded-2xl'>
+						<div className=' w-full lg:w-1/2  border   p-2 rounded-2xl'>
 							<FileUpload
 								id='image'
 								label={'Upload Images'}
@@ -515,14 +552,13 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								accept={'image/*'}
 								icon={<IoIosCloudUpload />}
 								onPreviewFileRemove={onPreviewFileRemove}
-								// selectedFiles={selectedImages}
 								uploadProgress={uploadProgress}
 								initialFiles={initialImageFiles}
 								onRemoveInitialFile={handleRemoveInitialAsset}
 							/>
 						</div>
 
-						<div className='w-full lg:w-1/2 border  p-2 rounded-2xl'>
+						<div className='w-full lg:w-1/2 border   p-2 rounded-2xl'>
 							<FileUpload
 								id='video'
 								label={'Upload Videos'}
@@ -531,7 +567,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 								accept={'video/*'}
 								icon={<RiVideoUploadLine />}
 								onPreviewFileRemove={onPreviewFileRemove}
-								// selectedFiles={selectedVideo}
 								uploadProgress={uploadProgress}
 								initialFiles={initialVideoFiles}
 								onRemoveInitialFile={handleRemoveInitialAsset}
