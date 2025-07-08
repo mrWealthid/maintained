@@ -360,15 +360,11 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
-		// setSelectedImages(files);
-
 		setValue('images', files, { shouldDirty: true });
 	};
 	const handleVideoSelect = (files: FileList) => {
 		if (files.length < 1) return;
-
-		// setSelectedVideo(files);
-		setValue('videos', files);
+		setValue('videos', files, { shouldDirty: true });
 	};
 
 	/* @Param {File} file - The file to be removed from the preview.
@@ -621,11 +617,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 					<hr className='-mx-6 my-3' />
 					<section className='flex justify-end   gap-4'>
-						{/* <ButtonComponent
-                            type='reset'
-                            styles='rounded-3xl'
-                            btnText={'Cancel'}></ButtonComponent> */}
-
 						<ButtonComponent
 							type='submit'
 							styles='rounded-lg'

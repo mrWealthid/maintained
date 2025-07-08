@@ -15,7 +15,7 @@ export default function Home() {
 	}
 
 	return (
-		<main className='flex min-h-screen gap-6 flex-col '>
+		<section className='flex min-h-screen gap-6 flex-col '>
 			<h1 className='title'> Maintenance Requests </h1>
 			<section className='flex flex-col gap-2  w-full  items-end'>
 				<div>
@@ -41,6 +41,6 @@ export default function Home() {
 					<TicketComponent />
 				</TransitionReveal>
 			)}
-		</main>
+		</section>
 	);
 }
