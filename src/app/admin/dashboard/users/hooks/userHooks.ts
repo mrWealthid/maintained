@@ -14,7 +14,7 @@ export function useCreateUser(
 			handleCreateUser(payload, isEditing, userId),
 
 		onSuccess: () => {
-			toast.success('User successfully updated...');
+			toast.success('Invited sent successfully...');
 			queryClient.invalidateQueries({
 				queryKey: ['Users']
 			});

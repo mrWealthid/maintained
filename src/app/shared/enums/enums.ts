@@ -22,6 +22,7 @@ export enum ROLES {
 }
 
 export enum TECHNICIAN_RESPONSE {
+	pending = 'PENDING',
 	accepted = 'ACCEPTED',
 	declined = 'DECLINED',
 	inspection_requested = 'INSPECTION_REQUESTED'

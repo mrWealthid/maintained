@@ -20,7 +20,8 @@ export interface AssignTechnicianFormProps {
 }
 
 export interface AssignTechnicianFormControls {
-	assignedTo: string;
+	// assignedTo: string;
+	technicianIds: string[];
 }
 
 export interface ManageTicketForm {

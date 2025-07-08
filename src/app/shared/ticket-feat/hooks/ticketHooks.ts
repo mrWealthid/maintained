@@ -6,8 +6,10 @@ import {
 	createTicket,
 	deleteTicket,
 	fetchRequestType,
+	fetchTechnicians,
 	fetchTickets,
-	ProcessTechnicianResponse
+	ProcessTechnicianResponse,
+	sendTechnicianRequest
 } from '../service/ticket-service';
 import {
 	ListQueryParams,
@@ -138,4 +140,37 @@ export function useAssignTechnician(id: string, close?: () => void) {
 		});
 
 	return { isAssigning, handleAssignTechnician };
+}
+
+export function useFetchTechnicians<T>(page: number = 1, limit: number = 50) {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['ticket-type'],
+		queryFn: () => fetchTechnicians<T>()
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		...data
+	};
+}
+
+export function useSendTechnicianRequest(id: string, close?: () => void) {
+	const queryClient = useQueryClient();
+	const { isPending: isSending, mutate: handleSendTechnicianRequest } =
+		useMutation({
+			mutationFn: (payload: { technicianIds: string[] }) =>
+				sendTechnicianRequest(id, payload),
+			onSuccess: () => {
+				toast.success('Request(s) successfully sent');
+				queryClient.invalidateQueries({
+					queryKey: ['tickets']
+				});
+				close?.();
+			},
+			onError: (err: ApiError) => toast.error(err.message)
+		});
+
+	return { isSending, handleSendTechnicianRequest };
 }

@@ -36,11 +36,21 @@ export function useOutsideClick(
 ) {
 	useEffect(() => {
 		function handleClick(event: MouseEvent) {
-			// Only close if the click is outside the ref element
-			if (ref.current && !ref.current.contains(event.target as Node)) {
-				handler();
-			}
+			const target = event.target as HTMLElement;
+
+			// If ref doesn't exist or click is inside the ref, ignore
+			if (!ref.current || ref.current.contains(target)) return;
+
+			// Check if the click is inside a Radix UI dropdown/popover portal
+			const isInRadixPopover = target.closest(
+				'[data-radix-popper-content-wrapper]'
+			);
+
+			if (isInRadixPopover) return;
+
+			handler(); // Only trigger outside handler if NOT in portal
 		}
+
 		document.addEventListener('mousedown', handleClick);
 		return () => {
 			document.removeEventListener('mousedown', handleClick);

@@ -10,13 +10,7 @@ interface ITicket extends Document {
 	area: string;
 	description: string;
 	category: ObjectId;
-	status:
-		| 'PENDING'
-		| 'PROCESSING'
-		| 'ASSIGNED'
-		| 'DECLINED'
-		| 'COMPLETED'
-		| 'SCHEDULED';
+	status: TICKET_STATUS;
 	videos: string[];
 	images: string[];
 	createdAt: Date;
@@ -26,11 +20,12 @@ interface ITicket extends Document {
 	assignedTo?: ObjectId;
 	relatedTo?: ObjectId;
 	type: ObjectId;
-	technicianResponse?: {
+	sentRequests?: {
+		technician: ObjectId;
 		response: TECHNICIAN_RESPONSE;
 		message: string;
 		respondedAt: Date;
-	};
+	}[];
 }
 
 const allowedTransitions: Record<string, string[]> = {
@@ -48,56 +43,77 @@ const TicketSchema = new Schema<ITicket>(
 		title: { type: String, required: true },
 		area: { type: String, required: true },
 		description: { type: String, required: true },
+
 		category: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: Category,
 			required: [true, 'Request must belong to a category']
 		},
-		status: {
-			type: String,
-			enum: TICKET_STATUS,
-			default: 'PENDING'
-		},
-		videos: [{ type: String }],
-		images: [{ type: String }],
-		createdAt: {
-			type: Date,
-			default: Date.now
-		},
-		user: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: User,
-			required: [true, 'Request must belong to a User']
-		},
-		business: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: Business,
-			required: [true, 'Request must belong to a business']
-		},
-		actionedBy: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: User
-		},
-		assignedTo: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: User
-		},
+
 		type: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'TicketType',
 			required: true
 		},
-		technicianResponse: {
-			response: {
-				type: String,
-				enum: TECHNICIAN_RESPONSE
-			},
-			message: String,
-			respondedAt: Date
-		}
-	},
 
-	{ timestamps: false }
+		status: {
+			type: String,
+			enum: TICKET_STATUS,
+			default: TICKET_STATUS.pending
+		},
+
+		videos: [{ type: String }],
+		images: [{ type: String }],
+
+		createdAt: {
+			type: Date,
+			default: Date.now
+		},
+
+		user: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: User,
+			required: [true, 'Request must belong to a User']
+		},
+
+		business: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: Business,
+			required: [true, 'Request must belong to a business']
+		},
+
+		actionedBy: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: User
+		},
+
+		assignedTo: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: User
+		},
+
+		sentRequests: [
+			{
+				technician: {
+					type: mongoose.Schema.Types.ObjectId,
+					ref: 'User',
+					required: true
+				},
+				requestedAt: {
+					type: Date,
+					default: Date.now
+				},
+				response: {
+					type: String,
+					enum: TECHNICIAN_RESPONSE,
+					default: null
+				},
+				message: String,
+				respondedAt: Date
+			}
+		]
+	},
+	{ timestamps: true }
 );
 
 TicketSchema.pre('findOneAndUpdate', async function (next) {

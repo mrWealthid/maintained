@@ -65,7 +65,7 @@ export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
 	}
 }
 export async function fetchTechnicians<T>(
-	query: string | null
+	query?: string | null
 ): Promise<ApiResponse<T[]>> {
 	const url = query
 		? `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&name=${query}`
@@ -166,6 +166,22 @@ export async function assignTechnician(
 	try {
 		const res = await axios.patch(
 			`${API_ROUTES.ticketManagement.assign_technician(id)}`,
+			payload
+		);
+		const data = await res.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
+
+export async function sendTechnicianRequest(
+	id: string,
+	payload: { technicianIds: string[] }
+) {
+	try {
+		const res = await axios.post(
+			`${API_ROUTES.ticketManagement.send_technician_request(id)}`,
 			payload
 		);
 		const data = await res.data;
