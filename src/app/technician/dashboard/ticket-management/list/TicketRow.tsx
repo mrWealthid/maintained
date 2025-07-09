@@ -1,15 +1,19 @@
-import { TicketRowProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import {
+	TechnicianTicketRowProps,
+	TicketRowProps
+} from '@/app/shared/ticket-feat/model/ticket.model';
 import TicketRowActions from './TicketRowActions';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Modal from '@/app/shared/components/modal/Modal';
 
-function RequestRow({ data }: TicketRowProps) {
+function RequestRow({ data }: TechnicianTicketRowProps) {
 	return (
 		<>
 			{data?.map((row, i) => {
+				const { area, title, user, category } = row.ticket;
 				return (
-					<TableRow key={i} className='relative  '>
+					<TableRow key={row._id} className='relative  '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
@@ -27,17 +31,17 @@ function RequestRow({ data }: TicketRowProps) {
 							<span>{i + 1}.</span>
 						</TableCell>
 						<TableCell colSpan={3}>
-							<span title={row.title} className='block '>
-								{row.title}
+							<span title={title} className='block '>
+								{title}
 							</span>
 						</TableCell>
 						<TableCell colSpan={2}>
 							<span
-								title={row.user?.name}
+								title={user.name}
 								className={
 									'text-sm font-semibold block   mb-1  rounded-3xl'
 								}>
-								{row.user?.name}
+								{user.name}
 							</span>
 							{/* <span
 								title={row.category?.name}
@@ -47,17 +51,15 @@ function RequestRow({ data }: TicketRowProps) {
 						</TableCell>
 
 						<TableCell>
-							<span
-								className=' block '
-								title={row.category?.name}>
-								{row.category?.name}
+							<span className=' block ' title={category.name}>
+								{category.name}
 							</span>
 						</TableCell>
 						<TableCell>
 							<span
 								className=' block ellipsis-overflow'
-								title={row.area}>
-								{row.area}
+								title={area}>
+								{area}
 							</span>
 						</TableCell>
 						<TableCell>
@@ -100,7 +102,7 @@ function RequestRow({ data }: TicketRowProps) {
 						</TableCell>
 
 						<Modal>
-							<TicketRowActions ticket={row} />
+							<TicketRowActions ticket={row.ticket} />
 						</Modal>
 					</TableRow>
 				);

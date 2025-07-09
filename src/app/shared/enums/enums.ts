@@ -23,7 +23,9 @@ export enum ROLES {
 
 export enum TECHNICIAN_RESPONSE {
 	pending = 'PENDING',
-	accepted = 'ACCEPTED',
+	applied = 'APPLIED',
 	declined = 'DECLINED',
-	inspection_requested = 'INSPECTION_REQUESTED'
+	selected = 'SELECTED',
+	inspection_requested = 'INSPECTION_REQUESTED',
+	all = 'ALL'
 }

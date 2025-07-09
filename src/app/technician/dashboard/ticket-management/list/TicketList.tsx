@@ -3,7 +3,10 @@ import { TableColumn } from '@/app/shared/components/table/models/table.model';
 import RequestRow from './TicketRow';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { FC } from 'react';
-import { fetchTicketList } from '@/app/shared/ticket-feat/service/ticket-service';
+import {
+	fetchRequestTicketList,
+	fetchTicketList
+} from '@/app/shared/ticket-feat/service/ticket-service';
 import TableComponent from '@/app/shared/components/table/Table';
 import { CreateTicketPayload, Ticket } from '@/app/shared/model/model';
 import TicketHeaderActions from './TicketHeaderActions';
@@ -13,18 +16,24 @@ const TicketList: FC = () => {
 	const columns: TableColumn[] = [
 		{
 			header: 'Title',
-			accessor: 'title',
+			accessor: 'ticket.title',
 			filterKey: 'title',
-			searchType: 'TEXT'
+			searchType: 'TEXT',
+			colspan: 3
 		},
 		{
 			header: 'user',
 			accessor: 'user.name',
 			searchType: 'TEXT',
-			filterKey: 'user'
+			filterKey: 'user',
+			colspan: 2
 		},
-		{ header: 'category', accessor: 'category.name', searchType: 'TEXT' },
-		{ header: 'area', accessor: 'area', searchType: 'TEXT' },
+		{
+			header: 'category',
+			accessor: 'ticket.category.name',
+			searchType: 'TEXT'
+		},
+		{ header: 'area', accessor: 'ticket.area', searchType: 'TEXT' },
 		{
 			header: 'status',
 			accessor: 'status',
@@ -47,10 +56,10 @@ const TicketList: FC = () => {
 	return (
 		<div className='h-80'>
 			<TableComponent<Ticket>
-				service={fetchTicketList}
+				service={fetchRequestTicketList}
 				queryKey='tickets'
-				searchKey='title'
-				defaultParams={{ status: TICKET_STATUS.pending_assignment }}
+				searchKey='ticket.title'
+				// defaultParams={{ status: TICKET_STATUS.pending_assignment }}
 				headerActions={<TicketHeaderActions />}
 				columns={columns}>
 				<TableComponent.TableHeader />

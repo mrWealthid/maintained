@@ -1,9 +1,8 @@
 'use client';
-import React, { FC, Fragment } from 'react';
-import { Menu, Transition } from '@headlessui/react';
+import React, { FC } from 'react';
 import Link from 'next/link';
 
-import { HiEye, HiTrash } from 'react-icons/hi2';
+
 import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
@@ -12,10 +11,9 @@ import {
 import Modal from '@/app/shared/components/modal/Modal';
 import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
-import { MdOutlineAssignmentInd } from 'react-icons/md';
+
 import { TfiMore } from 'react-icons/tfi';
-import { TbUserCog } from 'react-icons/tb';
-import AssignTechnicianForm from '../AssignTechnicianForm';
+
 import { TableCell } from '@/components/ui/table';
 import {
 	DropdownMenu,
@@ -25,6 +23,7 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import SendTechnicianRequestForm from '../SendTechnicianRequestForm';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -75,7 +74,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 					{ticket.status === TICKET_STATUS.processing && (
 						<DropdownMenuItem>
-							<Modal.Open opens='assign-technician'>
+							<Modal.Open opens='send-request-technicians'>
 								<button
 									type='button'
 									className='w-full text-left'>
@@ -128,10 +127,10 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 			</Modal.Window>
 
 			<Modal.Window
-				name='assign-technician'
-				title='Assign Maintenance Ticket'
-				description='Request ticket will be Assigned To Technician'>
-				<AssignTechnicianForm ticket={ticket} />
+				name='send-request-technicians'
+				title='Send Technincians Ticket Request'
+				description='Request ticket will be sent To Technicians'>
+				<SendTechnicianRequestForm ticket={ticket} />
 			</Modal.Window>
 		</TableCell>
 	);

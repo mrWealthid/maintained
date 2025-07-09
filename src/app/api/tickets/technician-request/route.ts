@@ -28,7 +28,10 @@ export async function GET(request: NextRequest) {
 			.sort()
 			.limitFields()
 			.paginate()
-			.populate('ticket');
+			.populate({
+				path: 'ticket',
+				populate: [{ path: 'category' }, { path: 'user' }]
+			});
 		const requests = await features.query;
 
 		let count;

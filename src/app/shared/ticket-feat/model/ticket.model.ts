@@ -18,9 +18,16 @@ export interface AssignTechnicianFormProps {
 	ticket: Ticket;
 	onCloseModal?: () => void;
 }
+export interface SendTechnicianRequestFormProps {
+	ticket: Ticket;
+	onCloseModal?: () => void;
+}
 
 export interface AssignTechnicianFormControls {
-	// assignedTo: string;
+	assignedTo: string;
+}
+
+export interface SendTechnicianRequestFormControls {
 	technicianIds: string[];
 }
 
@@ -42,13 +49,28 @@ export type TicketRowProps = {
 	data?: Ticket[];
 };
 
-export type TicketQueryprops = {
-	handleFilter?: (query: { status?: TICKET_STATUS } | null) => void;
+export type TechnicianTicketRowProps = {
+	data?: {
+		quote: {
+			currency: string;
+		};
+		_id: string;
+		ticket: Ticket;
+		status: TECHNICIAN_RESPONSE;
+		createdAt: string;
+	}[];
 };
 
-export type TicketFilterQuery = {
-	status?: TICKET_STATUS;
+export type TicketQueryprops<T = TICKET_STATUS> = {
+	handleFilter?: (query: { status?: T } | null) => void;
 };
+
+export type TicketFilterQuery<T = TICKET_STATUS> = {
+	status?: T;
+};
+// export type TechnicianTicketFilterQuery = {
+// 	status?: TECHNICIAN_RESPONSE;
+// };
 
 export type ListQueryParams<T> = {
 	status?: string;

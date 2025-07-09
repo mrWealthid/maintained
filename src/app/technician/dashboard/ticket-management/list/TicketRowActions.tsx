@@ -33,7 +33,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 		ticket._id
 	);
 	function handleProcessResponse(onCloseModal: () => void) {
-		const payload = { response: TECHNICIAN_RESPONSE.accepted };
+		const payload = { response: TECHNICIAN_RESPONSE.applied };
 		processResponse(payload, {
 			onSuccess: () => onCloseModal()
 		});

@@ -2,28 +2,33 @@
 
 import React, { FC, useState } from 'react';
 import { FaCircle } from 'react-icons/fa';
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { getStatusColor } from '@/utils/helper';
 import {
 	TicketFilterQuery,
 	TicketQueryprops
 } from '@/app/shared/ticket-feat/model/ticket.model';
-import { ticketListFilter } from '@/app/shared/ticket-feat/data/data';
+import { technicianListFilter } from '@/app/shared/ticket-feat/data/data';
 
-const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
-	const [query, setQuery] = useState<TicketFilterQuery | null>({
-		status: TICKET_STATUS.pending_assignment
-	});
+const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
+	handleFilter
+}) => {
+	const [query, setQuery] =
+		useState<TicketFilterQuery<TECHNICIAN_RESPONSE> | null>({
+			status: TECHNICIAN_RESPONSE.pending
+		});
 
-	async function handleClick(query: TicketFilterQuery | null) {
+	async function handleClick(
+		query: TicketFilterQuery<TECHNICIAN_RESPONSE> | null
+	) {
 		setQuery(query);
 		if (handleFilter) {
 			query ? handleFilter(query) : handleFilter(null);
 		}
 	}
 
-	function renderStyle(tab: { label: string; value: TICKET_STATUS }) {
-		if (tab.value === TICKET_STATUS.all && !query) {
+	function renderStyle(tab: { label: string; value: TECHNICIAN_RESPONSE }) {
+		if (tab.value === TECHNICIAN_RESPONSE.all && !query) {
 			return `bg-background`;
 		} else if (query?.status === tab.value) {
 			return `bg-background`;
@@ -32,12 +37,12 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 
 	return (
 		<>
-			{ticketListFilter.map((tab) => (
+			{technicianListFilter.map((tab) => (
 				<div key={tab.label}>
 					<button
 						onClick={() =>
 							handleClick(
-								tab.value === TICKET_STATUS.all
+								tab.value === 'ALL'
 									? null
 									: { status: tab.value }
 							)
