@@ -61,7 +61,7 @@ export async function PATCH(
 		let newStatus = existingTicket.status; // default, no status change
 
 		switch (ticketResponse) {
-			case TECHNICIAN_RESPONSE.accepted:
+			case TECHNICIAN_RESPONSE.applied:
 				newStatus = TICKET_STATUS.assigned;
 				logDescription = `${user.name} accepted the ticket.`;
 				break;
