@@ -163,7 +163,7 @@ export function useSendTechnicianRequest(id: string, close?: () => void) {
 			mutationFn: (payload: { technicianIds: string[] }) =>
 				sendTechnicianRequest(id, payload),
 			onSuccess: () => {
-				toast.success('Request(s) successfully sent');
+				toast.success('Request sent successfully');
 				queryClient.invalidateQueries({
 					queryKey: ['tickets']
 				});

@@ -14,6 +14,10 @@ export interface DeclineTicketFormProps {
 	ticket: Ticket;
 	onCloseModal?: () => void;
 }
+export interface ApplyTicketFormProps {
+	ticket: Ticket;
+	onCloseModal?: () => void;
+}
 export interface AssignTechnicianFormProps {
 	ticket: Ticket;
 	onCloseModal?: () => void;
@@ -25,6 +29,17 @@ export interface SendTechnicianRequestFormProps {
 
 export interface AssignTechnicianFormControls {
 	assignedTo: string;
+}
+export interface ApplyTechnicianFormControls {
+	quote?: { amount: number; currency: string };
+	message?: string;
+	addSchedule: boolean;
+	schedule?: {
+		date?: Date | undefined;
+		startTime?: string;
+		endTime?: string;
+		day?: string;
+	};
 }
 
 export interface SendTechnicianRequestFormControls {

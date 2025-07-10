@@ -1,25 +1,25 @@
 export interface ModalProps {
-  children: React.ReactNode;
-  size?: string;
+	children: React.ReactNode;
+	size?: string;
 }
 
 export interface OpenProps {
-  children: React.ReactElement;
-  opens: string;
+	children: React.ReactElement;
+	opens: string;
 }
 
 export interface WindowProps {
-  name: string;
-  title: string;
-  description?: string;
-  children: React.ReactElement<{ onCloseModal?: () => void }>;
+	name: string;
+	title: string;
+	description?: string;
+	children: React.ReactElement<{ onCloseModal?: () => void }>;
+	size?: string;
 }
 
 export interface ModalContextProps {
-  openName: string;
-  close: () => void;
-  open: (name: string) => void;
-  size?: string;
-  title?: string;
-  description?: string;
+	openName: string;
+	close: () => void;
+	open: (name: string) => void;
+	title?: string;
+	description?: string;
 }

@@ -10,11 +10,8 @@ import {
 	useProcessTechnicianResponse
 } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import Modal from '@/app/shared/components/modal/Modal';
-import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
 import { TfiMore } from 'react-icons/tfi';
-import { IoCheckmarkDoneOutline } from 'react-icons/io5';
-import { RxCross2 } from 'react-icons/rx';
 import DeclineForm from '../DeclineForm';
 import { TableCell } from '@/components/ui/table';
 import {
@@ -25,6 +22,7 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import ApplyForm from '../ApplyForm';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
@@ -95,6 +93,13 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				<DeclineForm ticket={ticket} />
 			</Modal.Window>
 			<Modal.Window
+				size='w-full md:w-1/2  3xl:w-1/3'
+				name='accept-request'
+				title='Apply for Ticket'
+				description='Submit your bid to get this ticket'>
+				<ApplyForm ticket={ticket} />
+			</Modal.Window>
+			{/* <Modal.Window
 				name='accept-request'
 				title='Accept Maintenance Ticket'
 				description='Request ticket will be assigned to you'>
@@ -106,8 +111,8 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					modalText={'Are you sure you want to accept this ticket'}
 					reason='confirm'
 				/>
-			</Modal.Window>
-			<Modal.Window
+			</Modal.Window> */}
+			{/* <Modal.Window
 				name='self-assign'
 				title='Assign Ticket'
 				description='Request ticket will be assigned to you'>
@@ -119,7 +124,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					modalText={'Are you sure you want to assign this ticket'}
 					reason='confirm'
 				/>
-			</Modal.Window>
+			</Modal.Window> */}
 		</TableCell>
 	);
 };

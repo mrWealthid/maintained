@@ -9,18 +9,17 @@ const ModalContext = createContext<ModalContextProps>({
 	openName: '',
 	close: () => {},
 	open: (name: string) => {},
-	size: 'w-full lg:w-1/2',
 	title: ''
 });
 
-function Modal({ children, size = 'w-full md:w-1/2 2xl:w-1/3' }: ModalProps) {
+function Modal({ children,  }: ModalProps) {
 	const [openName, setOpenName] = useState('');
 
 	const close = () => setOpenName('');
 	const open = setOpenName;
 
 	return (
-		<ModalContext.Provider value={{ openName, close, open, size }}>
+		<ModalContext.Provider value={{ openName, close, open }}>
 			{children}
 		</ModalContext.Provider>
 	);
@@ -39,8 +38,8 @@ const Open = React.forwardRef<HTMLButtonElement, any>(
 
 Open.displayName = 'Open';
 
-const Window = ({ name, children, title, description }: WindowProps) => {
-	const { openName, close, open, size }: ModalContextProps =
+const Window = ({ name, children, size = 'w-full md:w-1/2 2xl:w-1/3', title, description }: WindowProps) => {
+	const { openName, close, open }: ModalContextProps =
 		useContext(ModalContext);
 
 	const modalRef = useRef<HTMLDivElement>(null);
