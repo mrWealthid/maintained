@@ -20,6 +20,7 @@ export interface ITechnicianRequest extends Document {
 	respondedAt?: Date;
 	createdAt: Date;
 	updatedAt: Date;
+	isActive: boolean;
 }
 const TechnicianRequestSchema = new Schema(
 	{
@@ -51,8 +52,11 @@ const TechnicianRequestSchema = new Schema(
 		message: String,
 		reason: String,
 		scheduledDate: Date,
-		respondedAt: Date
+		respondedAt: Date,
+		isActive: { type: Boolean, default: true },
+		expiresAt: { type: Date, required: true }
 	},
+
 	{
 		timestamps: true
 	}

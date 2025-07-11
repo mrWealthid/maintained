@@ -44,6 +44,7 @@ export interface ApplyTechnicianFormControls {
 
 export interface SendTechnicianRequestFormControls {
 	technicianIds: string[];
+	expiresAt: Date;
 }
 
 export interface ManageTicketForm {
@@ -137,4 +138,9 @@ export interface ProcessRequest {
 		day: string;
 	};
 	message?: string;
+}
+
+export interface SendTechnicianRequestPayload {
+	technicianIds: string[];
+	expiresAt: Date;
 }

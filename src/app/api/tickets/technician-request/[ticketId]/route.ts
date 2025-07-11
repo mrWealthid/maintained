@@ -6,7 +6,6 @@ import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
-
 export async function POST(
 	request: NextRequest,
 	{ params }: { params: { ticketId: string } }
@@ -65,7 +64,8 @@ export async function POST(
 				TechnicianRequest.create({
 					ticket: ticketId,
 					technician: techId,
-					sentBy: adminUser._id
+					sentBy: adminUser._id,
+					expiresAt: body.expiresAt
 				})
 			)
 		);
@@ -95,7 +95,12 @@ export async function POST(
 			ticket: ticketId,
 			action: 'status-changed',
 			description: `Request sent to technicians for assignment`,
-			changedBy: adminUser._id
+			changedBy: adminUser._id,
+			metadata: {
+				field: 'status',
+				previous: ticket.status,
+				current: ticket.status
+			}
 		});
 
 		return NextResponse.json({

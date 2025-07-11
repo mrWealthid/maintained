@@ -14,6 +14,7 @@ import {
 import {
 	ListQueryParams,
 	ProcessRequest,
+	SendTechnicianRequestPayload,
 	TicketListFilter,
 	TicketStatus
 } from '../model/ticket.model';
@@ -160,7 +161,7 @@ export function useSendTechnicianRequest(id: string, close?: () => void) {
 	const queryClient = useQueryClient();
 	const { isPending: isSending, mutate: handleSendTechnicianRequest } =
 		useMutation({
-			mutationFn: (payload: { technicianIds: string[] }) =>
+			mutationFn: (payload: SendTechnicianRequestPayload) =>
 				sendTechnicianRequest(id, payload),
 			onSuccess: () => {
 				toast.success('Request sent successfully');

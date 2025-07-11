@@ -1,0 +1,8 @@
+{
+	"cron": [
+		{
+			"path": "/api/expire-technician-requests",
+			"schedule": "*/5 * * * *"
+		}
+	]
+}

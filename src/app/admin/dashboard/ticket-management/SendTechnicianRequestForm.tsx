@@ -1,5 +1,5 @@
 'use client';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import {
@@ -23,17 +23,21 @@ import {
 	CommandInput,
 	CommandItem
 } from '@/components/ui/command';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, ChevronDownIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { format } from 'date-fns/format';
+import { Calendar } from '@/components/ui/calendar';
 
 const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 	ticket,
 	onCloseModal
 }) => {
+	const [isOpen, setIsOpen] = useState(false);
 	const { handleSubmit, control, formState } =
 		useForm<SendTechnicianRequestFormControls>({
 			mode: 'all',
-			defaultValues: { technicianIds: [] }
+			defaultValues: { technicianIds: [], expiresAt: undefined }
 		});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
@@ -148,6 +152,127 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 							}}
 						/>
 					</div>
+
+					<section className='flex flex-col gap-4'>
+						<div className='w-full flex flex-col gap-3'>
+							<Label htmlFor='date-picker' className='px-1'>
+								Deadline
+							</Label>
+
+							<Controller
+								control={control}
+								name='expiresAt'
+								render={({ field }) => {
+									const hasValue = !!field.value;
+									return (
+										<Popover
+											open={isOpen}
+											onOpenChange={setIsOpen}>
+											<PopoverTrigger asChild>
+												<Button
+													variant='outline'
+													id='date-picker'
+													onClick={() =>
+														setIsOpen(true)
+													}
+													className={` w-full bg-transparent hover:bg-transparent justify-between font-normal ${
+														hasValue
+															? 'text-foreground'
+															: 'text-muted-foreground'
+													}`}>
+													{hasValue
+														? format(
+																field.value as Date,
+																'PPP'
+															) // e.g., Jul 9, 2025
+														: 'Select date'}
+													<ChevronDownIcon />
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent
+												className='w-auto overflow-hidden p-0'
+												align='start'>
+												<Calendar
+													mode='single'
+													selected={field.value}
+													captionLayout='dropdown'
+													onSelect={(date) => {
+														field.onChange(date);
+														setIsOpen(false);
+													}}
+												/>
+											</PopoverContent>
+										</Popover>
+									);
+								}}
+							/>
+						</div>
+
+						{/* <div className=' flex flex-col md:flex-row justify-between  gap-3'>
+							<section className='flex-1'>
+								{' '}
+								<Label htmlFor='startTime' className='px-1'>
+									Start Time
+								</Label>
+								<Controller
+									control={control}
+									name='schedule.startTime'
+									render={({ field }) => (
+										<Input
+											type='time'
+											id='startTime'
+											step='1'
+											disabled={!scheduleEnabled}
+											{...field}
+											className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+										/>
+									)}
+								/>
+							</section>
+
+							<section className='flex-1'>
+								<Label htmlFor='endTime' className='px-1'>
+									End Time
+								</Label>
+								<Controller
+									control={control}
+									name='schedule.endTime'
+									rules={{
+										validate: (value) => {
+											if (!scheduleEnabled) return true;
+											if (!startTime || !value)
+												return 'Please enter both times';
+
+											return (
+												value > startTime ||
+												'End time must be after start time'
+											);
+										}
+									}}
+									render={({ field }) => (
+										<>
+											<Input
+												type='time'
+												id='end-time'
+												step='1'
+												{...field}
+												className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+											/>
+
+											{errors.schedule?.endTime && (
+												<ErrorMessage
+													errorMsg={
+														errors.schedule.endTime
+															?.message ?? ''
+													}
+												/>
+											)}
+										</>
+									)}
+								/>
+							</section>
+						</div> */}
+					</section>
 					<hr className='-mx-6 my-3' />
 					<section className='flex justify-end  gap-4'>
 						<ButtonComponent

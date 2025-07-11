@@ -10,6 +10,7 @@ import { API_ROUTES } from '../../routes/apiRoutes';
 import {
 	ListQueryParams,
 	ProcessRequest,
+	SendTechnicianRequestPayload,
 	TicketListFilter
 } from '../model/ticket.model';
 import { buildQueryString } from '@/utils/helpers';
@@ -193,7 +194,7 @@ export async function assignTechnician(
 
 export async function sendTechnicianRequest(
 	id: string,
-	payload: { technicianIds: string[] }
+	payload: SendTechnicianRequestPayload
 ) {
 	try {
 		const res = await axios.post(
