@@ -6,6 +6,7 @@ import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
+
 export async function POST(
 	request: NextRequest,
 	{ params }: { params: { ticketId: string } }

@@ -1,13 +1,12 @@
 'use client';
 import React, { FC, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
 import { useProcessTechnicianResponse } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import {
 	ApplyTechnicianFormControls,
-	DeclineTicketFormProps
+	ApplyTicketFormProps
 } from '@/app/shared/ticket-feat/model/ticket.model';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,31 +24,37 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import ErrorMessage from '@/app/shared/components/form-elements/ErrorMessage';
 
-const ApplyForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
+const ApplyForm: FC<ApplyTicketFormProps> = ({
+	ticketRequest,
+	onCloseModal
+}) => {
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticket.id,
+		ticketRequest._id,
 		onCloseModal
 	);
 
 	const [isOpen, setIsOpen] = useState(false);
-	const [open, setOpen] = useState(false);
-	const [date, setDate] = useState<Date | undefined>(undefined);
 
-	const [scheduled, setScheduled] = useState(false);
+	const initialDate = ticketRequest.schedule?.date
+		? new Date(ticketRequest.schedule.date)
+		: new Date();
+	const initialStartTime = ticketRequest.schedule?.start
+		? new Date(ticketRequest.schedule.start).toTimeString().split(' ')[0]
+		: '10:30:00';
+	const initialEndTime = ticketRequest.schedule?.end
+		? new Date(ticketRequest.schedule.end).toTimeString().split(' ')[0]
+		: '11:30:00';
 
-	const initialDate = new Date();
-	const initialStartTime = '10:30:00';
-	const initialEndTime = '10:30:00';
-
-	// const initialDate = initialDateTime ? new Date(initialDateTime) : undefined;
-	// const initialTime = initialDateTime
-	// 	? initialDateTime.toTimeString().split(' ')[0]
-	// 	: '10:30:00';
 	const { control, handleSubmit, watch, formState } =
 		useForm<ApplyTechnicianFormControls>({
 			mode: 'all',
 			defaultValues: {
-				addSchedule: false,
+				addSchedule: !!ticketRequest.schedule,
+				quote: {
+					amount: ticketRequest.quote.amount || undefined,
+					currency: ticketRequest.quote.currency || 'USD'
+				},
+				message: ticketRequest.message || '',
 				schedule: {
 					date: initialDate,
 					startTime: initialStartTime,
@@ -64,66 +69,15 @@ const ApplyForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 	const startTime = watch('schedule.startTime');
 
 	const onSubmit = (data: ApplyTechnicianFormControls) => {
-		// console.log('Submitted:', data);
-		// let startUtc: string | null = null;
-		// let endUtc: string | null = null;
-
-		// if (scheduleEnabled) {
-		// 	const { date, startTime, endTime } = data.schedule ?? {};
-
-		// 	if (!date || !startTime || !endTime) {
-		// 		console.error('All fields are required');
-		// 		return;
-		// 	}
-
-		// 	// Parse start time
-		// 	const result = getUtcDateTimes(date, startTime, endTime);
-		// 	startUtc = result.startUtc;
-		// 	endUtc = result.endUtc;
-
-		// 	if (!startUtc || !endUtc) {
-		// 		console.error('Start time must be before end time');
-		// 		return;
-		// 	}
-		// }
-
-		// const payload = {
-		// 	quote: {
-		// 		amount: data.quote?.amount,
-		// 		currency: 'USD'
-		// 	},
-		// 	message: data.message,
-		// 	response: TECHNICIAN_RESPONSE.applied,
-		// 	...(scheduleEnabled &&
-		// 		startUtc &&
-		// 		endUtc && {
-		// 			schedule: {
-		// 				start: formatISO(new Date(startUtc)),
-		// 				end: formatISO(new Date(endUtc))
-		// 			}
-		// 		})
-		// };
-
-		// // processResponse(payload, {
-		// // 	onSuccess: () => onCloseModal?.()
-		// // });
-
-		// console.log('Payload to be sent:', payload);
-
-		// console.log('Start UTC:', startUtc);
-		// console.log('End UTC:', endUtc);
-		// console.log(data);
-
-		console.log('Submitted:', data);
-
 		let startUtc: string | null = null;
 		let endUtc: string | null = null;
+		let requestDate: Date | undefined = undefined;
 
 		if (scheduleEnabled) {
 			const { date, startTime, endTime } = data.schedule ?? {};
 
 			if (!date || !startTime || !endTime) {
-				console.error('❌ Schedule: Missing date or time fields.');
+				console.error('Schedule: Missing date or time fields.');
 				return;
 			}
 
@@ -134,12 +88,10 @@ const ApplyForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 			);
 
 			if (!sUtc || !eUtc) {
-				console.error(
-					'❌ Schedule: Start time must be before end time.'
-				);
+				console.error('Schedule: Start time must be before end time.');
 				return;
 			}
-
+			requestDate = date;
 			startUtc = sUtc;
 			endUtc = eUtc;
 		}
@@ -150,7 +102,7 @@ const ApplyForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 				currency: 'USD'
 			},
 			message: data.message,
-			response: TECHNICIAN_RESPONSE.applied,
+			status: TECHNICIAN_RESPONSE.applied,
 
 			// ✅ Only adds schedule key if all conditions are met
 			...(scheduleEnabled &&
@@ -158,21 +110,17 @@ const ApplyForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
 				endUtc && {
 					schedule: {
 						start: formatISO(new Date(startUtc)),
-						end: formatISO(new Date(endUtc))
+						end: formatISO(new Date(endUtc)),
+						day: format(new Date(startUtc), 'EEEE'),
+						date: requestDate
 					}
 				})
 		};
 
 		// ✅ You can now send the payload
-		// processResponse(payload, {
-		//   onSuccess: () => onCloseModal?.()
-		// });
-
-		console.log('📦 Payload to be sent:', payload);
-		if (scheduleEnabled) {
-			console.log('🕓 Start UTC:', startUtc);
-			console.log('🕔 End UTC:', endUtc);
-		}
+		processResponse(payload, {
+			onSuccess: () => onCloseModal?.()
+		});
 	};
 
 	function onError(err: unknown) {

@@ -3,7 +3,10 @@ import React, { FC, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { HiEye } from 'react-icons/hi2';
-import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import {
+	TechnicianRowActionsProps,
+	TicketRowActionsProps
+} from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
 	useDeleteTicket,
@@ -24,25 +27,27 @@ import {
 import { Button } from '@/components/ui/button';
 import ApplyForm from '../ApplyForm';
 
-const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
-	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
+const TicketRowActions: FC<TechnicianRowActionsProps> = ({
+	technicianRequest
+}) => {
+	// const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
 
-	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticket._id
-	);
-	function handleProcessResponse(onCloseModal: () => void) {
-		const payload = { response: TECHNICIAN_RESPONSE.applied };
-		processResponse(payload, {
-			onSuccess: () => onCloseModal()
-		});
-	}
+	// const { isProcessing, processResponse } = useProcessTechnicianResponse(
+	// 	technicianRequest._id
+	// );
+	// function handleProcessResponse(onCloseModal: () => void) {
+	// 	const payload = { response: TECHNICIAN_RESPONSE.applied };
+	// 	processResponse(payload, {
+	// 		onSuccess: () => onCloseModal()
+	// 	});
+	// }
 
-	function handleAssign(onCloseModal: () => void) {
-		const payload = { status: TICKET_STATUS.processing };
-		handleAssignTicket(payload, {
-			onSuccess: () => onCloseModal()
-		});
-	}
+	// function handleAssign(onCloseModal: () => void) {
+	// 	const payload = { status: TICKET_STATUS.processing };
+	// 	handleAssignTicket(payload, {
+	// 		onSuccess: () => onCloseModal()
+	// 	});
+	// }
 
 	return (
 		<TableCell className='md:px-2 py-2 space-x-3'>
@@ -58,16 +63,46 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align='end' className='w-32'>
 					<DropdownMenuItem>
-						<Link href={`bookings/${ticket.id}`}>View Details</Link>
+						<Link href={`bookings/${technicianRequest.ticket.id}`}>
+							View Details
+						</Link>
 					</DropdownMenuItem>
-					{ticket.status === TICKET_STATUS.pending_assignment && (
+					{technicianRequest.ticket.status ===
+						TICKET_STATUS.pending_assignment &&
+						technicianRequest.status ===
+							TECHNICIAN_RESPONSE.pending && (
+							<>
+								<DropdownMenuItem>
+									<Modal.Open opens='accept-request'>
+										<button
+											type='button'
+											className='w-full text-left'>
+											Accept
+										</button>
+									</Modal.Open>
+								</DropdownMenuItem>
+
+								<DropdownMenuItem>
+									<Modal.Open opens='decline-ticket'>
+										<button
+											type='button'
+											className='w-full text-left'>
+											Decline
+										</button>
+									</Modal.Open>
+								</DropdownMenuItem>
+							</>
+						)}
+
+					{technicianRequest.status ===
+						TECHNICIAN_RESPONSE.applied && (
 						<>
 							<DropdownMenuItem>
 								<Modal.Open opens='accept-request'>
 									<button
 										type='button'
 										className='w-full text-left'>
-										Accept
+										Update
 									</button>
 								</Modal.Open>
 							</DropdownMenuItem>
@@ -90,14 +125,14 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				name='decline-ticket'
 				title='Decline Maintenance Ticket'
 				description='Request ticket will be declined'>
-				<DeclineForm ticket={ticket} />
+				<DeclineForm ticketRequest={technicianRequest} />
 			</Modal.Window>
 			<Modal.Window
 				size='w-full md:w-1/2  3xl:w-1/3'
 				name='accept-request'
 				title='Apply for Ticket'
 				description='Submit your bid to get this ticket'>
-				<ApplyForm ticket={ticket} />
+				<ApplyForm ticketRequest={technicianRequest} />
 			</Modal.Window>
 			{/* <Modal.Window
 				name='accept-request'

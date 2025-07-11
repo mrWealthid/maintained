@@ -7,19 +7,22 @@ import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
 import { useProcessTechnicianResponse } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { DeclineTicketFormProps } from '@/app/shared/ticket-feat/model/ticket.model';
 
-const DeclineForm: FC<DeclineTicketFormProps> = ({ ticket, onCloseModal }) => {
+const DeclineForm: FC<DeclineTicketFormProps> = ({
+	ticketRequest,
+	onCloseModal
+}) => {
 	const { register, handleSubmit, formState } = useForm<{ reason: string }>({
 		mode: 'all'
 	});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticket.id,
+		ticketRequest._id,
 		onCloseModal
 	);
 
 	async function onSubmit(data: { reason: string }) {
-		const payload = { response: TECHNICIAN_RESPONSE.declined, ...data };
+		const payload = { status: TECHNICIAN_RESPONSE.declined, ...data };
 		processResponse(payload);
 	}
 

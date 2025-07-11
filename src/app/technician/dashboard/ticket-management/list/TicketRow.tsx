@@ -102,7 +102,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
 						</TableCell>
 
 						<Modal>
-							<TicketRowActions ticket={row.ticket} />
+							<TicketRowActions technicianRequest={row} />
 						</Modal>
 					</TableRow>
 				);

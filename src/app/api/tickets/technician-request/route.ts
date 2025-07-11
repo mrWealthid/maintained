@@ -1,9 +1,11 @@
+import { connect } from '@/dbConfig/dbConfig';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TechnicianRequest } from '@/model/technicanRequest';
 import APIFeatures from '@/utils/apiFeatures';
 import { mapToObject } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
+connect();
 export async function GET(request: NextRequest) {
 	try {
 		let filter = {};

@@ -11,11 +11,11 @@ export interface ManageTicketFormProps {
 	ticket?: Ticket | undefined;
 }
 export interface DeclineTicketFormProps {
-	ticket: Ticket;
+	ticketRequest: TechnicianRequest;
 	onCloseModal?: () => void;
 }
 export interface ApplyTicketFormProps {
-	ticket: Ticket;
+	ticketRequest: TechnicianRequest;
 	onCloseModal?: () => void;
 }
 export interface AssignTechnicianFormProps {
@@ -56,8 +56,29 @@ export interface ManageTicketForm {
 	type: string;
 }
 
+export type TechnicianRequest = {
+	quote: {
+		amount: number;
+		currency: string;
+	};
+	_id: string;
+	ticket: Ticket;
+	status: TECHNICIAN_RESPONSE;
+	createdAt: string;
+	schedule: {
+		start: string;
+		end: string;
+		day: string;
+		date: string;
+	};
+	message: string;
+};
+
 export type TicketRowActionsProps = {
 	ticket: Ticket;
+};
+export type TechnicianRowActionsProps = {
+	technicianRequest: TechnicianRequest;
 };
 
 export type TicketRowProps = {
@@ -65,15 +86,7 @@ export type TicketRowProps = {
 };
 
 export type TechnicianTicketRowProps = {
-	data?: {
-		quote: {
-			currency: string;
-		};
-		_id: string;
-		ticket: Ticket;
-		status: TECHNICIAN_RESPONSE;
-		createdAt: string;
-	}[];
+	data?: TechnicianRequest[];
 };
 
 export type TicketQueryprops<T = TICKET_STATUS> = {
@@ -112,6 +125,16 @@ export interface TicketListFilter {
 }
 
 export interface ProcessRequest {
-	response: TECHNICIAN_RESPONSE;
 	reason?: string;
+	status: TECHNICIAN_RESPONSE;
+	quote?: {
+		amount?: number;
+		currency?: string;
+	};
+	schedule?: {
+		start: string;
+		end: string;
+		day: string;
+	};
+	message?: string;
 }

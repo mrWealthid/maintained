@@ -9,8 +9,14 @@ export interface ITechnicianRequest extends Document {
 		amount?: number;
 		currency?: string;
 	};
+	schedule?: {
+		start: string;
+		end: string;
+		day: string;
+		date: Date;
+	};
+	reason?: string;
 	message?: string;
-	scheduledDate?: Date;
 	respondedAt?: Date;
 	createdAt: Date;
 	updatedAt: Date;
@@ -32,11 +38,18 @@ const TechnicianRequestSchema = new Schema(
 			enum: TECHNICIAN_RESPONSE,
 			default: TECHNICIAN_RESPONSE.pending
 		},
+		schedule: {
+			date: Date,
+			start: String,
+			end: String,
+			day: String
+		},
 		quote: {
 			amount: Number,
 			currency: { type: String, default: 'USD' }
 		},
 		message: String,
+		reason: String,
 		scheduledDate: Date,
 		respondedAt: Date
 	},
