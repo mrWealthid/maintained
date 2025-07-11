@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
 
 		filter = { technician: verify.userId };
 
+		if (verify.isTechnicianRole) {
+			filter = { ...filter, isActive: true };
+		}
 		const query: any = request.nextUrl.searchParams;
 
 		const transformedQuery = mapToObject(query);
