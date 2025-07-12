@@ -16,7 +16,9 @@ import {
 	Banknote,
 	Sparkles,
 	Sparkle,
-	BadgeInfo
+	BadgeInfo,
+	Check,
+	X
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -283,7 +285,7 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 										{new Date(
 											request.schedule.date
 										).toDateString()}{' '}
-										between {request.schedule.start} and{' '}
+										from {request.schedule.start} to{' '}
 										{request.schedule.end}
 									</span>
 								</div>
@@ -297,37 +299,54 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 											aria-label='Approve technician response'>
 											Approve
 										</button> */}
-										<button
-											className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
-											aria-label='Decline technician response'>
-											Decline
-										</button>
-										<button
-											className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200'
-											aria-label='Assign technician'>
+
+										<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
+											<Check
+												color='#2ecd0e'
+												strokeWidth={1.25}
+											/>
+											<span className='sr-only'>
+												Assign
+											</span>
 											Assign
-										</button>
+										</Button>
+										<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
+											<X
+												color='#bf0303'
+												strokeWidth={1}
+											/>
+											<span className='sr-only'>
+												Decline
+											</span>
+											Decline
+										</Button>
 									</>
 								)}
 
 								{request.status ===
 									TECHNICIAN_RESPONSE.applied && (
 									<>
-										{/* <button
-											className='bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700'
-											aria-label='Approve technician response'>
-											Approve
-										</button> */}
-										<button
-											className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
-											aria-label='Decline technician response'>
-											Decline
-										</button>
-										<button
-											className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200'
-											aria-label='Assign technician'>
+										<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
+											<Check
+												color='#2ecd0e'
+												strokeWidth={1.25}
+											/>
+											<span className='sr-only'>
+												Assign
+											</span>
 											Assign
-										</button>
+										</Button>
+
+										<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
+											<X
+												color='#bf0303'
+												strokeWidth={1}
+											/>
+											<span className='sr-only'>
+												Decline
+											</span>
+											Decline
+										</Button>
 									</>
 								)}
 							</div>

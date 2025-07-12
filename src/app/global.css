@@ -45,8 +45,9 @@ body {
 }
 
 .dashboard-body {
-	margin-top: var(--dashboard-header-height);
-	height: calc(100vh - var(--dashboard-header-height));
+	margin-top: calc(5vh + var(--dashboard-header-height));
+	margin-bottom: calc(5vh + var(--dashboard-header-height));
+	min-height: calc(100vh - var(--dashboard-header-height));
 	transition: 0.2s ease-in
 }
 

@@ -35,7 +35,7 @@ export default function AnimatedBorderWrapper({
 				/>
 			)}
 
-			<div className='relative z-10 bg-background rounded-xl'>
+			<div className='relative z-10 bg-background overflow-hidden rounded-xl'>
 				{children}
 			</div>
 		</motion.div>
