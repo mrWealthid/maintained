@@ -2,7 +2,6 @@
 import React, { FC } from 'react';
 import Link from 'next/link';
 
-
 import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
@@ -24,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import SendTechnicianRequestForm from '../SendTechnicianRequestForm';
+import { ADMIN_ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -55,7 +55,10 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align='end' className='w-32'>
 					<DropdownMenuItem>
-						<Link href={`bookings/${ticket.id}`}>View Details</Link>
+						<Link
+							href={`${ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket._id}`}>
+							View Details
+						</Link>
 					</DropdownMenuItem>
 
 					{/* TODO:: This feat should be executed by an admin who

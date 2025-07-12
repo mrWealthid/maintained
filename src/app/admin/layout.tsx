@@ -27,7 +27,7 @@ export default function DashboardLayout({
 				<AppSidebar routes={adminRoutes} />
 
 				<section className='mt-10 flex flex-col dashboard-body overflow-x-hidden w-full gap-6'>
-					<section className='container-text mt-14'>
+					<section className='container-text my-14'>
 						<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
 						{isAdmin}
 					</section>

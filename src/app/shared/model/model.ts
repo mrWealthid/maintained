@@ -23,7 +23,7 @@ export interface Ticket {
 	createdAt: string;
 	images?: string[];
 	videos?: string[];
-	user: Pick<User, 'id' | 'name'>;
+	user: Pick<User, 'id' | 'name'| 'email'>;
 	area: string;
 	category: Category;
 	id: string;

@@ -10,6 +10,9 @@ export type TicketStatus =
 export interface ManageTicketFormProps {
 	ticket?: Ticket | undefined;
 }
+export interface ManageTicketDetailsProps {
+	ticket: Ticket | undefined;
+}
 export interface DeclineTicketFormProps {
 	ticketRequest: TechnicianRequest;
 	onCloseModal?: () => void;

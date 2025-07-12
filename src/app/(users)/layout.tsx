@@ -26,7 +26,7 @@ export default function DashboardLayout({
 				</header>
 				<AppSidebar routes={routes} />
 				<section className='flex flex-col dashboard-body overflow-x-hidden  w-full gap-6'>
-					<section className='container-text mt-14'>
+					<section className='container-text my-14'>
 						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
 						{isUser}
 					</section>
