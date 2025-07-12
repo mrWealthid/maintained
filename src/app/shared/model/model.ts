@@ -1,4 +1,10 @@
-import { INVITE_STATUS, ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
+import {
+	INVITE_STATUS,
+	ROLES,
+	TICKET_PRIORITY,
+	TICKET_STATUS
+} from '@/app/shared/enums/enums';
+import { TechnicianRequest } from '../ticket-feat/model/ticket.model';
 
 export interface Category {
 	id: string;
@@ -23,15 +29,19 @@ export interface Ticket {
 	createdAt: string;
 	images?: string[];
 	videos?: string[];
-	user: Pick<User, 'id' | 'name'| 'email'>;
+	user: Pick<User, 'id' | 'name' | 'email'>;
 	area: string;
 	category: Category;
 	id: string;
 	assignedTo?: User;
 	actionedBy?: string;
 	type: string;
+	priority: TICKET_PRIORITY;
 }
 
+export interface TicketDetails extends Ticket {
+	requests: TechnicianRequest[];
+}
 // export interface TicketCardProps extends Ticket {
 // 	role: ROLES;
 // }
@@ -39,7 +49,7 @@ export interface Ticket {
 export interface CreateTicketPayload
 	extends Omit<
 		Ticket,
-		'_id' | 'createdAt' | 'id' | 'category' | 'user' | 'status'
+		'_id' | 'createdAt' | 'id' | 'category' | 'user' | 'status' | 'priority'
 	> {
 	status?: TICKET_STATUS;
 	category: string;

@@ -10,27 +10,30 @@ interface ITicketCategory extends Document {
 	isActive: boolean;
 }
 
-const ticketCategorySchema = new Schema<ITicketCategory>({
-	name: { type: String, required: true },
-	description: { type: String },
-	createdAt: {
-		type: Date,
-		default: Date.now,
-		select: false
-	},
+const ticketCategorySchema = new Schema<ITicketCategory>(
+	{
+		name: { type: String, required: true },
+		description: { type: String },
+		createdAt: {
+			type: Date,
+			default: Date.now,
+			select: false
+		},
 
-	business: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: Business,
-		required: false
-		// required: [true, 'User must belong to a business']
+		business: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: Business,
+			required: false
+			// required: [true, 'User must belong to a business']
+		},
+		isDefault: {
+			type: Boolean,
+			default: true
+		},
+		isActive: { type: Boolean, default: true }
 	},
-	isDefault: {
-		type: Boolean,
-		default: true
-	},
-	isActive: { type: Boolean, default: true }
-});
+	{ timestamps: true }
+);
 
 const TicketCategory: Model<ITicketCategory> =
 	mongoose.models.TicketCategory ||

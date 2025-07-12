@@ -3,7 +3,12 @@ import type { ObjectId } from 'mongoose';
 import Business from './businessModel';
 import User from './userModel';
 import Category from './ticketCategoryModel';
-import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
+import {
+	TECHNICIAN_RESPONSE,
+	TICKET_PRIORITY,
+	TICKET_STATUS
+} from '@/app/shared/enums/enums';
+import './technicanRequest';
 
 interface ITicket extends Document {
 	title: string;
@@ -20,12 +25,13 @@ interface ITicket extends Document {
 	assignedTo?: ObjectId;
 	relatedTo?: ObjectId;
 	type: ObjectId;
-	sentRequests?: {
-		technician: ObjectId;
-		response: TECHNICIAN_RESPONSE;
-		message: string;
-		respondedAt: Date;
-	}[];
+	priority: TICKET_PRIORITY;
+	// sentRequests?: {
+	// 	technician: ObjectId;
+	// 	response: TECHNICIAN_RESPONSE;
+	// 	message: string;
+	// 	respondedAt: Date;
+	// }[];
 }
 
 const allowedTransitions: Record<string, string[]> = {
@@ -91,29 +97,38 @@ const TicketSchema = new Schema<ITicket>(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: User
 		},
+		priority: {
+			type: String,
+			enum: TICKET_PRIORITY,
+			default: TICKET_PRIORITY.medium
+		}
 
-		sentRequests: [
-			{
-				technician: {
-					type: mongoose.Schema.Types.ObjectId,
-					ref: 'User',
-					required: true
-				},
-				requestedAt: {
-					type: Date,
-					default: Date.now
-				},
-				response: {
-					type: String,
-					enum: TECHNICIAN_RESPONSE,
-					default: null
-				},
-				message: String,
-				respondedAt: Date
-			}
-		]
+		// sentRequests: [
+		// 	{
+		// 		technician: {
+		// 			type: mongoose.Schema.Types.ObjectId,
+		// 			ref: 'User',
+		// 			required: true
+		// 		},
+		// 		requestedAt: {
+		// 			type: Date,
+		// 			default: Date.now
+		// 		},
+		// 		response: {
+		// 			type: String,
+		// 			enum: TECHNICIAN_RESPONSE,
+		// 			default: null
+		// 		},
+		// 		message: String,
+		// 		respondedAt: Date
+		// 	}
+		// ]
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
 
 TicketSchema.pre('findOneAndUpdate', async function (next) {
@@ -136,8 +151,21 @@ TicketSchema.pre('findOneAndUpdate', async function (next) {
 	}
 	next();
 });
+
+TicketSchema.virtual('requests', {
+	ref: 'TechnicianRequest',
+	foreignField: 'ticket',
+	localField: '_id'
+});
+
 const Ticket =
 	(mongoose.models.Ticket as Model<ITicket>) ||
 	mongoose.model<ITicket>('Ticket', TicketSchema);
 
 export default Ticket;
+
+// businessSchema.virtual('businessUsers', {
+// 	ref: 'User',
+// 	foreignField: 'business',
+// 	localField: '_id'
+// });

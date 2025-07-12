@@ -1,5 +1,5 @@
 import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
-import { Ticket } from '../../model/model';
+import { Ticket, User } from '../../model/model';
 
 export type TicketStatus =
 	| TICKET_STATUS.pending
@@ -10,8 +10,16 @@ export type TicketStatus =
 export interface ManageTicketFormProps {
 	ticket?: Ticket | undefined;
 }
+export interface ManageTicketDetails {
+	ticket: TicketDetailsResponse | undefined;
+}
+
 export interface ManageTicketDetailsProps {
-	ticket: Ticket | undefined;
+	ticket?: TicketDetailsResponse | undefined;
+}
+
+export interface TicketDetailsResponse extends Ticket {
+	requests: TechnicianRequestDetails[];
 }
 export interface DeclineTicketFormProps {
 	ticketRequest: TechnicianRequest;
@@ -60,7 +68,7 @@ export interface ManageTicketForm {
 	type: string;
 }
 
-export type TechnicianRequest = {
+export interface TechnicianRequestDetails {
 	quote: {
 		amount: number;
 		currency: string;
@@ -76,7 +84,14 @@ export type TechnicianRequest = {
 		date: string;
 	};
 	message: string;
-};
+	isActive: boolean;
+	technician: User;
+}
+
+export type TechnicianRequest = Omit<
+	TechnicianRequestDetails,
+	'technician' | 'isActive'
+>;
 
 export type TicketRowActionsProps = {
 	ticket: Ticket;

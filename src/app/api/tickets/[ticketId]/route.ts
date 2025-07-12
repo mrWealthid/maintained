@@ -9,9 +9,20 @@ export async function GET(
 	try {
 		const ticketId = params.ticketId;
 
-		const ticket = await Ticket.findOne({
-			_id: ticketId
-		}).populate([
+		// const ticket = await Ticket.findOne({
+		// 	_id: ticketId
+		// }).populate([
+		// 	{
+		// 		path: 'category',
+		// 		select: 'name'
+		// 	},
+		// 	{
+		// 		path: 'user',
+		// 		select: 'name email'
+		// 	},
+		// 	{ path: 'requests' }
+		// ]);
+		const ticket = await Ticket.findById(ticketId).populate([
 			{
 				path: 'category',
 				select: 'name'
@@ -19,24 +30,26 @@ export async function GET(
 			{
 				path: 'user',
 				select: 'name email'
+			},
+			{
+				path: 'requests',
+				populate: { path: 'technician', select: 'name email' }
 			}
 		]);
 
+		console.log('Populated Ticket:', ticket);
+
 		if (!ticket) {
 			return NextResponse.json(
-				{
-					error: 'No ticket not found'
-				},
-				{ status: 403 }
+				{ error: 'Ticket not found' },
+				{ status: 404 }
 			);
 		}
 
-		const response = NextResponse.json({
+		return NextResponse.json({
 			status: 'success',
-			data: ticket
+			data: ticket.toJSON() // ✅ includes virtuals like 'requests'
 		});
-
-		return response;
 	} catch (error: any) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}

@@ -53,7 +53,7 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						<span className='sr-only'>Open menu</span>
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align='end' className='w-32'>
+				<DropdownMenuContent align='end' className=''>
 					<DropdownMenuItem>
 						<Link
 							href={`${ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket._id}`}>
@@ -82,6 +82,18 @@ const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 									type='button'
 									className='w-full text-left'>
 									Assign
+								</button>
+							</Modal.Open>
+						</DropdownMenuItem>
+					)}
+
+					{ticket.status === TICKET_STATUS.pending_assignment && (
+						<DropdownMenuItem>
+							<Modal.Open opens='send-request-technicians'>
+								<button
+									type='button'
+									className='w-full text-left'>
+									Update Assignment
 								</button>
 							</Modal.Open>
 						</DropdownMenuItem>

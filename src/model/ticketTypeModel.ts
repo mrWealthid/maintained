@@ -10,22 +10,25 @@ interface ITicketType extends Document {
 	createdAt: Date;
 }
 // TicketType.ts
-const ticketTypeSchema = new Schema<ITicketType>({
-	name: { type: String, required: true },
-	description: String,
-	business: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: Business,
-		required: false
+const ticketTypeSchema = new Schema<ITicketType>(
+	{
+		name: { type: String, required: true },
+		description: String,
+		business: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: Business,
+			required: false
+		},
+		createdAt: {
+			type: Date,
+			default: Date.now,
+			select: false
+		},
+		isActive: { type: Boolean, default: true },
+		isDefault: { type: Boolean, default: true }
 	},
-	createdAt: {
-		type: Date,
-		default: Date.now,
-		select: false
-	},
-	isActive: { type: Boolean, default: true },
-	isDefault: { type: Boolean, default: true }
-});
+	{ timestamps: true }
+);
 
 const TicketType: Model<ITicketType> =
 	mongoose.models.TicketType ||

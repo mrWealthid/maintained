@@ -30,53 +30,56 @@ interface IUser extends Document {
 	passwordConfirm: string;
 }
 
-const userSchema = new Schema<IUser>({
-	name: { type: String, required: [true, 'Please tell us your name!'] },
-	email: {
-		type: String,
-		required: [true, 'Please provide your email'],
-		unique: true,
-		lowercase: true,
-		validate: [validator.isEmail, 'Please provide a valid email']
+const userSchema = new Schema<IUser>(
+	{
+		name: { type: String, required: [true, 'Please tell us your name!'] },
+		email: {
+			type: String,
+			required: [true, 'Please provide your email'],
+			unique: true,
+			lowercase: true,
+			validate: [validator.isEmail, 'Please provide a valid email']
+		},
+		photo: { type: String, default: 'default.jpg' },
+		role: {
+			type: String,
+			enum: ['USER', 'ADMIN', 'SUPER_ADMIN', 'TECHNICIAN', 'OWNER'],
+			default: 'USER'
+		},
+		password: {
+			type: String,
+			required: [true, 'Please provide a password'],
+			minlength: 8,
+			select: false
+		},
+		business: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: Business,
+			required: [true, 'User must belong to a business']
+		},
+		createdAt: {
+			type: Date,
+			default: Date.now,
+			select: false
+		},
+		dateOfBirth: { type: Date },
+		inviteToken: String,
+		inviteTokenExpires: Date,
+		passwordChangedAt: Date,
+		passwordResetToken: String,
+		passwordResetExpires: Date,
+		active: {
+			type: Boolean,
+			default: true,
+			select: false
+		},
+		status: {
+			type: String,
+			enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
+		}
 	},
-	photo: { type: String, default: 'default.jpg' },
-	role: {
-		type: String,
-		enum: ['USER', 'ADMIN', 'SUPER_ADMIN', 'TECHNICIAN', 'OWNER'],
-		default: 'USER'
-	},
-	password: {
-		type: String,
-		required: [true, 'Please provide a password'],
-		minlength: 8,
-		select: false
-	},
-	business: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: Business,
-		required: [true, 'User must belong to a business']
-	},
-	createdAt: {
-		type: Date,
-		default: Date.now,
-		select: false
-	},
-	dateOfBirth: { type: Date },
-	inviteToken: String,
-	inviteTokenExpires: Date,
-	passwordChangedAt: Date,
-	passwordResetToken: String,
-	passwordResetExpires: Date,
-	active: {
-		type: Boolean,
-		default: true,
-		select: false
-	},
-	status: {
-		type: String,
-		enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
-	}
-});
+	{ timestamps: true }
+);
 
 // Hash password before saving
 userSchema.pre<IUser>('save', async function (next) {

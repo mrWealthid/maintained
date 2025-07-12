@@ -29,3 +29,9 @@ export enum TECHNICIAN_RESPONSE {
 	inspection_requested = 'INSPECTION_REQUESTED',
 	all = 'ALL'
 }
+
+export enum TICKET_PRIORITY {
+	low = 'LOW',
+	medium = 'MEDIUM',
+	high = 'HIGH'
+}

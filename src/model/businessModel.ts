@@ -45,7 +45,7 @@ businessSchema.pre(/^find/, function (this: mongoose.Query<any, any>, next) {
 
 businessSchema.virtual('businessUsers', {
 	ref: 'User',
-	foreignField: 'businessId',
+	foreignField: 'business',
 	localField: '_id'
 });
 

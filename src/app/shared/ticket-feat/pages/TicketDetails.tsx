@@ -12,7 +12,11 @@ import {
 	Image as ImageIcon,
 	VideoIcon,
 	ChevronDown,
-	Calendar1
+	Calendar1,
+	Banknote,
+	Sparkles,
+	Sparkle,
+	BadgeInfo
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -26,8 +30,13 @@ import Link from 'next/link';
 import { ADMIN_ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 import Modal from '@/app/shared/components/modal/Modal';
 import { Badge } from '@/components/ui/badge';
-import { ManageTicketDetailsProps } from '../model/ticket.model';
+import {
+	ManageTicketDetails,
+	ManageTicketDetailsProps,
+	TicketDetailsResponse
+} from '../model/ticket.model';
 import Image from 'next/image';
+import { TECHNICIAN_RESPONSE, TICKET_PRIORITY } from '../../enums/enums';
 
 export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 	return (
@@ -126,49 +135,51 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 					</section>
 
 					{/* Image Gallery */}
-					{ticket?.images && (
-						<section>
-							<h3 className='font-medium flex items-center gap-1  mb-2'>
-								<ImageIcon size={14} /> <span>Images</span>
-							</h3>
-							<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-								{ticket.images.map((image, index) => (
-									<figure key={index}>
-										<Image
-											src={image}
-											alt={`Ticket image ${index + 1}`}
-											width={100}
-											height={100}
-											className='rounded-xl border object-cover h-56 w-full'
-										/>
-										<figcaption className='sr-only'>
-											Ticket photo {index + 1}
-										</figcaption>
-									</figure>
-								))}
-							</div>
-						</section>
-					)}
+					{Array.isArray(ticket?.images) &&
+						ticket.images.length > 0 && (
+							<section>
+								<h3 className='font-medium flex items-center gap-1  mb-2'>
+									<ImageIcon size={14} /> <span>Images</span>
+								</h3>
+								<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+									{ticket.images.map((image, index) => (
+										<figure key={index}>
+											<Image
+												src={image}
+												alt={`Ticket image ${index + 1}`}
+												width={100}
+												height={100}
+												className='rounded-xl border object-cover h-56 w-full'
+											/>
+											<figcaption className='sr-only'>
+												Ticket photo {index + 1}
+											</figcaption>
+										</figure>
+									))}
+								</div>
+							</section>
+						)}
 
 					{/* Video Section */}
-					{ticket?.videos && (
-						<section>
-							<h3 className='font-medium flex items-center gap-1  mb-2'>
-								<VideoIcon size={14} /> <span>Videos</span>
-							</h3>
-							<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-								{ticket.videos.map((vid, index) => (
-									<video
-										key={index}
-										controls
-										className='rounded-xl border object-cover h-56 w-full'
-										src={vid}
-										aria-label={`Leak video ${index + 1}`}
-									/>
-								))}
-							</div>
-						</section>
-					)}
+					{Array.isArray(ticket?.videos) &&
+						ticket.videos.length > 0 && (
+							<section>
+								<h3 className='font-medium flex items-center gap-1  mb-2'>
+									<VideoIcon size={14} /> <span>Videos</span>
+								</h3>
+								<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+									{ticket.videos.map((vid, index) => (
+										<video
+											key={index}
+											controls
+											className='rounded-xl border object-cover h-56 w-full'
+											src={vid}
+											aria-label={`Leak video ${index + 1}`}
+										/>
+									))}
+								</div>
+							</section>
+						)}
 				</article>
 
 				{/* User Details */}
@@ -196,54 +207,134 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 			</div>
 
 			{/* Technician Responses */}
-			<section
-				className='card rounded-3xl p-5 border space-y-6'
-				aria-labelledby='technician-responses-heading'>
-				<h2
-					id='technician-responses-heading'
-					className='text-lg font-semibold'>
-					Technician Responses
-				</h2>
+			{Array.isArray(ticket?.requests) && ticket.requests.length > 0 && (
+				<section
+					className='card rounded-3xl p-5 border space-y-6'
+					aria-labelledby='technician-responses-heading'>
+					<h2
+						id='technician-responses-heading'
+						className='text-lg font-semibold'>
+						Technician Responses
+					</h2>
 
-				{[1, 2, 3].map((_, idx) => (
-					<article
-						key={idx}
-						className='space-y-4 border-t pt-4'
-						aria-label={`Technician response ${idx + 1}`}>
-						<div className='flex items-center gap-2'>
-							<DollarSign size={14} />
-							<span className='font-medium'>$350.00</span>
-						</div>
-						<p className='text-gray-700'>
-							The estimated cost for the repair is{' '}
-							<span className='font-medium'>$350.00</span>.
-						</p>
-						<div className='flex items-center gap-2'>
-							<Calendar size={14} />
-							<span>
-								Visit scheduled for April 12, 2024 at 10:00 AM
-							</span>
-						</div>
-						<div className='flex gap-2'>
-							<button
-								className='bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700'
-								aria-label='Approve technician response'>
-								Approve
-							</button>
-							<button
-								className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
-								aria-label='Decline technician response'>
-								Decline
-							</button>
-							<button
-								className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200'
-								aria-label='Assign technician'>
-								Assign
-							</button>
-						</div>
-					</article>
-				))}
-			</section>
+					{ticket.requests.map((request, idx) => (
+						<article
+							key={idx}
+							className='space-y-4 border-t pt-4'
+							aria-label={`Technician response ${idx + 1}`}>
+							<div className='flex items-center gap-2'>
+								<User size={14} />
+								<span className='font-medium'>
+									{request.technician.name}
+								</span>
+							</div>
+							<div className='flex items-center gap-2'>
+								<Info size={14} />
+								<Badge variant='outline'>
+									{request.status}
+									{/*
+                                                        <IconLoader/> */}
+								</Badge>
+							</div>
+							<div className='flex items-center gap-2'>
+								<BadgeInfo size={14} />
+								<Badge className='flex gap-1' variant='outline'>
+									{request.isActive ? (
+										<Sparkles
+											size={16}
+											color='#f1d104'
+											strokeWidth={1}
+										/>
+									) : (
+										<Sparkle
+											size={16}
+											color='#f1d104'
+											strokeWidth={1}
+										/>
+									)}
+
+									{request.isActive ? 'Active' : 'Expired'}
+									{/*
+                                                        <IconLoader/> */}
+								</Badge>
+							</div>
+
+							{request.quote.amount && (
+								<div className='flex items-center gap-2'>
+									<Banknote strokeWidth={1} />
+									<span className='font-medium'>
+										{request.quote.amount}
+									</span>
+								</div>
+							)}
+							{request.schedule && (
+								<p>
+									The estimated cost for the repair is{' '}
+									<span className='font-medium'>
+										${request.quote.amount}
+									</span>
+								</p>
+							)}
+							{request.schedule && (
+								<div className='flex items-center gap-2'>
+									<Calendar size={14} />
+									<span>
+										Visit scheduled for{' '}
+										{new Date(
+											request.schedule.date
+										).toDateString()}{' '}
+										between {request.schedule.start} and{' '}
+										{request.schedule.end}
+									</span>
+								</div>
+							)}
+							<div className='flex gap-2'>
+								{request.status ===
+									TECHNICIAN_RESPONSE.pending && (
+									<>
+										{/* <button
+											className='bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700'
+											aria-label='Approve technician response'>
+											Approve
+										</button> */}
+										<button
+											className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
+											aria-label='Decline technician response'>
+											Decline
+										</button>
+										<button
+											className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200'
+											aria-label='Assign technician'>
+											Assign
+										</button>
+									</>
+								)}
+
+								{request.status ===
+									TECHNICIAN_RESPONSE.applied && (
+									<>
+										{/* <button
+											className='bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700'
+											aria-label='Approve technician response'>
+											Approve
+										</button> */}
+										<button
+											className='bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700'
+											aria-label='Decline technician response'>
+											Decline
+										</button>
+										<button
+											className='bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200'
+											aria-label='Assign technician'>
+											Assign
+										</button>
+									</>
+								)}
+							</div>
+						</article>
+					))}
+				</section>
+			)}
 		</div>
 	);
 }

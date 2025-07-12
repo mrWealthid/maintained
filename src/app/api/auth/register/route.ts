@@ -69,18 +69,18 @@ export async function POST(request: Request) {
 			);
 		}
 
-		//create default categories
-		const defaultCategories = await TicketCategory.find({
-			isDefault: true
-		});
+		// //create default categories
+		// const defaultCategories = await TicketCategory.find({
+		// 	isDefault: true
+		// });
 
-		const cloned = defaultCategories.map((cat) => ({
-			name: cat.name,
-			description: cat.description,
-			business: business._id
-		}));
+		// const cloned = defaultCategories.map((cat) => ({
+		// 	name: cat.name,
+		// 	description: cat.description,
+		// 	business: business._id
+		// }));
 
-		await TicketCategory.insertMany(cloned);
+		// await TicketCategory.insertMany(cloned);
 
 		// Create User
 		const newUser = await User.create({
