@@ -61,7 +61,7 @@ function UserRow({ data }: UserRowProps) {
 							</span>
 						</TableCell>
 						<TableCell>
-							<Badge variant='outline'>
+							<Badge variant='secondary'>
 								{row.status}
 								{/*
 								<IconLoader/> */}
