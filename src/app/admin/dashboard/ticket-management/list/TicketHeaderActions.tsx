@@ -9,6 +9,7 @@ import {
 	TicketQueryprops
 } from '@/app/shared/ticket-feat/model/ticket.model';
 import { ticketListFilter } from '@/app/shared/ticket-feat/data/data';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<TicketFilterQuery | null>({
@@ -17,43 +18,32 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 
 	async function handleClick(query: TicketFilterQuery | null) {
 		setQuery(query);
-		if (handleFilter) {
-			query ? handleFilter(query) : handleFilter(null);
-		}
-	}
-
-	function renderStyle(tab: { label: string; value: TICKET_STATUS }) {
-		if (tab.value === TICKET_STATUS.all && !query) {
-			return `bg-background`;
-		} else if (query?.status === tab.value) {
-			return `bg-background`;
-		}
+		handleFilter?.(query);
 	}
 
 	return (
 		<>
-			{ticketListFilter.map((tab) => (
-				<div key={tab.label}>
-					<button
-						onClick={() =>
-							handleClick(
-								tab.value === TICKET_STATUS.all
-									? null
-									: { status: tab.value }
-							)
-						}
-						type='button'
-						className={`${renderStyle(
-							tab
-						)} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl   font-light  border btn`}>
-						<FaCircle
-							size={10}
-							color={getStatusColor([tab.value])}
-						/>
-						{tab.label}
-					</button>
-				</div>
-			))}
+			<Tabs
+				value={query?.status ?? TICKET_STATUS.all}
+				onValueChange={(val) =>
+					handleClick(
+						val === TICKET_STATUS.all
+							? null
+							: { status: val as TICKET_STATUS }
+					)
+				}
+				className='w-auto'>
+				<TabsList className='bg-muted p-1 rounded-full shadow-sm space-x-1'>
+					{ticketListFilter.map((tab) => (
+						<TabsTrigger
+							key={tab.value}
+							value={tab.value}
+							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
+							{tab.label}
+						</TabsTrigger>
+					))}
+				</TabsList>
+			</Tabs>
 
 			{/*
 			<select

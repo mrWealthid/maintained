@@ -4,6 +4,7 @@ import { FaCircle } from 'react-icons/fa';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
 import { userListFilter } from '../data/user.data';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 	const [query, setQuery] = useState<UserFilterQuery | null>({
@@ -12,118 +13,33 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 
 	async function handleClick(query: UserFilterQuery | null) {
 		setQuery(query);
-		if (handleFilter) {
-			query ? handleFilter(query) : handleFilter(null);
-		}
-	}
-
-	function renderStyle(tab: { label: string; value: INVITE_STATUS }) {
-		if (tab.value === INVITE_STATUS.all && !query) {
-			return `bg-background`;
-		} else if (query?.status === tab.value) {
-			return `bg-background`;
-		}
+		handleFilter?.(query);
 	}
 
 	return (
 		<>
-			{userListFilter.map((tab) => (
-				<div key={tab.label}>
-					<button
-						onClick={() =>
-							handleClick(
-								tab.value === INVITE_STATUS.all
-									? null
-									: { status: tab.value }
-							)
-						}
-						type='button'
-						className={`${renderStyle(
-							tab
-						)} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl   font-light  border btn`}>
-						{/* <FaCircle
-							size={10}
-							color={getStatusColor([tab.value])}
-						/> */}
-						{tab.label}
-					</button>
-				</div>
-			))}
-			{/* <div className=''>
-				<button
-					onClick={() => handleClick(null)}
-					type='button'
-					className={`${
-						query ?? '!bg-primary text-white'
-					} w-full  text-xs px-6 py-2 rounded-3xl   dark:glass dark:border-none bg-gray-50 font-light text-black border btn`}>
-					All
-				</button>
-			</div> */}
+			<Tabs
+				value={query?.status ?? INVITE_STATUS.all}
+				onValueChange={(val) =>
+					handleClick(
+						val === INVITE_STATUS.all
+							? null
+							: { status: val as INVITE_STATUS }
+					)
+				}
+				className='w-auto'>
+				<TabsList className='bg-muted p-1 rounded-full shadow-sm space-x-1'>
+					{userListFilter.map((tab) => (
+						<TabsTrigger
+							key={tab.value}
+							value={tab.value}
+							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
+							{tab.label}
+						</TabsTrigger>
+					))}
+				</TabsList>
+			</Tabs>
 
-			{/* <div className=''>
-				<button
-					onClick={() =>
-						handleClick({ status: INVITE_STATUS.invited })
-					}
-					type='button'
-					className={`${
-						query?.status === INVITE_STATUS.invited &&
-						'!bg-primary text-white'
-					} w-full  text-xs px-6 py-2 flex gap-1 items-center rounded-3xl  bg-gray-50  dark:glass dark:border-none font-light text-black border btn`}>
-					<FaCircle color='yellow' />
-					Invited
-				</button>
-			</div> */}
-			{/* <div className=''>
-				<button
-					onClick={() =>
-						handleClick({
-							checkStatus: REQUEST_STATUS.assigned
-						})
-					}
-					type='button'
-					className={`${
-						query?.status === REQUEST_STATUS.assigned &&
-						'!bg-primary text-white'
-					} w-full flex gap-1 items-center  text-xs px-6 py-2 rounded-3xl  dark:glass dark:border-none bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='yellow' />
-					Activated
-				</button>
-			</div> */}
-
-			{/* <div className=''>
-				<button
-					onClick={() =>
-						handleClick({
-							status: INVITE_STATUS.activated
-						})
-					}
-					type='button'
-					className={`${
-						query?.status === INVITE_STATUS.activated &&
-						'!bg-primary text-white'
-					} w-full  text-xs px-6 py-2 flex items-center gap-1 rounded-3xl  dark:glass dark:border-none  bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='green' />
-					Activated
-				</button>
-			</div>
-
-			<div className=''>
-				<button
-					onClick={() =>
-						handleClick({
-							status: INVITE_STATUS.declined
-						})
-					}
-					type='button'
-					className={`${
-						query?.status === INVITE_STATUS.declined &&
-						'!bg-primary text-white'
-					} w-full  text-xs px-6 py-2 flex items-center gap-1 rounded-3xl  dark:glass dark:border-none  bg-gray-50 font-light text-black border btn`}>
-					<FaCircle color='red' />
-					Declined
-				</button>
-			</div> */}
 			{/*
 			<select
 				id="sort"

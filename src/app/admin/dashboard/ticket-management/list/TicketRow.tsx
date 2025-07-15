@@ -61,7 +61,7 @@ function RequestRow({ data }: TicketRowProps) {
 							</span>
 						</TableCell>
 						<TableCell>
-							<Badge variant='outline'>
+							<Badge variant='secondary'>
 								{row.status}
 								{/*
 								<IconLoader/> */}

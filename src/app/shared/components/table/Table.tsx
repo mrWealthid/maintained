@@ -435,33 +435,35 @@ export function TableHeaderAction({ children }: any) {
 	}, [debouncedSearchValue]);
 
 	return (
-		<div className='flex flex-col flex-wrap items-center gap-6  justify-between mb-2 px-3 overflow-x-auto md:flex-row'>
-			<div className='flex-1'>
+		<div className='flex flex-col flex-wrap  gap-6  justify-between mb-2 overflow-x-auto md:flex-row'>
+			<div className='flex-1 items-start'>
 				<Search
 					placeHolder={`Search by ${searchKey}`}
 					handleSearch={(val) => setSearchValue(val)}
 				/>
 			</div>
 
-			<div className='flex flex-1 py-1 flex-wrap items-center gap-3  my-2 md:gap-2'>
-				<TableFilter />
+			<div className='flex flex-1 flex-col  flex-wrap items-end  gap-2'>
+				<div className='flex gap-3  justify-end w-full '>
+					<TableFilter />
+					{isDownloadable && (
+						<DownloadTableExcel
+							filename={`${queryKey} table`}
+							sheet={queryKey}
+							currentTableRef={tableRef.current}>
+							<button
+								type='button'
+								className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border'>
+								<IoCloudDownloadOutline /> Export
+							</button>
+						</DownloadTableExcel>
+					)}
+				</div>
 
 				{cloneElement(children, { handleFilter })}
+			</div>
 
-				{isDownloadable && (
-					<DownloadTableExcel
-						filename={`${queryKey} table`}
-						sheet={queryKey}
-						currentTableRef={tableRef.current}>
-						<button
-							type='button'
-							className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border'>
-							<IoCloudDownloadOutline /> Export
-						</button>
-					</DownloadTableExcel>
-				)}
-
-				{/* <div className="flex gap-3 items-center">
+			{/* <div className="flex gap-3 items-center">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 512 512"
@@ -470,7 +472,6 @@ export function TableHeaderAction({ children }: any) {
 					</svg>
 					<p className="text-sm w-11">Print</p>
 				</div> */}
-			</div>
 		</div>
 	);
 }
