@@ -49,7 +49,7 @@ const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
 	// </section>
 
 	return (
-		<section className='w-full flex flex-1 ml-5 justify-end'>
+		<section className='flex flex-1 ml-5 justify-end'>
 			<Tabs
 				value={status}
 				onValueChange={(val) => handleClick(val as TICKET_STATUS)}
