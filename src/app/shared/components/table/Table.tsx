@@ -78,6 +78,14 @@ function TableComponent<T>({
 		isRefetching
 	}: IListResponse<T> = useTable<T>(page, limit, service, queryKey, search);
 
+	//reload my table
+	// function reloadTable() {
+	// 	setPage(1);
+	// 	// Remove all filters
+	// 	setSearch(null);
+	// 	setfilterIsActive(false);
+	// }
+
 	function handleFilter(val: IsearchParams | null) {
 		let transformedSearchQuery = '';
 		if (!val) {
@@ -816,7 +824,7 @@ function Paginator() {
 									}
 									className={
 										page === 1
-											? 'pointer-events-none opacity-50'
+											? 'pointer-events-none cursor-not-allowed opacity-50'
 											: ''
 									}
 								/>
@@ -827,6 +835,7 @@ function Paginator() {
 								.map((num) => (
 									<PaginationItem key={num}>
 										<PaginationLink
+											className='cursor-pointer'
 											isActive={page === num}
 											onClick={() =>
 												handlePaginate(num, limit)
@@ -850,7 +859,7 @@ function Paginator() {
 									}
 									className={
 										page >= maxNumPage
-											? 'pointer-events-none opacity-50'
+											? 'pointer-events-none cursor-not-allowed opacity-50'
 											: ''
 									}
 								/>
