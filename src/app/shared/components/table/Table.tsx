@@ -38,6 +38,15 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+import {
+	Pagination,
+	PaginationContent,
+	PaginationEllipsis,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious
+} from '@/components/ui/pagination';
 
 const TableContext = createContext({});
 
@@ -630,134 +639,225 @@ function Paginator() {
 		totalRecords,
 		handlePaginate
 	}: any = useContext(TableContext);
-	function CalcNumOfPages(data: number, limit: number) {
-		return Math.ceil(data / limit);
-	}
+	// function CalcNumOfPages(data: number, limit: number) {
+	// 	return Math.ceil(data / limit);
+	// }
 
 	useEffect(() => {
 		setMaxNumPage(Math.ceil(totalRecords / limit));
 	}, [totalRecords, limit]);
 
-	function displayButtons() {
-		let val = CalcNumOfPages(totalRecords, limit);
-		let newArray = Array.from({ length: val }, (value, index) => index + 1);
-		return newArray;
-	}
+	// function displayButtons() {
+	// 	let val = CalcNumOfPages(totalRecords, limit);
+	// 	let newArray = Array.from({ length: val }, (value, index) => index + 1);
+	// 	return newArray;
+	// }
+
+	const numPages = Math.ceil(totalRecords / limit);
+	const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1);
 
 	return (
-		<section className='flex justify-between p-2 items-center'>
-			<section className='flex-col flex  gap-1'>
+		// <section className='flex justify-between p-2 items-center'>
+		// 	<section className='flex-col flex  gap-1'>
+		// 		<strong>Summary</strong>
+		// 		<p>
+		// 			{' '}
+		// 			Showing <span>1</span> to <span>{data?.length}</span> of{' '}
+		// 			<span>{totalRecords}</span> results
+		// 		</p>
+		// 		<hr />
+		// 		<div className='font-semibold'>
+		// 			Total: {totalRecords} | Size: {limit} | Page: {page}
+		// 		</div>
+		// 	</section>
+		// 	{data?.length > 0 && (
+		// 		<nav
+		// 			className='flex gap-3'
+		// 			aria-label='Page navigation example'>
+		// 			<section className='flex items-center gap-1'>
+		// 				<span>Rows Per Page</span>
+		// 				<select
+		// 					onChange={(e) => {
+		// 						updateLimit(e.target.value);
+		// 						// service(limit, page);
+		// 						// setLimit(e.target.value);
+
+		// 						// paginate(e.target.value)
+		// 						// handlePaginate(page, e.target.value);
+		// 					}}
+		// 					value={limit}
+		// 					id='sort'
+		// 					name='sort'
+		// 					title='sortdropdown'
+		// 					className='text-xs font-light bg-card p-1  focus-within:ring-0 focus-within:border-none border border-gray-300  rounded'>
+		// 					<option value={5}>5</option>
+		// 					<option value={10}>10</option>
+		// 					<option value={15}>15</option>
+		// 					<option value={20}>20</option>
+		// 				</select>
+		// 			</section>
+
+		// 			<ul className='flex items-center gap-2 h-10 text-base'>
+		// 				<li
+		// 					onClick={() => {
+		// 						page > 1 && handlePaginate(page - 1, limit);
+		// 					}}>
+		// 					<a
+		// 						className={`${
+		// 							page === 1 && 'cursor-not-allowed'
+		// 						} flex items-center justify-center px-4 h-10 ml-0 leading-tight   border border-gray-300 rounded-l-lg   `}>
+		// 						<span className='sr-only'>Previous</span>
+		// 						<svg
+		// 							className='w-3 h-3'
+		// 							aria-hidden='true'
+		// 							xmlns='http://www.w3.org/2000/svg'
+		// 							fill='none'
+		// 							viewBox='0 0 6 10'>
+		// 							<path
+		// 								stroke='currentColor'
+		// 								strokeLinecap='round'
+		// 								strokeLinejoin='round'
+		// 								strokeWidth='2'
+		// 								d='M5 1 1 5l4 4'
+		// 							/>
+		// 						</svg>
+		// 					</a>
+		// 				</li>
+		// 				{displayButtons()
+		// 					.slice(page - 1, page + 2)
+		// 					.map((val, index) => (
+		// 						<li
+		// 							onClick={() => {
+		// 								handlePaginate(val, limit);
+		// 							}}
+		// 							key={val}>
+		// 							<a
+		// 								className={`${
+		// 									val === page ? '!bg-primary  ' : ''
+		// 								} flex items-center      rounded-3xl justify-center px-4 h-10 leading-tight   cursor-pointer  border border-gray-300 `}>
+		// 								{val}
+		// 							</a>
+		// 						</li>
+		// 					))}
+
+		// 				<li>
+		// 					<a
+		// 						onClick={() => {
+		// 							maxNumPage > page &&
+		// 								handlePaginate(page + 1, limit);
+		// 						}}
+		// 						className={`${
+		// 							maxNumPage <= page
+		// 								? 'cursor-not-allowed'
+		// 								: ''
+		// 						} flex items-center  justify-center px-4 h-10 leading-tight   border border-gray-300 rounded-r-lg hover:text-gray-700  dark:border-none  `}>
+		// 						<span className='sr-only'>Next</span>
+		// 						<svg
+		// 							className='w-3 h-3'
+		// 							aria-hidden='true'
+		// 							xmlns='http://www.w3.org/2000/svg'
+		// 							fill='none'
+		// 							viewBox='0 0 6 10'>
+		// 							<path
+		// 								stroke='currentColor'
+		// 								strokeLinecap='round'
+		// 								strokeLinejoin='round'
+		// 								strokeWidth='2'
+		// 								d='m1 9 4-4-4-4'
+		// 							/>
+		// 						</svg>
+		// 					</a>
+		// 				</li>
+		// 			</ul>
+		// 		</nav>
+		// 	)}
+		// </section>
+
+		<section className='flex justify-between p-4 items-center w-full'>
+			<div className='flex flex-col gap-1'>
 				<strong>Summary</strong>
 				<p>
-					{' '}
 					Showing <span>1</span> to <span>{data?.length}</span> of{' '}
 					<span>{totalRecords}</span> results
 				</p>
-				<hr />
-				<div className='font-semibold'>
+				<div className='text-sm text-muted-foreground'>
 					Total: {totalRecords} | Size: {limit} | Page: {page}
 				</div>
-			</section>
+			</div>
+
 			{data?.length > 0 && (
-				<nav
-					className='flex gap-3'
-					aria-label='Page navigation example'>
-					<section className='flex items-center gap-1'>
-						<span>Rows Per Page</span>
+				<div className='flex items-center gap-4'>
+					<div className='flex w-full items-center gap-2'>
+						<label htmlFor='limit' className='text-sm'>
+							Rows per page
+						</label>
 						<select
-							onChange={(e) => {
-								updateLimit(e.target.value);
-								// service(limit, page);
-								// setLimit(e.target.value);
-
-								// paginate(e.target.value)
-								// handlePaginate(page, e.target.value);
-							}}
+							id='limit'
 							value={limit}
-							id='sort'
-							name='sort'
-							title='sortdropdown'
-							className='text-xs font-light bg-card p-1  focus-within:ring-0 focus-within:border-none border border-gray-300  rounded'>
-							<option value={5}>5</option>
-							<option value={10}>10</option>
-							<option value={15}>15</option>
-							<option value={20}>20</option>
-						</select>
-					</section>
-
-					<ul className='flex items-center gap-2 h-10 text-base'>
-						<li
-							onClick={() => {
-								page > 1 && handlePaginate(page - 1, limit);
-							}}>
-							<a
-								className={`${
-									page === 1 && 'cursor-not-allowed'
-								} flex items-center justify-center px-4 h-10 ml-0 leading-tight   border border-gray-300 rounded-l-lg   `}>
-								<span className='sr-only'>Previous</span>
-								<svg
-									className='w-3 h-3'
-									aria-hidden='true'
-									xmlns='http://www.w3.org/2000/svg'
-									fill='none'
-									viewBox='0 0 6 10'>
-									<path
-										stroke='currentColor'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth='2'
-										d='M5 1 1 5l4 4'
-									/>
-								</svg>
-							</a>
-						</li>
-						{displayButtons()
-							.slice(page - 1, page + 2)
-							.map((val, index) => (
-								<li
-									onClick={() => {
-										handlePaginate(val, limit);
-									}}
-									key={val}>
-									<a
-										className={`${
-											val === page ? '!bg-primary  ' : ''
-										} flex items-center      rounded-3xl justify-center px-4 h-10 leading-tight   cursor-pointer  border border-gray-300 `}>
-										{val}
-									</a>
-								</li>
+							onChange={(e) =>
+								updateLimit(Number(e.target.value))
+							}
+							className='text-xs bg-background border rounded px-2 py-1'>
+							{[5, 10, 15, 20].map((size) => (
+								<option key={size} value={size}>
+									{size}
+								</option>
 							))}
+						</select>
+					</div>
 
-						<li>
-							<a
-								onClick={() => {
-									maxNumPage > page &&
-										handlePaginate(page + 1, limit);
-								}}
-								className={`${
-									maxNumPage <= page
-										? 'cursor-not-allowed'
-										: ''
-								} flex items-center  justify-center px-4 h-10 leading-tight   border border-gray-300 rounded-r-lg hover:text-gray-700  dark:border-none  `}>
-								<span className='sr-only'>Next</span>
-								<svg
-									className='w-3 h-3'
-									aria-hidden='true'
-									xmlns='http://www.w3.org/2000/svg'
-									fill='none'
-									viewBox='0 0 6 10'>
-									<path
-										stroke='currentColor'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth='2'
-										d='m1 9 4-4-4-4'
-									/>
-								</svg>
-							</a>
-						</li>
-					</ul>
-				</nav>
+					<Pagination>
+						<PaginationContent>
+							<PaginationItem>
+								<PaginationPrevious
+									onClick={() =>
+										page > 1 &&
+										handlePaginate(page - 1, limit)
+									}
+									className={
+										page === 1
+											? 'pointer-events-none opacity-50'
+											: ''
+									}
+								/>
+							</PaginationItem>
+
+							{pageNumbers
+								.slice(Math.max(0, page - 2), page + 1)
+								.map((num) => (
+									<PaginationItem key={num}>
+										<PaginationLink
+											isActive={page === num}
+											onClick={() =>
+												handlePaginate(num, limit)
+											}>
+											{num}
+										</PaginationLink>
+									</PaginationItem>
+								))}
+
+							{numPages > page + 1 && (
+								<PaginationItem>
+									<PaginationEllipsis />
+								</PaginationItem>
+							)}
+
+							<PaginationItem>
+								<PaginationNext
+									onClick={() =>
+										page < maxNumPage &&
+										handlePaginate(page + 1, limit)
+									}
+									className={
+										page >= maxNumPage
+											? 'pointer-events-none opacity-50'
+											: ''
+									}
+								/>
+							</PaginationItem>
+						</PaginationContent>
+					</Pagination>
+				</div>
 			)}
 		</section>
 	);

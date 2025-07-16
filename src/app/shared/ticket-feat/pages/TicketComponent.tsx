@@ -27,7 +27,7 @@ const TicketComponent: FC = () => {
 
 	return (
 		<section>
-			<div className='flex w-full mb-3 justify-between flex-wrap items-center'>
+			<div className='flex flex-col md:flex-row overflow-x-auto gap-2   mb-3 md:justify-between flex-wrap  md:items-center'>
 				<Search
 					placeHolder='Enter title'
 					handleSearch={(val) => setSearch(val)}

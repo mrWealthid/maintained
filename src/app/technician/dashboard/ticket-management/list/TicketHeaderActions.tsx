@@ -25,8 +25,6 @@ const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
 		handleFilter?.(query);
 	}
 
-
-
 	return (
 		<>
 			<Tabs
@@ -44,7 +42,7 @@ const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
 						<TabsTrigger
 							key={tab.value}
 							value={tab.value}
-							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white transition-all'>
+							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
 							{tab.label}
 						</TabsTrigger>
 					))}
