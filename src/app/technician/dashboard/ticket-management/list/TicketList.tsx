@@ -54,7 +54,7 @@ const TicketList: FC = () => {
 	];
 
 	return (
-		<div className='h-80'>
+		<>
 			<TableComponent<Ticket>
 				service={fetchRequestTicketList}
 				queryKey='tickets'
@@ -67,7 +67,7 @@ const TicketList: FC = () => {
 					<RequestRow />
 				</TableComponent.TableRow>
 			</TableComponent>
-		</div>
+		</>
 	);
 };
 
