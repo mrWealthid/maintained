@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import APIFeatures from '@/utils/apiFeatures';
 import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 
 connect();
 
@@ -11,8 +12,8 @@ export async function GET(request: NextRequest) {
 	try {
 		let filter = {};
 
-		const verify = new MiddlewareFeatures().verifyToken();
-		if (!verify?.isUserAuthenticated) {
+		const verify = await getUserFromCookies();
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized' },
 				{ status: 401 }
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		if (verify.isAdminRole) {
-			const user = await User.findById(verify.userId);
+			const user = await User.findById(verify.id);
 			if (!user) {
 				return NextResponse.json(
 					{ error: 'User not found' },

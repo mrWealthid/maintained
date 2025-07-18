@@ -1,4 +1,5 @@
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TechnicianRequest } from '@/model/technicanRequest';
 import { TicketActivity } from '@/model/ticketActivity';
@@ -8,20 +9,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
 	try {
-		const ticketId = params.ticketId;
-		const verify = new MiddlewareFeatures().verifyToken();
+		const { ticketId } = await params;
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (!verify || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const adminUser = await User.findById(verify.userId);
+		const adminUser = await User.findById(verify.id);
 		if (!adminUser) {
 			return NextResponse.json(
 				{ error: 'Admin user not found' },

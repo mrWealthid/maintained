@@ -1,14 +1,14 @@
 import { connect } from '@/dbConfig/dbConfig';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 connect();
 
 const signToken = (id: string, role: string) =>
 	jwt.sign({ id, role }, process.env.JWT_SECRET!, {
 		expiresIn: process.env.JWT_EXPIRES_IN
-	});
+	} as SignOptions);
 
 export async function POST(request: NextRequest) {
 	try {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
 		//3) If everything is ok, send token to client
 
-		const token = signToken(user._id, user.role);
+		const token = signToken(user.id, user.role);
 
 		const response = NextResponse.json({
 			status: 'success',

@@ -1,4 +1,8 @@
-import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
+import {
+	ROLES,
+	TECHNICIAN_RESPONSE,
+	TICKET_STATUS
+} from '@/app/shared/enums/enums';
 import { Ticket, User } from '../../model/model';
 
 export type TicketStatus =

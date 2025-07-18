@@ -1,4 +1,5 @@
 import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
@@ -7,13 +8,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
 	try {
-		const ticketId = params.ticketId;
-		const verify = new MiddlewareFeatures().verifyToken();
+		const { ticketId } = await params;
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (!verify || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -22,7 +23,7 @@ export async function PATCH(
 
 		const { assignedTo } = await request.json();
 
-		const adminUser = await User.findById(verify.userId);
+		const adminUser = await User.findById(verify.id);
 		if (!adminUser) {
 			return NextResponse.json(
 				{ error: 'Admin user not found' },

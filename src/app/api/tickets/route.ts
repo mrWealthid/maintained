@@ -8,14 +8,15 @@ import { Types } from 'mongoose';
 import User from '@/model/userModel';
 import { TicketActivity } from '@/model/ticketActivity';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 
 connect();
 
 export async function GET(request: NextRequest) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
-		const verify = new MiddlewareFeatures().verifyToken();
-		if (!verify?.isUserAuthenticated) {
+		const verify = await getUserFromCookies();
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'UnAuthorized' },
 				{ status: 401 }
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 		let filter = {};
 		if (verify.isAdminRole) {
-			const user = await User.findById(verify.userId);
+			const user = await User.findById(verify.id);
 			if (!user) {
 				return NextResponse.json(
 					{ error: 'User not found' },
@@ -35,13 +36,13 @@ export async function GET(request: NextRequest) {
 		}
 
 		if (verify.isUserRole) {
-			filter = { user: verify.userId };
+			filter = { user: verify.id };
 		}
 
 		if (verify.isTechnicianRole) {
 			// Only allow tickets assigned to this technician with specific statuses
 			filter = {
-				assignedTo: verify.userId,
+				assignedTo: verify.id,
 				status: {
 					$in: [
 						TICKET_STATUS.pending_assignment,
@@ -125,14 +126,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest, { params }: any) {
 	try {
 		//2) Check if user exists & password is correct after it's hashed
-		const verify = new MiddlewareFeatures().verifyToken();
-		if (!verify?.isUserAuthenticated) {
+		const verify = await getUserFromCookies();
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'UnAuthorized' },
 				{ status: 401 }
 			);
 		}
-		const user = await User.findById(verify.userId);
+		const user = await User.findById(verify.id);
 
 		if (!user) {
 			return NextResponse.json(
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest, { params }: any) {
 		//create Ticket
 		const data = await Ticket.create({
 			...body,
-			user: verify.userId,
+			user: verify.id,
 			business: user.business
 		});
 

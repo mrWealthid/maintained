@@ -2,16 +2,15 @@ import { connect } from '@/dbConfig/dbConfig';
 import User from '@/model/userModel';
 import Business from '@/model/businessModel';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { ROLES } from '@/app/shared/enums/enums';
-import TicketCategory from '@/model/ticketCategoryModel';
 
 connect();
 
 const signToken = (id: string, role: string) =>
 	jwt.sign({ id, role }, process.env.JWT_SECRET!, {
 		expiresIn: process.env.JWT_EXPIRES_IN
-	});
+	} as SignOptions);
 
 const createSendToken = (user: any, statusCode: number) => {
 	const token = signToken(user._id, user.role);

@@ -1,4 +1,5 @@
 import { connect } from '@/dbConfig/dbConfig';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,16 +8,16 @@ connect();
 
 export async function GET(request: NextRequest) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const user = await User.findById(verify?.userId).populate([
+		const user = await User.findById(verify.id).populate([
 			{
 				path: 'business',
 				select: 'businessName logo'

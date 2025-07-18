@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import PropTypes from 'prop-types';
 import Label from './Label';
 import ErrorMessage from './ErrorMessage';
 

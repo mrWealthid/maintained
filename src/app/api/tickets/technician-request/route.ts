@@ -1,4 +1,5 @@
 import { connect } from '@/dbConfig/dbConfig';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TechnicianRequest } from '@/model/technicanRequest';
 import APIFeatures from '@/utils/apiFeatures';
@@ -9,16 +10,16 @@ connect();
 export async function GET(request: NextRequest) {
 	try {
 		let filter = {};
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (!verify || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		filter = { technician: verify.userId };
+		filter = { technician: verify.id };
 
 		if (verify.isTechnicianRole) {
 			filter = { ...filter, isActive: true };

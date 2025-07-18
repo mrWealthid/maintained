@@ -4,20 +4,21 @@ import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
 import TicketType from '@/model/ticketTypeModel';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 connect();
 
 export async function GET(request: NextRequest) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const user = await User.findById(verify.userId);
+		const user = await User.findById(verify.id);
 		if (!user) {
 			return NextResponse.json(
 				{ error: 'User not found' },
@@ -51,15 +52,15 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
-		const user = await User.findById(verify.userId);
+		const user = await User.findById(verify.id);
 		if (!user) {
 			return NextResponse.json(
 				{ error: 'User not found' },
