@@ -20,6 +20,7 @@ export function useTable<T>(
 		isRefetching,
 		error,
 		data: data?.data,
+		summary: data?.summary,
 		totalRecords: data?.totalRecords,
 		results: data?.results
 	};

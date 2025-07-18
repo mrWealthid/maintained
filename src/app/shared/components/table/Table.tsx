@@ -73,6 +73,7 @@ function TableComponent<T>({
 		isLoading,
 		error,
 		data = [],
+		summary,
 		totalRecords,
 		results,
 		isRefetching
@@ -200,7 +201,8 @@ function TableComponent<T>({
 				isDownloadable,
 				isRefetching,
 				search,
-				searchKey
+				searchKey,
+				summary
 			}}>
 			<AnimatedBorderWrapper loading={isLoading}>
 				{CardContent}
@@ -437,7 +439,8 @@ export function TableHeaderAction({ children }: any) {
 		queryKey,
 		isDownloadable,
 		searchKey,
-		search
+		search,
+		summary
 	}: any = useContext(TableContext);
 
 	const [searchValue, setSearchValue] = useState('');
@@ -477,7 +480,7 @@ export function TableHeaderAction({ children }: any) {
 					)}
 				</div>
 
-				{cloneElement(children, { handleFilter })}
+				{cloneElement(children, { handleFilter, summary })}
 			</div>
 
 			{/* <div className="flex gap-3 items-center">

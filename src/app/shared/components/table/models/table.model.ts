@@ -47,4 +47,5 @@ export interface IListResponse<T> {
 	totalRecords: number;
 	results: number;
 	isRefetching: boolean;
+	summary: Record<string, number>;
 }
