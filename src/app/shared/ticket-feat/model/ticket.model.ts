@@ -114,6 +114,7 @@ export type TechnicianTicketRowProps = {
 
 export type TicketQueryprops<T = TICKET_STATUS> = {
 	handleFilter?: (query: { status?: T } | null) => void;
+	summary?: Record<string, number>;
 };
 
 export type TicketFilterQuery<T = TICKET_STATUS> = {

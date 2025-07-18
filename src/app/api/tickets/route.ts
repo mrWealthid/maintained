@@ -9,6 +9,7 @@ import User from '@/model/userModel';
 import { TicketActivity } from '@/model/ticketActivity';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import mongoose from 'mongoose';
 
 connect();
 
@@ -32,11 +33,11 @@ export async function GET(request: NextRequest) {
 					{ status: 404 }
 				);
 			}
-			filter = { business: user.business };
+			filter = { business: new mongoose.Types.ObjectId(user.business) };
 		}
 
 		if (verify.isUserRole) {
-			filter = { user: verify.id };
+			filter = { user: new mongoose.Types.ObjectId(verify.id) };
 		}
 
 		if (verify.isTechnicianRole) {
@@ -107,12 +108,33 @@ export async function GET(request: NextRequest) {
 			count = await Ticket.countDocuments(filter);
 		}
 
+		// Group ticket counts by status
+		const statusCounts = await Ticket.aggregate([
+			{ $match: filter }, // Match filtered tickets only
+			{
+				$group: {
+					_id: '$status',
+					count: { $sum: 1 }
+				}
+			}
+		]);
+
+		// Convert to object like { pending: 2, assigned: 3 }
+		const statusSummary = statusCounts.reduce(
+			(acc, curr) => {
+				acc[curr._id] = curr.count;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
+
 		const response = NextResponse.json(
 			{
 				totalRecords: count,
 				results: requests.length,
 				status: 'success',
-				data: requests
+				data: requests,
+				summary: statusSummary // <-- Add
 			},
 			{ status: 200 }
 		);

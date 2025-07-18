@@ -10,8 +10,12 @@ import {
 } from '@/app/shared/ticket-feat/model/ticket.model';
 import { ticketListFilter } from '@/app/shared/ticket-feat/data/data';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
-const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
+const TicketHeaderActions: FC<TicketQueryprops> = ({
+	handleFilter,
+	summary
+}) => {
 	const [query, setQuery] = useState<TicketFilterQuery | null>({
 		status: TICKET_STATUS.pending
 	});
@@ -38,8 +42,15 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ handleFilter }) => {
 						<TabsTrigger
 							key={tab.value}
 							value={tab.value}
-							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
+							className='rounded-full text-xs   py-1 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
 							{tab.label}
+							{summary && summary[tab.value] !== undefined && (
+								<Badge
+									variant='secondary'
+									className=' px-2 py-1 ml-1 rounded-full'>
+									{summary[tab.value]}
+								</Badge>
+							)}
 						</TabsTrigger>
 					))}
 				</TabsList>
