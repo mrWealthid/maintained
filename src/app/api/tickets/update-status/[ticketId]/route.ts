@@ -1,3 +1,4 @@
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
@@ -9,9 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 //     { params }: { params: { ticketId: string } }
 // ) {
 //     try {
-//         // const verify = new MiddlewareFeatures().verifyToken();
+//         // const verify =await getUserFromCookies();
 
-//         // if (!verify.isUserAuthenticated) {
+//         // if (!verify) {
 //         // 	return NextResponse.json(
 //         // 		{ error: 'Unauthorized access' },
 //         // 		{ status: 401 }
@@ -40,13 +41,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
 	try {
-		const ticketId = params.ticketId;
-		const verify = new MiddlewareFeatures().verifyToken();
+		const { ticketId } = await params;
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (!verify || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -55,7 +56,7 @@ export async function PATCH(
 
 		const { status } = await request.json();
 
-		const user = await User.findById(verify.userId);
+		const user = await User.findById(verify.id);
 
 		if (!user) {
 			return NextResponse.json(
@@ -65,7 +66,7 @@ export async function PATCH(
 		}
 
 		const payload = {
-			actionedBy: verify.userId,
+			actionedBy: verify.id,
 			status
 		};
 
@@ -82,7 +83,7 @@ export async function PATCH(
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			payload,
-	
+
 			{
 				new: true,
 				runValidators: true,

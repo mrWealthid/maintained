@@ -1,7 +1,7 @@
 import { connect } from '@/dbConfig/dbConfig';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 
 connect();
@@ -9,7 +9,7 @@ connect();
 const signToken = (id: any) =>
 	jwt.sign({ id }, process.env.JWT_SECRET!, {
 		expiresIn: process.env.JWT_EXPIRES_IN
-	});
+	} as SignOptions);
 
 export async function POST(request: NextRequest) {
 	const { newPassword, currentPassword, confirmNewPassword, resetToken } =

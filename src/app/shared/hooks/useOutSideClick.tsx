@@ -31,7 +31,7 @@
 import { useEffect } from 'react';
 
 export function useOutsideClick(
-	ref: React.RefObject<HTMLElement>,
+	ref: React.RefObject<HTMLElement | null>,
 	handler: () => void
 ) {
 	useEffect(() => {

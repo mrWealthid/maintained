@@ -7,13 +7,14 @@ import { technicianCrumbLabelMap } from '@/app/shared/data/data';
 
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '../(users)/AppSidebar';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
 	children // will be a page or nested layout
 }: {
 	children: React.ReactNode;
 }) {
-	const verify = new MiddlewareFeatures().verifyToken();
+	const verify = await getUserFromCookies();
 
 	const isUser = verify?.isTechnicianRole
 		? children

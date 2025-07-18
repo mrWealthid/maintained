@@ -53,7 +53,7 @@ const TicketComponent: FC = () => {
 			{data && data?.length > 0 && (
 				<section className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2'>
 					{data?.map((ticket: Ticket) => (
-						<TicketCard key={ticket._id} {...ticket} />
+						<TicketCard key={ticket._id} ticket={ticket} />
 					))}
 				</section>
 			)}

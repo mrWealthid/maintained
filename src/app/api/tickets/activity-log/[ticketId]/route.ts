@@ -1,3 +1,4 @@
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import User from '@/model/userModel';
@@ -5,23 +6,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
+		const { ticketId } = await params;
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
 
-		const ticketId = params.ticketId;
-
-
 		const data = await TicketActivity.find({ ticket: ticketId });
-
 
 		const response = NextResponse.json({
 			status: 'success',

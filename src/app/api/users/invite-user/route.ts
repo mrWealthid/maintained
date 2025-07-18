@@ -5,12 +5,13 @@ import jwt from 'jsonwebtoken';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { Emails } from '@/utils/email-resend';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 // import { Emails } from '@/utils/email-resend';
 
 connect();
 
 export async function POST(request: NextRequest) {
-	const verify = new MiddlewareFeatures().verifyToken();
+	const verify = await getUserFromCookies();
 	try {
 		//1) Protect route from none admin users
 		if (!verify?.isAdminRole) {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 		}
 		//2) Get business details from admin user
 
-		const adminUser = await User.findById(verify?.userId).populate([
+		const adminUser = await User.findById(verify.id).populate([
 			{
 				path: 'business',
 				select: 'businessName'

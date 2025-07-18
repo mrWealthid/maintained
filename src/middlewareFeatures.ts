@@ -10,8 +10,13 @@ class MiddlewareFeatures {
 	private isSuperAdmin: boolean;
 	private isTechnician: boolean;
 
+	async tokenInfo() {
+		const cookie = await cookies();
+		return cookie.get('token');
+	}
+
 	constructor() {
-		this.token = cookies().get('token');
+		this.token = this.tokenInfo();
 		this.userInfo = null;
 		this.isAuthenticated = false;
 		this.isAdmin = false;
@@ -41,11 +46,12 @@ class MiddlewareFeatures {
 		return this.userInfo?.id;
 	}
 
-	verifyToken() {
-		if (!this.token?.value) return this;
+	async verifyToken() {
+		const token = await this.token;
+		if (!token?.value) return this;
 		try {
 			this.userInfo = jwt.verify(
-				this.token.value,
+				token.value,
 				process.env.JWT_SECRET!
 			);
 

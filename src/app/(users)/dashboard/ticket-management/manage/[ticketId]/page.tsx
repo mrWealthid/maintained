@@ -4,8 +4,10 @@ import { API_ROUTES } from '@/app/shared/routes/apiRoutes';
 import { findData } from '@/utils/apiRequests';
 import { FC } from 'react';
 
-const Page: FC<{ params: { ticketId: string } }> = async ({ params }) => {
-	const ticketId = params.ticketId;
+const Page: FC<{ params: Promise<{ ticketId: string }> }> = async ({
+	params
+}) => {
+	const { ticketId } = await params;
 	const response = await findData<Ticket>(
 		API_ROUTES.ticketManagement.get_tickets,
 		ticketId

@@ -12,7 +12,7 @@ const ModalContext = createContext<ModalContextProps>({
 	title: ''
 });
 
-function Modal({ children,  }: ModalProps) {
+function Modal({ children }: ModalProps) {
 	const [openName, setOpenName] = useState('');
 
 	const close = () => setOpenName('');
@@ -38,11 +38,17 @@ const Open = React.forwardRef<HTMLButtonElement, any>(
 
 Open.displayName = 'Open';
 
-const Window = ({ name, children, size = 'w-full md:w-1/2 2xl:w-1/3', title, description }: WindowProps) => {
+const Window = ({
+	name,
+	children,
+	size = 'w-full md:w-1/2 2xl:w-1/3',
+	title,
+	description
+}: WindowProps) => {
 	const { openName, close, open }: ModalContextProps =
 		useContext(ModalContext);
 
-	const modalRef = useRef<HTMLDivElement>(null);
+	const modalRef = useRef<HTMLDivElement | null>(null);
 	useOutsideClick(modalRef, close);
 
 	if (name !== openName) return null;

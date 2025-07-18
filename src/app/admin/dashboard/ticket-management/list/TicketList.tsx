@@ -1,4 +1,3 @@
-'use client';
 import { TableColumn } from '@/app/shared/components/table/models/table.model';
 import RequestRow from './TicketRow';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';

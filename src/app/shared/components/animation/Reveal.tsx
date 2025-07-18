@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion, useInView, useAnimation, Variants } from 'framer-motion';
 
 interface Props {
-	children: JSX.Element;
+	children: React.ReactNode;
 	width?: 'fit-content' | '100%';
 	variant?: IVariant;
 	transition?: ITransistion;
@@ -46,7 +46,7 @@ const Reveal = ({
 		<div ref={ref} style={{ width }}>
 			<motion.div
 				variants={variant}
-				initial="hidden"
+				initial='hidden'
 				animate={mainControls}
 				transition={transition}>
 				{children}

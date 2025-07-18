@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
 	try {
-		cookies().delete('token');
+		const cookie = await cookies();
+		cookie.delete('token');
 		const response = NextResponse.json({
 			status: 'success',
 			message: 'User was logged out'

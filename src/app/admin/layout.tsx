@@ -8,13 +8,16 @@ import { adminCrumbLabelMap } from '@/app/shared/data/data';
 import { AppSidebar } from '../(users)/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { adminRoutes } from '@/app/shared/routes/routes';
+import { get } from 'http';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import { AppProvider } from '../shared/contexts/AppContext';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
 	children // will be a page or nested layout
 }: {
 	children: React.ReactNode;
 }) {
-	const verify = new MiddlewareFeatures().verifyToken();
+	const verify = await getUserFromCookies();
 	const isAdmin = verify?.isAdminRole ? children : redirect('/auth/login');
 
 	return (
@@ -29,7 +32,8 @@ export default function DashboardLayout({
 				<section className=' flex flex-col dashboard-body overflow-x-hidden w-full gap-6'>
 					<section className='container-text'>
 						<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
-						{isAdmin}
+
+						<AppProvider>{isAdmin}</AppProvider>
 					</section>
 				</section>
 			</SidebarProvider>

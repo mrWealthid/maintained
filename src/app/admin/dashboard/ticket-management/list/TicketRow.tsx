@@ -3,8 +3,11 @@ import TicketRowActions from './TicketRowActions';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Modal from '@/app/shared/components/modal/Modal';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import { ROLES } from '@/app/shared/enums/enums';
 
 function RequestRow({ data }: TicketRowProps) {
+	// const verify = await getUserFromCookies();
 	return (
 		<>
 			{data?.map((row, i) => {
@@ -85,15 +88,6 @@ function RequestRow({ data }: TicketRowProps) {
 										row.createdAt
 									).toDateString()}
 									className='flex  gap-1'>
-									{/* <span>
-										{new Date(row.startDate).toDateString()}{' '}
-										➡️
-									</span> */}
-
-									{/* <span>
-										{' '}
-										{new Date(row.endDate).toDateString()}
-									</span> */}
 									{new Date(row.createdAt).toDateString()}
 								</span>
 							</span>

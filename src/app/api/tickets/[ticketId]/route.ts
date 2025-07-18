@@ -1,13 +1,14 @@
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import Ticket from '@/model/ticketModel';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
 	try {
-		const ticketId = params.ticketId;
+		const { ticketId } = await params;
 
 		// const ticket = await Ticket.findOne({
 		// 	_id: ticketId
@@ -59,9 +60,9 @@ export async function GET(
 // 	{ params }: { params: { ticketId: string } }
 // ) {
 // 	try {
-// 		const verify = new MiddlewareFeatures().verifyToken();
+// 		const verify =await getUserFromCookies();
 
-// 		if (!verify.isUserAuthenticated) {
+// 		if (!verify) {
 // 			return NextResponse.json(
 // 				{ error: 'Unauthorized access' },
 // 				{ status: 401 }
@@ -72,7 +73,7 @@ export async function GET(
 
 // 		const ticket = await Ticket.findOne({
 // 			_id: ticketId,
-// 			user: verify.userId
+// 			user: verify.id
 // 		}).populate({
 // 			path: 'category',
 // 			select: 'name '
@@ -100,12 +101,13 @@ export async function GET(
 
 export async function PATCH(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
+	const { ticketId } = await params;
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -113,7 +115,6 @@ export async function PATCH(
 		}
 
 		const { status, ...rest } = await request.json();
-		const ticketId = params.ticketId;
 
 		// const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
 		// 	new: true,
@@ -121,7 +122,7 @@ export async function PATCH(
 		// });
 
 		const updatedRequest = await Ticket.findOneAndUpdate(
-			{ _id: ticketId, user: verify.userId }, // Ensure user is the owner
+			{ _id: ticketId, user: verify.id }, // Ensure user is the owner
 			rest,
 			{ new: true, runValidators: true }
 		);
@@ -149,22 +150,22 @@ export async function PATCH(
 
 export async function DELETE(
 	request: NextRequest,
-	{ params }: { params: { ticketId: string } }
+	{ params }: { params: Promise<{ ticketId: string }> }
 ) {
+	const { ticketId } = await params;
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || !verify.isUserRole) {
+		if (!verify || !verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
 			);
 		}
-		const ticketId = params.ticketId;
 
 		const ticket = await Ticket.findOneAndDelete({
 			_id: ticketId,
-			user: verify.userId // ← only delete if the user owns the ticket
+			user: verify.id // ← only delete if the user owns the ticket
 		});
 
 		if (!ticket) {

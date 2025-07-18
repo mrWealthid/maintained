@@ -7,13 +7,16 @@ import { crumbLabelMap } from '@/app/shared/data/data';
 
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { get } from 'http';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import { AppProvider } from '../shared/contexts/AppContext';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
 	children // will be a page or nested layout
 }: {
 	children: React.ReactNode;
 }) {
-	const verify = new MiddlewareFeatures().verifyToken();
+	const verify = await getUserFromCookies();
 
 	const isUser = verify?.isUserRole ? children : redirect('/auth/login');
 
@@ -28,7 +31,7 @@ export default function DashboardLayout({
 				<section className='flex flex-col dashboard-body overflow-x-hidden  w-full gap-6'>
 					<section className='container-text'>
 						<Breadcrumbs crumbLabelMap={crumbLabelMap} />
-						{isUser}
+						<AppProvider>{isUser}</AppProvider>
 					</section>
 				</section>
 			</SidebarProvider>

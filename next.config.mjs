@@ -6,7 +6,13 @@ const nextConfig = {
 		VIDEO_PRESET: process.env.UPLOAD_VIDEO_PRESET
 	},
 	images: {
-		domains: ['res.cloudinary.com']
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'res.cloudinary.com',
+				pathname: '/dw9grhu99/image/upload/**'
+			}
+		]
 	}
 };
 

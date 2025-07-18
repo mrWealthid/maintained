@@ -1,15 +1,17 @@
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(
 	request: NextRequest,
-	{ params }: { params: { userId: string } }
+	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const verify = new MiddlewareFeatures().verifyToken();
+		const verify = await getUserFromCookies();
+		const {userId} = await params
 
-		if (!verify.isUserAuthenticated) {
+		if (!verify) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -22,7 +24,6 @@ export async function DELETE(
 			);
 		}
 
-		const userId = params.userId;
 
 		const user = await User.findByIdAndDelete(userId);
 

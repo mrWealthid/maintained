@@ -1,34 +1,31 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
-// This is an example using TypeScript for Next.js middleware
-import { cookies } from 'next/headers';
 import { NextResponse, NextRequest } from 'next/server';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-export function middleware(request: NextRequest, response: NextResponse) {
+export function middleware(request: NextRequest) {
 	const url = request.nextUrl.clone();
-	const token = cookies().get('token') || null;
+	const currentPath = url.pathname;
 
-	const currentPath = new URL(request.url).pathname;
-
-	const unprotectedRoute = url.pathname.startsWith('/auth');
+	const token = request.cookies.get('token');
+	const unprotectedRoute = currentPath.startsWith('/auth');
 	const basePath = '/';
-	const { valid, role } = verifyToken(token?.value!);
 
-	//if there is no token (user isn't authenticated) and visit is made to to protected routes
+	const { valid, role } = verifyToken(token?.value || null);
+
+	// No token and trying to access protected route
 	if (!token && !unprotectedRoute) {
 		const loginUrl = new URL('/auth/login', request.url);
 		return NextResponse.redirect(loginUrl);
 	}
 
-	//If the logged in user tries to access the login page without logging out or visits the base path -- reroute to the dashboard
+	// Authenticated user accessing login or root page
 	if (token && (unprotectedRoute || currentPath === basePath)) {
-		const dashboardUrl = /ADMIN/.test(role)
+		const dashboardUrl = /ADMIN/.test(role || '')
 			? new URL('/admin/dashboard', request.url)
 			: new URL('/dashboard', request.url);
-
 		return NextResponse.redirect(dashboardUrl);
 	}
 
-	//  if there's a token kindly verify:: users with unverified token should be sent to login
+	// Invalid token on protected route
 	if (!valid && !unprotectedRoute) {
 		const loginUrl = new URL('/auth/login', request.url);
 		return NextResponse.redirect(loginUrl);
@@ -36,6 +33,8 @@ export function middleware(request: NextRequest, response: NextResponse) {
 
 	return NextResponse.next();
 }
+
+// Define routes that this middleware applies to
 export const config = {
 	matcher: [
 		'/',
@@ -45,11 +44,20 @@ export const config = {
 	]
 };
 
-// Function to verify the JWT token
-function verifyToken(token: string | null): any {
+// Edge-safe token validation (no verification, just decode and check expiry)
+function verifyToken(token: string | null): {
+	valid: boolean;
+	role: string | null;
+} {
 	if (!token) return { valid: false, role: null };
-
-	const { exp, role } = jwt.decode(token) as JwtPayload;
-
-	return { valid: Date.now() < exp! * 1000, role };
+	try {
+		const decoded = jwt.decode(token) as JwtPayload;
+		if (!decoded?.exp) return { valid: false, role: null };
+		return {
+			valid: Date.now() < decoded.exp * 1000,
+			role: decoded.role || null
+		};
+	} catch (err) {
+		return { valid: false, role: null };
+	}
 }

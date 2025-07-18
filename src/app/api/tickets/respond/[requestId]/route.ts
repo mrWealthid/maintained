@@ -1,5 +1,6 @@
 import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
 import { connect } from '@/dbConfig/dbConfig';
+import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { TechnicianRequest } from '@/model/technicanRequest';
 import { TicketActivity } from '@/model/ticketActivity';
@@ -10,13 +11,13 @@ import { NextRequest, NextResponse } from 'next/server';
 connect();
 export async function PATCH(
 	request: NextRequest,
-	{ params }: { params: { requestId: string } }
+	{ params }: { params: Promise<{ requestId: string }> }
 ) {
 	try {
-		const requestId = params.requestId;
-		const verify = new MiddlewareFeatures().verifyToken();
+		const { requestId } = await params;
+		const verify = await getUserFromCookies();
 
-		if (!verify.isUserAuthenticated || verify.isUserRole) {
+		if (!verify || verify.isUserRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -25,7 +26,7 @@ export async function PATCH(
 		const { status, reason, quote, message, schedule } =
 			await request.json();
 
-		const user = await User.findById(verify.userId);
+		const user = await User.findById(verify.id);
 
 		if (!user) {
 			return NextResponse.json(
@@ -39,7 +40,7 @@ export async function PATCH(
 
 		const technicianRequest = await TechnicianRequest.findOne({
 			_id: requestId,
-			technician: verify.userId
+			technician: verify.id
 		});
 
 		//Verify this had been assigned to the loggedIn Technician
@@ -76,7 +77,7 @@ export async function PATCH(
 		};
 
 		let payload: Payload = {
-			technician: verify.userId,
+			technician: verify.id,
 			ticket: technicianRequest.ticket,
 			status
 		};
@@ -131,7 +132,7 @@ export async function PATCH(
 		}
 
 		// updatedFields.status = newStatus;
-		// updatedFields.actionedBy = verify.userId;
+		// updatedFields.actionedBy = verify.id;
 
 		console.log('Payload for update:', payload);
 		const updatedTicket = await TechnicianRequest.findByIdAndUpdate(
