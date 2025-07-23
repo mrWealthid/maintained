@@ -73,13 +73,16 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 							TECHNICIAN_RESPONSE.pending && (
 							<>
 								<DropdownMenuItem>
-									<Modal.Open opens='accept-request'>
-										<button
-											type='button'
-											className='w-full text-left'>
-											Accept
-										</button>
-									</Modal.Open>
+									{/* <Modal.Open opens='accept-request'> */}
+
+									<Link
+										href={`ticket-management/apply/${technicianRequest._id}`}
+										type='button'
+										className='w-full text-left'>
+										Apply
+									</Link>
+
+									{/* </Modal.Open> */}
 								</DropdownMenuItem>
 
 								<DropdownMenuItem>
@@ -98,13 +101,20 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 						TECHNICIAN_RESPONSE.applied && (
 						<>
 							<DropdownMenuItem>
-								<Modal.Open opens='accept-request'>
+								{/* <Modal.Open opens='accept-request'>
 									<button
 										type='button'
 										className='w-full text-left'>
 										Update
 									</button>
-								</Modal.Open>
+								</Modal.Open> */}
+
+								<Link
+									href={`ticket-management/apply/${technicianRequest._id}`}
+									type='button'
+									className='w-full text-left'>
+									Update
+								</Link>
 							</DropdownMenuItem>
 
 							<DropdownMenuItem>

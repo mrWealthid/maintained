@@ -21,7 +21,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-import { ADMIN_ROUTES_DEFINITION } from '@/app/shared/routes/routes';
+import {
+	ADMIN_ROUTES_DEFINITION,
+	ROUTES_DEFINITION
+} from '@/app/shared/routes/routes';
 import SendTechnicianRequestForm from '@/app/admin/dashboard/ticket-management/SendTechnicianRequestForm';
 import { useAppContext } from '../../contexts/AppContext';
 
@@ -58,11 +61,20 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				<DropdownMenuContent align='end' className=''>
 					<DropdownMenuItem>
 						<Link
-							href={`${ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket._id}`}>
+							href={`${user?.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket._id}`}>
 							View Details
 						</Link>
 					</DropdownMenuItem>
 
+					{ticket.status === TICKET_STATUS.pending &&
+						user?.role === ROLES.user && (
+							<DropdownMenuItem>
+								<Link
+									href={`${user.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket._id}`}>
+									Edit
+								</Link>
+							</DropdownMenuItem>
+						)}
 					{/*  This feat should be executed only by an admin */}
 					{ticket.status === TICKET_STATUS.pending &&
 						user?.role === ROLES.admin && (

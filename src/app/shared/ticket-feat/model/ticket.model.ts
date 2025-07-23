@@ -31,7 +31,6 @@ export interface DeclineTicketFormProps {
 }
 export interface ApplyTicketFormProps {
 	ticketRequest: TechnicianRequest;
-	onCloseModal?: () => void;
 }
 export interface AssignTechnicianFormProps {
 	ticket: Ticket;
@@ -55,6 +54,7 @@ export interface ApplyTechnicianFormControls {
 		endTime?: string;
 		day?: string;
 	};
+	costs: { amount: number; title: string }[];
 }
 
 export interface SendTechnicianRequestFormControls {
@@ -90,6 +90,7 @@ export interface TechnicianRequestDetails {
 	message: string;
 	isActive: boolean;
 	technician: User;
+	costs: { amount: number; title: string }[];
 }
 
 export type TechnicianRequest = Omit<

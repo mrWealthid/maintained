@@ -162,3 +162,44 @@ export async function PATCH(
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }
+
+export async function GET(
+	request: NextRequest,
+	{ params }: { params: Promise<{ requestId: string }> }
+) {
+	try {
+		const { requestId } = await params;
+
+		// const ticket = await Ticket.findOne({
+		// 	_id: ticketId
+		// }).populate([
+		// 	{
+		// 		path: 'category',
+		// 		select: 'name'
+		// 	},
+		// 	{
+		// 		path: 'user',
+		// 		select: 'name email'
+		// 	},
+		// 	{ path: 'requests' }
+		// ]);
+		const ticket =
+			await TechnicianRequest.findById(requestId).populate('ticket');
+
+		console.log('Populated Ticket:', ticket);
+
+		if (!ticket) {
+			return NextResponse.json(
+				{ error: 'Ticket not found' },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json({
+			status: 'success',
+			data: ticket // ✅ includes virtuals like 'requests'
+		});
+	} catch (error: any) {
+		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+}
