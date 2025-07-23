@@ -3,6 +3,7 @@ import { Raleway } from 'next/font/google';
 import './global.css';
 import Provider from '@/utils/Provider';
 import { Toaster } from 'react-hot-toast';
+import { getThemeFromCookie } from '@/utils/theme';
 
 const raleway = Raleway({ subsets: ['latin'] });
 
@@ -11,14 +12,15 @@ export const metadata: Metadata = {
 	description: 'Automate Maintenance Today!'
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const theme = await getThemeFromCookie();
 	return (
 		<html lang='en'>
-			<body className={`${raleway.className} `}>
+			<body className={`${raleway.className} ${theme}`}>
 				<Provider>{children}</Provider>
 
 				<Toaster

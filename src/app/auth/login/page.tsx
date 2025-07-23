@@ -11,6 +11,7 @@ import EmailInput from '@/app/shared/components/form-elements/Email-Input';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { LoginForm } from '../model/model';
+import AuthWrapper from '../AuthWrapper';
 
 const LoginComponent = () => {
 	const { register, handleSubmit, formState } = useForm<LoginForm>({
@@ -37,8 +38,8 @@ const LoginComponent = () => {
 	};
 	return (
 		<>
-			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='border bg-card  w-5/6  lg:w-2/3  xl:w-1/3 p-10 flex gap-4 flex-col items-center justify-center'>
+			<AuthWrapper>
+				<section className=' w-full p-10 flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center font-bold text-2xl'>
 						Sign In to Get Started
 					</p>
@@ -53,90 +54,84 @@ const LoginComponent = () => {
 						</section>
 					</section> */}
 
-					<section className='w-full'>
-						<form
-							autoFocus
-							onSubmit={handleSubmit(onSubmit, onError)}
-							className='w-full flex flex-col justify-center gap-2 items-center'>
-							<EmailInput
-								name={'email'}
-								label='Email'
-								error={errors?.['email']?.message?.toString()}>
-								<input
-									{...register('email', {
-										required: 'This field is required',
-										pattern: {
-											value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-											message: 'Invalid email address'
-										}
-									})}
-									className='input-style'
-									type='email'
-									id='email'
-									autoFocus
-								/>
-							</EmailInput>
-							<TextInput
-								name={'psw'}
-								placeholder='Enter Password'
-								label='Password'
-								error={errors?.[
-									'password'
-								]?.message?.toString()}>
-								<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
-									<input
-										className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
-										type={
-											showPassword ? 'text' : 'password'
-										}
-										{...register('password', {
-											required: 'This field is required'
-										})}
-										id='psw'
-									/>
-
-									{!showPassword ? (
-										<FaEyeSlash
-											className='cursor-pointer'
-											onClick={togglePassword}
-										/>
-									) : (
-										<FaEye
-											className='cursor-pointer'
-											onClick={togglePassword}
-										/>
-									)}
-								</div>
-							</TextInput>
-
-							<ButtonComponent
-								styles='w-full mt-4'
-								btnText='Login'
-								loading={isLoading}
-								type='submit'
-								disabled={!isValid || isLoading}
+					<form
+						autoFocus
+						onSubmit={handleSubmit(onSubmit, onError)}
+						className='w-full flex flex-col justify-center gap-2 items-center'>
+						<EmailInput
+							name={'email'}
+							label='Email'
+							error={errors?.['email']?.message?.toString()}>
+							<input
+								{...register('email', {
+									required: 'This field is required',
+									pattern: {
+										value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+										message: 'Invalid email address'
+									}
+								})}
+								className='input-style'
+								type='email'
+								id='email'
+								autoFocus
 							/>
+						</EmailInput>
+						<TextInput
+							name={'psw'}
+							placeholder='Enter Password'
+							label='Password'
+							error={errors?.['password']?.message?.toString()}>
+							<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
+								<input
+									className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
+									type={showPassword ? 'text' : 'password'}
+									{...register('password', {
+										required: 'This field is required'
+									})}
+									id='psw'
+								/>
 
-							<p className='flex gap-3 text-sm '>
-								Forgot Password ?
-								<Link
-									href={'/auth/resetPassword'}
-									className='text-blue-600 text-sm'>
-									Reset
-								</Link>
-							</p>
-							<p className='flex gap-3 text-sm '>
-								Need An Account ?
-								<Link
-									href={'/auth/signup'}
-									className='text-blue-600 text-sm'>
-									Sign up
-								</Link>
-							</p>
-						</form>
-					</section>
+								{!showPassword ? (
+									<FaEyeSlash
+										className='cursor-pointer'
+										onClick={togglePassword}
+									/>
+								) : (
+									<FaEye
+										className='cursor-pointer'
+										onClick={togglePassword}
+									/>
+								)}
+							</div>
+						</TextInput>
+
+						<ButtonComponent
+							styles='w-full mt-4'
+							btnText='Login'
+							loading={isLoading}
+							type='submit'
+							disabled={!isValid || isLoading}
+						/>
+
+						<p className='flex gap-3 text-sm '>
+							Forgot Password ?
+							<Link
+								href={'/auth/resetPassword'}
+								className='text-blue-600 text-sm'>
+								Reset
+							</Link>
+						</p>
+						<p className='flex gap-3 text-sm '>
+							Need An Account ?
+							<Link
+								href={'/auth/signup'}
+								className='text-blue-600 text-sm'>
+								Sign up
+							</Link>
+						</p>
+					</form>
 				</section>
-			</section>
+			</AuthWrapper>
 		</>
 	);
 };

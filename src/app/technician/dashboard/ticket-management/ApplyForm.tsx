@@ -1,6 +1,6 @@
 'use client';
-import React, { FC, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, { FC, useMemo, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { TECHNICIAN_RESPONSE } from '@/app/shared/enums/enums';
 import { useProcessTechnicianResponse } from '@/app/shared/ticket-feat/hooks/ticketHooks';
@@ -14,7 +14,7 @@ import {
 	PopoverContent,
 	PopoverTrigger
 } from '@/components/ui/popover';
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, CirclePlus, X } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -24,13 +24,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import ErrorMessage from '@/app/shared/components/form-elements/ErrorMessage';
 
-const ApplyForm: FC<ApplyTicketFormProps> = ({
-	ticketRequest,
-	onCloseModal
-}) => {
+const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticketRequest._id,
-		onCloseModal
+		ticketRequest._id
 	);
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -45,9 +41,9 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({
 		? new Date(ticketRequest.schedule.end).toTimeString().split(' ')[0]
 		: '11:30:00';
 
-	const { control, handleSubmit, watch, formState } =
+	const { control, handleSubmit, watch, formState, trigger } =
 		useForm<ApplyTechnicianFormControls>({
-			mode: 'all',
+			mode: 'onChange',
 			defaultValues: {
 				addSchedule: !!ticketRequest.schedule,
 				quote: {
@@ -59,14 +55,37 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({
 					date: initialDate,
 					startTime: initialStartTime,
 					endTime: initialEndTime
-				}
+				},
+				costs: ticketRequest.costs?.length ? ticketRequest.costs : []
 			}
 		});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 
+	const { fields, append, remove } = useFieldArray({
+		control,
+		name: 'costs'
+	});
+
+	const watchCosts = watch('costs');
 	const scheduleEnabled = watch('addSchedule');
 	const startTime = watch('schedule.startTime');
+
+	const totalCost = useMemo(
+		() =>
+			watchCosts?.reduce(
+				(sum, item) => sum + (Number(item.amount) || 0),
+				0
+			) ?? 0,
+		[watchCosts]
+	);
+
+	const handleAddCost = async () => {
+		const valid = await trigger('costs'); // validate the entire costs array
+		if (valid) {
+			append({ title: '', amount: 0 });
+		}
+	};
 
 	const onSubmit = (data: ApplyTechnicianFormControls) => {
 		let startUtc: string | null = null;
@@ -118,9 +137,9 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({
 		};
 
 		// ✅ You can now send the payload
-		processResponse(payload, {
-			onSuccess: () => onCloseModal?.()
-		});
+		// processResponse(payload, {
+		// 	onSuccess: () => onCloseModal?.()
+		// });
 	};
 
 	function onError(err: unknown) {
@@ -155,215 +174,354 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({
 		};
 	}
 
+	function removeIndex(index: number) {
+		// if (fields.length > 1) {
+		// 	remove(index);
+		// }
+		remove(index);
+	}
+
 	return (
-		<form
-			onSubmit={handleSubmit(onSubmit, onError)}
-			className='flex flex-col gap-4'>
-			<div className='flex flex-col gap-3'>
-				<Label htmlFor='cost' className='px-1'>
-					Cost
-				</Label>
-				<Controller
-					control={control}
-					rules={{ required: 'Please enter cost' }}
-					name='quote.amount'
-					render={({ field }) => (
-						<div className='relative w-full'>
-							<Input
-								{...field}
-								value={field.value ?? ''}
-								type='text'
-								id='cost'
-								className='w-full pr-14 bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-							/>
-							<span className='absolute right-3 top-1/2 -translate-y-1/2  text-muted-foreground text-sm pointer-events-none'>
-								USD
-							</span>
+		<div className='flex gap-6'>
+			<form
+				onSubmit={handleSubmit(onSubmit, onError)}
+				className='flex w-2/3 flex-col gap-4'>
+				<div className='flex flex-col gap-3'>
+					<Label htmlFor='cost' className='px-1'>
+						Cost
+					</Label>
+
+					<div className='border  rounded-lg p-4'>
+						<h3 className='text-sm font-semibold mb-2'>
+							Cost Breakdown
+						</h3>
+
+						{fields.map((item, index) => (
+							<div
+								key={item.id}
+								className='flex items-start gap-4 mb-2'>
+								<Controller
+									name={`costs.${index}.title`}
+									control={control}
+									shouldUnregister={false}
+									rules={{ required: 'Title is required' }}
+									render={({ field, fieldState }) => (
+										<div className='flex-1'>
+											<Input
+												type='text'
+												placeholder='Title (e.g. Purchase of new items)'
+												{...field}
+											/>
+
+											{fieldState.error && (
+												<ErrorMessage
+													errorMsg={
+														fieldState.error
+															.message ?? ''
+													}
+												/>
+											)}
+										</div>
+									)}
+								/>
+								<Controller
+									name={`costs.${index}.amount`}
+									control={control}
+									rules={{
+										required: 'Amount is required',
+										min: {
+											value: 0,
+											message: 'Must be >= 0'
+										}
+									}}
+									render={({ field, fieldState }) => (
+										<div className='flex-1'>
+											<Input
+												type='number'
+												step='0.01'
+												placeholder='Amount'
+												{...field}
+											/>
+											{fieldState.error && (
+												<ErrorMessage
+													errorMsg={
+														fieldState.error
+															.message ?? ''
+													}
+												/>
+											)}
+										</div>
+									)}
+								/>
+
+								<button
+									title='Remove cost item'
+									type='button'
+									onClick={() => {
+										removeIndex(index);
+									}}
+									className='flex items-center  text-sm cursor-pointer font-bold'>
+									<X strokeWidth={1} size={14} color='red' />
+								</button>
+							</div>
+						))}
+
+						<div className='flex mt-5 justify-end'>
+							<button
+								type='button'
+								onClick={handleAddCost}
+								className=' px-2 py-2 bg-blue-600 flex items-center gap-2 text-white text-sm rounded'>
+								<CirclePlus size={14} strokeWidth={1} /> Add
+								Cost Item
+							</button>
 						</div>
-					)}
-				/>
-			</div>
+						{/* <div className='mt-4 font-semibold'>
+							Total: {Number(totalCost).toLocaleString()} USD
+						</div> */}
+					</div>
 
-			<div className='flex flex-col gap-3'>
-				<Label htmlFor='message' className='px-1'>
-					Message
-				</Label>
-				<Controller
-					control={control}
-					name='message'
-					render={({ field }) => (
-						<Textarea
-							{...field}
-							id='message'
-							className='w-full pr-14 bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-						/>
-					)}
-				/>
-			</div>
+					<Controller
+						control={control}
+						rules={{ required: 'Please enter cost' }}
+						name='quote.amount'
+						render={({ field }) => (
+							<div className='relative w-full'>
+								<Input
+									{...field}
+									value={field.value ?? ''}
+									type='text'
+									id='cost'
+								/>
+								<span className='absolute right-3 top-1/2 -translate-y-1/2  text-muted-foreground text-sm pointer-events-none'>
+									USD
+								</span>
+							</div>
+						)}
+					/>
+				</div>
 
-			<div className='flex items-center space-x-2'>
-				<Controller
-					control={control}
-					name='addSchedule'
-					render={({ field }) => (
-						<>
-							<Switch
-								className={`
+				<div className='flex flex-col gap-3'>
+					<Label htmlFor='message' className='px-1'>
+						Message
+					</Label>
+					<Controller
+						control={control}
+						name='message'
+						render={({ field }) => (
+							<Textarea {...field} id='message' />
+						)}
+					/>
+				</div>
+
+				<div className='flex items-center space-x-2'>
+					<Controller
+						control={control}
+						name='addSchedule'
+						render={({ field }) => (
+							<>
+								<Switch
+									className={`
 						data-[state=checked]:bg-foreground
 					   relative inline-flex  items-center rounded-full
 					 `}
-								checked={!!field.value}
-								onCheckedChange={field.onChange}
-								id='toggle-schedule'
-							/>
+									checked={!!field.value}
+									onCheckedChange={field.onChange}
+									id='toggle-schedule'
+								/>
 
-							<Label htmlFor='toggle-schedule'>
-								Would you like to schedule now ?
+								<Label htmlFor='toggle-schedule'>
+									Would you like to schedule now ?
+								</Label>
+							</>
+						)}
+					/>
+				</div>
+
+				{scheduleEnabled && (
+					<section className='flex flex-col gap-4'>
+						<div className='w-full flex flex-col gap-3'>
+							<Label htmlFor='date-picker' className='px-1'>
+								Date
 							</Label>
-						</>
-					)}
-				/>
-			</div>
 
-			{scheduleEnabled && (
-				<section className='flex flex-col gap-4'>
-					<div className='w-full flex flex-col gap-3'>
-						<Label htmlFor='date-picker' className='px-1'>
-							Date
-						</Label>
-
-						<Controller
-							control={control}
-							name='schedule.date'
-							render={({ field }) => {
-								const hasValue = !!field.value;
-								return (
-									<Popover
-										open={isOpen}
-										onOpenChange={setIsOpen}>
-										<PopoverTrigger asChild>
-											<Button
-												variant='outline'
-												id='date-picker'
-												disabled={!scheduleEnabled}
-												onClick={() => setIsOpen(true)}
-												className={` w-full bg-transparent hover:bg-transparent justify-between font-normal ${
-													hasValue
-														? 'text-foreground'
-														: 'text-muted-foreground'
-												}`}>
-												{hasValue
-													? format(
-															field.value as Date,
-															'PPP'
-														) // e.g., Jul 9, 2025
-													: 'Select date'}
-												<ChevronDownIcon />
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent
-											className='w-auto overflow-hidden p-0'
-											align='start'>
-											<Calendar
-												mode='single'
-												selected={field.value}
-												captionLayout='dropdown'
-												onSelect={(date) => {
-													field.onChange(date);
-													setIsOpen(false);
-												}}
-											/>
-										</PopoverContent>
-									</Popover>
-								);
-							}}
-						/>
-					</div>
-
-					<div className=' flex flex-col md:flex-row justify-between  gap-3'>
-						<section className='flex-1'>
-							{' '}
-							<Label htmlFor='startTime' className='px-1'>
-								Start Time
-							</Label>
 							<Controller
 								control={control}
-								name='schedule.startTime'
-								render={({ field }) => (
-									<Input
-										type='time'
-										id='startTime'
-										step='1'
-										disabled={!scheduleEnabled}
-										{...field}
-										className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-									/>
-								)}
-							/>
-						</section>
-
-						<section className='flex-1'>
-							<Label htmlFor='endTime' className='px-1'>
-								End Time
-							</Label>
-							<Controller
-								control={control}
-								name='schedule.endTime'
-								rules={{
-									validate: (value) => {
-										if (!scheduleEnabled) return true;
-										if (!startTime || !value)
-											return 'Please enter both times';
-
-										return (
-											value > startTime ||
-											'End time must be after start time'
-										);
-									}
+								name='schedule.date'
+								render={({ field }) => {
+									const hasValue = !!field.value;
+									return (
+										<Popover
+											open={isOpen}
+											onOpenChange={setIsOpen}>
+											<PopoverTrigger asChild>
+												<Button
+													variant='outline'
+													id='date-picker'
+													disabled={!scheduleEnabled}
+													onClick={() =>
+														setIsOpen(true)
+													}
+													className={` w-full bg-transparent hover:bg-transparent justify-between font-normal ${
+														hasValue
+															? 'text-foreground'
+															: 'text-muted-foreground'
+													}`}>
+													{hasValue
+														? format(
+																field.value as Date,
+																'PPP'
+															) // e.g., Jul 9, 2025
+														: 'Select date'}
+													<ChevronDownIcon />
+												</Button>
+											</PopoverTrigger>
+											<PopoverContent
+												className='w-auto overflow-hidden p-0'
+												align='start'>
+												<Calendar
+													mode='single'
+													selected={field.value}
+													captionLayout='dropdown'
+													onSelect={(date) => {
+														field.onChange(date);
+														setIsOpen(false);
+													}}
+												/>
+											</PopoverContent>
+										</Popover>
+									);
 								}}
-								render={({ field }) => (
-									<>
+							/>
+						</div>
+
+						<div className=' flex flex-col md:flex-row justify-between  gap-3'>
+							<section className='flex-1'>
+								{' '}
+								<Label htmlFor='startTime' className='px-1'>
+									Start Time
+								</Label>
+								<Controller
+									control={control}
+									name='schedule.startTime'
+									render={({ field }) => (
 										<Input
 											type='time'
-											id='end-time'
+											id='startTime'
 											step='1'
+											disabled={!scheduleEnabled}
 											{...field}
 											className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
 										/>
+									)}
+								/>
+							</section>
 
-										{errors.schedule?.endTime && (
-											<ErrorMessage
-												errorMsg={
-													errors.schedule.endTime
-														?.message ?? ''
-												}
+							<section className='flex-1'>
+								<Label htmlFor='endTime' className='px-1'>
+									End Time
+								</Label>
+								<Controller
+									control={control}
+									name='schedule.endTime'
+									rules={{
+										validate: (value) => {
+											if (!scheduleEnabled) return true;
+											if (!startTime || !value)
+												return 'Please enter both times';
+
+											return (
+												value > startTime ||
+												'End time must be after start time'
+											);
+										}
+									}}
+									render={({ field }) => (
+										<>
+											<Input
+												type='time'
+												id='end-time'
+												step='1'
+												{...field}
+												className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
 											/>
-										)}
-									</>
-								)}
-							/>
-						</section>
-					</div>
-				</section>
-			)}
 
-			<hr className='-mx-6 my-3' />
-			<section className='flex justify-end  gap-4'>
-				<ButtonComponent
-					type='reset'
-					handleClick={() => onCloseModal?.()}
-					styles='rounded-3xl'
-					btnText={'Cancel'}></ButtonComponent>
+											{errors.schedule?.endTime && (
+												<ErrorMessage
+													errorMsg={
+														errors.schedule.endTime
+															?.message ?? ''
+													}
+												/>
+											)}
+										</>
+									)}
+								/>
+							</section>
+						</div>
+					</section>
+				)}
 
-				<ButtonComponent
-					type='submit'
-					styles='rounded-3xl'
-					disabled={!isDirty || !isValid}
-					loading={isProcessing}
-					btnText={`Submit
+				<hr className='-mx-6 my-3' />
+				<section className='flex justify-end  gap-4'>
+					<ButtonComponent
+						type='reset'
+						// handleClick={() => onCloseModal?.()}
+						styles='rounded-3xl'
+						btnText={'Cancel'}></ButtonComponent>
+
+					<ButtonComponent
+						type='submit'
+						styles='rounded-3xl'
+						disabled={!isDirty || !isValid}
+						loading={isProcessing}
+						btnText={`Submit
                                     `}></ButtonComponent>
-			</section>
-		</form>
+				</section>
+			</form>
+
+			<div className='w-1/3 border rounded-lg  p-4 text-sm shadow-sm h-fit'>
+				<h3 className='text-lg font-semibold mb-4'>Cost Receipt</h3>
+				{watchCosts.length === 0 ? (
+					<p className='text-gray-500'>No cost items added yet.</p>
+				) : (
+					<>
+						<ul className='space-y-2'>
+							{watchCosts.map((item, index) => (
+								<li
+									key={index}
+									className='flex justify-between border-b pb-1 text-xs'>
+									<span className='truncate'>
+										{item.title}
+									</span>
+									<span>
+										₦
+										{Number(
+											item.amount || 0
+										).toLocaleString()}
+									</span>
+								</li>
+							))}
+						</ul>
+
+						<hr className='my-4' />
+
+						<div className='flex justify-between font-bold text-sm'>
+							<span>Total</span>
+							<span>
+								₦
+								{watchCosts
+									.reduce(
+										(acc, item) =>
+											acc + Number(item.amount || 0),
+										0
+									)
+									.toLocaleString()}
+							</span>
+						</div>
+					</>
+				)}
+			</div>
+		</div>
 	);
 };
 

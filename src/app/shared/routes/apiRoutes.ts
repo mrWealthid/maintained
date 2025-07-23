@@ -27,6 +27,7 @@ export const API_ROUTES = {
 		update_status: (id: string) =>
 			resourceById('tickets/update-status')(id),
 		assign_technician: (id: string) => resourceById('tickets/assign')(id),
+		fetch_technician_requestDetails: `${base}/tickets/respond`,
 		process_technician_response: (id: string) =>
 			resourceById('tickets/respond')(id),
 		send_technician_request: (id: string) =>

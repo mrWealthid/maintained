@@ -1,9 +1,7 @@
 'use client';
 
 import React, { FC, useState } from 'react';
-import { FaCircle } from 'react-icons/fa';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
-import { getStatusColor } from '@/utils/helper';
 import {
 	TicketFilterQuery,
 	TicketQueryprops
@@ -37,17 +35,17 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({
 					)
 				}
 				className='w-auto'>
-				<TabsList className='bg-muted p-1 rounded-full shadow-sm space-x-1'>
+				<TabsList className='bg-muted p-1 rounded-full shadow-sm'>
 					{ticketListFilter.map((tab) => (
 						<TabsTrigger
 							key={tab.value}
 							value={tab.value}
-							className='rounded-full text-xs   py-1 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
+							className='rounded-full text-xs flex justify-between py-1 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
 							{tab.label}
 							{summary && summary[tab.value] !== undefined && (
 								<Badge
 									variant='secondary'
-									className=' px-2 py-1 ml-1 rounded-full'>
+									className='rounded-full ml-1'>
 									{summary[tab.value]}
 								</Badge>
 							)}
