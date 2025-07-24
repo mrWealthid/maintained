@@ -27,6 +27,7 @@ import {
 } from '@/app/shared/routes/routes';
 import SendTechnicianRequestForm from '@/app/admin/dashboard/ticket-management/SendTechnicianRequestForm';
 import { useAppContext } from '../../contexts/AppContext';
+import HandOffTicketForm from '@/app/admin/dashboard/ticket-management/HandOffTicketForm';
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -88,6 +89,17 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 								</Modal.Open>
 							</DropdownMenuItem>
 						)}
+					{user?.role === ROLES.admin && (
+						<DropdownMenuItem>
+							<Modal.Open opens='handoff-ticket'>
+								<button
+									type='button'
+									className='w-full text-left'>
+									Handoff
+								</button>
+							</Modal.Open>
+						</DropdownMenuItem>
+					)}
 
 					{/*  This feat should be executed by an admin who
 					created the ticket only */}
@@ -164,6 +176,13 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				title='Send Technincians Ticket Request'
 				description='Request ticket will be sent To Technicians'>
 				<SendTechnicianRequestForm ticket={ticket} />
+			</Modal.Window>
+
+			<Modal.Window
+				name='handoff-ticket'
+				title='Hand-off Ticket Request'
+				description='Request ticket will be reassigned to a new admin'>
+				<HandOffTicketForm ticket={ticket} />
 			</Modal.Window>
 		</>
 	);

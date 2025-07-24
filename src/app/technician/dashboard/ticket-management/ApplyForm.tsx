@@ -136,10 +136,10 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 				})
 		};
 
-		// ✅ You can now send the payload
-		// processResponse(payload, {
-		// 	onSuccess: () => onCloseModal?.()
-		// });
+		//✅ You can now send the payload
+		processResponse(payload, {
+			onSuccess: () => console.log('success')
+		});
 	};
 
 	function onError(err: unknown) {
@@ -191,10 +191,16 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 						Cost
 					</Label>
 
-					<div className='border  rounded-lg p-4'>
+					<section className='border  rounded-lg p-4'>
 						<h3 className='text-sm font-semibold mb-2'>
 							Cost Breakdown
 						</h3>
+						{watchCosts.length === 0 && (
+							<small>
+								Add a breakdown of cost required to complete
+								gig.
+							</small>
+						)}
 
 						{fields.map((item, index) => (
 							<div
@@ -265,20 +271,27 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 								</button>
 							</div>
 						))}
-
 						<div className='flex mt-5 justify-end'>
-							<button
+							<ButtonComponent
+								type='reset'
+								handleClick={handleAddCost}
+								styles='rounded-lg'
+								beforeIcon={
+									<CirclePlus size={14} strokeWidth={1} />
+								}
+								btnText={'Add Cost Item'}></ButtonComponent>
+							{/* <button
 								type='button'
 								onClick={handleAddCost}
 								className=' px-2 py-2 bg-blue-600 flex items-center gap-2 text-white text-sm rounded'>
 								<CirclePlus size={14} strokeWidth={1} /> Add
 								Cost Item
-							</button>
+							</button> */}
 						</div>
 						{/* <div className='mt-4 font-semibold'>
 							Total: {Number(totalCost).toLocaleString()} USD
 						</div> */}
-					</div>
+					</section>
 
 					<Controller
 						control={control}
@@ -480,7 +493,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 			</form>
 
 			<div className='w-1/3 border rounded-lg  p-4 text-sm shadow-sm h-fit'>
-				<h3 className='text-lg font-semibold mb-4'>Cost Receipt</h3>
+				<h3 className='text-lg font-semibold mb-4'>Estimated Cost</h3>
 				{watchCosts.length === 0 ? (
 					<p className='text-gray-500'>No cost items added yet.</p>
 				) : (
@@ -494,7 +507,6 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 										{item.title}
 									</span>
 									<span>
-										₦
 										{Number(
 											item.amount || 0
 										).toLocaleString()}
@@ -503,12 +515,9 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 							))}
 						</ul>
 
-						<hr className='my-4' />
-
 						<div className='flex justify-between font-bold text-sm'>
 							<span>Total</span>
 							<span>
-								₦
 								{watchCosts
 									.reduce(
 										(acc, item) =>

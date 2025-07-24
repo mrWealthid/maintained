@@ -79,6 +79,20 @@ export async function fetchTechnicians<T>(
 		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
+export async function fetchAdmins<T>(
+	query?: string | null
+): Promise<ApiResponse<T[]>> {
+	const url = query
+		? `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}&name=${query}`
+		: `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}`;
+	try {
+		const response = await axios(url);
+		const data = await response.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
 
 export async function fetchTickets<T>({
 	limit = 10,
@@ -161,6 +175,22 @@ export async function assignTicket(
 		throw new Error(ApiErrorHandler.parse(err));
 	}
 }
+export async function handOffTicket(
+	id: string,
+	payload: Pick<Ticket, 'actionedBy'>
+) {
+	try {
+		const res = await axios.patch(
+			`${API_ROUTES.ticketManagement.update_status(id)}`,
+			payload
+		);
+		const data = await res.data;
+		return data;
+	} catch (err: unknown) {
+		throw new Error(ApiErrorHandler.parse(err));
+	}
+}
+
 export async function ProcessTechnicianResponse(
 	id: string,
 	payload: ProcessRequest

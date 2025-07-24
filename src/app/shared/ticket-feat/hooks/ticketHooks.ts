@@ -5,9 +5,11 @@ import {
 	assignTicket,
 	createTicket,
 	deleteTicket,
+	fetchAdmins,
 	fetchRequestType,
 	fetchTechnicians,
 	fetchTickets,
+	handOffTicket,
 	ProcessTechnicianResponse,
 	sendTechnicianRequest
 } from '../service/ticket-service';
@@ -156,6 +158,19 @@ export function useFetchTechnicians<T>(page: number = 1, limit: number = 50) {
 		...data
 	};
 }
+export function useFetchAdmins<T>(page: number = 1, limit: number = 50) {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['ticket-type'],
+		queryFn: () => fetchAdmins<T>()
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		...data
+	};
+}
 
 export function useSendTechnicianRequest(id: string, close?: () => void) {
 	const queryClient = useQueryClient();
@@ -174,4 +189,23 @@ export function useSendTechnicianRequest(id: string, close?: () => void) {
 		});
 
 	return { isSending, handleSendTechnicianRequest };
+}
+
+export function useHandOffTicket(id: string, close?: () => void) {
+	const queryClient = useQueryClient();
+	const { isPending: isUpdating, mutate: handleHandleOffTicket } =
+		useMutation({
+			mutationFn: (payload: Pick<Ticket, 'actionedBy'>) =>
+				handOffTicket(id, payload),
+			onSuccess: () => {
+				toast.success('Ticket successfully assigned');
+				queryClient.invalidateQueries({
+					queryKey: ['tickets']
+				});
+				close?.();
+			},
+			onError: (err: ApiError) => toast.error(err.message)
+		});
+
+	return { isUpdating, handleHandleOffTicket };
 }

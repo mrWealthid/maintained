@@ -24,15 +24,15 @@ const ButtonComponent = ({
 			className={`btn-primary ${styles}`}
 			type={type}
 			disabled={disabled}>
-			{beforeIcon && (
-				<Image
-					className=' object-contain'
-					height={20}
-					src={beforeIcon}
-					alt='ministers'
-					width={20}
-				/>
-			)}
+			{beforeIcon &&
+				// <Image
+				// 	className=' object-contain'
+				// 	height={20}
+				// 	src={beforeIcon}
+				// 	alt='ministers'
+				// 	width={20}
+				// />
+				beforeIcon}
 
 			{btnText}
 
@@ -81,7 +81,7 @@ interface IButton extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	// type: 'button' | 'submit' | 'reset' | undefined;
 	styles?: string;
 	afterIcon?: string;
-	beforeIcon?: string;
+	beforeIcon?: string | React.ReactNode;
 	loading?: boolean;
 	handleClick?: () => void;
 	// disabled?: boolean;

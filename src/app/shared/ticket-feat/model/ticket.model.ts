@@ -40,6 +40,10 @@ export interface SendTechnicianRequestFormProps {
 	ticket: Ticket;
 	onCloseModal?: () => void;
 }
+export interface handOffTicketFormProps {
+	ticket: Ticket;
+	onCloseModal?: () => void;
+}
 
 export interface AssignTechnicianFormControls {
 	assignedTo: string;
