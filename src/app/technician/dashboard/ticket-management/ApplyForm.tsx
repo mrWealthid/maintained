@@ -31,6 +31,8 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table';
+import { useRouter } from 'next/navigation';
+import { TECHNICIAN_ROUTES_DEFINITION } from '@/app/shared/routes/routes';
 
 const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
@@ -55,27 +57,30 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 			defaultValues: {
 				addSchedule: !!ticketRequest.schedule,
 				quote: {
-					amount: ticketRequest.quote.amount || undefined,
-					currency: ticketRequest.quote.currency || 'USD'
+					total: ticketRequest.quote.total || undefined,
+					currency: ticketRequest.quote.currency || 'USD',
+					cost: ticketRequest.quote.cost?.length
+						? ticketRequest.quote.cost
+						: []
 				},
 				message: ticketRequest.message || '',
 				schedule: {
 					date: initialDate,
 					startTime: initialStartTime,
 					endTime: initialEndTime
-				},
-				costs: ticketRequest.costs?.length ? ticketRequest.costs : []
+				}
 			}
 		});
 
+	const router = useRouter();
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 
 	const { fields, append, remove } = useFieldArray({
 		control,
-		name: 'costs'
+		name: 'quote.cost'
 	});
 
-	const watchCosts = watch('costs');
+	const watchCosts = watch('quote.cost');
 	const scheduleEnabled = watch('addSchedule');
 	const startTime = watch('schedule.startTime');
 
@@ -89,7 +94,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 	);
 
 	const handleAddCost = async () => {
-		const valid = await trigger('costs'); // validate the entire costs array
+		const valid = await trigger('quote.cost'); // validate the entire costs array
 		if (valid) {
 			append({ title: '', amount: 0 });
 		}
@@ -125,8 +130,8 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 
 		const payload = {
 			quote: {
-				amount: data.quote?.amount,
-				currency: 'USD'
+				...(data.quote?.total && { total: data.quote?.total }),
+				cost: data.quote.cost
 			},
 			message: data.message,
 			status: TECHNICIAN_RESPONSE.applied,
@@ -146,7 +151,8 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 
 		//✅ You can now send the payload
 		processResponse(payload, {
-			onSuccess: () => console.log('success')
+			onSuccess: () =>
+				router.push(TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS)
 		});
 	};
 
@@ -189,16 +195,11 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 		remove(index);
 	}
 
-	const total = watchCosts.reduce(
-		(acc, item) => acc + Number(item.amount || 0),
-		0
-	);
-
 	return (
-		<div className='flex gap-6'>
+		<div className='flex  gap-6'>
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
-				className='flex w-2/3 flex-col gap-4'>
+				className='flex bg-card p-6 border rounded-xl w-2/3 flex-col gap-4'>
 				<div className='flex flex-col gap-3'>
 					<Label htmlFor='cost' className='px-1'>
 						Cost
@@ -220,7 +221,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 								key={item.id}
 								className='flex items-start gap-4 mb-2'>
 								<Controller
-									name={`costs.${index}.title`}
+									name={`quote.cost.${index}.title`}
 									control={control}
 									shouldUnregister={false}
 									rules={{ required: 'Title is required' }}
@@ -244,7 +245,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 									)}
 								/>
 								<Controller
-									name={`costs.${index}.amount`}
+									name={`quote.cost.${index}.amount`}
 									control={control}
 									rules={{
 										required: 'Amount is required',
@@ -306,10 +307,10 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 						</div> */}
 					</section>
 
-					<Controller
+					{/* <Controller
 						control={control}
 						rules={{ required: 'Please enter cost' }}
-						name='quote.amount'
+						name='quote.total'
 						render={({ field }) => (
 							<div className='relative w-full'>
 								<Input
@@ -323,7 +324,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 								</span>
 							</div>
 						)}
-					/>
+					/> */}
 				</div>
 
 				<div className='flex flex-col gap-3'>
@@ -505,7 +506,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 				</section>
 			</form>
 
-			<section className='w-1/3 border rounded-lg p-4 text-sm shadow-sm h-fit'>
+			<section className='w-1/3 bg-card border rounded-xl p-4 text-sm shadow-sm h-fit'>
 				<h3 className='text-lg font-semibold mb-4'>Estimated Cost</h3>
 
 				{watchCosts.length === 0 ? (
@@ -538,7 +539,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 							<TableRow className='font-bold border-t'>
 								<TableCell className='text-sm'>Total</TableCell>
 								<TableCell className='text-right text-sm'>
-									{total.toLocaleString()}
+									{totalCost.toLocaleString()}
 								</TableCell>
 							</TableRow>
 						</TableBody>

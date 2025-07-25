@@ -6,8 +6,9 @@ export interface ITechnicianRequest extends Document {
 	technician: Types.ObjectId;
 	status: TECHNICIAN_RESPONSE;
 	quote?: {
-		amount?: number;
-		currency?: string;
+		total?: number;
+		currency: string;
+		cost: { title: string; amount: number };
 	};
 	schedule?: {
 		start: string;
@@ -46,8 +47,14 @@ const TechnicianRequestSchema = new Schema(
 			day: String
 		},
 		quote: {
-			amount: Number,
-			currency: { type: String, default: 'USD' }
+			total: { type: Number, default: 0 },
+			currency: { type: String, default: 'USD' },
+			cost: [
+				{
+					title: { type: String, required: true },
+					amount: { type: Number, required: true }
+				}
+			]
 		},
 		message: String,
 		reason: String,
@@ -73,6 +80,17 @@ TechnicianRequestSchema.set('toJSON', {
 	}
 });
 
+TechnicianRequestSchema.pre('save', function (next) {
+	if (this.quote && Array.isArray(this.quote.cost)) {
+		this.quote.total = this.quote.cost.reduce(
+			(sum, item) => sum + (item.amount || 0),
+			0
+		);
+	} else {
+		this.quote && (this.quote.total = 0);
+	}
+	next();
+});
 export const TechnicianRequest =
 	mongoose.models.TechnicianRequest ||
 	mongoose.model<ITechnicianRequest>(

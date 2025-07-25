@@ -6,6 +6,7 @@ import { TechnicianRequest } from '@/model/technicanRequest';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 connect();
@@ -35,12 +36,9 @@ export async function PATCH(
 			);
 		}
 
-		// const existingRequest = await TechnicianRequest.findById(requestId);
-		// const existingTicket = await Ticket.findById(ticketId);
-
 		const technicianRequest = await TechnicianRequest.findOne({
-			id: requestId,
-			technician: verify.id
+			_id: requestId,
+			technician: new mongoose.Types.ObjectId(verify.id)
 		});
 
 		//Verify this had been assigned to the loggedIn Technician
@@ -65,7 +63,10 @@ export async function PATCH(
 			technician: string;
 			ticket: string;
 			status: string;
-			quote?: { amount: number; currency: string };
+			quote?: {
+				cost: { title: string; amount: number }[];
+				currency: string;
+			};
 			message?: string;
 			reason?: string;
 			schedule?: {
@@ -91,8 +92,10 @@ export async function PATCH(
 				payload = {
 					...payload,
 					quote: {
-						amount: quote.amount,
-						currency: quote.currency || 'USD'
+						...(quote?.total && {
+							total: quote?.total
+						}),
+						cost: quote.cost
 					},
 					...(schedule && {
 						schedule: {
@@ -183,10 +186,9 @@ export async function GET(
 		// 	},
 		// 	{ path: 'requests' }
 		// ]);
+
 		const ticket =
 			await TechnicianRequest.findById(requestId).populate('ticket');
-
-		console.log('Populated Ticket:', ticket);
 
 		if (!ticket) {
 			return NextResponse.json(

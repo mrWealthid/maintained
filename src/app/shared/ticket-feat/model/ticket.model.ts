@@ -49,7 +49,11 @@ export interface AssignTechnicianFormControls {
 	assignedTo: string;
 }
 export interface ApplyTechnicianFormControls {
-	quote?: { amount: number; currency: string };
+	quote: {
+		total?: number;
+		currency?: string;
+		cost: { title: string; amount: number }[];
+	};
 	message?: string;
 	addSchedule: boolean;
 	schedule?: {
@@ -58,7 +62,7 @@ export interface ApplyTechnicianFormControls {
 		endTime?: string;
 		day?: string;
 	};
-	costs: { amount: number; title: string }[];
+	// cost: { amount: number; title: string }[];
 }
 
 export interface SendTechnicianRequestFormControls {
@@ -78,8 +82,9 @@ export interface ManageTicketForm {
 
 export interface TechnicianRequestDetails {
 	quote: {
-		amount: number;
+		total: number;
 		currency: string;
+		cost: { title: string; amount: number }[];
 	};
 	id: string;
 	ticket: Ticket;
@@ -94,7 +99,6 @@ export interface TechnicianRequestDetails {
 	message: string;
 	isActive: boolean;
 	technician: User;
-	costs: { amount: number; title: string }[];
 }
 
 export type TechnicianRequest = Omit<
@@ -157,8 +161,9 @@ export interface ProcessRequest {
 	reason?: string;
 	status: TECHNICIAN_RESPONSE;
 	quote?: {
-		amount?: number;
+		total?: number;
 		currency?: string;
+		cost: { title: string; amount: number }[];
 	};
 	schedule?: {
 		start: string;
