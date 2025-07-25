@@ -14,7 +14,7 @@ import {
 	PopoverContent,
 	PopoverTrigger
 } from '@/components/ui/popover';
-import { ChevronDownIcon, CirclePlus, X } from 'lucide-react';
+import { ChevronDownIcon, CirclePlus, Trash } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -216,75 +216,83 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 							</small>
 						)}
 
-						{fields.map((item, index) => (
-							<div
-								key={item.id}
-								className='flex items-start gap-4 mb-2'>
-								<Controller
-									name={`quote.cost.${index}.title`}
-									control={control}
-									shouldUnregister={false}
-									rules={{ required: 'Title is required' }}
-									render={({ field, fieldState }) => (
-										<div className='flex-1'>
-											<Input
-												type='text'
-												placeholder='Title (e.g. Purchase of new items)'
-												{...field}
-											/>
-
-											{fieldState.error && (
-												<ErrorMessage
-													errorMsg={
-														fieldState.error
-															.message ?? ''
-													}
+						<div className='flex flex-col gap-3'>
+							{fields.map((item, index) => (
+								<div
+									key={item.id}
+									className='flex items-start gap-4 mb-2'>
+									<Controller
+										name={`quote.cost.${index}.title`}
+										control={control}
+										shouldUnregister={false}
+										rules={{
+											required: 'Title is required'
+										}}
+										render={({ field, fieldState }) => (
+											<div className='flex-1'>
+												<Input
+													type='text'
+													placeholder='Title (e.g. Purchase of new items)'
+													{...field}
 												/>
-											)}
-										</div>
-									)}
-								/>
-								<Controller
-									name={`quote.cost.${index}.amount`}
-									control={control}
-									rules={{
-										required: 'Amount is required',
-										min: {
-											value: 0,
-											message: 'Must be >= 0'
-										}
-									}}
-									render={({ field, fieldState }) => (
-										<div className='flex-1'>
-											<Input
-												type='number'
-												step='0.01'
-												placeholder='Amount'
-												{...field}
-											/>
-											{fieldState.error && (
-												<ErrorMessage
-													errorMsg={
-														fieldState.error
-															.message ?? ''
-													}
-												/>
-											)}
-										</div>
-									)}
-								/>
 
-								<button
-									title='Remove cost item'
-									type='button'
-									onClick={() => {
-										removeIndex(index);
-									}}
-									className='flex items-center  text-sm cursor-pointer font-bold'>
-									<X strokeWidth={1} size={14} color='red' />
-								</button>
-							</div>
-						))}
+												{fieldState.error && (
+													<ErrorMessage
+														errorMsg={
+															fieldState.error
+																.message ?? ''
+														}
+													/>
+												)}
+											</div>
+										)}
+									/>
+									<Controller
+										name={`quote.cost.${index}.amount`}
+										control={control}
+										rules={{
+											required: 'Amount is required',
+											min: {
+												value: 0,
+												message: 'Must be >= 0'
+											}
+										}}
+										render={({ field, fieldState }) => (
+											<div className='flex-1'>
+												<Input
+													type='number'
+													step='0.01'
+													placeholder='Amount'
+													{...field}
+												/>
+												{fieldState.error && (
+													<ErrorMessage
+														errorMsg={
+															fieldState.error
+																.message ?? ''
+														}
+													/>
+												)}
+											</div>
+										)}
+									/>
+
+									<button
+										title='Remove cost item'
+										type='button'
+										onClick={() => {
+											removeIndex(index);
+										}}
+										className='flex items-center  text-sm cursor-pointer font-bold'>
+										<Trash
+											strokeWidth={2}
+											size={14}
+											color='red'
+										/>
+									</button>
+								</div>
+							))}
+						</div>
 						<div className='flex mt-5 justify-end'>
 							<ButtonComponent
 								type='reset'
