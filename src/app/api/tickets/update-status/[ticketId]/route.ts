@@ -22,7 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 //         const ticketId = params.ticketId;
 
 //         const maintenanceRequest = await Ticket.findOne({
-//             _id: ticketId
+//             id: ticketId
 //         }).populate({
 //             path: 'category',
 //             select: 'name '
@@ -95,8 +95,8 @@ export async function PATCH(
 		await TicketActivity.create({
 			ticket: ticketId,
 			action: 'status-changed',
-			description: `Assigned to ${user.name}`,
-			changedBy: user._id,
+			description: `Actioned by ${user.name}`,
+			changedBy: user.id,
 			metadata: {
 				field: 'status',
 				previous: previous.status,

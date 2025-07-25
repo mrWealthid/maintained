@@ -78,8 +78,21 @@ const userSchema = new Schema<IUser>(
 			enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
 		}
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
+
+userSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 // Hash password before saving
 userSchema.pre<IUser>('save', async function (next) {

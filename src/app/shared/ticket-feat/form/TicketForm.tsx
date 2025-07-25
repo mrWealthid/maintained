@@ -27,7 +27,7 @@ import {
 import Label from '../../components/form-elements/Label';
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
-	const isEditing = !!ticket?._id;
+	const isEditing = !!ticket?.id;
 	const [autoCompleteValue, setAutoCompleteValue] = useState<{
 		category: Category;
 	} | null>(null);
@@ -75,7 +75,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 						type: ticket.type,
 						category:
 							typeof ticket.category === 'object'
-								? ticket.category._id
+								? ticket.category.id
 								: ticket.category,
 						images: undefined,
 						videos: undefined
@@ -87,13 +87,13 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	// Handle auto-complete values
 	function handleAutoCompleteValues(values: any) {
 		setAutoCompleteValue({ ...autoCompleteValue, ...values });
-		if (values.category) setValue('category', values.category._id);
+		if (values.category) setValue('category', values.category.id);
 	}
 
 	// Create ticket mutation
 	const { isCreating, handleCreateTicket } = useCreateTicket(
 		isEditing,
-		ticket?._id
+		ticket?.id
 	);
 
 	const isSubmitting = isUploading || isCreating;
@@ -437,7 +437,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							queryKey='category'
 							service={fetchTicketCategory}
 							label={'Category'}
-							optionKey={'_id'}
+							optionKey={'id'}
 							// custom={'regularPrice'}
 							displayValue={'name'}
 							initialValue={ticket?.category}
@@ -448,21 +448,21 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 							queryKey='category'
 							// service={fetchTicketCategory}
 							label={'Category'}
-							optionKey={'_id'}
+							optionKey={'id'}
 							// custom={'regularPrice'}
 							displayValue={'name'}
 							initialValue={ticket?.category}
 							handler={handleAutoCompleteValues}
 							staticData={[
 								{
-									_id: '2222y2y22',
+									id: '2222y2y22',
 									id: '2222y2y22',
 									name: 'Electrical',
 									description:
 										'Issues related to electrical wiring, lighting, and power outlets.'
 								},
 								{
-									_id: '2222y2y223',
+									id: '2222y2y223',
 									id: '2222y2y223',
 
 									name: 'Plumbing',
@@ -470,14 +470,14 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 										'Problems with water supply, drainage, leaks, and pipes.'
 								},
 								{
-									_id: '2222y2y228',
+									id: '2222y2y228',
 									id: '2222y2y228',
 									name: 'HVAC',
 									description:
 										'Heating, ventilation, and air conditioning system repairs.'
 								},
 								{
-									_id: '2222y2y2290',
+									id: '2222y2y2290',
 									id: '2222y2y2290',
 
 									name: 'Carpentry',
@@ -485,28 +485,28 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 										'Woodwork repairs, doors, windows, and furniture.'
 								},
 								{
-									_id: '2222y2y22qw',
+									id: '2222y2y22qw',
 									id: '2222y2y22qw',
 									name: 'Appliance',
 									description:
 										'Repairs for household or office appliances.'
 								},
 								{
-									_id: '2222y2y22op',
+									id: '2222y2y22op',
 									id: '2222y2y22op',
 									name: 'Painting',
 									description:
 										'Wall, ceiling, or surface painting and touch-ups.'
 								},
 								{
-									_id: '2222y242',
+									id: '2222y242',
 									id: '2222y242',
 									name: 'Pest Control',
 									description:
 										'Issues with insects, rodents, or other pests.'
 								},
 								{
-									_id: '2239222',
+									id: '2239222',
 									id: '2239222',
 									name: 'General Maintenance',
 									description:
@@ -573,8 +573,8 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 										<SelectLabel>Ticket Types</SelectLabel>
 										{data?.map((type) => (
 											<SelectItem
-												key={type._id}
-												value={type._id}>
+												key={type.id}
+												value={type.id}>
 												{type.name}
 											</SelectItem>
 										))}

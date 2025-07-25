@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 		//3 Update changedpasswordAt property for the user
 		//4 Log the user in, send JWT
 
-		const token = signToken(user._id);
+		const token = signToken(user.id);
 		const response = NextResponse.json({
 			status: 'success',
 			message:

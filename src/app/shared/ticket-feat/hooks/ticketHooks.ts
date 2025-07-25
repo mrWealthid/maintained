@@ -195,7 +195,7 @@ export function useHandOffTicket(id: string, close?: () => void) {
 	const queryClient = useQueryClient();
 	const { isPending: isUpdating, mutate: handleHandleOffTicket } =
 		useMutation({
-			mutationFn: (payload: Pick<Ticket, 'actionedBy'>) =>
+			mutationFn: (payload: { actionedBy: string }) =>
 				handOffTicket(id, payload),
 			onSuccess: () => {
 				toast.success('Ticket successfully assigned');

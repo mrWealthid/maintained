@@ -42,7 +42,7 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 	const { isSending, handleSendTechnicianRequest } = useSendTechnicianRequest(
-		ticket._id,
+		ticket.id,
 		onCloseModal
 	);
 
@@ -80,7 +80,7 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 													? technicians
 															?.filter((user) =>
 																selectedValues.includes(
-																	user._id
+																	user.id
 																)
 															)
 															.map(
@@ -105,12 +105,12 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 														(user) => {
 															const isSelected =
 																selectedValues.includes(
-																	user._id
+																	user.id
 																);
 															return (
 																<CommandItem
 																	key={
-																		user._id
+																		user.id
 																	}
 																	onSelect={() => {
 																		if (
@@ -122,14 +122,14 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
 																						v
 																					) =>
 																						v !==
-																						user._id
+																						user.id
 																				)
 																			);
 																		} else {
 																			field.onChange(
 																				[
 																					...selectedValues,
-																					user._id
+																					user.id
 																				]
 																			);
 																		}

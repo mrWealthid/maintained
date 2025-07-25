@@ -11,30 +11,28 @@ export interface Category {
 	name: string;
 	description?: string;
 	createdAt?: Date;
-	_id: string;
 }
 export interface TicketType {
-	id: string;
 	name: string;
 	description?: string;
 	createdAt?: Date;
-	_id: string;
+	id: string;
 }
 
 export interface Ticket {
 	title: string;
 	description: string;
 	status: TICKET_STATUS;
-	_id: string;
+	id: string;
 	createdAt: string;
 	images?: string[];
 	videos?: string[];
 	user: Pick<User, 'id' | 'name' | 'email'>;
 	area: string;
 	category: Category;
-	id: string;
+
 	assignedTo?: User;
-	actionedBy?: string;
+	actionedBy?: Pick<User, 'id' | 'id' | 'name'>;
 	type: string;
 	priority: TICKET_PRIORITY;
 }
@@ -49,7 +47,7 @@ export interface TicketDetails extends Ticket {
 export interface CreateTicketPayload
 	extends Omit<
 		Ticket,
-		'_id' | 'createdAt' | 'id' | 'category' | 'user' | 'status' | 'priority'
+		'id' | 'createdAt' | 'id' | 'category' | 'user' | 'status' | 'priority'
 	> {
 	status?: TICKET_STATUS;
 	category: string;
@@ -106,8 +104,8 @@ export type Routes = {
 //USER
 
 export interface User {
-	_id: string;
 	id: string;
+
 	name: string;
 	email: string;
 	photo?: string;
@@ -122,7 +120,6 @@ export interface User {
 }
 
 export interface Business {
-	_id?: string;
 	id: string;
 	businessName: string;
 	registrationId: string;

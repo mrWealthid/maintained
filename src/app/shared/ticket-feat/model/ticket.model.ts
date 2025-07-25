@@ -81,7 +81,7 @@ export interface TechnicianRequestDetails {
 		amount: number;
 		currency: string;
 	};
-	_id: string;
+	id: string;
 	ticket: Ticket;
 	status: TECHNICIAN_RESPONSE;
 	createdAt: string;

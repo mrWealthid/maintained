@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import OnboardingForm from './onboarding-form';
 
 const Page: FC<{ params: Promise<{ inviteToken: string }> }> = async ({

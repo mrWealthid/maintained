@@ -131,6 +131,15 @@ const TicketSchema = new Schema<ITicket>(
 	}
 );
 
+TicketSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
+
 TicketSchema.pre('findOneAndUpdate', async function (next) {
 	const update = this.getUpdate() as any;
 	if (!update.status) return next();

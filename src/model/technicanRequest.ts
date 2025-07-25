@@ -58,9 +58,20 @@ const TechnicianRequestSchema = new Schema(
 	},
 
 	{
-		timestamps: true
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
 	}
 );
+
+TechnicianRequestSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 export const TechnicianRequest =
 	mongoose.models.TechnicianRequest ||
@@ -68,7 +79,3 @@ export const TechnicianRequest =
 		'TechnicianRequest',
 		TechnicianRequestSchema
 	);
-
-
-
-

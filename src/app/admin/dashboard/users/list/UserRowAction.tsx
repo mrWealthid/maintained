@@ -20,8 +20,8 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
 	const { isDeleting, deleteUser } = useDeleteUser();
 
 	function handleDelete(onCloseModal: () => void) {
-		if (!user._id) return;
-		deleteUser(user._id, {
+		if (!user.id) return;
+		deleteUser(user.id, {
 			onSuccess: () => onCloseModal()
 		});
 	}

@@ -27,8 +27,21 @@ const ticketTypeSchema = new Schema<ITicketType>(
 		isActive: { type: Boolean, default: true },
 		isDefault: { type: Boolean, default: true }
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
+
+ticketTypeSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 const TicketType: Model<ITicketType> =
 	mongoose.models.TicketType ||

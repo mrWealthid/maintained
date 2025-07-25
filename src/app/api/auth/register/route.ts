@@ -13,7 +13,7 @@ const signToken = (id: string, role: string) =>
 	} as SignOptions);
 
 const createSendToken = (user: any, statusCode: number) => {
-	const token = signToken(user._id, user.role);
+	const token = signToken(user.id, user.role);
 
 	//Remove password from output
 	user.password = undefined;
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 		// const cloned = defaultCategories.map((cat) => ({
 		// 	name: cat.name,
 		// 	description: cat.description,
-		// 	business: business._id
+		// 	business: business.id
 		// }));
 
 		// await TicketCategory.insertMany(cloned);

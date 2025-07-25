@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
 		//3) If everything is ok, send token to client
 
-		// const token = signToken(user._id);
+		// const token = signToken(user.id);
 		const response = NextResponse.json({
 			status: 'success',
 			message: 'Invite sent to user',

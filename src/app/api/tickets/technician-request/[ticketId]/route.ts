@@ -5,6 +5,7 @@ import { TechnicianRequest } from '@/model/technicanRequest';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
@@ -15,7 +16,7 @@ export async function POST(
 		const { ticketId } = await params;
 		const verify = await getUserFromCookies();
 
-		if (!verify || verify.isUserRole) {
+		if (!verify || verify.isUserRole || verify.isTechnicianRole) {
 			return NextResponse.json(
 				{ error: 'Unauthorized access' },
 				{ status: 401 }
@@ -48,6 +49,16 @@ export async function POST(
 			);
 		}
 
+		if (
+			verify.isAdminRole &&
+			ticket.actionedBy?.toString() !== verify.id.toString()
+		) {
+			return NextResponse.json(
+				{ error: 'You are not allowed to perform this action' },
+				{ status: 403 }
+			);
+		}
+
 		const existingRequests = await TechnicianRequest.find({
 			ticket: ticketId
 		});
@@ -65,7 +76,7 @@ export async function POST(
 				TechnicianRequest.create({
 					ticket: ticketId,
 					technician: techId,
-					sentBy: adminUser._id,
+					sentBy: adminUser.id,
 					expiresAt: body.expiresAt
 				})
 			)
@@ -83,7 +94,7 @@ export async function POST(
 		// 		TicketActivity.create({
 		// 			ticket: ticketId,
 		// 			action: 'assignment-request-sent',
-		// 			changedBy: adminUser._id,
+		// 			changedBy: adminUser.id,
 		// 			description: `Assignment request sent to technician with ID ${req.technician}`,
 		// 			metadata: {
 		// 				technicianId: req.technician
@@ -96,7 +107,7 @@ export async function POST(
 			ticket: ticketId,
 			action: 'status-changed',
 			description: `Request sent to technicians for assignment`,
-			changedBy: adminUser._id,
+			changedBy: adminUser.id,
 			metadata: {
 				field: 'status',
 				previous: ticket.status,

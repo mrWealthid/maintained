@@ -32,8 +32,22 @@ const ticketCategorySchema = new Schema<ITicketCategory>(
 		},
 		isActive: { type: Boolean, default: true }
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
+
+
+ticketCategorySchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 const TicketCategory: Model<ITicketCategory> =
 	mongoose.models.TicketCategory ||

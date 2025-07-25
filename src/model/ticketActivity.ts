@@ -9,7 +9,8 @@ export interface ITicketActivity extends Document {
 		| 'commented'
 		| 'completed'
 		| 'status-changed'
-		| 'type-changed';
+		| 'type-changed'
+		| 'actioned-by';
 	description?: string;
 	changedBy: Types.ObjectId; // user
 	timestamp: Date;
@@ -29,7 +30,8 @@ const ticketActivitySchema = new Schema<ITicketActivity>(
 				'commented',
 				'completed',
 				'status-changed',
-				'type-changed'
+				'type-changed',
+				'actioned-by'
 			]
 		},
 		description: { type: String },
@@ -37,8 +39,21 @@ const ticketActivitySchema = new Schema<ITicketActivity>(
 		timestamp: { type: Date, default: Date.now },
 		metadata: { type: Schema.Types.Mixed }
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
+
+ticketActivitySchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 export const TicketActivity =
 	mongoose.models.TicketActivity ||

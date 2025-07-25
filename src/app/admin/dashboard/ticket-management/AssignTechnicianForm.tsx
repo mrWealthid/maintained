@@ -27,7 +27,7 @@ const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 	const { isAssigning, handleAssignTechnician } = useAssignTechnician(
-		ticket._id,
+		ticket.id,
 		onCloseModal
 	);
 
@@ -42,7 +42,7 @@ const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
 	function handleAutoCompleteValues(values: any) {
 		setAutoCompleteValue({ ...autoCompleteValue, ...values });
 		if (values.assignedTo)
-			setValue('assignedTo', values.assignedTo._id, {
+			setValue('assignedTo', values.assignedTo.id, {
 				shouldValidate: true,
 				shouldDirty: true
 			});
@@ -59,7 +59,7 @@ const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
 							queryKey='assignedTo'
 							service={fetchTechnicians}
 							label={'Technician'}
-							optionKey={'_id'}
+							optionKey={'id'}
 							displayValue={'name'}
 							initialValue={ticket?.assignedTo}
 							handler={handleAutoCompleteValues}

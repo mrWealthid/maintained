@@ -17,7 +17,7 @@ const DeclineForm: FC<DeclineTicketFormProps> = ({
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticketRequest._id,
+		ticketRequest.id,
 		onCloseModal
 	);
 

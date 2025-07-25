@@ -7,7 +7,6 @@ import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import { ROLES } from '@/app/shared/enums/enums';
 
 function RequestRow({ data }: TicketRowProps) {
-	// const verify = await getUserFromCookies();
 	return (
 		<>
 			{data?.map((row, i) => {
@@ -61,6 +60,13 @@ function RequestRow({ data }: TicketRowProps) {
 								className=' block ellipsis-overflow'
 								title={row.area}>
 								{row.area}
+							</span>
+						</TableCell>
+						<TableCell>
+							<span
+								className='block'
+								title={row.actionedBy?.name}>
+								{row.actionedBy?.name || 'N/A'}
 							</span>
 						</TableCell>
 						<TableCell>

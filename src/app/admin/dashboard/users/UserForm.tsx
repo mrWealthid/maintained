@@ -9,7 +9,7 @@ import { ROLES } from '@/app/shared/enums/enums';
 import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
 
 const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
-	const isEditing = !!user?._id;
+	const isEditing = !!user?.id;
 
 	const { register, handleSubmit, formState } = useForm<ManageUserForm>({
 		mode: 'all',

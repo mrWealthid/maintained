@@ -11,7 +11,7 @@ export async function GET(
 		const { ticketId } = await params;
 
 		// const ticket = await Ticket.findOne({
-		// 	_id: ticketId
+		// 	id: ticketId
 		// }).populate([
 		// 	{
 		// 		path: 'category',
@@ -72,7 +72,7 @@ export async function GET(
 // 		const ticketId = params.ticketId;
 
 // 		const ticket = await Ticket.findOne({
-// 			_id: ticketId,
+// 			id: ticketId,
 // 			user: verify.id
 // 		}).populate({
 // 			path: 'category',
@@ -122,7 +122,7 @@ export async function PATCH(
 		// });
 
 		const updatedRequest = await Ticket.findOneAndUpdate(
-			{ _id: ticketId, user: verify.id }, // Ensure user is the owner
+			{ id: ticketId, user: verify.id }, // Ensure user is the owner
 			rest,
 			{ new: true, runValidators: true }
 		);
@@ -164,7 +164,7 @@ export async function DELETE(
 		}
 
 		const ticket = await Ticket.findOneAndDelete({
-			_id: ticketId,
+			id: ticketId,
 			user: verify.id // ← only delete if the user owns the ticket
 		});
 

@@ -166,7 +166,7 @@ export async function assignTicket(
 ) {
 	try {
 		const res = await axios.patch(
-			`${API_ROUTES.ticketManagement.update_status(id)}`,
+			`${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
 			payload
 		);
 		const data = await res.data;
@@ -177,11 +177,11 @@ export async function assignTicket(
 }
 export async function handOffTicket(
 	id: string,
-	payload: Pick<Ticket, 'actionedBy'>
+	payload: { actionedBy: string }
 ) {
 	try {
 		const res = await axios.patch(
-			`${API_ROUTES.ticketManagement.update_status(id)}`,
+			`${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
 			payload
 		);
 		const data = await res.data;

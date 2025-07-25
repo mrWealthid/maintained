@@ -51,7 +51,7 @@ export async function PATCH(
 		const updatedRequest = await Ticket.findByIdAndUpdate(
 			ticketId,
 			{
-				actionedBy: adminUser._id,
+				actionedBy: adminUser.id,
 				assignedTo,
 				status: TICKET_STATUS.pending_assignment
 			},
@@ -62,7 +62,7 @@ export async function PATCH(
 			ticket: ticketId,
 			action: 'status-changed',
 			description: `Ticket assigned to ${technician.name}`,
-			changedBy: adminUser._id,
+			changedBy: adminUser.id,
 			metadata: {
 				field: 'assignedTo',
 				previous: previous.assignedTo || null,

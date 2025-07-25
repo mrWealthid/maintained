@@ -13,7 +13,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
 			{data?.map((row, i) => {
 				const { area, title, user, category } = row.ticket;
 				return (
-					<TableRow key={row._id} className='relative  '>
+					<TableRow key={row.id} className='relative  '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"

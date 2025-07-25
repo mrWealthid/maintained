@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import validator from 'validator';
 
- interface IBusiness extends Document {
+interface IBusiness extends Document {
 	businessName: string;
 	registrationId: string;
 	businessContact: string;
@@ -35,8 +35,21 @@ const businessSchema = new Schema<IBusiness>(
 		logo: { type: String, default: 'default.jpg' },
 		active: { type: Boolean, default: true }
 	},
-	{ toJSON: { virtuals: true }, toObject: { virtuals: true } }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true }
+	}
 );
+
+businessSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function (_doc, ret: Record<string, any>) {
+		ret.id = ret._id?.toString();
+		delete ret._id;
+	}
+});
 
 businessSchema.pre(/^find/, function (this: mongoose.Query<any, any>, next) {
 	this.find({ active: { $ne: false } });

@@ -31,10 +31,10 @@ import HandOffTicketForm from '@/app/admin/dashboard/ticket-management/HandOffTi
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
-	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
+	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
 
 	function handleDelete(onCloseModal: () => void) {
-		handleDeleteTicket(ticket._id, {
+		handleDeleteTicket(ticket.id, {
 			onSuccess: () => onCloseModal()
 		});
 	}
@@ -62,7 +62,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				<DropdownMenuContent align='end' className=''>
 					<DropdownMenuItem>
 						<Link
-							href={`${user?.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket._id}`}>
+							href={`${user?.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket.id}`}>
 							View Details
 						</Link>
 					</DropdownMenuItem>
@@ -71,7 +71,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						user?.role === ROLES.user && (
 							<DropdownMenuItem>
 								<Link
-									href={`${user.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket._id}`}>
+									href={`${user.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket.id}`}>
 									Edit
 								</Link>
 							</DropdownMenuItem>
@@ -89,17 +89,31 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 								</Modal.Open>
 							</DropdownMenuItem>
 						)}
-					{user?.role === ROLES.admin && (
-						<DropdownMenuItem>
-							<Modal.Open opens='handoff-ticket'>
-								<button
-									type='button'
-									className='w-full text-left'>
-									Handoff
-								</button>
-							</Modal.Open>
-						</DropdownMenuItem>
-					)}
+					{user?.role === ROLES.admin &&
+						user.id === ticket.actionedBy?.id &&
+						ticket.status !== TICKET_STATUS.pending && (
+							<DropdownMenuItem>
+								<Modal.Open opens='handoff-ticket'>
+									<button
+										type='button'
+										className='w-full text-left'>
+										Handoff
+									</button>
+								</Modal.Open>
+							</DropdownMenuItem>
+						)}
+					{user?.role === ROLES.super_admin &&
+						ticket.status !== TICKET_STATUS.pending && (
+							<DropdownMenuItem>
+								<Modal.Open opens='handoff-ticket'>
+									<button
+										type='button'
+										className='w-full text-left'>
+										Handoff
+									</button>
+								</Modal.Open>
+							</DropdownMenuItem>
+						)}
 
 					{/*  This feat should be executed by an admin who
 					created the ticket only */}
@@ -159,8 +173,8 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 			</Modal.Window>
 			<Modal.Window
 				name='self-assign'
-				title='Assign Ticket'
-				description='Request ticket will be assigned to you'>
+				title='Admin Assignment'
+				description='Request ticket will be actioned by you'>
 				<ConfirmationPage
 					handler={(onCloseModal) => {
 						handleAssign(onCloseModal ?? (() => {}));
@@ -173,7 +187,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 			<Modal.Window
 				name='send-request-technicians'
-				title='Send Technincians Ticket Request'
+				title='Send Technicians Ticket Request'
 				description='Request ticket will be sent To Technicians'>
 				<SendTechnicianRequestForm ticket={ticket} />
 			</Modal.Window>

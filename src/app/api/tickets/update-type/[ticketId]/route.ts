@@ -61,7 +61,7 @@ export async function PATCH(
 			ticket: ticketId,
 			action: 'type-changed',
 			description: `Assigned to ${user.name}`,
-			changedBy: user._id,
+			changedBy: user.id,
 			metadata: {
 				field: 'type',
 				previous: previous.type,

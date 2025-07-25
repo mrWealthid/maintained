@@ -65,7 +65,7 @@ body {
 	}
 
 	.request-card__details {
-		@apply rounded-full flex gap-1 capitalize items-center bg-card border px-3 py-1.5 text-xs;
+		@apply rounded-full flex gap-1 capitalize items-center bg-muted border px-3 py-1.5 text-xs;
 	}
 
 	.container-text {

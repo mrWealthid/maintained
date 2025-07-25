@@ -9,7 +9,7 @@ function UserRow({ data }: UserRowProps) {
 		<>
 			{data?.map((row, i) => {
 				return (
-					<TableRow key={row._id} className='  relative border-b '>
+					<TableRow key={row.id} className='  relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"

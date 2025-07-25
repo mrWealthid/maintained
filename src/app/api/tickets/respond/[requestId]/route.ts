@@ -39,7 +39,7 @@ export async function PATCH(
 		// const existingTicket = await Ticket.findById(ticketId);
 
 		const technicianRequest = await TechnicianRequest.findOne({
-			_id: requestId,
+			id: requestId,
 			technician: verify.id
 		});
 
@@ -145,7 +145,7 @@ export async function PATCH(
 		// 	ticket: technicianRequest.ticket,
 		// 	action: `status-changed`,
 		// 	description: logDescription,
-		// 	changedBy: user._id,
+		// 	changedBy: user.id,
 		// 	// metadata: {
 		// 	// 	field: 'status',
 		// 	// 	previous: existingTicket.status,
@@ -171,7 +171,7 @@ export async function GET(
 		const { requestId } = await params;
 
 		// const ticket = await Ticket.findOne({
-		// 	_id: ticketId
+		// 	id: ticketId
 		// }).populate([
 		// 	{
 		// 		path: 'category',

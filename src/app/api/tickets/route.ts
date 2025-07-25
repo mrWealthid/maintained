@@ -174,7 +174,7 @@ export async function POST(request: NextRequest, { params }: any) {
 
 		//Log Ticket Activity
 		await TicketActivity.create({
-			ticket: data._id,
+			ticket: data.id,
 			action: 'created',
 			description: `Ticket created with title: "${data.title}"`,
 			changedBy: user.id,

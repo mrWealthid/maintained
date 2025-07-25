@@ -27,6 +27,11 @@ const TicketList: FC = () => {
 		{ header: 'category', accessor: 'category.name', searchType: 'TEXT' },
 		{ header: 'area', accessor: 'area', searchType: 'TEXT' },
 		{
+			header: 'actionedBy',
+			accessor: 'actionedBy.name',
+			searchType: 'TEXT'
+		},
+		{
 			header: 'status',
 			accessor: 'status',
 			searchType: 'DROPDOWN',

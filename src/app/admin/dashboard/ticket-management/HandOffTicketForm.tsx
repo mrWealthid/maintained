@@ -4,16 +4,10 @@ import { Controller, useForm } from 'react-hook-form';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import {
 	useFetchAdmins,
-	useFetchTechnicians,
-	useHandOffTicket,
-	useSendTechnicianRequest
+	useHandOffTicket
 } from '@/app/shared/ticket-feat/hooks/ticketHooks';
-import {
-	handOffTicketFormProps,
-	SendTechnicianRequestFormControls,
-	SendTechnicianRequestFormProps
-} from '@/app/shared/ticket-feat/model/ticket.model';
-import { Ticket, User } from '@/app/shared/model/model';
+import { handOffTicketFormProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import { User } from '@/app/shared/model/model';
 import {
 	PopoverTrigger,
 	Popover,
@@ -26,7 +20,7 @@ import {
 	CommandInput,
 	CommandItem
 } from '@/components/ui/command';
-import { Check, ChevronDown, ChevronDownIcon } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const HandOffTicketForm: FC<handOffTicketFormProps> = ({
@@ -34,22 +28,22 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
 	onCloseModal
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { handleSubmit, control, formState } = useForm<
-		Pick<Ticket, 'actionedBy'>
-	>({
+	const { handleSubmit, control, formState } = useForm<{
+		actionedBy: string;
+	}>({
 		mode: 'all',
 		defaultValues: { actionedBy: '' }
 	});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;
 	const { isUpdating, handleHandleOffTicket } = useHandOffTicket(
-		ticket._id,
+		ticket.id,
 		onCloseModal
 	);
 
 	const { data: admins } = useFetchAdmins<User>();
 
-	async function onSubmit(data: Pick<Ticket, 'actionedBy'>) {
+	async function onSubmit(data: { actionedBy: string }) {
 		handleHandleOffTicket(data);
 	}
 
@@ -71,7 +65,9 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
 								const selectedValue = field.value;
 
 								return (
-									<Popover>
+									<Popover
+										open={isOpen}
+										onOpenChange={setIsOpen}>
 										<PopoverTrigger asChild>
 											<Button
 												variant='outline'
@@ -80,7 +76,7 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
 												{selectedValue
 													? admins?.find(
 															(user) =>
-																user._id ===
+																user.id ===
 																selectedValue
 														)?.name
 													: 'Select Admin'}
@@ -98,15 +94,18 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
 												<CommandGroup>
 													{admins?.map((user) => (
 														<CommandItem
-															key={user._id}
-															onSelect={() =>
+															key={user.id}
+															onSelect={() => {
 																field.onChange(
-																	user._id
-																)
-															}>
+																	user.id
+																);
+																setIsOpen(
+																	false
+																);
+															}}>
 															<span className='mr-2'>
 																{selectedValue ===
-																	user._id && (
+																	user.id && (
 																	<Check className='h-4 w-4' />
 																)}
 															</span>

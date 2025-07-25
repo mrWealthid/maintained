@@ -30,10 +30,10 @@ import ApplyForm from '../ApplyForm';
 const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 	technicianRequest
 }) => {
-	// const { isUpdating, handleAssignTicket } = useAssignTicket(ticket._id);
+	// const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
 
 	// const { isProcessing, processResponse } = useProcessTechnicianResponse(
-	// 	technicianRequest._id
+	// 	technicianRequest.id
 	// );
 	// function handleProcessResponse(onCloseModal: () => void) {
 	// 	const payload = { response: TECHNICIAN_RESPONSE.applied };
@@ -76,7 +76,7 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 									{/* <Modal.Open opens='accept-request'> */}
 
 									<Link
-										href={`ticket-management/apply/${technicianRequest._id}`}
+										href={`ticket-management/apply/${technicianRequest.id}`}
 										type='button'
 										className='w-full text-left'>
 										Apply
@@ -110,7 +110,7 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 								</Modal.Open> */}
 
 								<Link
-									href={`ticket-management/apply/${technicianRequest._id}`}
+									href={`ticket-management/apply/${technicianRequest.id}`}
 									type='button'
 									className='w-full text-left'>
 									Update

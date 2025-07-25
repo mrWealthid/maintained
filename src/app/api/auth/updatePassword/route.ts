@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 		user.passwordConfirm = newPassword;
 		await user.save();
 
-		const token = signToken(user._id);
+		const token = signToken(user.id);
 		const response = NextResponse.json({
 			status: 'success',
 			message: 'Token sent to email'

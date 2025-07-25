@@ -23,10 +23,18 @@ import { formatISO } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import ErrorMessage from '@/app/shared/components/form-elements/ErrorMessage';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow
+} from '@/components/ui/table';
 
 const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 	const { isProcessing, processResponse } = useProcessTechnicianResponse(
-		ticketRequest._id
+		ticketRequest.id
 	);
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -180,6 +188,11 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 		// }
 		remove(index);
 	}
+
+	const total = watchCosts.reduce(
+		(acc, item) => acc + Number(item.amount || 0),
+		0
+	);
 
 	return (
 		<div className='flex gap-6'>
@@ -492,44 +505,46 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 				</section>
 			</form>
 
-			<div className='w-1/3 border rounded-lg  p-4 text-sm shadow-sm h-fit'>
+			<section className='w-1/3 border rounded-lg p-4 text-sm shadow-sm h-fit'>
 				<h3 className='text-lg font-semibold mb-4'>Estimated Cost</h3>
+
 				{watchCosts.length === 0 ? (
 					<p className='text-gray-500'>No cost items added yet.</p>
 				) : (
-					<>
-						<ul className='space-y-2'>
+					<Table>
+						<TableHeader>
+							<TableRow className='bg-muted rounded-lg'>
+								<TableHead className='text-xs'>Item</TableHead>
+								<TableHead className='text-right text-xs'>
+									Amount (₦)
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+
+						<TableBody>
 							{watchCosts.map((item, index) => (
-								<li
-									key={index}
-									className='flex justify-between border-b pb-1 text-xs'>
-									<span className='truncate'>
+								<TableRow key={index}>
+									<TableCell className='truncate text-xs'>
 										{item.title}
-									</span>
-									<span>
+									</TableCell>
+									<TableCell className='text-right text-xs'>
 										{Number(
 											item.amount || 0
 										).toLocaleString()}
-									</span>
-								</li>
+									</TableCell>
+								</TableRow>
 							))}
-						</ul>
 
-						<div className='flex justify-between font-bold text-sm'>
-							<span>Total</span>
-							<span>
-								{watchCosts
-									.reduce(
-										(acc, item) =>
-											acc + Number(item.amount || 0),
-										0
-									)
-									.toLocaleString()}
-							</span>
-						</div>
-					</>
+							<TableRow className='font-bold border-t'>
+								<TableCell className='text-sm'>Total</TableCell>
+								<TableCell className='text-right text-sm'>
+									{total.toLocaleString()}
+								</TableCell>
+							</TableRow>
+						</TableBody>
+					</Table>
 				)}
-			</div>
+			</section>
 		</div>
 	);
 };

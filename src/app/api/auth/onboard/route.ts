@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 		user.inviteTokenExpires = undefined;
 		await user.save();
 
-		// const token = signToken(user._id);
+		// const token = signToken(user.id);
 		const response = NextResponse.json({
 			status: 'success',
 			message: 'New User onboarded sucessfully, Kindly Login',
