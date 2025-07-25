@@ -261,11 +261,11 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 								</Badge>
 							</div>
 
-							{request.quote.amount && (
+							{request.quote.total && (
 								<div className='flex items-center gap-2'>
 									<Banknote strokeWidth={1} />
 									<span className='font-medium'>
-										{request.quote.amount}
+										{request.quote.total}
 									</span>
 								</div>
 							)}
@@ -273,7 +273,7 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 								<p>
 									The estimated cost for the repair is{' '}
 									<span className='font-medium'>
-										${request.quote.amount}
+										${request.quote.total}
 									</span>
 								</p>
 							)}
