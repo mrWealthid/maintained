@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 					{ status: 404 }
 				);
 			}
-			filter = { business: new mongoose.Types.ObjectId(user.business) };
+			filter = { business: user.currentBusiness };
 		}
 
 		if (verify.isUserRole) {
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest, { params }: any) {
 		const data = await Ticket.create({
 			...body,
 			user: verify.id,
-			business: user.business
+			business: user.currentBusiness
 		});
 
 		//Log Ticket Activity

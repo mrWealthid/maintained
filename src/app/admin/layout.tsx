@@ -23,16 +23,14 @@ export default async function DashboardLayout({
 	return (
 		<section className='min-h-screen'>
 			<SidebarProvider>
-				<header className='flex pl-2 bg-card items-center fixed top-0 w-full'>
-					<SidebarTrigger />
-					<Header />
-				</header>
 				<AppSidebar routes={adminRoutes} />
-
-				<section className=' flex flex-col dashboard-body overflow-x-hidden w-full gap-6'>
+				<section className=' flex flex-col  overflow-x-hidden w-full gap-6'>
+					<header className='flex p-2 bg-card border-b items-center justify-between  w-full'>
+						<SidebarTrigger />
+						<Header />
+					</header>
 					<section className='container-text'>
 						<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
-
 						<AppProvider>{isAdmin}</AppProvider>
 					</section>
 				</section>

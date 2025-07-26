@@ -1,95 +1,126 @@
-import { connect } from '@/dbConfig/dbConfig';
-import User from '@/model/userModel';
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import MiddlewareFeatures from '@/middlewareFeatures';
-import { Emails } from '@/utils/email-resend';
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
-// import { Emails } from '@/utils/email-resend';
-
-connect();
+import User from '@/model/userModel';
+import { Emails } from '@/utils/email-resend';
+import { generateInviteToken } from '@/utils/helpers';
+import mongoose, { ObjectId, Types } from 'mongoose';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
 	const verify = await getUserFromCookies();
+
 	try {
-		//1) Protect route from none admin users
+		// 1) Ensure requester is admin
 		if (!verify?.isAdminRole) {
 			return NextResponse.json(
 				{ error: 'User is not authorized' },
 				{ status: 401 }
 			);
 		}
-		//2) Get business details from admin user
 
-		const adminUser = await User.findById(verify.id).populate([
-			{
-				path: 'business',
-				select: 'businessName'
-			}
-		]);
+		const currentBusinessId = verify.currentBusiness;
 
-		if (!adminUser) {
+		if (!currentBusinessId) {
 			return NextResponse.json(
-				{ error: 'Admin user not found' },
-				{ status: 404 }
-			);
-		}
-
-		const body = await request.json();
-
-		//3) Check if user with email exists
-		if (
-			await User.findOne({
-				email: body.email
-			})
-		) {
-			return NextResponse.json(
-				{ error: 'User does exist' },
+				{ error: 'No current business context' },
 				{ status: 400 }
 			);
 		}
 
-		//create the user but will be assigned a
-
+		const body = await request.json();
 		const capitalize = (str: string) =>
 			str.replace(/\b\w/g, (char) => char.toUpperCase());
 
-		const user = await new User({
-			email: body.email,
-			business: adminUser.business.id,
-			dateOfBirth: body.dateOfBirth,
-			role: body.role,
-			name: capitalize(body.name),
-			status: INVITE_STATUS.invited
-			// businessName: adminUser.business.businessName
-		});
+		const existingUser = await User.findOne({ email: body.email });
 
-		const inviteToken = user.createUserInviteToken();
+		let inviteToken = '';
+		let userToInvite;
 
-		user.save({
-			validateBeforeSave: false
-		});
+		const { token, hashed, expires } = generateInviteToken();
 
-		console.log(user);
-		let inviteURL =
+		console.log({ token, hashed });
+		console.log({ existingUser });
+
+		if (existingUser) {
+			// Check if they're already a member of this business
+			const alreadyMember = existingUser.memberships.some(
+				(m) => m.business.toString() === currentBusinessId
+			);
+
+			if (alreadyMember) {
+				return NextResponse.json(
+					{ error: 'User already belongs to this business' },
+					{ status: 400 }
+				);
+			}
+			const businessObjectId = new mongoose.Types.ObjectId(
+				currentBusinessId
+			);
+
+			// Append the new membership
+			existingUser.memberships.push({
+				business: businessObjectId,
+				role: body.role,
+				status: INVITE_STATUS.invited,
+				inviteToken: hashed,
+				inviteTokenExpires: expires
+			});
+
+			// Optional: only update currentBusiness if none is set
+			if (!existingUser.currentBusiness) {
+				existingUser.currentBusiness = businessObjectId;
+			}
+
+			// Refresh invite status and generate token
+			// existingUser.status = INVITE_STATUS.invited;
+			// inviteToken = existingUser.createUserInviteToken();
+			await existingUser.save({ validateBeforeSave: false });
+
+			userToInvite = existingUser;
+		} else {
+			// New user
+			const newUser = new User({
+				name: capitalize(body.name),
+				email: body.email,
+				dateOfBirth: body.dateOfBirth,
+				memberships: [
+					{
+						business: currentBusinessId,
+						role: body.role,
+						status: INVITE_STATUS.invited,
+						inviteToken: hashed,
+						inviteTokenExpires: expires
+					}
+				],
+				currentBusiness: currentBusinessId
+			});
+
+			inviteToken = newUser.createUserInviteToken();
+			await newUser.save({ validateBeforeSave: false });
+
+			userToInvite = newUser;
+		}
+
+		// Construct invite URL
+		const inviteURL =
 			process.env.NODE_ENV === 'development'
-				? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${inviteToken}`
-				: `${process.env.PRODUCTION_URL}/auth/onboard-user/${inviteToken}`;
+				? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
+				: `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
 
-		await new Emails(user, inviteURL, adminUser.business).sendInviteUser();
+		// Send invite email
+		await new Emails(
+			userToInvite,
+			inviteURL,
+			currentBusinessId
+		).sendInviteUser();
 
-		//3) If everything is ok, send token to client
-
-		// const token = signToken(user.id);
-		const response = NextResponse.json({
+		return NextResponse.json({
 			status: 'success',
-			message: 'Invite sent to user',
+			message: 'Invite sent successfully',
 			url: inviteURL
 		});
-
-		return response;
 	} catch (error: any) {
+		console.error('[INVITE_USER_ERROR]', error);
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 }

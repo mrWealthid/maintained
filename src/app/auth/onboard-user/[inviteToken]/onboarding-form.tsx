@@ -48,9 +48,8 @@ const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
 					<section className='w-full'>
 						<form
 							onSubmit={handleSubmit(onSubmit, onError)}
-							action=''
 							className='w-full flex flex-col justify-center gap-2 items-center'>
-							<TextInput
+							{/* <TextInput
 								name={'dateOfBirth'}
 								label='Date Of Birth'
 								error={errors?.[
@@ -65,7 +64,7 @@ const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
 									id='dateOfBirth'
 									autoFocus
 								/>
-							</TextInput>
+							</TextInput> */}
 
 							<TextInput
 								name={'psw'}

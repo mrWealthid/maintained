@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link'; // ✅ Correct import
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Routes, User } from '@/app/shared/model/model';
 import {
 	DropdownMenu,
@@ -29,6 +29,9 @@ import {
 import Profile from '@/app/shared/components/profile/Profile';
 import Logout from '@/app/shared/components/header/Logout';
 import { useProfile } from '@/app/shared/components/profile/hooks/useProfile';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 export function AppSidebar({ routes }: { routes: Routes[] }) {
 	const pathname = usePathname();
@@ -44,21 +47,74 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 
 	const { data, isLoading, error } = useProfile<User>();
 
+	function handleBusinessSwitch(id: string) {
+		console.log(id);
+	}
+
 	return (
 		<Sidebar className='flex flex-col h-screen' collapsible='icon'>
 			<SidebarHeader>
-				<div className='flex px-2 justify-between'>
+				<div className='flex flex-col py-2   justify-between'>
 					{open && (
-						<section className='flex  flex-col gap-1 group-data-[collapsible=icon]:hidden'>
-							<h3>{data?.business.businessName}</h3>
-							<span className='font-light text-xs italic'>
+						<>
+							{/* <section className='flex justify-between items-center'>
+								<>
+									<h3>Maintainly</h3>
+									<span className='font-light text-xs italic'>
+										Maintenance at it&apos;s best
+									</span>
+								</>
+								<SidebarTrigger />
+							</section> */}
+
+							<section className='flex flex-1 flex-col gap-1 group-data-[collapsible=icon]:hidden'>
+								{/* <h3>{data?.currentBusiness.businessName}</h3> */}
+
+								<div className='relative'>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<SidebarMenuButton
+												size='lg'
+												className='data-[state=open]:bg-sidebar-accent flex justify-between data-[state=open]:text-sidebar-accent-foreground'>
+												{data?.memberships.find(
+													(m) =>
+														m.business.id ===
+														data.currentBusiness.id
+												)?.business.businessName ??
+													'Select Business'}
+												<ChevronDown />
+											</SidebarMenuButton>
+										</DropdownMenuTrigger>
+
+										<DropdownMenuContent
+											align='end'
+											className='w-(--radix-dropdown-menu-trigger-width)   min-w-56 rounded-lg'>
+											{data?.memberships.map((org) => (
+												<DropdownMenuItem
+													key={org.id}
+													className='w-full text-left'
+													onSelect={() =>
+														handleBusinessSwitch(
+															org.business.id
+														)
+													} // <- your switch function
+												>
+													{org.business.businessName}
+												</DropdownMenuItem>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+
+								{/* <span className='font-light text-xs italic'>
 								Maintenance at it&apos;s best
-							</span>
-						</section>
+							</span> */}
+							</section>
+						</>
 					)}
-					<SidebarTrigger />
 				</div>
 			</SidebarHeader>
+			<Separator />
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarGroupContent>

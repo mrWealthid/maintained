@@ -19,7 +19,7 @@ const UserList = () => {
 			colspan: 2
 		},
 		{ header: 'email', accessor: 'email' },
-		{ header: 'Nationality', accessor: 'business.country' },
+		// { header: 'Nationality', accessor: 'business.country' },
 		{
 			header: 'Invite Status',
 			accessor: 'status',

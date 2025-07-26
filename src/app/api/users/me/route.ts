@@ -19,8 +19,12 @@ export async function GET(request: NextRequest) {
 
 		const user = await User.findById(verify.id).populate([
 			{
-				path: 'business',
+				path: 'currentBusiness',
 				select: 'businessName logo'
+			},
+			{
+				path: 'memberships.business',
+				select: 'businessName'
 			}
 		]);
 

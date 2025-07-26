@@ -15,6 +15,7 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	isUserRole: boolean;
 	isSuperAdminRole: boolean;
 	isTechnicianRole: boolean;
+	currentBusiness: string;
 } | null> {
 	let token: string | undefined;
 
@@ -37,6 +38,7 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	return {
 		id: payload.id,
 		role: payload.role,
+		currentBusiness: payload.currentBusiness,
 		isAdminRole: payload.role === 'ADMIN',
 		isUserRole: payload.role === 'USER',
 		isSuperAdminRole: payload.role === 'SUPER_ADMIN',
