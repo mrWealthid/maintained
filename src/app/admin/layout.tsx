@@ -13,25 +13,28 @@ import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import { AppProvider } from '../shared/contexts/AppContext';
 
 export default async function DashboardLayout({
-	children // will be a page or nested layout
+	children
 }: {
 	children: React.ReactNode;
 }) {
 	const verify = await getUserFromCookies();
-	const isAdmin = verify?.isAdminRole ? children : redirect('/auth/login');
+
+	if (!verify?.isAdminRole) {
+		redirect('/auth/login');
+	}
 
 	return (
 		<section className='min-h-screen'>
 			<SidebarProvider>
 				<AppSidebar routes={adminRoutes} />
-				<section className=' flex flex-col  overflow-x-hidden w-full gap-6'>
-					<header className='flex p-2 bg-card border-b items-center justify-between  w-full'>
+				<section className='flex flex-col overflow-x-hidden w-full gap-6'>
+					<header className='flex p-2 bg-card border-b items-center justify-between w-full'>
 						<SidebarTrigger />
 						<Header />
 					</header>
 					<section className='container-text'>
 						<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
-						<AppProvider>{isAdmin}</AppProvider>
+						<AppProvider>{children}</AppProvider>
 					</section>
 				</section>
 			</SidebarProvider>
