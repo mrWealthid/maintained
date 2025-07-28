@@ -35,7 +35,7 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	}
 
 	// Dynamically determine role in current business
-	const user = await User.findById(payload.id);
+	const user = await User.findById(payload.id).lean();
 
 	console.log('test...', user);
 	if (!user) return null;
