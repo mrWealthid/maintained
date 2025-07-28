@@ -7,6 +7,7 @@ import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import mongoose from 'mongoose';
 
 connect();
 
@@ -32,8 +33,16 @@ export async function GET(request: NextRequest) {
 		let filter = {};
 		const query: any = request.nextUrl.searchParams;
 		const transformedQuery = mapToObject(query);
+		// filter = {
+		// 	$or: [{ business: { $in: user.business } }, { isDefault: true }]
+		// };
+
+		const businessIds = user.memberships.map((m) =>
+			typeof m.business === 'object' ? m.business._id : m.business
+		);
+
 		filter = {
-			$or: [{ business: { $in: user.business } }, { isDefault: true }]
+			$or: [{ business: { $in: businessIds } }, { isDefault: true }]
 		};
 
 		if (transformedQuery.name) {
@@ -85,7 +94,7 @@ export async function POST(request: NextRequest) {
 		const newCategory = {
 			name,
 			description,
-			business: user.business,
+			business: new mongoose.Types.ObjectId(verify.currentBusiness),
 			isDefault: false
 		};
 

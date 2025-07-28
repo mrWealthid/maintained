@@ -1,12 +1,11 @@
 import { connect } from '@/dbConfig/dbConfig';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
-import MiddlewareFeatures from '@/middlewareFeatures';
 import User from '@/model/userModel';
 import { NextRequest, NextResponse } from 'next/server';
 
 connect();
 
-export async function GET(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
 	try {
 		const verify = await getUserFromCookies();
 
@@ -17,24 +16,27 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		const user = await User.findById(verify.id).populate([
-			{
-				path: 'currentBusiness',
-				select: 'businessName logo'
-			},
-			{
-				path: 'memberships.business',
-				select: 'businessName'
-			}
-		]);
+		const { currentBusiness } = await request.json();
 
-		if (!user)
+		console.log({ currentBusiness });
+
+		const updatedCurrentBusiness = await User.findByIdAndUpdate(
+			verify.id,
+			{ currentBusiness },
+			{
+				new: true,
+				runValidators: true,
+				context: 'query'
+			}
+		);
+
+		if (!updatedCurrentBusiness)
 			NextResponse.json({ error: 'User not found' }, { status: 404 });
 
 		const response = NextResponse.json(
 			{
 				status: 'success',
-				data: user
+				data: updatedCurrentBusiness
 			},
 			{ status: 200 }
 		);

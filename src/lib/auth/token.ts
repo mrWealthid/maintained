@@ -6,6 +6,7 @@ export type UserRole = 'ADMIN' | 'SUPER_ADMIN' | 'TECHNICIAN' | 'USER';
 export interface TokenPayload extends JwtPayload {
 	id: string;
 	role: ROLES;
+	currentBusiness: string;
 }
 
 export function decodeToken(token: string): TokenPayload | null {

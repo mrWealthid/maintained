@@ -17,7 +17,7 @@ export default function AuthWrapper({
 	return (
 		<div className='min-h-screen justify-center  items-center flex'>
 			<div className='grid   w-5/6 border lg:grid-cols-2'>
-				<div className='flex bg-card flex-col gap-4 p-6 md:p-10'>
+				<div className='flex bg-card flex-col gap-4 p-6'>
 					<div className='flex justify-center gap-2 md:justify-start'>
 						<a
 							href='#'

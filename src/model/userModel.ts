@@ -1,16 +1,17 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model, Types, ObjectId } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import Business from './businessModel';
+import { ROLES } from '@/app/shared/enums/enums';
 
-interface IUser extends Document {
+export interface IUser extends Document {
 	name: string;
 	email: string;
 	photo?: string;
-	role: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'TECHNICIAN' | 'OWNER';
+	// role: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'TECHNICIAN' | 'OWNER';
 	password: string;
-	business: mongoose.Types.ObjectId;
+	// business: mongoose.Types.ObjectId;
 	createdAt: Date;
 	dateOfBirth?: Date;
 	inviteToken?: string;
@@ -19,7 +20,7 @@ interface IUser extends Document {
 	passwordResetToken?: string;
 	passwordResetExpires?: Date;
 	active?: boolean;
-	status?: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
+	// status?: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
 	changedPasswordAfter(JWTTimestamp: number): Promise<boolean>;
 	correctPassword(
 		newPassword: string,
@@ -28,6 +29,14 @@ interface IUser extends Document {
 	createPasswordResetToken(): string;
 	createUserInviteToken(): string;
 	passwordConfirm: string;
+	memberships: {
+		business: Types.ObjectId;
+		role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER' | 'SUPER_ADMIN';
+		status: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
+		inviteToken?: string;
+		inviteTokenExpires?: Date;
+	}[];
+	currentBusiness: Types.ObjectId;
 }
 
 const userSchema = new Schema<IUser>(
@@ -41,21 +50,41 @@ const userSchema = new Schema<IUser>(
 			validate: [validator.isEmail, 'Please provide a valid email']
 		},
 		photo: { type: String, default: 'default.jpg' },
-		role: {
-			type: String,
-			enum: ['USER', 'ADMIN', 'SUPER_ADMIN', 'TECHNICIAN', 'OWNER'],
-			default: 'USER'
-		},
 		password: {
 			type: String,
 			required: [true, 'Please provide a password'],
 			minlength: 8,
 			select: false
 		},
-		business: {
+		memberships: [
+			{
+				business: {
+					type: mongoose.Schema.Types.ObjectId,
+					ref: Business,
+					required: true
+				},
+				status: {
+					type: String,
+					enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
+				},
+				role: {
+					type: String,
+					enum: [
+						'USER',
+						'ADMIN',
+						'TECHNICIAN',
+						'OWNER',
+						'SUPER_ADMIN'
+					],
+					required: true
+				},
+				inviteToken: String,
+				inviteTokenExpires: Date
+			}
+		],
+		currentBusiness: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: Business,
-			required: [true, 'User must belong to a business']
+			ref: Business
 		},
 		createdAt: {
 			type: Date,
@@ -63,8 +92,6 @@ const userSchema = new Schema<IUser>(
 			select: false
 		},
 		dateOfBirth: { type: Date },
-		inviteToken: String,
-		inviteTokenExpires: Date,
 		passwordChangedAt: Date,
 		passwordResetToken: String,
 		passwordResetExpires: Date,
@@ -72,10 +99,6 @@ const userSchema = new Schema<IUser>(
 			type: Boolean,
 			default: true,
 			select: false
-		},
-		status: {
-			type: String,
-			enum: ['INVITED', 'ACTIVATED', 'DEACTIVATED']
 		}
 	},
 	{

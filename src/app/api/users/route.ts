@@ -5,12 +5,13 @@ import APIFeatures from '@/utils/apiFeatures';
 import { mapToObject } from '@/utils/helpers';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import mongoose from 'mongoose';
 
 connect();
 
 export async function GET(request: NextRequest) {
 	try {
-		let filter = {};
+		let filter: any = {};
 
 		const verify = await getUserFromCookies();
 		if (!verify) {
@@ -20,6 +21,9 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
+		const currentBusinessId = new mongoose.Types.ObjectId(
+			verify.currentBusiness
+		);
 		if (verify.isAdminRole) {
 			const user = await User.findById(verify.id);
 			if (!user) {
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
 					{ status: 404 }
 				);
 			}
-			filter = { business: user.business };
+			filter = { 'memberships.business': currentBusinessId };
 		}
 
 		if (verify.isUserRole) {
@@ -48,6 +52,16 @@ export async function GET(request: NextRequest) {
 			delete transformedQuery.name; // Remove name from transformedQuery so it doesn't get double-filtered
 		}
 
+		if (transformedQuery.status) {
+			filter.memberships = {
+				$elemMatch: {
+					business: currentBusinessId,
+					status: transformedQuery.status
+				}
+			};
+			delete transformedQuery.status;
+		}
+
 		const userQuery = User.find(filter);
 
 		const features = new APIFeatures(userQuery, transformedQuery)
@@ -57,8 +71,12 @@ export async function GET(request: NextRequest) {
 			.paginate()
 			.populate([
 				{
-					path: 'business',
+					path: 'currentBusiness',
 					select: 'businessName country'
+				},
+				{
+					path: 'memberships.business',
+					select: 'businessName'
 				}
 			]);
 

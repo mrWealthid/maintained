@@ -105,18 +105,21 @@ export type Routes = {
 
 export interface User {
 	id: string;
-
 	name: string;
 	email: string;
 	photo?: string;
-	role: ROLES;
-	business: Pick<Business, 'country' | 'businessName'>;
+	currentBusiness: Pick<Business, 'country' | 'businessName' | 'id'>;
 	createdAt?: Date;
 	dateOfBirth?: Date;
 	inviteToken?: string;
+	memberships: {
+		business: { businessName: string; id: string };
+		status?: INVITE_STATUS;
+		role: ROLES
+		id: string;
+	}[];
 
 	active?: boolean;
-	status?: INVITE_STATUS;
 }
 
 export interface Business {
@@ -162,7 +165,7 @@ export interface ManageUserForm {
 	role: ROLES;
 }
 
-export type CreateUserPayload = Pick<User, 'name' | 'email' | 'role'>;
+export type CreateUserPayload = Pick<User, 'name' | 'email'>;
 
 export interface CrumbLabelMap {
 	[segment: string]: {

@@ -3,11 +3,22 @@ import UserRowAction from './UserRowAction';
 import Modal from '@/app/shared/components/modal/Modal';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { getMembershipForBusiness } from '@/utils/helpers';
+import { useAppContext } from '@/app/shared/contexts/AppContext';
+import { CircleCheck, Loader } from 'lucide-react';
+import { INVITE_STATUS } from '@/app/shared/enums/enums';
 
 function UserRow({ data }: UserRowProps) {
+	const { user } = useAppContext();
+
 	return (
 		<>
 			{data?.map((row, i) => {
+				const membership = getMembershipForBusiness(
+					row,
+					user?.currentBusiness.id!
+				);
+
 				return (
 					<TableRow key={row.id} className='  relative border-b '>
 						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
@@ -42,9 +53,9 @@ function UserRow({ data }: UserRowProps) {
 								{row.name}
 							</span>
 							<span
-								title={row.business?.businessName}
+								title={membership?.business.businessName}
 								className={' text-xs block'}>
-								{row.business?.businessName}
+								{membership?.business.businessName}
 							</span>
 						</TableCell>
 
@@ -53,26 +64,36 @@ function UserRow({ data }: UserRowProps) {
 								{row.email}
 							</span>
 						</TableCell>
-						<TableCell>
+						{/* <TableCell>
 							<span
 								className=' block ellipsis-overflow'
-								title={row.business.country}>
-								{row.business.country}
+								title={row.currentBusiness.country}>
+								{row.currentBusiness.country}
 							</span>
-						</TableCell>
+						</TableCell> */}
 						<TableCell>
-							<Badge variant='secondary'>
-								{row.status}
-								{/*
-								<IconLoader/> */}
+							<Badge variant='outline' className='gap-1'>
+								{membership?.status ===
+									INVITE_STATUS.activated && (
+									<CircleCheck
+										className=' '
+										strokeWidth={1.25}
+										size={14}
+										color='green'
+									/>
+								)}
+
+								{membership?.status ===
+									INVITE_STATUS.invited && (
+									<Loader strokeWidth={1.25} size={14} />
+								)}
+								{membership?.status}
 							</Badge>
 						</TableCell>
 						<TableCell>
-							<span
-								className=' block ellipsis-overflow'
-								title={row.role}>
-								{row.role}
-							</span>
+							<Badge variant='secondary'>
+								{membership?.role}
+							</Badge>
 						</TableCell>
 						<Modal>
 							<UserRowAction user={row} />

@@ -15,7 +15,7 @@
 	--light-blue: blue;
 	--background-color: #eceef1;
 	--text-color: #0000004d; */
-	--dashboard-header-height: 6vh;
+	--dashboard-header-height: 4vh;
 }
 
 /* @media (prefers-color-scheme: dark) {

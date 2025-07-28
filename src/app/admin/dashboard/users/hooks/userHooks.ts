@@ -14,7 +14,7 @@ export function useCreateUser(
 			handleCreateUser(payload, isEditing, userId),
 
 		onSuccess: () => {
-			toast.success('Invited sent successfully...');
+			toast.success('Invite sent successfully...');
 			queryClient.invalidateQueries({
 				queryKey: ['Users']
 			});
@@ -32,7 +32,7 @@ export function useDeleteUser() {
 	const { isPending: isDeleting, mutate: deleteUser } = useMutation({
 		mutationFn: (id: string) => handleDeleteUser(id),
 		onSuccess: () => {
-			toast.success('Users successfully deleted');
+			toast.success('User successfully deleted');
 			queryClient.invalidateQueries({
 				queryKey: ['Users']
 			});

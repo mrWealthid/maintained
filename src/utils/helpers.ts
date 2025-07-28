@@ -1,3 +1,8 @@
+import { Types } from 'mongoose';
+import crypto from 'crypto';
+import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
+import { User } from '@/app/shared/model/model';
+
 export function mapToObject(map: Map<string, any>): { [key: string]: any } {
 	const obj: { [key: string]: any } = {};
 	for (let [key, value] of Array.from(map)) {
@@ -49,4 +54,77 @@ export function buildQueryString(params: Record<string, any>): string {
 				`${encodeURIComponent(key)}=${encodeURIComponent(value)}`
 		)
 		.join('&');
+}
+
+interface Membership {
+	business: { businessName: string; id: string };
+	status?: INVITE_STATUS;
+	role: ROLES;
+	id: string;
+}
+
+/**
+ * Gets the user's role for a specific business
+ * @param memberships Array of user's memberships
+ * @param businessId Target business ID to check against
+ * @returns Role for the business, or undefined if not found
+ */
+export function getRoleForBusiness(
+	memberships: Membership[],
+	businessId: string | Types.ObjectId
+): Membership['role'] | undefined {
+	const targetId =
+		typeof businessId === 'string'
+			? new Types.ObjectId(businessId)
+			: businessId;
+
+	const membership = memberships.find((m) => {
+		const businessId =
+			typeof m.business === 'string'
+				? new Types.ObjectId(m.business)
+				: m.business;
+
+		return businessId.toString() === targetId.toString();
+	});
+
+	return membership?.role;
+}
+export function getInviteStatusForBusiness(
+	memberships: Membership[],
+	businessId: string | Types.ObjectId
+): Membership['status'] | undefined {
+	const targetId =
+		typeof businessId === 'string'
+			? new Types.ObjectId(businessId)
+			: businessId;
+
+	const membership = memberships.find((m) => {
+		const businessId =
+			typeof m.business === 'string'
+				? new Types.ObjectId(m.business)
+				: m.business.id;
+
+		return businessId.toString() === targetId.toString();
+	});
+
+	return membership?.status;
+}
+
+export function generateInviteToken() {
+	const token = crypto.randomBytes(32).toString('hex');
+	const hashed = crypto.createHash('sha256').update(token).digest('hex');
+	const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+	return { token, hashed, expires };
+}
+
+export function getMembershipForBusiness(
+	user: User,
+	businessId: string
+): Membership | undefined {
+	return user.memberships.find((m) => {
+		const businessIdFromMembership =
+			typeof m.business === 'string' ? m.business : m.business.id;
+
+		return businessIdFromMembership === businessId;
+	});
 }

@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import Link from 'next/link';
-
 import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
@@ -9,18 +8,14 @@ import {
 import Modal from '@/app/shared/components/modal/Modal';
 import ConfirmationPage from '@/app/shared/components/ui/ConfirmationPage';
 import { ROLES, TICKET_STATUS } from '@/app/shared/enums/enums';
-
 import { TfiMore } from 'react-icons/tfi';
-
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-
 import {
 	ADMIN_ROUTES_DEFINITION,
 	ROUTES_DEFINITION
@@ -45,7 +40,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 		});
 	}
 
-	const { user } = useAppContext();
+	const { user, role } = useAppContext();
 
 	return (
 		<>
@@ -62,23 +57,23 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				<DropdownMenuContent align='end' className=''>
 					<DropdownMenuItem>
 						<Link
-							href={`${user?.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket.id}`}>
+							href={`${role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket.id}`}>
 							View Details
 						</Link>
 					</DropdownMenuItem>
 
 					{ticket.status === TICKET_STATUS.pending &&
-						user?.role === ROLES.user && (
+						role === ROLES.user && (
 							<DropdownMenuItem>
 								<Link
-									href={`${user.role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket.id}`}>
+									href={`${role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket.id}`}>
 									Edit
 								</Link>
 							</DropdownMenuItem>
 						)}
 					{/*  This feat should be executed only by an admin */}
 					{ticket.status === TICKET_STATUS.pending &&
-						user?.role === ROLES.admin && (
+						role === ROLES.admin && (
 							<DropdownMenuItem>
 								<Modal.Open opens='self-assign'>
 									<button
@@ -89,8 +84,8 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 								</Modal.Open>
 							</DropdownMenuItem>
 						)}
-					{user?.role === ROLES.admin &&
-						user.id === ticket.actionedBy?.id &&
+					{role === ROLES.admin &&
+						user?.id === ticket.actionedBy?.id &&
 						ticket.status !== TICKET_STATUS.pending && (
 							<DropdownMenuItem>
 								<Modal.Open opens='handoff-ticket'>
@@ -102,7 +97,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 								</Modal.Open>
 							</DropdownMenuItem>
 						)}
-					{user?.role === ROLES.super_admin &&
+					{role === ROLES.super_admin &&
 						ticket.status !== TICKET_STATUS.pending && (
 							<DropdownMenuItem>
 								<Modal.Open opens='handoff-ticket'>
@@ -118,7 +113,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{/*  This feat should be executed by an admin who
 					created the ticket only */}
 					{ticket.status === TICKET_STATUS.processing &&
-						user?.role === ROLES.admin && (
+						role === ROLES.admin && (
 							<DropdownMenuItem>
 								<Modal.Open opens='send-request-technicians'>
 									<button
@@ -131,7 +126,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 						)}
 
 					{ticket.status === TICKET_STATUS.pending_assignment &&
-						user?.role === ROLES.admin && (
+						role === ROLES.admin && (
 							<DropdownMenuItem>
 								<Modal.Open opens='send-request-technicians'>
 									<button
@@ -145,7 +140,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{/* <DropdownMenuSeparator /> */}
 					{/* TODO:: This feat should be executed by the user who
 					created the ticket only */}
-					{user?.role === ROLES.user && (
+					{role === ROLES.user && (
 						<DropdownMenuItem>
 							<Modal.Open opens='delete-ticket'>
 								<button

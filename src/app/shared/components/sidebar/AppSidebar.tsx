@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -10,55 +11,35 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarTrigger,
 	useSidebar
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link'; // ✅ Correct import
-import React from 'react';
-import { Routes, User } from '@/app/shared/model/model';
+import Link from 'next/link';
+import { Routes } from '@/app/shared/model/model';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import Profile from '@/app/shared/components/profile/Profile';
 import Logout from '@/app/shared/components/header/Logout';
-import { useProfile } from '@/app/shared/components/profile/hooks/useProfile';
+import { Separator } from '@/components/ui/separator';
+import { SwitchBusiness } from './SwitchBusiness';
 
 export function AppSidebar({ routes }: { routes: Routes[] }) {
 	const pathname = usePathname();
-	const {
-		state,
-		open,
-		setOpen,
-		openMobile,
-		setOpenMobile,
-		isMobile,
-		toggleSidebar
-	} = useSidebar();
-
-	const { data, isLoading, error } = useProfile<User>();
+	const { open, setOpenMobile, isMobile } = useSidebar();
 
 	return (
 		<Sidebar className='flex flex-col h-screen' collapsible='icon'>
 			<SidebarHeader>
-				<div className='flex px-2 justify-between'>
-					{open && (
-						<section className='flex  flex-col gap-1 group-data-[collapsible=icon]:hidden'>
-							<h3>{data?.business.businessName}</h3>
-							<span className='font-light text-xs italic'>
-								Maintenance at it&apos;s best
-							</span>
-						</section>
-					)}
-					<SidebarTrigger />
+				<div className='flex flex-col   justify-between'>
+					{open && <SwitchBusiness />}
 				</div>
 			</SidebarHeader>
+			<Separator />
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarGroupContent>
@@ -68,12 +49,17 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 
 								return (
 									<SidebarMenuItem key={link.name}>
-										<SidebarMenuButton asChild>
+										<SidebarMenuButton
+											onClick={() => {
+												if (isMobile)
+													setOpenMobile(false);
+											}}
+											asChild>
 											<Link
 												href={link.path}
 												className={`hover:translate-x-1  rounded-lg text-sm transition-all duration-500 flex items-center gap-2 ${
 													isActive
-														? 'bg-sidebar-accent'
+														? 'bg-sidebar-accent text-button-primary'
 														: ''
 												}`}>
 												{link.icon &&
@@ -101,7 +87,7 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size='lg'
-									className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'>
+									className='focus-visible:ring-0 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'>
 									<Profile />
 								</SidebarMenuButton>
 							</DropdownMenuTrigger>
@@ -110,17 +96,13 @@ export function AppSidebar({ routes }: { routes: Routes[] }) {
 								side={isMobile ? 'bottom' : 'right'}
 								align='end'
 								sideOffset={4}>
-								{/* <DropdownMenuLabel className='p-0 font-normal'></DropdownMenuLabel> */}
-
-								{/* <DropdownMenuGroup> */}
 								<DropdownMenuItem
 									onSelect={(e) => {
-										e.preventDefault(); // ✅ keeps the dropdown open
+										e.preventDefault();
 									}}>
 									<Logout />
 								</DropdownMenuItem>
 
-								{/* </DropdownMenuGroup> */}
 								<DropdownMenuSeparator />
 							</DropdownMenuContent>
 						</DropdownMenu>

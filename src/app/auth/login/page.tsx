@@ -37,7 +37,7 @@ const LoginComponent = () => {
 	return (
 		<>
 			<AuthWrapper>
-				<section className=' w-full p-10  flex gap-4 flex-col items-center justify-center'>
+				<section className=' w-full   flex gap-4 flex-col items-center justify-center'>
 					<p className='text-center font-bold text-2xl'>
 						Sign In to Get Started
 					</p>

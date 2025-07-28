@@ -1,19 +1,31 @@
 import { connect } from '@/dbConfig/dbConfig';
-import User from '@/model/userModel';
+import User, { IUser } from '@/model/userModel';
 import Business from '@/model/businessModel';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { ROLES } from '@/app/shared/enums/enums';
+import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
+import { getRoleForBusiness } from '@/utils/helpers';
+import { Types } from 'mongoose';
 
 connect();
 
-const signToken = (id: string, role: string) =>
-	jwt.sign({ id, role }, process.env.JWT_SECRET!, {
-		expiresIn: process.env.JWT_EXPIRES_IN
-	} as SignOptions);
+const signTokenFromMembership = (user: any, businessId: Types.ObjectId) => {
+	console.log({ memberships: user.memberships, id: businessId });
+	const role = getRoleForBusiness(user.memberships, businessId);
+
+	if (!role) {
+		throw new Error('User is not a member of the specified business');
+	}
+
+	return jwt.sign(
+		{ id: user._id, currentBusiness: businessId, role },
+		process.env.JWT_SECRET!,
+		{ expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
+	);
+};
 
 const createSendToken = (user: any, statusCode: number) => {
-	const token = signToken(user.id, user.role);
+	const token = signTokenFromMembership(user, user.currentBusiness);
 
 	//Remove password from output
 	user.password = undefined;
@@ -61,6 +73,7 @@ export async function POST(request: Request) {
 			businessCreator: req.name
 		});
 
+		console.log(business);
 		if (!business) {
 			return NextResponse.json(
 				{ error: 'Business could not be created' },
@@ -68,30 +81,26 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// //create default categories
-		// const defaultCategories = await TicketCategory.find({
-		// 	isDefault: true
-		// });
-
-		// const cloned = defaultCategories.map((cat) => ({
-		// 	name: cat.name,
-		// 	description: cat.description,
-		// 	business: business.id
-		// }));
-
-		// await TicketCategory.insertMany(cloned);
-
 		// Create User
 		const newUser = await User.create({
 			name: req.name,
 			email: req.email,
-			business: business.id,
 			password: req.password,
-			role: ROLES.admin
+			memberships: [
+				{
+					business: business.id,
+					role: ROLES.admin,
+					status: INVITE_STATUS.activated
+				}
+			],
+			currentBusiness: business.id
 		});
+
+		console.log(newUser);
 
 		return createSendToken(newUser, 201);
 	} catch (error) {
+		console.log(error);
 		return NextResponse.json(
 			{ error: 'Server error occurred' },
 			{ status: 500 }
