@@ -31,7 +31,7 @@ export interface IUser extends Document {
 	passwordConfirm: string;
 	memberships: {
 		business: Types.ObjectId;
-		role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER' | 'SUPER_ADMIN';
+		role: ROLES;
 		status: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
 		inviteToken?: string;
 		inviteTokenExpires?: Date;

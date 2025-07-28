@@ -7,7 +7,7 @@ import { technicianCrumbLabelMap } from '@/app/shared/data/data';
 
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
-import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import { getVerifiedUser } from '@/lib/auth/getVerifiedUser';
 import { AppProvider } from '../shared/contexts/AppContext';
 
 export default async function DashboardLayout({
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const verify = await getUserFromCookies();
+	const verify = await getVerifiedUser();
 
 	if (!verify) {
 		redirect('/auth/login');

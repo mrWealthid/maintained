@@ -9,7 +9,7 @@ export async function DELETE(
 ) {
 	try {
 		const verify = await getUserFromCookies();
-		const {userId} = await params
+		const { userId } = await params;
 
 		if (!verify) {
 			return NextResponse.json(
@@ -23,7 +23,6 @@ export async function DELETE(
 				{ status: 401 }
 			);
 		}
-
 
 		const user = await User.findByIdAndDelete(userId);
 

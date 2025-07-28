@@ -1,26 +1,14 @@
-// utils/auth/getUserFromCookies.ts
-'use server';
-import { cookies as getCookiesHeader } from 'next/headers';
+// lib/auth/getVerifiedUser.ts
 import { NextRequest } from 'next/server';
-import { verifyToken, TokenPayload } from './token';
+import { verifyToken } from './token';
+import { cookies as getCookiesHeader } from 'next/headers';
 import User from '@/model/userModel';
 import { ROLES } from '@/app/shared/enums/enums';
-import mongoose from 'mongoose';
 
-/**
- * Reads the token from cookies and verifies it.
- * Automatically detects if it's running inside middleware or server context.
- * @param request Optional — only used in middleware (where headers.cookies doesn't work)
- */
-export async function getUserFromCookies(request?: NextRequest): Promise<{
-	id: string;
-	role: string;
-	isAdminRole: boolean;
-	isUserRole: boolean;
-	isSuperAdminRole: boolean;
-	isTechnicianRole: boolean;
-	currentBusiness: string;
-} | null> {
+export async function getUserFromCookies(
+	request?: NextRequest,
+	requiredRoles?: ROLES[]
+) {
 	let token: string | undefined;
 
 	if (request) {
@@ -37,30 +25,30 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 		return null;
 	}
 
-	// Dynamically determine role in current business
-	const user = await User.findById(
-		new mongoose.Types.ObjectId(payload.id)
-	).lean();
-
-	console.log('test...', user);
+	const user = await User.findById(payload.id).select(
+		'memberships currentBusiness'
+	);
 	if (!user) return null;
 
-	const membership = user.memberships.find(
+	const currentMembership = user.memberships.find(
 		(m) => m.business.toString() === user.currentBusiness.toString()
 	);
 
-	console.log('mber', membership);
-	console.log('mber', membership?.role);
+	if (!currentMembership) return null;
 
-	const role = membership?.role || 'USER';
+	// Check required role(s)
+	if (requiredRoles && !requiredRoles.includes(currentMembership.role)) {
+		return null;
+	}
 
 	return {
 		id: payload.id,
-		role,
 		currentBusiness: payload.currentBusiness,
-		isAdminRole: role === 'ADMIN',
-		isUserRole: role === 'USER',
-		isSuperAdminRole: role === 'SUPER_ADMIN',
-		isTechnicianRole: role === 'TECHNICIAN'
+		role: currentMembership.role,
+		user,
+		isAdminRole: currentMembership.role === 'ADMIN',
+		isUserRole: currentMembership.role === 'USER',
+		isSuperAdminRole: currentMembership.role === 'SUPER_ADMIN',
+		isTechnicianRole: currentMembership.role === 'TECHNICIAN'
 	};
 }

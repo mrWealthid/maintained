@@ -8,16 +8,15 @@ import { adminCrumbLabelMap } from '@/app/shared/data/data';
 import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { adminRoutes } from '@/app/shared/routes/routes';
-import { get } from 'http';
-import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import { AppProvider } from '../shared/contexts/AppContext';
+import { getVerifiedUser } from '@/lib/auth/getVerifiedUser';
 
 export default async function DashboardLayout({
 	children
 }: {
 	children: React.ReactNode;
 }) {
-	const verify = await getUserFromCookies();
+	const verify = await getVerifiedUser();
 
 	if (!verify) {
 		redirect('/auth/login');
