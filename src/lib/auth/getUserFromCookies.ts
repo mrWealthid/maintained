@@ -3,6 +3,7 @@ import { cookies as getCookiesHeader } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { verifyToken, TokenPayload } from './token';
 import User from '@/model/userModel';
+import { ROLES } from '@/app/shared/enums/enums';
 
 /**
  * Reads the token from cookies and verifies it.
@@ -35,19 +36,19 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	}
 
 	// Dynamically determine role in current business
-	const user = await User.findById(payload.id).lean();
+	// const user = await User.findById(payload.id).lean();
 
-	console.log('test...', user);
-	if (!user) return null;
+	// console.log('test...', user);
+	// if (!user) return null;
 
-	const membership = user.memberships.find(
-		(m) => m.business.toString() === user.currentBusiness.toString()
-	);
+	// const membership = user.memberships.find(
+	// 	(m) => m.business.toString() === user.currentBusiness.toString()
+	// );
 
-	console.log('mber', membership);
-	console.log('mber', membership?.role);
+	// console.log('mber', membership);
+	// console.log('mber', membership?.role);
 
-	const role = membership?.role || 'USER';
+	const role = 'USER' as ROLES;
 
 	return {
 		id: payload.id,
