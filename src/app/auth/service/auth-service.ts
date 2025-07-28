@@ -8,10 +8,11 @@ import {
 	OnboardUser
 } from '../model/model';
 import { ApiErrorHandler } from '@/utils/apiError';
+import { API_ROUTES } from '@/app/shared/routes/apiRoutes';
 
 export async function handleLogin(payload: ILogin) {
 	try {
-		const res = await axios.post(`/api/auth/login`, payload);
+		const res = await axios.post(`${API_ROUTES.auth.login}`, payload);
 		const data = await res.data;
 		return data;
 	} catch (err: unknown) {

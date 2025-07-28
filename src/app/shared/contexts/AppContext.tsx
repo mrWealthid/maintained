@@ -1,8 +1,9 @@
 'use client';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { ROLES } from '../enums/enums';
 import { User } from '../model/model';
 import { useProfile } from '../components/profile/hooks/useProfile';
+import { useRouter } from 'next/navigation';
 
 interface AppContextType {
 	user: User | undefined;
@@ -23,23 +24,24 @@ export const useAppContext = () => {
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const { data: user, isLoading, error } = useProfile<User>();
+	const router = useRouter();
 
-	// function getUserRoleForCurrentBusiness(
-	// 	user: User | undefined
-	// ): ROLES | undefined {
-	// 	const membership = user?.memberships.find((m) => {
-	// 		const businessId =
-	// 			typeof m.business === 'string' ? m.business : m.business.id;
-	// 		const currentBusinessId =
-	// 			typeof user.currentBusiness === 'string'
-	// 				? user.currentBusiness
-	// 				: user.currentBusiness.id;
+	function getUserRoleForCurrentBusiness(
+		user: User | undefined
+	): ROLES | undefined {
+		const membership = user?.memberships.find((m) => {
+			const businessId =
+				typeof m.business === 'string' ? m.business : m.business.id;
+			const currentBusinessId =
+				typeof user.currentBusiness === 'string'
+					? user.currentBusiness
+					: user.currentBusiness.id;
 
-	// 		return businessId === currentBusinessId;
-	// 	});
+			return businessId === currentBusinessId;
+		});
 
-	// 	return membership?.role;
-	// }
+		return membership?.role;
+	}
 	// if (isLoading) {
 	// 	return <div>Loading user...</div>; // Or a skeleton component
 	// }
@@ -48,13 +50,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	// 	return <div>Error loading user</div>; // Or handle as needed
 	// }
 
+	useEffect(() => {
+		if (!isLoading && user) {
+			const role = getUserRoleForCurrentBusiness(user);
+
+			if (role === 'TECHNICIAN') router.push('/technician/dashboard');
+			else if (role === 'ADMIN') router.push('/admin/dashboard');
+			else if (role === 'USER') router.push('/dashboard');
+		}
+	}, [user, isLoading, router]);
+
 	return (
 		<AppContext.Provider
 			value={{
 				user,
 				isLoading,
 				error,
-				role: ROLES.user
+				role: getUserRoleForCurrentBusiness(user)
 			}}>
 			{children}
 		</AppContext.Provider>

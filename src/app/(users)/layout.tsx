@@ -18,7 +18,7 @@ export default async function DashboardLayout({
 }) {
 	const verify = await getUserFromCookies();
 
-	if (!verify?.isUserRole) {
+	if (!verify) {
 		redirect('/auth/login');
 	}
 

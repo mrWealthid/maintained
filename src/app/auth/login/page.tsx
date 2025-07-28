@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { useLogin } from '../hooks/useAuth';
+import { useLogin, useLogins } from '../hooks/useAuth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import EmailInput from '@/app/shared/components/form-elements/Email-Input';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
@@ -19,6 +19,7 @@ const LoginComponent = () => {
 	});
 
 	const { isLoading, login } = useLogin();
+	const { handleLogins } = useLogins();
 
 	async function onSubmit(payload: LoginForm) {
 		login(payload);

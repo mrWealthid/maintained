@@ -21,6 +21,47 @@ import {
 } from '../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
 import { ROLES } from '@/app/shared/enums/enums';
+import { useState } from 'react';
+import axios from 'axios';
+import { API_ROUTES } from '@/app/shared/routes/apiRoutes';
+import { User } from '@/app/shared/model/model';
+
+export function useLogins(): {
+	handleLogins: ({
+		email,
+		password
+	}: {
+		email: string;
+		password: string;
+	}) => void;
+	isLoading: boolean;
+	data: User | null;
+	error: string | null;
+} {
+	const [isLoading, setIsLoading] = useState(false);
+	const [data, setData] = useState(null);
+	const [error, setError] = useState(null);
+
+	async function handleLogins(payload: { email: string; password: string }) {
+		try {
+			setIsLoading(true);
+			const response = await axios.post(
+				`${API_ROUTES.auth.login}`,
+				payload
+			);
+
+			setIsLoading(false);
+			setData(response.data);
+			console.log('I fetched', response.data);
+		} catch (err: any) {
+			setIsLoading(false);
+			setError(err);
+			console.log(err);
+		}
+	}
+
+	return { handleLogins, isLoading, data, error };
+}
 
 export function useLogin() {
 	const router = useRouter();

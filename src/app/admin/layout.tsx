@@ -19,7 +19,7 @@ export default async function DashboardLayout({
 }) {
 	const verify = await getUserFromCookies();
 
-	if (!verify?.isAdminRole) {
+	if (!verify) {
 		redirect('/auth/login');
 	}
 
