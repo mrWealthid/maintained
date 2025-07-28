@@ -5,7 +5,7 @@ import Header from '@/app/shared/components/header/Header';
 import Breadcrumbs from '@/app/shared/components/breadcrumbs/BreadCrumbs';
 import { crumbLabelMap } from '@/app/shared/data/data';
 
-import { AppSidebar } from './AppSidebar';
+import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { get } from 'http';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';

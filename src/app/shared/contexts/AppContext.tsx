@@ -8,6 +8,7 @@ interface AppContextType {
 	user: User | undefined;
 	isLoading: boolean;
 	error: any;
+	role: ROLES | undefined;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -23,6 +24,22 @@ export const useAppContext = () => {
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const { data: user, isLoading, error } = useProfile<User>();
 
+	function getUserRoleForCurrentBusiness(
+		user: User | undefined
+	): ROLES | undefined {
+		const membership = user?.memberships.find((m) => {
+			const businessId =
+				typeof m.business === 'string' ? m.business : m.business.id;
+			const currentBusinessId =
+				typeof user.currentBusiness === 'string'
+					? user.currentBusiness
+					: user.currentBusiness.id;
+
+			return businessId === currentBusinessId;
+		});
+
+		return membership?.role;
+	}
 	// if (isLoading) {
 	// 	return <div>Loading user...</div>; // Or a skeleton component
 	// }
@@ -32,7 +49,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	// }
 
 	return (
-		<AppContext.Provider value={{ user, isLoading, error }}>
+		<AppContext.Provider
+			value={{
+				user,
+				isLoading,
+				error,
+				role: getUserRoleForCurrentBusiness(user)
+			}}>
 			{children}
 		</AppContext.Provider>
 	);

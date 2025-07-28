@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import crypto from 'crypto';
-import { INVITE_STATUS } from '@/app/shared/enums/enums';
+import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
 import { User } from '@/app/shared/model/model';
 
 export function mapToObject(map: Map<string, any>): { [key: string]: any } {
@@ -59,7 +59,7 @@ export function buildQueryString(params: Record<string, any>): string {
 interface Membership {
 	business: { businessName: string; id: string };
 	status?: INVITE_STATUS;
-	role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER';
+	role: ROLES;
 	id: string;
 }
 

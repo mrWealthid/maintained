@@ -4,6 +4,7 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import { TicketActivity } from '@/model/ticketActivity';
 import Ticket from '@/model/ticketModel';
 import User from '@/model/userModel';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(
@@ -31,10 +32,25 @@ export async function PATCH(
 			);
 		}
 
+		const businessId = new mongoose.Types.ObjectId(verify.currentBusiness); // or from payload/context
+
 		const technician = await User.findById(assignedTo);
-		if (!technician || technician.role !== ROLES.technician) {
+
+		if (!technician) {
 			return NextResponse.json(
-				{ error: 'Invalid technician' },
+				{ error: 'Technician not found' },
+				{ status: 404 }
+			);
+		}
+
+		// Check role in the current business
+		const membership = technician.memberships.find(
+			(m) => m.business.equals(businessId) && m.role === ROLES.technician
+		);
+
+		if (!membership) {
+			return NextResponse.json(
+				{ error: 'User is not a technician in this business' },
 				{ status: 400 }
 			);
 		}

@@ -6,7 +6,7 @@ import Breadcrumbs from '@/app/shared/components/breadcrumbs/BreadCrumbs';
 import { technicianCrumbLabelMap } from '@/app/shared/data/data';
 
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '../(users)/AppSidebar';
+import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 
 export default async function DashboardLayout({

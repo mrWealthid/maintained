@@ -31,7 +31,7 @@ export interface IUser extends Document {
 	passwordConfirm: string;
 	memberships: {
 		business: Types.ObjectId;
-		role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER';
+		role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER' | 'SUPER_ADMIN';
 		status: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
 		inviteToken?: string;
 		inviteTokenExpires?: Date;
@@ -69,7 +69,13 @@ const userSchema = new Schema<IUser>(
 				},
 				role: {
 					type: String,
-					enum: ['USER', 'ADMIN', 'TECHNICIAN', 'OWNER'],
+					enum: [
+						'USER',
+						'ADMIN',
+						'TECHNICIAN',
+						'OWNER',
+						'SUPER_ADMIN'
+					],
 					required: true
 				},
 				inviteToken: String,

@@ -115,7 +115,7 @@ export interface User {
 	memberships: {
 		business: { businessName: string; id: string };
 		status?: INVITE_STATUS;
-		role: 'USER' | 'ADMIN' | 'TECHNICIAN' | 'OWNER';
+		role: ROLES
 		id: string;
 	}[];
 

@@ -5,7 +5,7 @@ import Header from '@/app/shared/components/header/Header';
 import Breadcrumbs from '@/app/shared/components/breadcrumbs/BreadCrumbs';
 import { adminCrumbLabelMap } from '@/app/shared/data/data';
 
-import { AppSidebar } from '../(users)/AppSidebar';
+import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { adminRoutes } from '@/app/shared/routes/routes';
 import { get } from 'http';

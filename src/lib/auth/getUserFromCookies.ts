@@ -2,6 +2,7 @@
 import { cookies as getCookiesHeader } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { verifyToken, TokenPayload } from './token';
+import User from '@/model/userModel';
 
 /**
  * Reads the token from cookies and verifies it.
@@ -10,7 +11,7 @@ import { verifyToken, TokenPayload } from './token';
  */
 export async function getUserFromCookies(request?: NextRequest): Promise<{
 	id: string;
-	role: TokenPayload['role'];
+	role: string;
 	isAdminRole: boolean;
 	isUserRole: boolean;
 	isSuperAdminRole: boolean;
@@ -20,10 +21,8 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	let token: string | undefined;
 
 	if (request) {
-		// Middleware case: use request.cookies
 		token = request.cookies.get('token')?.value;
 	} else {
-		// Route handler/server component case
 		const cookieStore = await getCookiesHeader();
 		token = cookieStore.get('token')?.value;
 	}
@@ -35,13 +34,28 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 		return null;
 	}
 
+	// Dynamically determine role in current business
+	const user = await User.findById(payload.id);
+
+	console.log('test...', user);
+	if (!user) return null;
+
+	const membership = user.memberships.find(
+		(m) => m.business.toString() === user.currentBusiness.toString()
+	);
+
+	console.log('mber', membership);
+	console.log('mber', membership?.role);
+
+	const role = membership?.role || 'USER';
+
 	return {
 		id: payload.id,
-		role: payload.role,
+		role,
 		currentBusiness: payload.currentBusiness,
-		isAdminRole: payload.role === 'ADMIN',
-		isUserRole: payload.role === 'USER',
-		isSuperAdminRole: payload.role === 'SUPER_ADMIN',
-		isTechnicianRole: payload.role === 'TECHNICIAN'
+		isAdminRole: role === 'ADMIN',
+		isUserRole: role === 'USER',
+		isSuperAdminRole: role === 'SUPER_ADMIN',
+		isTechnicianRole: role === 'TECHNICIAN'
 	};
 }
