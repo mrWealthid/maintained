@@ -5,6 +5,7 @@ import { NextRequest } from 'next/server';
 import { verifyToken, TokenPayload } from './token';
 import User from '@/model/userModel';
 import { ROLES } from '@/app/shared/enums/enums';
+import mongoose from 'mongoose';
 
 /**
  * Reads the token from cookies and verifies it.
@@ -37,7 +38,9 @@ export async function getUserFromCookies(request?: NextRequest): Promise<{
 	}
 
 	// Dynamically determine role in current business
-	const user = await User.findById(payload.id).lean();
+	const user = await User.findById(
+		new mongoose.Types.ObjectId(payload.id)
+	).lean();
 
 	console.log('test...', user);
 	if (!user) return null;
