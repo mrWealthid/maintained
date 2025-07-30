@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 		if (existingUser) {
 			// Check if they're already a member of this business
 			const alreadyMember = existingUser.memberships.some(
-				(m) => m.business.toString() === currentBusinessId
+				(m) => m.business.toString() === currentBusinessId.toString()
 			);
 
 			if (alreadyMember) {

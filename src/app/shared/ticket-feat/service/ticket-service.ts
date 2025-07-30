@@ -162,7 +162,7 @@ export async function deleteTicket(id: string) {
 }
 export async function assignTicket(
 	id: string,
-	payload: Pick<Ticket, 'status'>
+	payload: { actionedBy?: string; status: TICKET_STATUS }
 ) {
 	try {
 		const res = await axios.patch(

@@ -43,7 +43,7 @@ export async function getUserFromCookies(
 
 	return {
 		id: payload.id,
-		currentBusiness: payload.currentBusiness,
+		currentBusiness: user.currentBusiness,
 		role: currentMembership.role,
 		user,
 		isAdminRole: currentMembership.role === 'ADMIN',

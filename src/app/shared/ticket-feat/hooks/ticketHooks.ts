@@ -96,7 +96,7 @@ export function useDeleteTicket() {
 export function useAssignTicket(id: string) {
 	const queryClient = useQueryClient();
 	const { isPending: isUpdating, mutate: handleAssignTicket } = useMutation({
-		mutationFn: (payload: Pick<Ticket, 'status'>) =>
+		mutationFn: (payload: {actionedBy?: string, status: TICKET_STATUS}) =>
 			assignTicket(id, payload),
 		onSuccess: () => {
 			toast.success('Ticket successfully assigned');

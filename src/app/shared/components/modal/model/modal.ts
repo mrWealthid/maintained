@@ -14,6 +14,7 @@ export interface WindowProps {
 	description?: string;
 	children: React.ReactElement<{ onCloseModal?: () => void }>;
 	size?: string;
+	closeOnOutsideClick?: boolean;
 }
 
 export interface ModalContextProps {

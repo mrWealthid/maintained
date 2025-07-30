@@ -43,17 +43,19 @@ const Window = ({
 	children,
 	size = 'w-full md:w-1/2 2xl:w-1/3',
 	title,
-	description
+	description,
+	closeOnOutsideClick
 }: WindowProps) => {
 	const { openName, close, open }: ModalContextProps =
 		useContext(ModalContext);
 
 	const modalRef = useRef<HTMLDivElement | null>(null);
-	useOutsideClick(modalRef, close);
+	useOutsideClick(modalRef, close, closeOnOutsideClick);
 
 	if (name !== openName) return null;
 	return createPortal(
 		<section>
+			{closeOnOutsideClick ? 'true' : 'false'}
 			<div
 				className={` ${
 					openName === name

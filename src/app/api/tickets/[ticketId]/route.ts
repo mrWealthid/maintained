@@ -23,6 +23,7 @@ export async function GET(
 		// 	},
 		// 	{ path: 'requests' }
 		// ]);
+
 		const ticket = await Ticket.findById(ticketId).populate([
 			{
 				path: 'category',

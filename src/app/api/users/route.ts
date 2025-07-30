@@ -61,6 +61,15 @@ export async function GET(request: NextRequest) {
 			};
 			delete transformedQuery.status;
 		}
+		if (transformedQuery.role) {
+			filter.memberships = {
+				$elemMatch: {
+					business: currentBusinessId,
+					role: transformedQuery.role
+				}
+			};
+			delete transformedQuery.role;
+		}
 
 		const userQuery = User.find(filter);
 

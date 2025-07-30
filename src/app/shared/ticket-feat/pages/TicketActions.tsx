@@ -23,6 +23,7 @@ import {
 import SendTechnicianRequestForm from '@/app/admin/dashboard/ticket-management/SendTechnicianRequestForm';
 import { useAppContext } from '../../contexts/AppContext';
 import HandOffTicketForm from '@/app/admin/dashboard/ticket-management/HandOffTicketForm';
+import { Ticket } from '../../model/model';
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
@@ -33,14 +34,16 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 			onSuccess: () => onCloseModal()
 		});
 	}
+	const { user, role } = useAppContext();
+
+
 	function handleAssign(onCloseModal: () => void) {
-		const payload = { status: TICKET_STATUS.processing };
+		const payload = { actionedBy: user?.id , status: TICKET_STATUS.processing} ;
 		handleAssignTicket(payload, {
 			onSuccess: () => onCloseModal()
 		});
 	}
 
-	const { user, role } = useAppContext();
 
 	return (
 		<>

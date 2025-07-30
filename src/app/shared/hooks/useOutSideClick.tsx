@@ -32,11 +32,14 @@ import { useEffect } from 'react';
 
 export function useOutsideClick(
 	ref: React.RefObject<HTMLElement | null>,
-	handler: () => void
+	handler: () => void,
+	closeOnOutsideClick: boolean = false
 ) {
 	useEffect(() => {
 		function handleClick(event: MouseEvent) {
 			const target = event.target as HTMLElement;
+
+			if (!closeOnOutsideClick) return;
 
 			// If ref doesn't exist or click is inside the ref, ignore
 			if (!ref.current || ref.current.contains(target)) return;
