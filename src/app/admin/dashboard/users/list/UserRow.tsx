@@ -53,9 +53,9 @@ function UserRow({ data }: UserRowProps) {
 								{row.name}
 							</span>
 							<span
-								title={membership?.business.businessName}
+								title={membership?.business.name}
 								className={' text-xs block'}>
-								{membership?.business.businessName}
+								{membership?.business.name}
 							</span>
 						</TableCell>
 

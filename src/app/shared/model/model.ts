@@ -108,14 +108,14 @@ export interface User {
 	name: string;
 	email: string;
 	photo?: string;
-	currentBusiness: Pick<Business, 'country' | 'businessName' | 'id'>;
+	currentBusiness: Pick<Business, 'country' | 'name' | 'id'>;
 	createdAt?: Date;
 	dateOfBirth?: Date;
 	inviteToken?: string;
 	memberships: {
-		business: { businessName: string; id: string };
+		business: { name: string; id: string };
 		status?: INVITE_STATUS;
-		role: ROLES
+		role: ROLES;
 		id: string;
 	}[];
 
@@ -124,18 +124,16 @@ export interface User {
 
 export interface Business {
 	id: string;
-	businessName: string;
+	name: string;
 	registrationId: string;
-	businessContact: string;
+	contact: string;
 	country: string;
-	businessAddress: string;
+	address: string;
 	description?: string;
 	createdAt?: Date;
-	businessEmail: string;
-	businessCreator: string;
+	email: string;
+	creator: string;
 	logo?: string;
-	// businessUsers?: string[]; // Uncomment and adjust if you use this field
-	// Add other fields as needed
 }
 
 export type UserRowActionsProps = {

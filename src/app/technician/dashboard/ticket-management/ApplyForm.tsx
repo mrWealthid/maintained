@@ -533,7 +533,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 						<TableBody>
 							{watchCosts.map((item, index) => (
 								<TableRow key={index}>
-									<TableCell className='truncate text-xs'>
+									<TableCell className='truncate capitalize text-xs'>
 										{item.title}
 									</TableCell>
 									<TableCell className='text-right text-xs'>

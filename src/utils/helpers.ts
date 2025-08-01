@@ -57,7 +57,7 @@ export function buildQueryString(params: Record<string, any>): string {
 }
 
 interface Membership {
-	business: { businessName: string; id: string };
+	business: { name: string; id: string };
 	status?: INVITE_STATUS;
 	role: ROLES;
 	id: string;

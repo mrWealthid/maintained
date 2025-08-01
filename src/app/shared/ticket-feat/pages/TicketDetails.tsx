@@ -18,7 +18,9 @@ import {
 	Sparkle,
 	BadgeInfo,
 	Check,
-	X
+	X,
+	CircleCheck,
+	Loader
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -27,6 +29,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ADMIN_ROUTES_DEFINITION } from '@/app/shared/routes/routes';
@@ -38,7 +48,11 @@ import {
 	TicketDetailsResponse
 } from '../model/ticket.model';
 import Image from 'next/image';
-import { TECHNICIAN_RESPONSE, TICKET_PRIORITY } from '../../enums/enums';
+import {
+	TECHNICIAN_RESPONSE,
+	TICKET_PRIORITY,
+	TICKET_STATUS
+} from '../../enums/enums';
 
 export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 	return (
@@ -222,53 +236,138 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 					{ticket.requests.map((request, idx) => (
 						<article
 							key={idx}
-							className='space-y-4 border-t pt-4'
+							className='space-y-4 border p-4 rounded-2xl'
 							aria-label={`Technician response ${idx + 1}`}>
-							<div className='flex items-center gap-2'>
-								<User size={14} />
-								<span className='font-medium'>
-									{request.technician.name}
-								</span>
-							</div>
-							<div className='flex items-center gap-2'>
-								<Info size={14} />
-								<Badge variant='outline'>
-									{request.status}
-									{/*
-                                                        <IconLoader/> */}
-								</Badge>
-							</div>
-							<div className='flex items-center gap-2'>
-								<BadgeInfo size={14} />
-								<Badge className='flex gap-1' variant='outline'>
-									{request.isActive ? (
-										<Sparkles
-											size={16}
-											color='#f1d104'
-											strokeWidth={1}
-										/>
-									) : (
-										<Sparkle
-											size={16}
-											color='#f1d104'
-											strokeWidth={1}
-										/>
-									)}
+							<div className='flex  rounded-lg justify-between'>
+								<div className='flex w-full  flex-col  gap-2'>
+									<div className='flex gap-2 justify-between items-center'>
+										<span className='flex items-center gap-1'>
+											<User size={14} />
+											<span className='font-medium'>
+												{request.technician.name}
+											</span>
+										</span>
+										<div className='flex items-center gap-2'>
+											<Badge
+												variant='outline'
+												className='gap-1'>
+												{request.status ===
+													TECHNICIAN_RESPONSE.applied && (
+													<CircleCheck
+														strokeWidth={1.25}
+														size={14}
+														color='green'
+													/>
+												)}
 
-									{request.isActive ? 'Active' : 'Expired'}
-									{/*
-                                                        <IconLoader/> */}
-								</Badge>
-							</div>
+												{request.status ===
+													TECHNICIAN_RESPONSE.pending && (
+													<Loader
+														strokeWidth={1.25}
+														size={14}
+													/>
+												)}
+												{request.status}
+											</Badge>
+										</div>
+									</div>
+									<Table className=''>
+										<TableHeader>
+											<TableRow className='bg-muted rounded-lg'>
+												<TableHead className='text-xs'>
+													Item
+												</TableHead>
+												<TableHead className='text-right text-xs'>
+													Amount (₦)
+												</TableHead>
+											</TableRow>
+										</TableHeader>
 
-							{request.quote.total && (
-								<div className='flex items-center gap-2'>
-									<Banknote strokeWidth={1} />
-									<span className='font-medium'>
-										{request.quote.total}
-									</span>
+										<TableBody>
+											{request.quote.cost.map(
+												(item, index) => (
+													<TableRow key={index}>
+														<TableCell className='truncate capitalize text-xs'>
+															{item.title}
+														</TableCell>
+														<TableCell className='text-right text-xs'>
+															{Number(
+																item.amount || 0
+															).toLocaleString()}
+														</TableCell>
+													</TableRow>
+												)
+											)}
+
+											<TableRow className='font-bold border-t'>
+												<TableCell className='text-sm'>
+													Total
+												</TableCell>
+												<TableCell className='text-right text-sm'>
+													{request.quote.total.toLocaleString()}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
 								</div>
-							)}
+
+								<div className=' flex justify-end w-full relative'>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
+												{/* <TfiMore /> */}
+												Actions
+												<ChevronDown
+													strokeWidth={1.25}
+												/>
+												<span className='sr-only'>
+													Open menu
+												</span>
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											align='end'
+											className='w-48'>
+											<DropdownMenuItem>
+												<Link
+													href={`${ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${'12'}`}>
+													Approve
+												</Link>
+											</DropdownMenuItem>
+
+											<DropdownMenuItem>
+												<Modal.Open opens='self-assign'>
+													<button
+														type='button'
+														className='w-full text-left'>
+														Withdraw
+													</button>
+												</Modal.Open>
+											</DropdownMenuItem>
+
+											<DropdownMenuItem>
+												<Modal.Open opens='self-assign'>
+													<button
+														type='button'
+														className='w-full text-left'>
+														Update Schedule
+													</button>
+												</Modal.Open>
+											</DropdownMenuItem>
+
+											<DropdownMenuItem>
+												<Modal.Open opens='send-request-technicians'>
+													<button
+														type='button'
+														className='w-full text-left'>
+														Decline
+													</button>
+												</Modal.Open>
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+							</div>
 							{request.schedule && (
 								<p>
 									The estimated cost for the repair is{' '}
@@ -280,13 +379,25 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 							{request.schedule && (
 								<div className='flex items-center gap-2'>
 									<Calendar size={14} />
-									<span>
-										Visit scheduled for{' '}
-										{new Date(
-											request.schedule.date
-										).toDateString()}{' '}
-										from {request.schedule.start} to{' '}
-										{request.schedule.end}
+									<span className='flex gap-1'>
+										Repair scheduled for
+										<span className='font-bold'>
+											{new Date(
+												request.schedule.date
+											).toDateString()}
+										</span>
+										from
+										<span className='font-bold'>
+											{new Date(
+												request.schedule.start
+											).toLocaleTimeString()}
+										</span>
+										to
+										<span className='font-bold'>
+											{new Date(
+												request.schedule.end
+											).toLocaleTimeString()}
+										</span>
 									</span>
 								</div>
 							)}
@@ -323,7 +434,7 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 									</>
 								)}
 
-								{request.status ===
+								{/* {request.status ===
 									TECHNICIAN_RESPONSE.applied && (
 									<>
 										<Button className='bg-button-primary hover:bg-button-accent text-button-primary-foreground flex'>
@@ -348,7 +459,7 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
 											Decline
 										</Button>
 									</>
-								)}
+								)} */}
 							</div>
 						</article>
 					))}

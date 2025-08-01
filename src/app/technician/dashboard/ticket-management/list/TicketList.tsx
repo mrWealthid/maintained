@@ -58,7 +58,7 @@ const TicketList: FC = () => {
 			<TableComponent<Ticket>
 				service={fetchRequestTicketList}
 				queryKey='tickets'
-				searchKey='ticket.title'
+				searchKey='title'
 				// defaultParams={{ status: TICKET_STATUS.pending_assignment }}
 				headerActions={<TicketHeaderActions />}
 				columns={columns}>

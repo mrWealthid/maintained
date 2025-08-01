@@ -4,12 +4,13 @@ import MiddlewareFeatures from '@/middlewareFeatures';
 import { TechnicianRequest } from '@/model/technicanRequest';
 import APIFeatures from '@/utils/apiFeatures';
 import { mapToObject } from '@/utils/helpers';
+import Ticket from '@/model/ticketModel';
 import { NextRequest, NextResponse } from 'next/server';
 
 connect();
 export async function GET(request: NextRequest) {
 	try {
-		let filter = {};
+		let filter: any = {};
 		const verify = await getUserFromCookies();
 
 		if (!verify || verify.isUserRole) {
@@ -27,6 +28,24 @@ export async function GET(request: NextRequest) {
 		const query: any = request.nextUrl.searchParams;
 
 		const transformedQuery = mapToObject(query);
+
+		if ('title' in transformedQuery) {
+			const titleQuery = transformedQuery['title'];
+			const matchingTickets = await Ticket.find({
+				title: { $regex: new RegExp(titleQuery, 'i') }
+			}).select('_id');
+
+			const ticketIds = matchingTickets.map((t) => t._id);
+
+			// Replace 'title' filter with 'ticket' ObjectId filter
+			filter.ticket = { $in: ticketIds };
+
+			// Optionally remove from transformedQuery
+			delete transformedQuery['title'];
+		}
+
+		console.log(transformedQuery.title);
+
 		const requestQuery = TechnicianRequest.find(filter);
 
 		const features = new APIFeatures(requestQuery, transformedQuery)
