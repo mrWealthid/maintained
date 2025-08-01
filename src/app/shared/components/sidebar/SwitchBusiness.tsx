@@ -42,7 +42,7 @@ export const SwitchBusiness = () => {
 							className='focus-visible:ring-0 data-[state=open]:bg-sidebar-accent flex justify-between  data-[state=open]:text-sidebar-accent-foreground'>
 							{data?.memberships.find(
 								(m) => m.business.id === data.currentBusiness.id
-							)?.business.businessName ?? 'Select Business'}
+							)?.business.name ?? 'Select Business'}
 							<ChevronDown />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
@@ -59,7 +59,7 @@ export const SwitchBusiness = () => {
 									handleBusinessSwitch(org.business.id);
 									setActiveBusinessId(org.business.id);
 								}}>
-								{org.business.businessName}
+								{org.business.name}
 								{isSwitching &&
 									activeBusinessId === org.business.id && (
 										<LoaderCircle
