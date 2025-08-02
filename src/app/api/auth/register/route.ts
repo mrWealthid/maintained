@@ -64,13 +64,13 @@ export async function POST(request: Request) {
 		}
 
 		const business = await Business.create({
-			businessName: req.name,
+			name: req.businessName,
 			registrationId: req.registrationId,
-			businessContact: req.contact,
+			contact: req.businessContact,
 			country: req.country,
-			businessAddress: req.address,
-			businessEmail: req.email,
-			businessCreator: req.name
+			address: req.businessAddress,
+			email: req.businessEmail,
+			creator: req.name
 		});
 
 		console.log(business);
