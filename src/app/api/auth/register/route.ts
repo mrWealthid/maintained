@@ -18,7 +18,7 @@ const signTokenFromMembership = (user: any, businessId: Types.ObjectId) => {
 	}
 
 	return jwt.sign(
-		{ id: user._id, currentBusiness: businessId, role },
+		{ id: user._id, currentBusiness: businessId },
 		process.env.JWT_SECRET!,
 		{ expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
 	);

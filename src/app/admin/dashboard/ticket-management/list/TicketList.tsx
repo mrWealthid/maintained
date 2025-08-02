@@ -37,10 +37,10 @@ const TicketList: FC = () => {
 			searchType: 'DROPDOWN',
 			filterKey: 'status',
 			selectOptions: [
-				{ name: 'pending', value: TICKET_STATUS.pending },
-				{ name: 'assigned', value: TICKET_STATUS.assigned },
-				{ name: 'completed', value: TICKET_STATUS.completed },
-				{ name: 'declined', value: TICKET_STATUS.declined }
+				{ name: 'Pending', value: TICKET_STATUS.pending },
+				{ name: 'Assigned', value: TICKET_STATUS.assigned },
+				{ name: 'Completed', value: TICKET_STATUS.completed },
+				{ name: 'Declined', value: TICKET_STATUS.declined }
 			]
 		},
 

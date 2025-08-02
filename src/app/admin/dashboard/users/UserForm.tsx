@@ -7,13 +7,16 @@ import EmailInput from '@/app/shared/components/form-elements/Email-Input';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
 import { ROLES } from '@/app/shared/enums/enums';
 import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
+import { useAppContext } from '@/app/shared/contexts/AppContext';
 
 const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
 	const isEditing = !!user?.id;
 
+	const { role } = useAppContext();
+
 	const { register, handleSubmit, formState } = useForm<ManageUserForm>({
 		mode: 'all',
-		defaultValues: isEditing ? { ...user } : {}
+		defaultValues: isEditing ? { ...user, role } : {}
 	});
 
 	const { errors, isSubmitting, isValid, isDirty } = formState;

@@ -154,6 +154,7 @@ userSchema.methods.correctPassword = async function (
 	newPassword: string,
 	userPassword: string
 ): Promise<boolean> {
+	if (!this.password) return false;
 	return await bcrypt.compare(newPassword, userPassword);
 };
 
