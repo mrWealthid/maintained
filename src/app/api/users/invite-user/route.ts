@@ -1,5 +1,6 @@
 import { INVITE_STATUS } from '@/app/shared/enums/enums';
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
+import Business from '@/model/businessModel';
 import User from '@/model/userModel';
 import { Emails } from '@/utils/email-resend';
 import { generateInviteToken } from '@/utils/helpers';
@@ -28,18 +29,17 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
+
 		const capitalize = (str: string) =>
 			str.replace(/\b\w/g, (char) => char.toUpperCase());
 
 		const existingUser = await User.findOne({ email: body.email });
+		const activeBusiness = await Business.findById(currentBusinessId);
 
 		let inviteToken = '';
 		let userToInvite;
 
 		const { token, hashed, expires } = generateInviteToken();
-
-		console.log({ token, hashed });
-		console.log({ existingUser });
 
 		if (existingUser) {
 			// Check if they're already a member of this business
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 		await new Emails(
 			userToInvite,
 			inviteURL,
-			currentBusinessId
+			activeBusiness
 		).sendInviteUser();
 
 		return NextResponse.json({

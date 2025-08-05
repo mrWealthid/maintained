@@ -9,7 +9,7 @@ export class Emails {
 		this.to = user.email;
 		this.firstName = user.name.split(',')[0];
 		this.url = url;
-		this.business = business.businessName;
+		this.business = business.name;
 		this.from = 'support@wealthtech.website';
 
 	}

@@ -12,6 +12,10 @@ export const ROUTES_DEFINITION = {
 		TICKETS: '/dashboard/ticket-management',
 		MANAGE_TICKET: '/dashboard/ticket-management/manage',
 		CHAT: '/dashboard/chat'
+	},
+	AUTH: {
+		LOGIN: '/auth/login',
+		REGISTER: '/auth/register'
 	}
 };
 

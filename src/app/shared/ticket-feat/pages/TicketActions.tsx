@@ -36,14 +36,15 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	}
 	const { user, role } = useAppContext();
 
-
 	function handleAssign(onCloseModal: () => void) {
-		const payload = { actionedBy: user?.id , status: TICKET_STATUS.processing} ;
+		const payload = {
+			actionedBy: user?.id,
+			status: TICKET_STATUS.processing
+		};
 		handleAssignTicket(payload, {
 			onSuccess: () => onCloseModal()
 		});
 	}
-
 
 	return (
 		<>
@@ -116,7 +117,8 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{/*  This feat should be executed by an admin who
 					created the ticket only */}
 					{ticket.status === TICKET_STATUS.processing &&
-						role === ROLES.admin && (
+						role === ROLES.admin &&
+						user?.id === ticket.actionedBy?.id && (
 							<DropdownMenuItem>
 								<Modal.Open opens='send-request-technicians'>
 									<button

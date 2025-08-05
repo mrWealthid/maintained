@@ -6,11 +6,16 @@ export function middleware(request: NextRequest) {
 	const currentPath = url.pathname;
 
 	const token = request.cookies.get('token');
-	const unprotectedRoute = currentPath.startsWith('/auth');
+	const unprotectedRoute =
+		currentPath.startsWith('/auth') ||
+		currentPath.startsWith('/auth/onboard-user');
 	const basePath = '/';
 
 	const { valid, role } = verifyToken(token?.value || null);
 
+	if (basePath) {
+		return NextResponse.next();
+	}
 	// No token and trying to access protected route
 	if (!token && !unprotectedRoute) {
 		const loginUrl = new URL('/auth/login', request.url);
@@ -18,7 +23,7 @@ export function middleware(request: NextRequest) {
 	}
 
 	// Authenticated user accessing login or root page
-	if (token && (unprotectedRoute || currentPath === basePath)) {
+	if (token && unprotectedRoute) {
 		const dashboardUrl = /ADMIN/.test(role || '')
 			? new URL('/admin/dashboard', request.url)
 			: new URL('/dashboard', request.url);

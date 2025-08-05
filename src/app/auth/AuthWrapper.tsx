@@ -1,5 +1,9 @@
+import { ThemeToggle } from '@/components/Theme-Toggle';
+import { Button } from '@/components/ui/button';
 import {
+	ArrowLeft,
 	BetweenVerticalStart,
+	Building2,
 	Cog,
 	Cuboid,
 	GalleryVerticalEnd,
@@ -8,6 +12,7 @@ import {
 	Warehouse
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AuthWrapper({
 	children
@@ -15,36 +20,34 @@ export default function AuthWrapper({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className='min-h-screen justify-center  items-center flex'>
-			<div className='grid   w-5/6 border lg:grid-cols-2'>
-				<div className='flex bg-card flex-col gap-4 p-6'>
-					<div className='flex justify-center gap-2 md:justify-start'>
-						<a
-							href='#'
-							className='flex items-center gap-3 font-medium'>
-							<div className='bg-primary flex  text-primary-foreground  items-center justify-center rounded-md'>
-								<Warehouse
-									className='size-3'
-									color='#1849aa'
-									strokeWidth={2}
-								/>
-							</div>
-							Maintainly
-						</a>
-					</div>
-					<div className='flex flex-1 items-center justify-center'>
-						<div className='w-full'>{children}</div>
+		<div className='min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col'>
+			{/* Header */}
+			<header className='w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950'>
+				<div className='container mx-auto flex h-16 items-center justify-between px-4'>
+					<Link href='/' className='flex items-center space-x-3'>
+						<div className='flex h-8 w-8 items-center justify-center rounded bg-blue-600'>
+							<Building2 className='h-5 w-5 text-white' />
+						</div>
+						<span className='text-xl font-semibold text-gray-900 dark:text-white'>
+							ApartmentHub
+						</span>
+					</Link>
+					<div className='flex items-center space-x-4'>
+						<ThemeToggle />
+						<Link href='/'>
+							<Button
+								variant='ghost'
+								size='sm'
+								className='text-gray-600 dark:text-gray-300'>
+								<ArrowLeft className='h-4 w-4 mr-2' />
+								Back to Home
+							</Button>
+						</Link>
 					</div>
 				</div>
-				<div className=' relative hidden lg:block'>
-					<Image
-						width={100}
-						height={100}
-						src='https://deifkwefumgah.cloudfront.net/shadcnblocks/block/patterns/square-alt-grid.svg'
-						alt='Image'
-						className='absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale'
-					/>
-				</div>
+			</header>
+			<div className='flex-1 flex items-center justify-center p-4 py-8'>
+				<div className='w-full  space-y-6'>{children}</div>
 			</div>
 		</div>
 	);
