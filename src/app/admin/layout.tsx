@@ -23,15 +23,37 @@ export default async function DashboardLayout({
 	}
 
 	return (
-		<section className='min-h-screen'>
+		// <section className='min-h-screen'>
+		// 	<SidebarProvider>
+		// 		<AppSidebar routes={adminRoutes} />
+		// 		<section className='flex min-h-screen flex-col overflow-x-hidden w-full gap-6'>
+		// 			<header className='sticky p-2  flex items-center justify-between top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 dark:supports-[backdrop-filter]:bg-gray-950/90'>
+		// 				<SidebarTrigger />
+		// 				<Header />
+		// 			</header>
+
+		// 			<section className='overflow-y-auto container-text'>
+		// 				<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
+		// 				<AppProvider>{children}</AppProvider>
+		// 			</section>
+		// 		</section>
+		// 	</SidebarProvider>
+		// </section>
+
+		<section className='min-h-screen flex'>
 			<SidebarProvider>
 				<AppSidebar routes={adminRoutes} />
-				<section className='flex flex-col overflow-x-hidden w-full gap-6'>
-					<header className='flex p-2 bg-card border-b items-center justify-between w-full'>
+
+				{/* Main Content Area */}
+				<section className='flex flex-col w-full'>
+					{/* Sticky Header */}
+					<header className='sticky top-0 z-50 p-2 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 dark:supports-[backdrop-filter]:bg-gray-950/90'>
 						<SidebarTrigger />
 						<Header />
 					</header>
-					<section className='container-text'>
+
+					{/* Scrollable Content */}
+					<section className='overflow-y-auto flex-1 px-4 py-6'>
 						<Breadcrumbs crumbLabelMap={adminCrumbLabelMap} />
 						<AppProvider>{children}</AppProvider>
 					</section>

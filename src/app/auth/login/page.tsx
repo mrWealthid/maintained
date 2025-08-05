@@ -64,7 +64,7 @@ const LoginComponent = () => {
 							Or
 						</section>
 					</section> */}
-					<Card className='border-gray-200 dark:border-gray-700 w-1/3 bg-white dark:bg-gray-900'>
+					<Card className='border-gray-200 dark:border-gray-700 w-full lg:w-1/3  bg-white dark:bg-gray-900'>
 						<CardHeader className='space-y-1 pb-4'>
 							<CardTitle className='text-xl font-semibold text-center text-gray-900 dark:text-white'>
 								Sign In

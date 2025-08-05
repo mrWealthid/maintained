@@ -71,7 +71,7 @@ const SignupComponent = () => {
 						</section>
 					</section> */}
 
-				<Card className='border-gray-200 dark:border-gray-700 w-1/2 bg-white dark:bg-gray-900'>
+				<Card className='border-gray-200 dark:border-gray-700 w-full lg:w-1/2 bg-white dark:bg-gray-900'>
 					<CardHeader className='space-y-1 pb-4'>
 						<CardTitle className='text-xl font-semibold text-center text-gray-900 dark:text-white'>
 							Sign Up
@@ -84,11 +84,11 @@ const SignupComponent = () => {
 						<form
 							onSubmit={handleSubmit(onSubmit, onError)}
 							className='w-full flex flex-col gap-2 items-center'>
-							<section className='w-full border rounded-xl p-2'>
+							<section className='w-full border rounded-xl p-4'>
 								<p className='text-sm  inline-block mb-4'>
 									Business Details
 								</p>
-								<div className='w-full flex gap-4'>
+								<div className='w-full lg:flex-row flex-col flex lg:gap-4 gap-2'>
 									<TextInput
 										name={'businessName'}
 										label='Name'
@@ -125,7 +125,7 @@ const SignupComponent = () => {
 									</TextInput>
 								</div>
 
-								<div className='w-full flex gap-4'>
+								<div className='w-full lg:flex-row flex-col flex lg:gap-4 gap-2'>
 									<EmailInput
 										name={'businessEmail'}
 										label='Email'
@@ -166,7 +166,7 @@ const SignupComponent = () => {
 										/>
 									</TextInput>
 								</div>
-								<div className='w-full flex gap-4'>
+								<div className='w-full lg:flex-row flex-col flex lg:gap-4 gap-2'>
 									<TextInput
 										name={'businessAddress'}
 										label='Address'
@@ -204,11 +204,11 @@ const SignupComponent = () => {
 								</div>
 							</section>
 
-							<section className='w-full border mt-3 rounded-xl p-2'>
+							<section className='w-full border mt-3 rounded-xl p-4'>
 								<p className='text-sm  inline-block mb-4'>
 									Personal Details
 								</p>
-								<div className='w-full flex gap-4'>
+								<div className='w-full lg:flex-row flex-col flex lg:gap-4 gap-2'>
 									<TextInput
 										name={'firstName'}
 										label='First Name'
@@ -245,7 +245,7 @@ const SignupComponent = () => {
 										/>
 									</TextInput>
 								</div>
-								<div className='w-full flex gap-4'>
+								<div className='w-full lg:flex-row flex-col flex lg:gap-4 gap-2'>
 									<EmailInput
 										name={'email'}
 										label='Email'
