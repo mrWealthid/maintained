@@ -169,7 +169,11 @@ const mockTechnicians = [
 	}
 ];
 
-export default function ChatPage() {
+export default function ChatPage({
+	params
+}: {
+	params: Promise<{ requestId: string }>;
+}) {
 	const [messages, setMessages] = useState(mockMessages);
 	const [newMessage, setNewMessage] = useState('');
 	const [isTyping, setIsTyping] = useState(false);
