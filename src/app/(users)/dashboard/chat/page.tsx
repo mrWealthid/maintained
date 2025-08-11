@@ -553,6 +553,7 @@ export default function ChatPage() {
 					<div className='border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4'>
 						<div className='flex space-x-2'>
 							<input
+								title='Upload files'
 								type='file'
 								ref={fileInputRef}
 								onChange={handleFileUpload}

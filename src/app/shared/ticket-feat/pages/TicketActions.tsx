@@ -117,6 +117,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 					{ticket.status === TICKET_STATUS.pending &&
 						role === ROLES.user && (
 							<DropdownMenuItem
+								className='cursor-pointer'
 								onSelect={(e) => {
 									e.stopPropagation();
 									setOpen(true); // you manage open state

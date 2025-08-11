@@ -7,7 +7,7 @@ import { CiCirclePlus } from 'react-icons/ci';
 import TransitionReveal from '@/app/shared/components/animation/TransitionReveal';
 import { InteractiveTicketChat } from '@/app/shared/ticket-feat/pages/InteractiveTicketChat';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, X } from 'lucide-react';
+import { Bot, FilePlus, MessageSquare, X } from 'lucide-react';
 import { ManageTicketForm } from '@/app/shared/ticket-feat/model/ticket.model';
 import { FormProvider, useForm } from 'react-hook-form';
 import TicketForm from '@/app/shared/ticket-feat/form/TicketForm';
@@ -25,6 +25,21 @@ import {
 import { useCreateTicket } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import { useRouter } from 'next/navigation';
 import { ROUTES_DEFINITION } from '@/app/shared/routes/routes';
+
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuPortal,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 export default function Home() {
 	const [isList, setIsList] = useState(false);
@@ -59,50 +74,75 @@ export default function Home() {
 			<h1 className='title'> Maintenance Requests </h1>
 			<section className='flex flex-col gap-2  w-full  items-end'>
 				<FormProvider {...methods}>
-					<div>
-						<Sheet open={open} onOpenChange={setOpen}>
-							<SheetTrigger asChild>
-								<button className='btn-primary bg-card flex items-center gap-1 rounded-3xl'>
-									<CiCirclePlus size={18} />
-									Create Ticket
-								</button>
-							</SheetTrigger>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<button
+								type='button'
+								className='btn-primary bg-card flex items-center gap-1 rounded-lg'>
+								<CiCirclePlus size={18} />
+								Create Ticket
+							</button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className='w-56' align='end'>
+							{/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
+							<DropdownMenuGroup>
+								<DropdownMenuItem asChild>
+									<Sheet open={open} onOpenChange={setOpen}>
+										<SheetTrigger asChild>
+											<button
+												type='button'
+												className='relative gap-2 flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent w-full  hover:bg-accent focus:text-accent-foreground hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'
+												role='button'>
+												<FilePlus size={14} /> Fill
+												Ticket Form
+											</button>
+										</SheetTrigger>
 
-							<SheetContent
-								side='bottom'
-								className='w-full  max-h-screen  overflow-y-auto  max-w-[90vw] md:max-w-full'>
-								<SheetClose asChild>
-									<Button
-										variant='ghost'
-										size='icon'
-										className='absolute top-4 right-4 rounded-full p-2 text-gray-600 bg-muted hover:bg-gray-100 dark:hover:bg-gray-800'>
-										<X className='w-6 h-6' />{' '}
-									</Button>
-								</SheetClose>
+										<SheetContent
+											side='bottom'
+											className='w-full  max-h-screen  overflow-y-auto  max-w-[90vw] md:max-w-full'>
+											<SheetClose asChild>
+												<Button
+													variant='ghost'
+													size='icon'
+													className='absolute top-4 right-4 rounded-full p-2 text-gray-600 bg-muted hover:bg-gray-100 dark:hover:bg-gray-800'>
+													<X className='w-6 h-6' />{' '}
+												</Button>
+											</SheetClose>
 
-								<div className='h-full w-2/3 mx-auto flex flex-col gap-4 px-4 py-6'>
-									<SheetHeader>
-										<SheetTitle>Manage Ticket</SheetTitle>
-										<SheetDescription>
-											Seamlessly manage requests
-										</SheetDescription>
-									</SheetHeader>
+											<div className='h-full w-2/3 mx-auto flex flex-col gap-4 px-4 py-6'>
+												<SheetHeader>
+													<SheetTitle>
+														Manage Ticket
+													</SheetTitle>
+													<SheetDescription>
+														Seamlessly manage
+														requests
+													</SheetDescription>
+												</SheetHeader>
 
-									<TicketForm onSubmit={onSubmit} />
-								</div>
-							</SheetContent>
-						</Sheet>
-
-						<InteractiveTicketChat onSubmit={onSubmit}>
-							<Button
-								variant='outline'
-								size='lg'
-								className='h-12 px-8 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 bg-transparent'>
-								<MessageSquare className='mr-2 h-4 w-4' />
-								Try Maintenance Chat
-							</Button>
-						</InteractiveTicketChat>
-					</div>
+												<TicketForm
+													onSubmit={onSubmit}
+												/>
+											</div>
+										</SheetContent>
+									</Sheet>
+								</DropdownMenuItem>
+								<DropdownMenuItem asChild>
+									<InteractiveTicketChat onSubmit={onSubmit}>
+										<button
+											type='button'
+											className='relative flex gap-2 cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent w-full  hover:bg-accent focus:text-accent-foreground hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'
+											role='button'>
+											{/* <MessageSquare className='mr-2 h-4 w-4' /> */}
+											<Bot size={14} />
+											Chat-based Ticket
+										</button>
+									</InteractiveTicketChat>
+								</DropdownMenuItem>
+							</DropdownMenuGroup>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</FormProvider>
 
 				<ToggleView
