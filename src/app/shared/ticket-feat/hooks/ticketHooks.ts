@@ -8,6 +8,7 @@ import {
 	fetchAdmins,
 	fetchRequestType,
 	fetchTechnicians,
+	fetchTicketCategory,
 	fetchTickets,
 	handOffTicket,
 	ProcessTechnicianResponse,
@@ -20,7 +21,12 @@ import {
 	TicketListFilter,
 	TicketStatus
 } from '../model/ticket.model';
-import { CreateTicketPayload, Ticket } from '../../model/model';
+import {
+	Category,
+	CreateTicketPayload,
+	Ticket,
+	TicketType
+} from '../../model/model';
 import { ApiError } from 'next/dist/server/api-utils';
 import { IListResponse } from '@/app/shared/components/table/models/table.model';
 import { TICKET_STATUS } from '@/app/shared/enums/enums';
@@ -32,7 +38,7 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
 			createTicket(payload, isEditing, ticketId),
 		onSuccess: () => {
 			toast.success(
-				`Maintenance Request successfully ${isEditing ? 'updated' : 'created'}...`
+				` 🎉 Maintenance request successfully ${isEditing ? 'updated' : 'created'}...`
 			);
 			queryClient.invalidateQueries({
 				queryKey: ['tickets']
@@ -83,7 +89,7 @@ export function useDeleteTicket() {
 	const { isPending: isDeleting, mutate: handleDeleteTicket } = useMutation({
 		mutationFn: (id: string) => deleteTicket(id),
 		onSuccess: () => {
-			toast.success('Maintenance Request successfully deleted');
+			toast.success('🎉 Maintenance request successfully deleted');
 			queryClient.invalidateQueries({
 				queryKey: ['tickets']
 			});
@@ -96,7 +102,7 @@ export function useDeleteTicket() {
 export function useAssignTicket(id: string) {
 	const queryClient = useQueryClient();
 	const { isPending: isUpdating, mutate: handleAssignTicket } = useMutation({
-		mutationFn: (payload: {actionedBy?: string, status: TICKET_STATUS}) =>
+		mutationFn: (payload: { actionedBy?: string; status: TICKET_STATUS }) =>
 			assignTicket(id, payload),
 		onSuccess: () => {
 			toast.success('Ticket successfully assigned');
@@ -147,7 +153,7 @@ export function useAssignTechnician(id: string, close?: () => void) {
 
 export function useFetchTechnicians<T>(page: number = 1, limit: number = 50) {
 	const { isLoading, data, error, isRefetching } = useQuery({
-		queryKey: ['ticket-type'],
+		queryKey: ['technicians'],
 		queryFn: () => fetchTechnicians<T>()
 	});
 
@@ -160,7 +166,7 @@ export function useFetchTechnicians<T>(page: number = 1, limit: number = 50) {
 }
 export function useFetchAdmins<T>(page: number = 1, limit: number = 50) {
 	const { isLoading, data, error, isRefetching } = useQuery({
-		queryKey: ['ticket-type'],
+		queryKey: ['admin-users'],
 		queryFn: () => fetchAdmins<T>()
 	});
 
@@ -208,4 +214,40 @@ export function useHandOffTicket(id: string, close?: () => void) {
 		});
 
 	return { isUpdating, handleHandleOffTicket };
+}
+
+export function useFetchCategories(page: number = 1, limit: number = 50) {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['categories'],
+		queryFn: () => fetchTicketCategory<Category>(),
+		select(data) {
+			return data.data.map((cat) => ({ label: cat.name, value: cat.id }));
+		}
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		data
+	};
+}
+export function useFetchRequestTypes(page: number = 1, limit: number = 50) {
+	const { isLoading, data, error, isRefetching } = useQuery({
+		queryKey: ['request-type'],
+		queryFn: () => fetchRequestType<TicketType>(),
+		select(data) {
+			return data.data.map((type) => ({
+				label: type.name,
+				value: type.id
+			}));
+		}
+	});
+
+	return {
+		isLoading,
+		error,
+		isRefetching,
+		data
+	};
 }

@@ -3,7 +3,7 @@ import {
 	TECHNICIAN_RESPONSE,
 	TICKET_STATUS
 } from '@/app/shared/enums/enums';
-import { Ticket, User } from '../../model/model';
+import { CreateTicketPayload, Ticket, User } from '../../model/model';
 
 export type TicketStatus =
 	| TICKET_STATUS.pending
@@ -13,6 +13,10 @@ export type TicketStatus =
 
 export interface ManageTicketFormProps {
 	ticket?: Ticket | undefined;
+	onSubmit: (
+		data: CreateTicketPayload,
+		actions?: { onSuccess: () => void; onError: () => void }
+	) => void;
 }
 export interface ManageTicketDetails {
 	ticket: TicketDetailsResponse | undefined;
@@ -75,8 +79,9 @@ export interface ManageTicketForm {
 	description: string;
 	area: string;
 	category: string;
-	images?: FileList | null;
-	videos?: FileList | null;
+	images?: File[] | null;
+	videos?: File[] | null;
+	documents?: File[] | null;
 	type: string;
 }
 

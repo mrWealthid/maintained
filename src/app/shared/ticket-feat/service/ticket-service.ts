@@ -40,7 +40,7 @@ export async function createTicket(
 }
 
 export async function fetchTicketCategory<T>(
-	query: string | null
+	query?: string | null
 ): Promise<ApiResponse<T[]>> {
 	const url = query
 		? `${API_ROUTES.ticketManagement.get_categories}?name=${query}`
@@ -83,8 +83,8 @@ export async function fetchAdmins<T>(
 	query?: string | null
 ): Promise<ApiResponse<T[]>> {
 	const url = query
-		? `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}&name=${query}`
-		: `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}`;
+		? `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}&excludeSelf=true&name=${query}`
+		: `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}&excludeSelf=true`;
 	try {
 		const response = await axios(url);
 		const data = await response.data;
