@@ -1,19 +1,17 @@
 'use client';
 import React, { FC, useState } from 'react';
-import { Controller, useForm, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { IoIosCloudUpload } from 'react-icons/io';
-import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import { fetchTicketCategory } from '../service/ticket-service';
 import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
-import { useCreateTicket, useFetchTicketType } from '../hooks/ticketHooks';
+import {  useFetchTicketType } from '../hooks/ticketHooks';
 import { Category, CreateTicketPayload, TicketType } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
 import FileUpload from '@/app/shared/components/form-elements/File-Upload';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import { ROUTES_DEFINITION } from '../../routes/routes';
 import toast from 'react-hot-toast';
 import {
 	Select,

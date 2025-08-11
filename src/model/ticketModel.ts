@@ -18,6 +18,7 @@ interface ITicket extends Document {
 	status: TICKET_STATUS;
 	videos: string[];
 	images: string[];
+	documents: string[]; // Optional for documents
 	createdAt: Date;
 	user: ObjectId;
 	business: ObjectId;
@@ -70,6 +71,7 @@ const TicketSchema = new Schema<ITicket>(
 
 		videos: [{ type: String }],
 		images: [{ type: String }],
+		documents: [{ type: String }],
 
 		createdAt: {
 			type: Date,

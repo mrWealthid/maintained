@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 		const verify = await getUserFromCookies();
 		if (!verify) {
 			return NextResponse.json(
-				{ error: 'UnAuthorized' },
+				{ error: 'Unauthorized' },
 				{ status: 401 }
 			);
 		}
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest, { params }: any) {
 		const verify = await getUserFromCookies();
 		if (!verify) {
 			return NextResponse.json(
-				{ error: 'UnAuthorized' },
+				{ error: 'Unauthorized' },
 				{ status: 401 }
 			);
 		}
