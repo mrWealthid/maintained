@@ -27,6 +27,7 @@ export interface Ticket {
 	createdAt: string;
 	images?: string[];
 	videos?: string[];
+	documents?: string[];
 	user: Pick<User, 'id' | 'name' | 'email'>;
 	area: string;
 	category: Category;

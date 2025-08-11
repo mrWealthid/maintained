@@ -1,6 +1,7 @@
 import { getUserFromCookies } from '@/lib/auth/getUserFromCookies';
 import MiddlewareFeatures from '@/middlewareFeatures';
 import Ticket from '@/model/ticketModel';
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -123,7 +124,7 @@ export async function PATCH(
 		// });
 
 		const updatedRequest = await Ticket.findOneAndUpdate(
-			{ id: ticketId, user: verify.id }, // Ensure user is the owner
+			{ _id: ticketId, user: verify.id }, // Ensure user is the owner
 			rest,
 			{ new: true, runValidators: true }
 		);
@@ -165,10 +166,14 @@ export async function DELETE(
 		}
 
 		const ticket = await Ticket.findOneAndDelete({
-			id: ticketId,
+			_id: ticketId,
 			user: verify.id // ← only delete if the user owns the ticket
 		});
 
+		console.log(ticket);
+
+		console.log(verify.id);
+		console.log(ticket?.user);
 		if (!ticket) {
 			return NextResponse.json(
 				{

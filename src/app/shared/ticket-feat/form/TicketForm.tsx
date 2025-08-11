@@ -1,19 +1,17 @@
 'use client';
 import React, { FC, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { IoIosCloudUpload } from 'react-icons/io';
-import axios from 'axios';
 import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import { fetchTicketCategory } from '../service/ticket-service';
 import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
-import { useCreateTicket, useFetchTicketType } from '../hooks/ticketHooks';
+import {  useFetchTicketType } from '../hooks/ticketHooks';
 import { Category, CreateTicketPayload, TicketType } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
 import FileUpload from '@/app/shared/components/form-elements/File-Upload';
 import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import { ROUTES_DEFINITION } from '../../routes/routes';
 import toast from 'react-hot-toast';
 import {
 	Select,
@@ -25,8 +23,9 @@ import {
 	SelectValue
 } from '@/components/ui/select';
 import Label from '../../components/form-elements/Label';
+import { batchUpload } from '../helpers/helpers';
 
-const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
+const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 	const isEditing = !!ticket?.id;
 	const [autoCompleteValue, setAutoCompleteValue] = useState<{
 		category: Category;
@@ -38,6 +37,8 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	const [uploadResults, setUploadResults] = useState<Record<string, string>>(
 		{}
 	);
+
+	const [isLoading, setIsLoading] = useState(false);
 
 	const initialImageFiles =
 		isEditing && Array.isArray(ticket?.images)
@@ -56,33 +57,52 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 					id: url
 				}))
 			: [];
+	const initialDocumentFiles =
+		isEditing && Array.isArray(ticket?.documents)
+			? ticket.documents.map((url) => ({
+					url,
+					type: 'application/pdf',
+					id: url
+				}))
+			: [];
 
 	const [remainingImages, setRemainingImages] = useState(initialImageFiles);
 	const [remainingVideos, setRemainingVideos] = useState(initialVideoFiles);
+	const [remainingDocuments, setRemainingDocuments] =
+		useState(initialDocumentFiles);
 
 	const router = useRouter();
 	const { data } = useFetchTicketType<TicketType>();
 
 	//form controls
-	const { register, handleSubmit, control, setValue, formState, getValues } =
-		useForm<ManageTicketForm>({
-			mode: 'all',
-			defaultValues: isEditing
-				? {
-						title: ticket.title,
-						description: ticket.description,
-						area: ticket.area,
-						type: ticket.type,
-						category:
-							typeof ticket.category === 'object'
-								? ticket.category.id
-								: ticket.category,
-						images: undefined,
-						videos: undefined
-					}
-				: {}
-		});
-	const { errors, isValid, isDirty } = formState;
+	// const { register, handleSubmit, control, setValue, formState, getValues } =
+	// 	useForm<ManageTicketForm>({
+	// 		mode: 'all',
+	// 		defaultValues: isEditing
+	// 			? {
+	// 					title: ticket.title,
+	// 					description: ticket.description,
+	// 					area: ticket.area,
+	// 					type: ticket.type,
+	// 					category:
+	// 						typeof ticket.category === 'object'
+	// 							? ticket.category.id
+	// 							: ticket.category,
+	// 					images: undefined,
+	// 					videos: undefined
+	// 				}
+	// 			: {}
+	// 	});
+
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		getValues,
+		control,
+		formState: { errors, isValid, isDirty }
+	} = useFormContext<ManageTicketForm>();
+	// const { errors, isValid, isDirty } = formState;
 
 	// Handle auto-complete values
 	function handleAutoCompleteValues(values: any) {
@@ -91,12 +111,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	}
 
 	// Create ticket mutation
-	const { isCreating, handleCreateTicket } = useCreateTicket(
-		isEditing,
-		ticket?.id
-	);
+	// const { isCreating, handleCreateTicket } = useCreateTicket(
+	// 	isEditing,
+	// 	ticket?.id
+	// );
 
-	const isSubmitting = isUploading || isCreating;
+	const isSubmitting = isUploading || isLoading;
 
 	function getCloudinaryPublicId(url: string) {
 		const matches = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/);
@@ -141,7 +161,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 			const updatedFileList =
 				updated.length > 0 && updated[0] instanceof File
-					? fileArrayToFileList(updated)
+					? updated
 					: null;
 
 			setValue(formFieldKey[resourceType], updatedFileList, {
@@ -171,24 +191,95 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
   		If there is an error during the upload or ticket creation process, it logs the error to the console.
 	*/
 
-	async function onSubmit(data: ManageTicketForm) {
-		console.log('Submitting form:', data);
-		const imgUrls = await handleMultipleUpload(
-			getValues().images!,
-			'image'
-		);
-		const videoUrls = await handleMultipleUpload(
-			getValues().videos!,
-			'video'
-		);
+	// async function formSubmit(data: ManageTicketForm) {
+	// 	console.log('Submitting form:', data);
+	// 	    const [imgUrls, videoUrls] = await Promise.all([
+	// 			handleMultipleUpload(images, 'image', {
+	// 				cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_NAME!,
+	// 				presets: {
+	// 					image: process.env.NEXT_PUBLIC_UPLOAD_IMAGE_PRESET!,
+	// 					video: process.env.NEXT_PUBLIC_UPLOAD_VIDEO_PRESET! // unused in image branch
+	// 				},
+	// 				cache: uploadResults // optional; filename -> url map if you keep one
+	// 			}),
+	// 			handleMultipleUpload(videos, 'video', {
+	// 				cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_NAME!,
+	// 				presets: {
+	// 					image: process.env.NEXT_PUBLIC_UPLOAD_IMAGE_PRESET!, // unused in video branch
+	// 					video: process.env.NEXT_PUBLIC_UPLOAD_VIDEO_PRESET!
+	// 				},
+	// 				cache: uploadResults
+	// 			})
+	// 		]);
 
-		const payload = BuildRequestPayload(data, imgUrls, videoUrls);
+	// 	const payload = BuildRequestPayload(data, imgUrls, videoUrls);
 
-		handleCreateTicket(payload, {
-			onSuccess: () => {
-				router.push(ROUTES_DEFINITION.DASHBOARD.TICKETS);
-			}
-		});
+	// 	setIsLoading(true);
+	// 	onSubmit(payload, {
+	// 		onSuccess() {
+	// 			setIsLoading(false);
+	// 		},
+	// 		onError() {
+	// 			setIsLoading(false);
+	// 		}
+	// 	});
+	// 	// handleCreateTicket(payload, {
+	// 	// 	onSuccess: () => {
+	// 	// 		router.push(ROUTES_DEFINITION.DASHBOARD.TICKETS);
+	// 	// 	}
+	// 	// });
+	// }
+
+	async function formSubmit(data: ManageTicketForm) {
+		try {
+			const { images, videos, documents } = getValues(); // Avoid multiple getValues() calls
+
+			setIsLoading(true);
+
+			const [imgUrls, videoUrls] = await Promise.all([
+				handleMultipleUpload(images, 'image', {
+					cloudName: process.env.CLOUDINARY_NAME!,
+					presets: {
+						image: process.env.IMG_PRESET!,
+						video: process.env.VIDEO_PRESET!, // unused in image branch
+						raw: process.env.DOCUMENT_PRESET!
+					},
+					cache: uploadResults // optional; filename -> url map if you keep one
+				}),
+				handleMultipleUpload(videos, 'video', {
+					cloudName: process.env.CLOUDINARY_NAME!,
+					presets: {
+						image: process.env.IMG_PRESET!,
+						video: process.env.VIDEO_PRESET!,
+						raw: process.env.DOCUMENT_PRESET!
+					},
+					cache: uploadResults
+				}),
+				handleMultipleUpload(documents, 'raw', {
+					cloudName: process.env.CLOUDINARY_NAME!,
+					presets: {
+						image: process.env.IMG_PRESET!,
+						video: process.env.VIDEO_PRESET!,
+						raw: process.env.DOCUMENT_PRESET!
+					},
+					cache: uploadResults
+				})
+			]);
+
+			const payload = BuildRequestPayload(data, imgUrls, videoUrls);
+
+			onSubmit(payload, {
+				onSuccess() {
+					setIsLoading(false);
+				},
+				onError() {
+					setIsLoading(false);
+				}
+			});
+		} catch (err) {
+			console.error('Submit failed:', err);
+			setIsLoading(false);
+		}
 	}
 
 	/* 			@Param {ManageTicketForm} data - The form data submitted by the user.
@@ -209,12 +300,15 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	): CreateTicketPayload {
 		let images: string[] = [];
 		let videos: string[] = [];
+		let documents: string[] = [];
 
 		if (isEditing) {
 			const existingImages = remainingImages.map((f) => f.url);
 			const existingVideos = remainingVideos.map((f) => f.url);
+			const existingDocuments = remainingDocuments.map((f) => f.url);
 			images = [...existingImages, ...(imgUrls || [])];
 			videos = [...existingVideos, ...(videoUrls || [])];
+			documents = [...existingDocuments, ...(documents || [])];
 		} else {
 			images = imgUrls || [];
 			videos = videoUrls || [];
@@ -224,6 +318,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 			...data,
 			images,
 			videos,
+			documents,
 			...(isEditing && {
 				status: ticket?.status
 			})
@@ -240,50 +335,50 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		@returns {Promise<string[]>} - A promise that resolves to an array of URLs for the successfully uploaded files.
 	*/
 
-	function batchUpload(
-		fileList: FileList,
-		type: 'video' | 'image',
-		setProgress?: (fileName: string, percent: number) => void
-	) {
-		return Array.from(fileList).map(async (file) => {
-			// ✅ Check if already uploaded
-			if (uploadResults[file.name]) {
-				return uploadResults[file.name]; // reuse cached result
-			}
+	//   function batchUpload(
+	// 		fileList: FileList,
+	// 		type: 'video' | 'image',
+	// 		setProgress?: (fileName: string, percent: number) => void
+	// 	) {
+	// 		return Array.from(fileList).map(async (file) => {
+	// 			// ✅ Check if already uploaded
+	// 			if (uploadResults[file.name]) {
+	// 				return uploadResults[file.name]; // reuse cached result
+	// 			}
 
-			const formData = new FormData();
-			formData.append(
-				'upload_preset',
-				type === 'image'
-					? process.env.IMG_PRESET!
-					: process.env.VIDEO_PRESET!
-			);
-			formData.append('file', file);
+	// 			const formData = new FormData();
+	// 			formData.append(
+	// 				'upload_preset',
+	// 				type === 'image'
+	// 					? process.env.IMG_PRESET!
+	// 					: process.env.VIDEO_PRESET!
+	// 			);
+	// 			formData.append('file', file);
 
-			try {
-				const response = await axios.post(
-					`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
-					formData,
-					{
-						onUploadProgress: (event) => {
-							const percent = Math.round(
-								(event.loaded * 100) / (event.total ?? 1)
-							);
-							if (setProgress) setProgress(file.name, percent);
-						}
-					}
-				);
-				const url = response.data.secure_url || response.data.url;
+	// 			try {
+	// 				const response = await axios.post(
+	// 					`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/${type}/upload`,
+	// 					formData,
+	// 					{
+	// 						onUploadProgress: (event) => {
+	// 							const percent = Math.round(
+	// 								(event.loaded * 100) / (event.total ?? 1)
+	// 							);
+	// 							if (setProgress) setProgress(file.name, percent);
+	// 						}
+	// 					}
+	// 				);
+	// 				const url = response.data.secure_url || response.data.url;
 
-				setUploadResults((prev) => ({ ...prev, [file.name]: url }));
+	// 				setUploadResults((prev) => ({ ...prev, [file.name]: url }));
 
-				return url;
-			} catch (error) {
-				console.error('Upload error:', error);
-				throw error;
-			}
-		});
-	}
+	// 				return url;
+	// 			} catch (error) {
+	// 				console.error('Upload error:', error);
+	// 				throw error;
+	// 			}
+	// 		});
+	// 	}
 
 	// I prefered to keep the above because it gave me accurate progress updates from cloudinary,
 	// but this is an alternative approach that uses the server-side API route
@@ -333,21 +428,106 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 		If any upload fails, it catches the error, logs it to the console, and rethrows the error.
 		Finally, it resets the uploading state to false to indicate that the upload process has ended.
 	*/
+	// async function handleMultipleUpload(
+	// 	file: FileList,
+	// 	type: 'video' | 'image'
+	// ) {
+	// 	if (!file) return;
+	// 	setIsUploading(true);
+	// 	const uploadPromises = await  batchUpload(file, type, updateProgress);
+	// 	try {
+	// 		const urls = await Promise.all(uploadPromises);
+	// 		return urls;
+	// 	} catch (error) {
+	// 		console.error('Error uploading one or more files:', error);
+	// 		throw error;
+	// 	} finally {
+	// 		setIsUploading(false); // upload ended
+	// 	}
+	// }
+
+	// async function handleMultipleUpload(
+	// 	fileList: FileList | null | undefined,
+	// 	type: 'image' | 'video',
+	// 	{
+	// 		cloudName,
+	// 		presets,
+	// 		cache
+	// 	}: {
+	// 		cloudName: string;
+	// 		presets: { image: string; video: string };
+	// 		cache?: Record<string, string>;
+	// 	}
+	// ): Promise<string[]> {
+	// 	if (!fileList || fileList.length === 0) return [];
+
+	// 	setIsUploading(true);
+	// 	try {
+	// 		const { urls, errors } = await batchUpload(fileList, type, {
+	// 			cloudName,
+	// 			presets,
+	// 			cache,
+	// 			onProgress: updateProgress, // (fileName, percent) => void
+	// 			axiosConfig: { timeout: 60_000 }
+	// 		});
+
+	// 		// Surface any failures (non-blocking for successful ones)
+	// 		const failed = Object.keys(errors);
+	// 		if (failed.length > 0) {
+	// 			console.warn('Some files failed to upload:', errors);
+	// 			// Optionally: show a toast/snackbar here
+	// 			// showToast(`Failed to upload: ${failed.join(', ')}`);
+	// 		}
+
+	// 		// Return URLs in the SAME order as the incoming FileList
+	// 		return Array.from(fileList)
+	// 			.map((f) => urls[f.name])
+	// 			.filter((u): u is string => Boolean(u));
+	// 	} finally {
+	// 		setIsUploading(false);
+	// 	}
+	// }
+
+	type MediaType = 'image' | 'video' | 'raw';
+
 	async function handleMultipleUpload(
-		file: FileList,
-		type: 'video' | 'image'
-	) {
-		if (!file) return;
+		files: File[] | null | undefined,
+		type: MediaType,
+		{
+			cloudName,
+			presets,
+			cache
+		}: {
+			cloudName: string;
+			presets: { image: string; video: string; raw: string };
+			cache?: Record<string, string>;
+		}
+	): Promise<string[]> {
+		if (!files || files.length === 0) return [];
+
 		setIsUploading(true);
-		const uploadPromises = batchUpload(file, type, updateProgress);
 		try {
-			const urls = await Promise.all(uploadPromises);
-			return urls;
-		} catch (error) {
-			console.error('Error uploading one or more files:', error);
-			throw error;
+			const { urls, errors } = await batchUpload(files, type, {
+				cloudName,
+				presets,
+				cache,
+				onProgress: updateProgress, // (fileName, percent) => void
+				axiosConfig: { timeout: 60_000 }
+			});
+
+			// Optional: surface failures without blocking successes
+			const failed = Object.keys(errors);
+			if (failed.length > 0) {
+				console.warn('Some files failed to upload:', errors);
+				// e.g., toast(`Failed: ${failed.join(', ')}`);
+			}
+
+			// Preserve the order of the incoming File[]
+			return files
+				.map((f) => urls[f.name])
+				.filter((u): u is string => Boolean(u));
 		} finally {
-			setIsUploading(false); // upload ended
+			setIsUploading(false);
 		}
 	}
 
@@ -360,11 +540,11 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 
 	const handleImageSelect = (files: FileList) => {
 		if (files.length < 1) return;
-		setValue('images', files, { shouldDirty: true });
+		setValue('images', Array.from(files), { shouldDirty: true });
 	};
 	const handleVideoSelect = (files: FileList) => {
 		if (files.length < 1) return;
-		setValue('videos', files, { shouldDirty: true });
+		setValue('videos', Array.from(files), { shouldDirty: true });
 	};
 
 	/* @Param {File} file - The file to be removed from the preview.
@@ -389,9 +569,9 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket }) => {
 	// }
 
 	return (
-		<div className='lg:w-2/3  flex flex-col gap-4'>
+		<div className='w-full  flex flex-col gap-4'>
 			<form
-				onSubmit={handleSubmit(onSubmit, onError)}
+				onSubmit={handleSubmit(formSubmit, onError)}
 				className='flex bg-card flex-1 p-6 rounded-lg border items-center'>
 				<section className='flex-col flex gap-2 w-full'>
 					<section className='flex mb-5 justify-between items-center'>

@@ -45,6 +45,13 @@ export async function GET(request: NextRequest) {
 		const query: any = request.nextUrl.searchParams;
 		const transformedQuery = mapToObject(query);
 
+		// 🔐 Exclude current user if excludeSelf=true is passed
+
+		if (query.get('excludeSelf') === 'true') {
+			filter._id = { $ne: verify.id };
+			delete transformedQuery.excludeSelf;
+		}
+
 		//This is added for fields that should resolve with partial search
 		if (transformedQuery.name) {
 			const regex = new RegExp(transformedQuery.name, 'i'); // 'i' for case-insensitive

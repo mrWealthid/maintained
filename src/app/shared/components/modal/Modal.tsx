@@ -54,8 +54,7 @@ const Window = ({
 
 	if (name !== openName) return null;
 	return createPortal(
-		<section>
-			{closeOnOutsideClick ? 'true' : 'false'}
+		<section className=''>
 			<div
 				className={` ${
 					openName === name
@@ -95,13 +94,13 @@ const Window = ({
 							</div>
 						</div>
 						<hr className='-mx-6' />
-						<>
+						<div className='overflow-y-hidden  max-h-[80vh]'>
 							{React.isValidElement(children)
 								? cloneElement(children, {
 										onCloseModal: close
 									})
 								: null}
-						</>
+						</div>
 					</div>
 				</div>
 			</div>

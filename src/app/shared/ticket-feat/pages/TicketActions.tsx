@@ -1,8 +1,12 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import Link from 'next/link';
-import { TicketRowActionsProps } from '@/app/shared/ticket-feat/model/ticket.model';
+import {
+	ManageTicketForm,
+	TicketRowActionsProps
+} from '@/app/shared/ticket-feat/model/ticket.model';
 import {
 	useAssignTicket,
+	useCreateTicket,
 	useDeleteTicket
 } from '@/app/shared/ticket-feat/hooks/ticketHooks';
 import Modal from '@/app/shared/components/modal/Modal';
@@ -23,11 +27,24 @@ import {
 import SendTechnicianRequestForm from '@/app/admin/dashboard/ticket-management/SendTechnicianRequestForm';
 import { useAppContext } from '../../contexts/AppContext';
 import HandOffTicketForm from '@/app/admin/dashboard/ticket-management/HandOffTicketForm';
-import { Ticket } from '../../model/model';
+import { CreateTicketPayload, Ticket } from '../../model/model';
+import { FormProvider, useForm } from 'react-hook-form';
+import TicketForm from '../form/TicketForm';
+import {
+	Sheet,
+	SheetClose,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger
+} from '@/components/ui/sheet';
+import { X } from 'lucide-react';
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 	const { isDeleting, handleDeleteTicket } = useDeleteTicket();
 	const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
+	const [open, setOpen] = useState(false);
 
 	function handleDelete(onCloseModal: () => void) {
 		handleDeleteTicket(ticket.id, {
@@ -45,6 +62,37 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 			onSuccess: () => onCloseModal()
 		});
 	}
+
+	const { handleCreateTicket } = useCreateTicket(false);
+
+	const methods = useForm<ManageTicketForm>({
+		mode: 'all',
+		defaultValues: {
+			title: ticket.title,
+			description: ticket.description,
+			area: ticket.area,
+			type: ticket.type,
+			category:
+				typeof ticket.category === 'object'
+					? ticket.category.id
+					: ticket.category,
+			images: undefined,
+			videos: undefined
+		}
+	});
+	// const router = useRouter();
+
+	const onSubmit = (
+		data: CreateTicketPayload,
+		actions?: { onSuccess: () => void; onError: () => void }
+	) => {
+		handleCreateTicket(data, {
+			onSuccess: () => {
+				actions?.onSuccess();
+				setOpen(false);
+			}
+		});
+	};
 
 	return (
 		<>
@@ -68,11 +116,12 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 
 					{ticket.status === TICKET_STATUS.pending &&
 						role === ROLES.user && (
-							<DropdownMenuItem>
-								<Link
-									href={`${role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/manage/${ticket.id}`}>
-									Edit
-								</Link>
+							<DropdownMenuItem
+								onSelect={(e) => {
+									e.stopPropagation();
+									setOpen(true); // you manage open state
+								}}>
+								Edit
 							</DropdownMenuItem>
 						)}
 					{/*  This feat should be executed only by an admin */}
@@ -198,6 +247,34 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 				description='Request ticket will be reassigned to a new admin'>
 				<HandOffTicketForm ticket={ticket} />
 			</Modal.Window>
+
+			<Sheet open={open} onOpenChange={setOpen}>
+				<SheetContent
+					side='bottom'
+					className='w-full  max-h-screen  overflow-y-auto  max-w-[90vw] md:max-w-full'>
+					<SheetClose asChild>
+						<Button
+							variant='ghost'
+							size='icon'
+							className='absolute top-4 right-4 rounded-full p-2 text-gray-600 bg-muted hover:bg-gray-100 dark:hover:bg-gray-800'>
+							<X className='w-6 h-6' />{' '}
+						</Button>
+					</SheetClose>
+
+					<div className='h-full w-2/3 mx-auto flex flex-col gap-4 px-4 py-6'>
+						<SheetHeader>
+							<SheetTitle>Manage Ticket</SheetTitle>
+							<SheetDescription>
+								Seamlessly manage requests
+							</SheetDescription>
+						</SheetHeader>
+
+						<FormProvider {...methods}>
+							<TicketForm ticket={ticket} onSubmit={onSubmit} />
+						</FormProvider>
+					</div>
+				</SheetContent>
+			</Sheet>
 		</>
 	);
 };
