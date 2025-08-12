@@ -252,24 +252,14 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
 			<Sheet open={open} onOpenChange={setOpen}>
 				<SheetContent
 					side='bottom'
-					className='w-full  max-h-screen  overflow-y-auto  max-w-[90vw] md:max-w-full'>
-					<SheetClose asChild>
-						<Button
-							variant='ghost'
-							size='icon'
-							className='absolute top-4 right-4 rounded-full p-2 text-gray-600 bg-muted hover:bg-gray-100 dark:hover:bg-gray-800'>
-							<X className='w-6 h-6' />{' '}
-						</Button>
-					</SheetClose>
-
-					<div className='h-full w-2/3 mx-auto flex flex-col gap-4 px-4 py-6'>
+					className='w-full  overflow-y-auto h-full max-h-screen   max-w-[100vw] md:max-w-full'>
+					<div className='w-full  flex flex-col gap-4 py-4 px-2 sm:w-2/3 sm:mx-auto sm:px-4'>
 						<SheetHeader>
 							<SheetTitle>Manage Ticket</SheetTitle>
 							<SheetDescription>
 								Seamlessly manage requests
 							</SheetDescription>
 						</SheetHeader>
-
 						<FormProvider {...methods}>
 							<TicketForm ticket={ticket} onSubmit={onSubmit} />
 						</FormProvider>

@@ -109,27 +109,9 @@ export default function Home() {
 					</DropdownMenu>
 
 					<Sheet open={open} onOpenChange={setOpen}>
-						{/* <SheetTrigger asChild>
-							<button
-								type='button'
-								className='relative gap-2 flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent w-full  hover:bg-accent focus:text-accent-foreground hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50'
-								role='button'>
-								<FilePlus size={14} /> Fill Ticket Form
-							</button>
-						</SheetTrigger> */}
-
 						<SheetContent
 							side='bottom'
 							className='w-full  overflow-y-auto h-full max-h-screen   max-w-[100vw] md:max-w-full'>
-							{/* <SheetClose asChild>
-								<Button
-									variant='ghost'
-									size='icon'
-									className='absolute top-4 right-4 rounded-full p-2 text-gray-600 bg-muted hover:bg-gray-100 dark:hover:bg-gray-800'>
-									<X className='w-6 h-6' />{' '}
-								</Button>
-							</SheetClose> */}
-
 							<div className='w-full  flex flex-col gap-4 py-4 px-2 sm:w-2/3 sm:mx-auto sm:px-4'>
 								<SheetHeader>
 									<SheetTitle>Manage Ticket</SheetTitle>
