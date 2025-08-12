@@ -36,10 +36,10 @@ export const SwitchBusiness = () => {
 
 			<div className='relative'>
 				<DropdownMenu open={open} onOpenChange={setOpen}>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger className='cursor-pointer' asChild>
 						<SidebarMenuButton
 							size='lg'
-							className='focus-visible:ring-0 data-[state=open]:bg-sidebar-accent flex justify-between  data-[state=open]:text-sidebar-accent-foreground'>
+							className=' focus-visible:ring-0 data-[state=open]:bg-sidebar-accent flex justify-between  data-[state=open]:text-sidebar-accent-foreground'>
 							{data?.memberships.find(
 								(m) => m.business.id === data.currentBusiness.id
 							)?.business.name ?? 'Select Business'}
@@ -53,7 +53,7 @@ export const SwitchBusiness = () => {
 						{data?.memberships.map((org) => (
 							<DropdownMenuItem
 								key={org.id}
-								className='w-full text-left'
+								className='w-full text-left cursor-pointer'
 								onSelect={(e) => {
 									e.preventDefault();
 									handleBusinessSwitch(org.business.id);

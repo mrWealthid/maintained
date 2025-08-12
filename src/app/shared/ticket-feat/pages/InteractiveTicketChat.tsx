@@ -1047,15 +1047,15 @@ Would you like to submit this request?`;
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent
 				side='right'
-				className='w-full sm:w-[500px] p-0 flex flex-col'>
-				<SheetClose asChild>
+				className='w-full   p-0 flex flex-col max-h-screen   max-w-[100vw] md:max-w-3/4'>
+				{/* <SheetClose asChild>
 					<Button
 						variant='ghost'
 						size='icon'
 						className='absolute top-2 right-1 rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'>
 						<X className='w-6 h-6' />{' '}
 					</Button>
-				</SheetClose>
+				</SheetClose> */}
 				<SheetHeader className='p-4 border-b border-gray-200 dark:border-gray-800'>
 					<div className='flex items-center justify-between'>
 						<div className='flex items-center space-x-3'>

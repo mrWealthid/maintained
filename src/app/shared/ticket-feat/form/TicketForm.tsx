@@ -6,7 +6,7 @@ import { RiVideoUploadLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import { fetchTicketCategory } from '../service/ticket-service';
 import { ManageTicketForm, ManageTicketFormProps } from '../model/ticket.model';
-import {  useFetchTicketType } from '../hooks/ticketHooks';
+import { useFetchTicketType } from '../hooks/ticketHooks';
 import { Category, CreateTicketPayload, TicketType } from '../../model/model';
 import TextInput from '@/app/shared/components/form-elements/Text-Input';
 import AutoComplete from '@/app/shared/components/auto-complete/AutoComplete';
@@ -547,12 +547,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 		setValue('videos', Array.from(files), { shouldDirty: true });
 	};
 
-	/* @Param {File} file - The file to be removed from the preview.
-		@description - This function handles the removal of a file from the preview section.
-		It checks the type of the file (image or video) and updates the corresponding state (selectedImages or selectedVideo) by filtering out the removed file.
-		If there are no remaining files after the removal, it sets the state to null.
-	*/
-
 	const onPreviewFileRemove = (file: File) => {
 		if (file.type.startsWith('image/')) {
 			setValue('images', null); // Clear the images field in the form
@@ -561,70 +555,63 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 		}
 	};
 
-	// // Helper to create a FileList from an array of File objects
-	// function FileListFromArray(files: File[]): FileList {
-	// 	const dataTransfer = new DataTransfer();
-	// 	files.forEach((file) => dataTransfer.items.add(file));
-	// 	return dataTransfer.files;
-	// }
-
 	return (
-		<div className='w-full  flex flex-col gap-4'>
-			<form
-				onSubmit={handleSubmit(formSubmit, onError)}
-				className='flex bg-card flex-1 p-6 rounded-lg border items-center'>
-				<section className='flex-col flex gap-2 w-full'>
-					<section className='flex mb-5 justify-between items-center'>
-						<h3>Create Maintenance Ticket</h3>
-					</section>
+		
+		<form
+			onSubmit={handleSubmit(formSubmit, onError)}
+			className='flex bg-card w-full flex-1 p-6 rounded-lg border items-center'>
+			<section className='flex-col flex gap-2 w-full'>
+				<section className='flex mb-5 justify-between items-center'>
+					<h3>Create Maintenance Ticket</h3>
+				</section>
 
-					<TextInput
-						name={'title'}
-						placeholder='Enter Title'
-						label='Title'
-						required={true}
-						error={errors?.['title']?.message?.toString()}>
-						<input
-							{...register('title', {
-								required: 'This field is required'
-							})}
-							className='input-style'
-							type='text'
-							disabled={isSubmitting}
-							id='title'
-						/>
-					</TextInput>
+				<TextInput
+					name={'title'}
+					placeholder='Enter Title'
+					label='Title'
+					required={true}
+					error={errors?.['title']?.message?.toString()}>
+					<input
+						{...register('title', {
+							required: 'This field is required'
+						})}
+						className='input-style'
+						type='text'
+						disabled={isSubmitting}
+						id='title'
+					/>
+				</TextInput>
 
-					<TextInput
-						name={'description'}
-						placeholder='Kindly describe'
-						label='Description'
-						required={true}
-						error={errors?.['description']?.message?.toString()}>
-						<textarea
-							className='input-style'
-							{...register('description', {
-								required: 'This field is required'
-							})}
-							disabled={isSubmitting}
-							id='description'
-							cols={40}
-							rows={4}></textarea>
-					</TextInput>
+				<TextInput
+					name={'description'}
+					placeholder='Kindly describe'
+					label='Description'
+					required={true}
+					error={errors?.['description']?.message?.toString()}>
+					<textarea
+						className='input-style'
+						{...register('description', {
+							required: 'This field is required'
+						})}
+						disabled={isSubmitting}
+						id='description'
+						cols={40}
+						rows={4}></textarea>
+				</TextInput>
 
-					<div>
-						<AutoComplete<Category>
-							queryKey='category'
-							service={fetchTicketCategory}
-							label={'Category'}
-							optionKey={'id'}
-							// custom={'regularPrice'}
-							displayValue={'name'}
-							initialValue={ticket?.category}
-							handler={handleAutoCompleteValues}
-						/>
-						{/* Autocomplete usage with static data */}
-						{/* <AutoComplete<Category>
+				<div>
+					<AutoComplete<Category>
+						queryKey='category'
+						service={fetchTicketCategory}
+						label={'Category'}
+						optionKey={'id'}
+						// custom={'regularPrice'}
+						displayValue={'name'}
+						initialValue={ticket?.category}
+						handler={handleAutoCompleteValues}
+					/>
+					{/* Autocomplete usage with static data */}
+					{/* <AutoComplete<Category>
 							queryKey='category'
 							// service={fetchTicketCategory}
 							label={'Category'}
@@ -695,120 +682,117 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 							]}
 						/> */}
 
-						<div className='hidden'>
-							<TextInput
-								name={'category'}
-								error={errors?.[
-									'category'
-								]?.message?.toString()}>
-								<input
-									title='category'
-									{...register('category', {
-										required: 'This field is required'
-									})}
-									className='input-style'
-									type='text'
-									hidden
-									id='category'
-								/>
-							</TextInput>
-						</div>
+					<div className='hidden'>
+						<TextInput
+							name={'category'}
+							error={errors?.['category']?.message?.toString()}>
+							<input
+								title='category'
+								{...register('category', {
+									required: 'This field is required'
+								})}
+								className='input-style'
+								type='text'
+								hidden
+								id='category'
+							/>
+						</TextInput>
+					</div>
+				</div>
+
+				<TextInput
+					name={'area'}
+					placeholder='Enter Area'
+					required={true}
+					label='Area (Ex. Kitchen)'
+					error={errors?.['area']?.message?.toString()}>
+					<input
+						{...register('area', {
+							required: 'This field is required'
+						})}
+						className='input-style'
+						type='text'
+						disabled={isSubmitting}
+						id='area'
+					/>
+				</TextInput>
+
+				<Label
+					text={'Specify Request Type'}
+					name={'ticketType'}
+					required={true}
+				/>
+				<Controller
+					name='type'
+					control={control}
+					rules={{ required: 'Please select a ticket type' }}
+					render={({ field }) => (
+						<Select
+							value={field.value}
+							onValueChange={field.onChange}>
+							<SelectTrigger className='py-3 h-fit'>
+								<SelectValue placeholder='Select a ticket type' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel>Ticket Types</SelectLabel>
+									{data?.map((type) => (
+										<SelectItem
+											key={type.id}
+											value={type.id}>
+											{type.name}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					)}
+				/>
+				<section className='w-full items-start flex-col mt-3 lg:flex-row flex gap-10'>
+					<div className=' w-full lg:w-1/2  border   p-2 rounded-2xl'>
+						<FileUpload
+							id='image'
+							label={'Upload Images'}
+							onFileSelect={handleImageSelect}
+							multiple={true}
+							accept={'image/*'}
+							icon={<IoIosCloudUpload />}
+							onPreviewFileRemove={onPreviewFileRemove}
+							uploadProgress={uploadProgress}
+							initialFiles={initialImageFiles}
+							onRemoveInitialFile={handleRemoveInitialAsset}
+						/>
 					</div>
 
-					<TextInput
-						name={'area'}
-						placeholder='Enter Area'
-						required={true}
-						label='Area (Ex. Kitchen)'
-						error={errors?.['area']?.message?.toString()}>
-						<input
-							{...register('area', {
-								required: 'This field is required'
-							})}
-							className='input-style'
-							type='text'
-							disabled={isSubmitting}
-							id='area'
+					<div className='w-full lg:w-1/2 border   p-2 rounded-2xl'>
+						<FileUpload
+							id='video'
+							label={'Upload Videos'}
+							onFileSelect={handleVideoSelect}
+							multiple={true}
+							accept={'video/*'}
+							icon={<RiVideoUploadLine />}
+							onPreviewFileRemove={onPreviewFileRemove}
+							uploadProgress={uploadProgress}
+							initialFiles={initialVideoFiles}
+							onRemoveInitialFile={handleRemoveInitialAsset}
 						/>
-					</TextInput>
-
-					<Label
-						text={'Specify Request Type'}
-						name={'ticketType'}
-						required={true}
-					/>
-					<Controller
-						name='type'
-						control={control}
-						rules={{ required: 'Please select a ticket type' }}
-						render={({ field }) => (
-							<Select
-								value={field.value}
-								onValueChange={field.onChange}>
-								<SelectTrigger className='py-3 h-fit'>
-									<SelectValue placeholder='Select a ticket type' />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Ticket Types</SelectLabel>
-										{data?.map((type) => (
-											<SelectItem
-												key={type.id}
-												value={type.id}>
-												{type.name}
-											</SelectItem>
-										))}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						)}
-					/>
-					<section className='w-full items-start flex-col mt-3 lg:flex-row flex gap-10'>
-						<div className=' w-full lg:w-1/2  border   p-2 rounded-2xl'>
-							<FileUpload
-								id='image'
-								label={'Upload Images'}
-								onFileSelect={handleImageSelect}
-								multiple={true}
-								accept={'image/*'}
-								icon={<IoIosCloudUpload />}
-								onPreviewFileRemove={onPreviewFileRemove}
-								uploadProgress={uploadProgress}
-								initialFiles={initialImageFiles}
-								onRemoveInitialFile={handleRemoveInitialAsset}
-							/>
-						</div>
-
-						<div className='w-full lg:w-1/2 border   p-2 rounded-2xl'>
-							<FileUpload
-								id='video'
-								label={'Upload Videos'}
-								onFileSelect={handleVideoSelect}
-								multiple={true}
-								accept={'video/*'}
-								icon={<RiVideoUploadLine />}
-								onPreviewFileRemove={onPreviewFileRemove}
-								uploadProgress={uploadProgress}
-								initialFiles={initialVideoFiles}
-								onRemoveInitialFile={handleRemoveInitialAsset}
-							/>
-						</div>
-					</section>
-
-					<hr className='-mx-6 my-3' />
-					<section className='flex justify-end   gap-4'>
-						<ButtonComponent
-							type='submit'
-							styles='rounded-lg'
-							disabled={!isValid || isSubmitting || !isDirty}
-							loading={isSubmitting}
-							btnText={` ${
-								isEditing ? 'Update' : 'Create'
-							} Ticket`}></ButtonComponent>
-					</section>
+					</div>
 				</section>
-			</form>
-		</div>
+
+				<hr className='-mx-6 my-3' />
+				<section className='flex justify-end   gap-4'>
+					<ButtonComponent
+						type='submit'
+						styles='rounded-lg'
+						disabled={!isValid || isSubmitting || !isDirty}
+						loading={isSubmitting}
+						btnText={` ${
+							isEditing ? 'Update' : 'Create'
+						} Ticket`}></ButtonComponent>
+				</section>
+			</section>
+		</form>
 	);
 };
 
