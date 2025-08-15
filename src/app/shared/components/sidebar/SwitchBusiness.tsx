@@ -8,11 +8,11 @@ import {
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { useProfile, useSwitchBusiness } from '../profile/hooks/useProfile';
 import { User } from '../../model/model';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
+import { ChevronDown, CircleCheck, LoaderCircle } from 'lucide-react';
 
 export const SwitchBusiness = () => {
 	const [open, setOpen] = useState(false);
-	const { data, isLoading, error } = useProfile<User>();
+	const { data, isLoading, error, isRefetching } = useProfile<User>();
 
 	const { isSwitching, handleSwitchCurrentBusiness } = useSwitchBusiness();
 
@@ -22,6 +22,10 @@ export const SwitchBusiness = () => {
 			{
 				onSuccess: () => {
 					setOpen(false);
+				},
+				onError: (err) => {
+					setOpen(true);
+					setActiveBusinessId(null);
 				}
 			}
 		);
@@ -30,6 +34,13 @@ export const SwitchBusiness = () => {
 	const [activeBusinessId, setActiveBusinessId] = useState<string | null>(
 		null
 	);
+
+	function activeBusiness(businessId: string) {
+		return (
+			businessId === data?.currentBusiness.id ||
+			businessId === activeBusinessId
+		);
+	}
 	return (
 		<section className='flex flex-1 flex-col gap-1 group-data-[collapsible=icon]:hidden'>
 			{/* <h3>{data?.currentBusiness.businessName}</h3> */}
@@ -53,7 +64,8 @@ export const SwitchBusiness = () => {
 						{data?.memberships.map((org) => (
 							<DropdownMenuItem
 								key={org.id}
-								className='w-full text-left cursor-pointer'
+								className='w-full text-left flex justify-between items-center cursor-pointer disabled:cursor-not-allowed'
+								disabled={activeBusiness(org.business.id)}
 								onSelect={(e) => {
 									e.preventDefault();
 									handleBusinessSwitch(org.business.id);
@@ -65,7 +77,16 @@ export const SwitchBusiness = () => {
 										<LoaderCircle
 											strokeWidth={1}
 											size={18}
-											className='ml-2 text-button-primary animate-spin'
+											className=' text-button-primary animate-spin'
+										/>
+									)}
+								{!isSwitching &&
+									!isRefetching &&
+									activeBusiness(org.business.id) && (
+										<CircleCheck
+											color={'green'}
+											strokeWidth={1.5}
+											size={18}
 										/>
 									)}
 							</DropdownMenuItem>

@@ -1,34 +1,36 @@
 import { connect } from '@/dbConfig/dbConfig';
-import User, { IUser } from '@/model/userModel';
+import User, { UserDoc } from '@/model/userModel';
 import Business from '@/model/businessModel';
 import { NextResponse } from 'next/server';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
-import { getRoleForBusiness } from '@/utils/helpers';
-import { Types } from 'mongoose';
 
 connect();
 
-const signTokenFromMembership = (user: any, businessId: Types.ObjectId) => {
-	console.log({ memberships: user.memberships, id: businessId });
-	const role = getRoleForBusiness(user.memberships, businessId);
-
-	if (!role) {
-		throw new Error('User is not a member of the specified business');
-	}
-
+const signToken = (
+	id: string,
+	tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
+) => {
 	return jwt.sign(
-		{ id: user._id, currentBusiness: businessId },
+		{
+			id: id,
+			role: tenants[0].role || 'USER',
+			tenants
+		},
 		process.env.JWT_SECRET!,
 		{ expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
 	);
 };
 
-const createSendToken = (user: any, statusCode: number) => {
-	const token = signTokenFromMembership(user, user.currentBusiness);
+const createSendToken = (
+	user: UserDoc,
+	statusCode: number,
+	tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
+) => {
+	const token = signToken(user.id, tenants);
 
 	//Remove password from output
-	user.password = undefined;
+	delete (user as any).password;
 	const response = NextResponse.json(
 		{
 			status: 'success',
@@ -96,9 +98,11 @@ export async function POST(request: Request) {
 			currentBusiness: business.id
 		});
 
+		const tenants = newUser.tenantsClaim();
+
 		console.log(newUser);
 
-		return createSendToken(newUser, 201);
+		return createSendToken(newUser, 201, tenants);
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(

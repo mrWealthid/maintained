@@ -40,6 +40,15 @@ export async function PATCH(request: NextRequest) {
 			},
 			{ status: 200 }
 		);
+
+		// httpOnly so client JS can’t tamper; shortish max-age; secure + samesite for safety
+		response.cookies.set('activeBusiness', String(currentBusiness), {
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: true,
+			path: '/',
+			maxAge: 60 * 60 * 24 * 7 // 7 days; adjust as needed
+		});
 		return response;
 	} catch (error: any) {
 		return NextResponse.json({ error: error.message }, { status: 500 });

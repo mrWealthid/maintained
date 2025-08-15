@@ -1,9 +1,16 @@
-import mongoose, { Document, Schema, Model, Types, ObjectId } from 'mongoose';
+import mongoose, {
+	Document,
+	Schema,
+	Model,
+	Types,
+	ObjectId,
+	InferSchemaType
+} from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import Business from './businessModel';
-import { ROLES } from '@/app/shared/enums/enums';
+import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
 
 export interface IUser extends Document {
 	name: string;
@@ -32,11 +39,16 @@ export interface IUser extends Document {
 	memberships: {
 		business: Types.ObjectId;
 		role: ROLES;
-		status: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
+		status: INVITE_STATUS;
 		inviteToken?: string;
 		inviteTokenExpires?: Date;
 	}[];
 	currentBusiness: Types.ObjectId;
+	tenantsClaim(): Array<{
+		business: string;
+		role: ROLES;
+		status: INVITE_STATUS;
+	}>;
 }
 
 const userSchema = new Schema<IUser>(
@@ -117,6 +129,34 @@ userSchema.set('toJSON', {
 	}
 });
 
+userSchema.methods.tenantsClaim = function (): Array<{
+	businessId: string;
+	role: ROLES;
+}> {
+	return (this.memberships || [])
+		.filter((m: any) => m.status === 'ACTIVATED')
+		.map((m: any) => ({
+			business: String(m.business),
+			role: m.role as ROLES,
+			status: m.status as INVITE_STATUS
+		}));
+};
+
+export type UserDoc = mongoose.Document &
+	Omit<InferSchemaType<typeof userSchema>, 'memberships'> & {
+		memberships: Array<{
+			business: Types.ObjectId;
+			role: ROLES;
+			status: INVITE_STATUS;
+			inviteToken?: string;
+			inviteTokenExpires?: Date;
+		}>;
+		tenantsClaim(): Array<{
+			business: string;
+			role: ROLES;
+			status: INVITE_STATUS;
+		}>;
+	};
 // Hash password before saving
 userSchema.pre<IUser>('save', async function (next) {
 	if (!this.isModified('password')) return next();
@@ -177,6 +217,7 @@ userSchema.methods.createUserInviteToken = function (): string {
 	this.inviteTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hrs
 	return inviteToken;
 };
+
 
 const User: Model<IUser> =
 	mongoose.models.User || mongoose.model<IUser>('User', userSchema);
