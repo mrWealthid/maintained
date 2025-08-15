@@ -72,7 +72,61 @@ function UserRow({ data }: UserRowProps) {
 							</span>
 						</TableCell> */}
 						<TableCell>
-							<Badge variant='outline' className='gap-1'>
+							{membership?.status === INVITE_STATUS.activated && (
+								<Badge
+									variant='outline'
+									className='gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300'>
+									<CircleCheck
+										className=' '
+										strokeWidth={1.25}
+										size={14}
+										color='green'
+									/>
+
+									{membership?.status}
+								</Badge>
+							)}
+							{membership?.status === INVITE_STATUS.invited && (
+								<Badge
+									variant='outline'
+									className='gap-1 border-orange-200 text-orange-500 dark:border-orange-400 dark:text-orange-300'>
+									<CircleCheck
+										className=' '
+										strokeWidth={1.25}
+										size={14}
+										color='orange'
+									/>
+
+									{membership?.status}
+								</Badge>
+							)}
+							{membership?.status === INVITE_STATUS.declined && (
+								<Badge
+									variant='outline'
+									className='gap-1 text-or border-red-200 text-red-700 dark:border-red-800 dark:text-red-300'>
+									<CircleCheck
+										className=' '
+										strokeWidth={1.25}
+										size={14}
+										color='red'
+									/>
+
+									{membership?.status}
+								</Badge>
+							)}
+							{/* <Badge
+								variant='outline'
+								className='gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300'>
+								{membership?.status ===
+									INVITE_STATUS.activated && (
+									/>
+
+									{membership?.status}
+								</Badge>
+							)}
+							{/* <Badge
+								variant='outline'
+								className='gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300'>
 								{membership?.status ===
 									INVITE_STATUS.activated && (
 									<CircleCheck
@@ -82,13 +136,15 @@ function UserRow({ data }: UserRowProps) {
 										color='green'
 									/>
 								)}
-
+								{membership?.status}
+							</Badge> */}
+							{/* <Badge variant='outline' className='gap-1'>
 								{membership?.status ===
 									INVITE_STATUS.invited && (
 									<Loader strokeWidth={1.25} size={14} />
 								)}
 								{membership?.status}
-							</Badge>
+							</Badge> */}
 						</TableCell>
 						<TableCell>
 							<Badge variant='secondary'>

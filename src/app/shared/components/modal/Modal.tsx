@@ -93,7 +93,7 @@ const Window = ({
 								</button>
 							</div>
 						</div>
-						<hr className='-mx-6' />
+						<hr className='' />
 						<div className='overflow-y-hidden  max-h-[80vh]'>
 							{React.isValidElement(children)
 								? cloneElement(children, {

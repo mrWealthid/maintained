@@ -50,15 +50,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	// 	return <div>Error loading user</div>; // Or handle as needed
 	// }
 
-	useEffect(() => {
-		if (!isLoading && user) {
-			const role = getUserRoleForCurrentBusiness(user);
+	// useEffect(() => {
+	// 	if (!isLoading && user) {
+	// 		const role = getUserRoleForCurrentBusiness(user);
 
-			if (role === 'TECHNICIAN') router.push('/technician/dashboard');
-			else if (role === 'ADMIN') router.push('/admin/dashboard');
-			else if (role === 'USER') router.push('/dashboard');
-		}
-	}, [user, isLoading, router]);
+	// 		if (role === 'TECHNICIAN') router.push('/technician/dashboard');
+	// 		else if (role === 'ADMIN') router.push('/admin/dashboard');
+	// 		else if (role === 'USER') router.push('/dashboard');
+	// 	}
+	// }, [user, isLoading, router]);
 
 	return (
 		<AppContext.Provider

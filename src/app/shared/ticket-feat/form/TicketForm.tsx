@@ -556,7 +556,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 	};
 
 	return (
-		
+
 		<form
 			onSubmit={handleSubmit(formSubmit, onError)}
 			className='flex bg-card w-full flex-1 p-6 rounded-lg border items-center'>
@@ -780,7 +780,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 					</div>
 				</section>
 
-				<hr className='-mx-6 my-3' />
+				<hr className='my-3' />
 				<section className='flex justify-end   gap-4'>
 					<ButtonComponent
 						type='submit'

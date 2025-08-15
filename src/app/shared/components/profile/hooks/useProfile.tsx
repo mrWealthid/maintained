@@ -6,12 +6,13 @@ import { ApiError } from 'next/dist/server/api-utils';
 import { useRouter } from 'next/navigation';
 
 export function useProfile<T>() {
-	const { isLoading, data, error } = useQuery({
+	const { isLoading, isRefetching, data, error } = useQuery({
 		queryKey: ['profile'],
 		queryFn: () => fetchProfile<ApiResponse<T>>()
 	});
 
 	return {
+		isRefetching,
 		isLoading,
 		error,
 		data: data?.data
@@ -28,21 +29,21 @@ export function useSwitchBusiness() {
 			onSuccess: ({ data }) => {
 				toast.success('Business switched successfully');
 
-				const currentMembership = data.memberships.find(
-					(m) => m.business === data.currentBusiness
-				);
+				// const currentMembership = data.memberships.find(
+				// 	(m) => m.business === data.currentBusiness
+				// );
 
-				const role = currentMembership?.role;
+				// const role = currentMembership?.role;
 
-				// Navigate based on role
-				const prefix = role === 'USER' ? '' : role?.toLowerCase();
+				// // Navigate based on role
+				// const prefix = role === 'USER' ? '' : role?.toLowerCase();
 
-				const route = `/${prefix ? prefix + '/' : ''}dashboard`;
-				router.push(route);
+				// const route = `/${prefix ? prefix + '/' : ''}dashboard`;
+				// router.push(route);
 
 				queryClient.invalidateQueries();
 
-				// router.refresh();
+				router.refresh();
 			},
 			onError: (err: ApiError) => toast.error(err.message)
 		});

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import crypto from 'crypto';
 import { INVITE_STATUS, ROLES } from '@/app/shared/enums/enums';
-import { User } from '@/app/shared/model/model';
+import { Membership, User } from '@/app/shared/model/model';
 
 export function mapToObject(map: Map<string, any>): { [key: string]: any } {
 	const obj: { [key: string]: any } = {};
@@ -56,12 +56,7 @@ export function buildQueryString(params: Record<string, any>): string {
 		.join('&');
 }
 
-interface Membership {
-	business: { name: string; id: string };
-	status?: INVITE_STATUS;
-	role: ROLES;
-	id: string;
-}
+
 
 /**
  * Gets the user's role for a specific business

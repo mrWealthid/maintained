@@ -121,7 +121,7 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
 						/>
 					</div>
 
-					<hr className='-mx-6 my-3' />
+					<hr className=' my-3' />
 					<section className='flex justify-end  gap-4'>
 						<ButtonComponent
 							type='reset'

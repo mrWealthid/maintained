@@ -5,6 +5,8 @@ import {
 	TICKET_STATUS
 } from '@/app/shared/enums/enums';
 import { TechnicianRequest } from '../ticket-feat/model/ticket.model';
+import { IUser } from '@/model/userModel';
+import { ObjectId } from 'mongoose';
 
 export interface Category {
 	id: string;
@@ -113,14 +115,29 @@ export interface User {
 	createdAt?: Date;
 	dateOfBirth?: Date;
 	inviteToken?: string;
+	memberships: Membership[];
+	active?: boolean;
+}
+
+export interface Membership {
+	business: { name: string; id: string };
+	status?: INVITE_STATUS;
+	role: ROLES;
+	id: string;
+}
+
+//how to create a User interface without a populated response object
+
+export interface UserResponse
+	extends Omit<IUser, 'currentBusiness' | 'memberships'> {
+	id: string;
+	currentBusiness: string;
 	memberships: {
 		business: { name: string; id: string };
 		status?: INVITE_STATUS;
 		role: ROLES;
 		id: string;
 	}[];
-
-	active?: boolean;
 }
 
 export interface Business {
