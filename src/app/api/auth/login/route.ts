@@ -10,10 +10,14 @@ const signToken = (
 	user: UserDoc,
 	tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
 ) => {
+	const tenant = tenants.find(
+		(tenant) => user.currentBusiness.toString() === tenant.business
+	);
+
 	return jwt.sign(
 		{
 			id: user.id,
-			role: tenants[0].role || 'USER',
+			role: tenant?.role || 'USER',
 			tenants
 		},
 		process.env.JWT_SECRET!,
