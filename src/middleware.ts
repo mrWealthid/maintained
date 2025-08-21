@@ -20,17 +20,18 @@ export function middleware(request: NextRequest) {
 
 	const token = request.cookies.get('token')?.value || null;
 	const { valid, decoded } = decodeToken(token);
+
 	const role: Role = getEffectiveRole(request, decoded);
 
 	// --- Route groups ---
 	const isHome = path === '/';
 	const isAuthBase = path.startsWith('/auth');
 	const isOnboarding = path.startsWith('/auth/onboard-user');
-	const isAuthRoute = isAuthBase && !isOnboarding; // login/register/etc. but NOT onboard-user
 
+	const isAuthRoute = isAuthBase && !isOnboarding; // login/register/etc. but NOT onboard-user
 	const isUserDash = path.startsWith('/dashboard');
-	const isAdminDash = path.startsWith('/admin/dashboard');
 	const isTechDash = path.startsWith('/technician/dashboard');
+	const isAdminDash = path.startsWith('/admin/dashboard');
 	const isAnyDashboard = isUserDash || isAdminDash || isTechDash;
 
 	// Home page should not be protected
@@ -48,7 +49,11 @@ export function middleware(request: NextRequest) {
 		// No/invalid token → send to login
 		if (!token || !valid) {
 			return NextResponse.redirect(new URL('/auth/login', request.url));
+
 		}
+
+
+		
 
 		// Token present: normalize dashboard by role
 		// --- inside your middleware, inside the "isAnyDashboard" guard ---
@@ -68,6 +73,8 @@ export function middleware(request: NextRequest) {
 	}
 
 	// All other /auth routes (like onboard-user) pass through
+
+
 	return NextResponse.next();
 }
 

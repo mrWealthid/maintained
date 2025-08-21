@@ -239,12 +239,27 @@ input:not([type="email"])::placeholder {
 
 
 
+html,
+body {
+	height: 100%;
+	overflow: hidden;
+	/* Body won't scroll; only your main section will */
+}
+
 @layer base {
 	* {
 		@apply border-border;
 	}
 
 	body {
+
 		@apply bg-background text-foreground;
+	}
+}
+
+@supports (height: 100dvh) {
+	:root {
+		--vh: 100dvh;
+		/* Optional: use if you compute custom heights */
 	}
 }
