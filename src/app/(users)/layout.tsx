@@ -1,15 +1,21 @@
 import MiddlewareFeatures from '@/middlewareFeatures';
 import { redirect } from 'next/navigation';
-import { routes } from '@/app/shared/routes/routes';
+import { routes, technicianRoutes } from '@/app/shared/routes/routes';
 import Header from '@/app/shared/components/header/Header';
 import Breadcrumbs from '@/app/shared/components/breadcrumbs/BreadCrumbs';
-import { crumbLabelMap } from '@/app/shared/data/data';
+import {
+	adminCrumbLabelMap,
+	crumbLabelMap,
+	layoutConfig,
+	technicianCrumbLabelMap
+} from '@/app/shared/data/data';
 
 import { AppSidebar } from '../shared/components/sidebar/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { get } from 'http';
 import { getVerifiedUser } from '@/lib/auth/getVerifiedUser';
 import { AppProvider } from '../shared/contexts/AppContext';
+import { ROLES } from '../shared/enums/enums';
 
 export default async function DashboardLayout({
 	children
@@ -21,6 +27,8 @@ export default async function DashboardLayout({
 	if (!verify) {
 		redirect('/auth/login');
 	}
+
+	const { routes, crumbLabelMap } = layoutConfig[ROLES.user];
 
 	return (
 		<section className='h-dvh flex'>
