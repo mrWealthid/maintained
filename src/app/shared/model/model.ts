@@ -1,192 +1,192 @@
 import {
-	INVITE_STATUS,
-	ROLES,
-	TICKET_PRIORITY,
-	TICKET_STATUS
-} from '@/app/shared/enums/enums';
-import { TechnicianRequest } from '../ticket-feat/model/ticket.model';
-import { IUser } from '@/model/userModel';
-import { ObjectId } from 'mongoose';
+  INVITE_STATUS,
+  ROLES,
+  TICKET_PRIORITY,
+  TICKET_STATUS,
+} from "@/app/shared/enums/enums";
+import { TechnicianRequest } from "../ticket-feat/model/ticket.model";
+import { IUser } from "@/model/userModel";
 
 export interface Category {
-	id: string;
-	name: string;
-	description?: string;
-	createdAt?: Date;
+  id: string;
+  name: string;
+  description?: string;
+  createdAt?: Date;
 }
 export interface TicketType {
-	name: string;
-	description?: string;
-	createdAt?: Date;
-	id: string;
+  name: string;
+  description?: string;
+  createdAt?: Date;
+  id: string;
 }
 
 export interface Ticket {
-	title: string;
-	description: string;
-	status: TICKET_STATUS;
-	id: string;
-	createdAt: string;
-	images?: string[];
-	videos?: string[];
-	documents?: string[];
-	user: Pick<User, 'id' | 'name' | 'email'>;
-	area: string;
-	category: Category;
+  title: string;
+  description: string;
+  status: TICKET_STATUS;
+  id: string;
+  createdAt: string;
+  images?: string[];
+  videos?: string[];
+  documents?: string[];
+  user: Pick<User, "id" | "name" | "email">;
+  area: string;
+  category: Category;
 
-	assignedTo?: User;
-	actionedBy?: Pick<User, 'id' | 'id' | 'name'>;
-	type: string;
-	priority: TICKET_PRIORITY;
+  assignedTo?: User;
+  actionedBy?: Pick<User, "id" | "id" | "name">;
+  type: string;
+  priority: TICKET_PRIORITY;
 }
 
 export interface TicketDetails extends Ticket {
-	requests: TechnicianRequest[];
+  requests: TechnicianRequest[];
 }
 // export interface TicketCardProps extends Ticket {
 // 	role: ROLES;
 // }
 
 export interface CreateTicketPayload
-	extends Omit<
-		Ticket,
-		'id' | 'createdAt' | 'id' | 'category' | 'user' | 'status' | 'priority'
-	> {
-	status?: TICKET_STATUS;
-	category: string;
+  extends Omit<
+    Ticket,
+    "id" | "createdAt" | "id" | "category" | "user" | "status" | "priority"
+  > {
+  status?: TICKET_STATUS;
+  category: string;
 }
 
 export interface FileUploadPreview {
-	id: number;
-	url: string;
-	type: string;
-	file: File;
-	uploadProgress: number;
+  id: number;
+  url: string;
+  type: string;
+  file: File;
+  uploadProgress: number;
 }
 
 export interface ApiError {
-	message: string;
+  message: string;
 }
 
 export interface ApiResponse<T> {
-	status: string;
-	message: string;
-	data: T;
+  status: string;
+  message: string;
+  data: T;
 }
 export interface ApiPaginatedResponse<T> {
-	status: string;
-	message: string;
-	data: T;
-	totalRecords: number;
-	results: number;
+  status: string;
+  message: string;
+  data: T;
+  totalRecords: number;
+  results: number;
 }
 
 export interface ITab {
-	title: string;
-	order: number;
-	icon: React.ReactNode;
+  title: string;
+  order: number;
+  icon: React.ReactNode;
 }
 
 export interface ButtonGroupTabsProps<T = string> {
-	handleClick: (type: TICKET_STATUS) => void;
-	status: TICKET_STATUS;
-	data: TabData<T>[];
+  handleClick: (type: TICKET_STATUS) => void;
+  status: TICKET_STATUS;
+  data: TabData<T>[];
 }
 
 interface TabData<T> {
-	label: string;
-	value: T;
+  label: string;
+  value: T;
 }
 
 export type Routes = {
-	name: string;
-	path: string;
-	icon: React.ElementType;
+  name: string;
+  path: string;
+  icon: React.ElementType;
 };
 
 //USER
 
 export interface User {
-	id: string;
-	name: string;
-	email: string;
-	photo?: string;
-	currentBusiness: Pick<Business, 'country' | 'name' | 'id'>;
-	createdAt?: Date;
-	dateOfBirth?: Date;
-	inviteToken?: string;
-	memberships: Membership[];
-	active?: boolean;
+  id: string;
+  name: string;
+  email: string;
+  photo?: string;
+  currentBusiness: Pick<Business, "country" | "name" | "id">;
+  createdAt?: Date;
+  dateOfBirth?: Date;
+  inviteToken?: string;
+  memberships: Membership[];
+  active?: boolean;
 }
 
 export interface Membership {
-	business: { name: string; id: string };
-	status?: INVITE_STATUS;
-	role: ROLES;
-	id: string;
+  business: { name: string; id: string };
+  status?: INVITE_STATUS;
+  role: ROLES;
+  id: string;
+  inviteExpired: boolean;
 }
 
 //how to create a User interface without a populated response object
 
 export interface UserResponse
-	extends Omit<IUser, 'currentBusiness' | 'memberships'> {
-	id: string;
-	currentBusiness: string;
-	memberships: {
-		business: { name: string; id: string };
-		status?: INVITE_STATUS;
-		role: ROLES;
-		id: string;
-	}[];
+  extends Omit<IUser, "currentBusiness" | "memberships"> {
+  id: string;
+  currentBusiness: string;
+  memberships: {
+    business: { name: string; id: string };
+    status?: INVITE_STATUS;
+    role: ROLES;
+    id: string;
+  }[];
 }
 
 export interface Business {
-	id: string;
-	name: string;
-	registrationId: string;
-	contact: string;
-	country: string;
-	address: string;
-	description?: string;
-	createdAt?: Date;
-	email: string;
-	creator: string;
-	logo?: string;
+  id: string;
+  name: string;
+  registrationId: string;
+  contact: string;
+  country: string;
+  address: string;
+  description?: string;
+  createdAt?: Date;
+  email: string;
+  creator: string;
+  logo?: string;
 }
 
 export type UserRowActionsProps = {
-	user: User;
+  user: User;
 };
 
 export type UserRowProps = {
-	data?: User[];
+  data?: User[];
 };
 
 export type UserQueryprops = {
-	handleFilter?: (query: { status?: INVITE_STATUS } | null) => void;
+  handleFilter?: (query: { status?: INVITE_STATUS } | null) => void;
 };
 
 export type UserFilterQuery = {
-	status?: INVITE_STATUS;
+  status?: INVITE_STATUS;
 };
 
 export interface ManageUserFormProps {
-	user?: User | undefined;
-	onCloseModal?: () => void;
+  user?: User | undefined;
+  onCloseModal?: () => void;
 }
 
 export interface ManageUserForm {
-	name: string;
-	email: string;
-	role: ROLES;
+  name: string;
+  email: string;
+  role: ROLES;
 }
 
-export type CreateUserPayload = Pick<User, 'name' | 'email'>;
+export type CreateUserPayload = Pick<User, "name" | "email">;
 
 export interface CrumbLabelMap {
-	[segment: string]: {
-		label: string;
-		// icon?: ReactNode; // Optional: if you want icons later
-		hide?: boolean; // 🔍 used to omit from breadcrumbs
-	};
+  [segment: string]: {
+    label: string;
+    // icon?: ReactNode; // Optional: if you want icons later
+    hide?: boolean; // 🔍 used to omit from breadcrumbs
+  };
 }

@@ -1,46 +1,66 @@
-import { toast } from 'react-hot-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { handleCreateUser, handleDeleteUser } from '../service/user.service';
-import { ApiError, CreateUserPayload } from '@/app/shared/model/model';
+import { toast } from "react-hot-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  handleCreateUser,
+  handleDeleteUser,
+  handleReInviteUser,
+} from "../service/user.service";
+import { ApiError, CreateUserPayload } from "@/app/shared/model/model";
 
 export function useCreateUser(
-	isEditing: boolean,
-	close?: () => void,
-	userId?: string
+  isEditing: boolean,
+  close?: () => void,
+  userId?: string
 ) {
-	const queryClient = useQueryClient();
-	const { isPending: isCreating, mutate: createUser } = useMutation({
-		mutationFn: (payload: CreateUserPayload) =>
-			handleCreateUser(payload, isEditing, userId),
+  const queryClient = useQueryClient();
+  const { isPending: isCreating, mutate: createUser } = useMutation({
+    mutationFn: (payload: CreateUserPayload) =>
+      handleCreateUser(payload, isEditing, userId),
 
-		onSuccess: () => {
-			toast.success('Invite sent successfully...');
-			queryClient.invalidateQueries({
-				queryKey: ['Users']
-			});
+    onSuccess: () => {
+      toast.success("Invite sent successfully...");
+      queryClient.invalidateQueries({
+        queryKey: ["Users"],
+      });
 
-			close?.();
-		},
-		onError: (err: any) => toast.error(err.message)
-	});
+      close?.();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
 
-	return { isCreating, createUser };
+  return { isCreating, createUser };
 }
 
 export function useDeleteUser() {
-	const queryClient = useQueryClient();
-	const { isPending: isDeleting, mutate: deleteUser } = useMutation({
-		mutationFn: (id: string) => handleDeleteUser(id),
-		onSuccess: () => {
-			toast.success('User successfully deleted');
-			queryClient.invalidateQueries({
-				queryKey: ['Users']
-			});
-		},
-		onError: (err: ApiError) => toast.error(err.message)
-	});
+  const queryClient = useQueryClient();
+  const { isPending: isDeleting, mutate: deleteUser } = useMutation({
+    mutationFn: (id: string) => handleDeleteUser(id),
+    onSuccess: () => {
+      toast.success("User successfully deleted");
+      queryClient.invalidateQueries({
+        queryKey: ["Users"],
+      });
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
 
-	return { isDeleting, deleteUser };
+  return { isDeleting, deleteUser };
+}
+export function useReInviteUser() {
+  const queryClient = useQueryClient();
+  const { isPending: isInviting, mutate: reInviteUser } = useMutation({
+    mutationFn: (payload: { email: string; force?: boolean }) =>
+      handleReInviteUser(payload),
+    onSuccess: () => {
+      toast.success("Invite resent successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["Users"],
+      });
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
+
+  return { isInviting, reInviteUser };
 }
 // export function useFetchMaintenanceRequests(
 // 	status: string,
