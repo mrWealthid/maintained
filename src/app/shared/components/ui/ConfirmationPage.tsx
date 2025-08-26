@@ -4,9 +4,10 @@ interface ConfirmationPageProps {
   modalText: ReactNode;
   onCloseModal?: () => void;
   // handler: (closeModal: () => void, ...args: any[]) => void;
-  handler: (callback: () => void) => void;
+  handler: (callback: () => void, data?: unknown) => void;
   isLoading: boolean;
   reason?: "delete" | "confirm";
+  data?: unknown;
 }
 
 const ConfirmationPage: FC<ConfirmationPageProps> = ({
@@ -15,6 +16,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
   handler,
   isLoading,
   reason = "delete",
+  data,
 }) => {
   return (
     <div className="p-6 text-center">
@@ -75,7 +77,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
       )}
       <h3 className="mb-5 ">{modalText} ?</h3>
       <button
-        onClick={() => handler(onCloseModal ?? (() => {}))}
+        onClick={() => handler(onCloseModal ?? (() => {}), data)}
         data-modal-hide="popup-modal"
         type="button"
         className="btn-primary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-2xl text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
