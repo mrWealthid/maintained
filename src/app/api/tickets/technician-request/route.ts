@@ -1,9 +1,9 @@
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { TechnicianRequest } from "@/model/technicanRequest";
+import { TechnicianRequest } from "@/models/technicanRequest";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
-import Ticket from "@/model/ticketModel";
+import Ticket from "@/models/ticketModel";
 import { NextRequest, NextResponse } from "next/server";
 
 connect();

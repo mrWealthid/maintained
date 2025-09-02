@@ -56,13 +56,19 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
       mode: "onChange",
       defaultValues: {
         addSchedule: !!ticketRequest.schedule,
-        quote: {
-          total: ticketRequest.quote.total || undefined,
-          currency: ticketRequest.quote.currency || "USD",
-          cost: ticketRequest.quote.cost?.length
-            ? ticketRequest.quote.cost
-            : [],
-        },
+        quote: ticketRequest.quote
+          ? {
+              total: ticketRequest.quote.total ?? undefined,
+              currency: ticketRequest.quote.currency || "USD",
+              cost: ticketRequest.quote.cost?.length
+                ? ticketRequest.quote.cost
+                : [],
+            }
+          : {
+              total: undefined,
+              currency: "USD",
+              cost: [],
+            },
         message: ticketRequest.message || "",
         schedule: {
           date: initialDate,

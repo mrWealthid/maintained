@@ -2,10 +2,10 @@ import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import MiddlewareFeatures from "@/middlewareFeatures";
-import { TechnicianRequest } from "@/model/technicanRequest";
-import { TicketActivity } from "@/model/ticketActivity";
-import Ticket from "@/model/ticketModel";
-import User from "@/model/userModel";
+import { TechnicianRequest } from "@/models/technicanRequest";
+import { TicketActivity } from "@/models/ticketActivity";
+import Ticket from "@/models/ticketModel";
+import User from "@/models/userModel";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 

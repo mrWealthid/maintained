@@ -1,6 +1,6 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User, { UserDoc } from "@/model/userModel";
-import Business from "@/model/businessModel";
+import User, { UserDoc } from "@/models/userModel";
+import Business from "@/models/businessModel";
 import { NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { INVITE_STATUS, ROLES } from "@/app/shared/enums/enums";

@@ -1,5 +1,5 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User, { UserDoc } from "@/model/userModel";
+import User, { UserDoc } from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { INVITE_STATUS } from "@/app/shared/enums/enums";

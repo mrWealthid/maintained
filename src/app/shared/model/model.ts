@@ -5,7 +5,7 @@ import {
   TICKET_STATUS,
 } from "@/app/shared/enums/enums";
 import { TechnicianRequest } from "../ticket-feat/model/ticket.model";
-import { IUser } from "@/model/userModel";
+import { IUser } from "@/models/userModel";
 
 export interface Category {
   id: string;

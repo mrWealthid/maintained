@@ -1,81 +1,80 @@
-import { connect } from '@/dbConfig/dbConfig';
-import User from '@/model/userModel';
-import { NextRequest, NextResponse } from 'next/server';
-import jwt, { SignOptions } from 'jsonwebtoken';
-import crypto from 'crypto';
+import { connect } from "@/dbConfig/dbConfig";
+import User from "@/models/userModel";
+import { NextRequest, NextResponse } from "next/server";
+import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "crypto";
 
 connect();
 
 const signToken = (id: any) =>
-	jwt.sign({ id }, process.env.JWT_SECRET!, {
-		expiresIn: process.env.JWT_EXPIRES_IN
-	} as SignOptions);
+  jwt.sign({ id }, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  } as SignOptions);
 
 export async function POST(request: NextRequest) {
-	const { newPassword, currentPassword, confirmNewPassword, resetToken } =
-		await request.json();
+  const { newPassword, currentPassword, confirmNewPassword, resetToken } =
+    await request.json();
 
-	try {
-		const hashedToken = crypto
-			.createHash('sha256')
-			.update(resetToken)
-			.digest('hex');
+  try {
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-		const user = await User.findOne({
-			passwordResetToken: hashedToken,
-			passwordResetExpires: { $gt: Date.now() }
-		}).select('+password');
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    }).select("+password");
 
-		console.log('User', user);
+    console.log("User", user);
 
-		// 2) If token has not expired and there is a user, set the new password
-		if (!user) {
-			return NextResponse.json(
-				{ error: 'Token is invalid or has expired' },
-				{ status: 400 }
-			);
-		}
+    // 2) If token has not expired and there is a user, set the new password
+    if (!user) {
+      return NextResponse.json(
+        { error: "Token is invalid or has expired" },
+        { status: 400 }
+      );
+    }
 
-		// 3 Check if current the password is correct
-		if (!(await user.correctPassword(currentPassword, user.password))) {
-			return NextResponse.json(
-				{ error: 'Your current password is wrong' },
-				{ status: 400 }
-			);
-		}
+    // 3 Check if current the password is correct
+    if (!(await user.correctPassword(currentPassword, user.password))) {
+      return NextResponse.json(
+        { error: "Your current password is wrong" },
+        { status: 400 }
+      );
+    }
 
-		//4 Check if the current password and the new password is the same
-		if (currentPassword === newPassword) {
-			return NextResponse.json(
-				{ error: "You can't use your old password" },
-				{ status: 400 }
-			);
-		}
-		user.password = newPassword;
-		user.passwordConfirm = confirmNewPassword;
-		user.passwordResetToken = undefined;
-		user.passwordResetExpires = undefined;
-		await user.save();
+    //4 Check if the current password and the new password is the same
+    if (currentPassword === newPassword) {
+      return NextResponse.json(
+        { error: "You can't use your old password" },
+        { status: 400 }
+      );
+    }
+    user.password = newPassword;
+    user.passwordConfirm = confirmNewPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
 
-		//3 Update changedpasswordAt property for the user
-		//4 Log the user in, send JWT
+    //3 Update changedpasswordAt property for the user
+    //4 Log the user in, send JWT
 
-		const token = signToken(user.id);
-		const response = NextResponse.json({
-			status: 'success',
-			message:
-				'Password reset successfully! Kindly Login with Credentials'
-		});
+    const token = signToken(user.id);
+    const response = NextResponse.json({
+      status: "success",
+      message: "Password reset successfully! Kindly Login with Credentials",
+    });
 
-		const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-		const expires = new Date(Date.now() + timeInMs);
-		response.cookies.set('token', token, {
-			httpOnly: true,
-			expires
-		});
+    const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
+    const expires = new Date(Date.now() + timeInMs);
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      expires,
+    });
 
-		return response;
-	} catch (error: any) {
-		return NextResponse.json({ error: error.message }, { status: 500 });
-	}
+    return response;
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

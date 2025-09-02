@@ -1,20 +1,17 @@
-import {
-	TechnicianTicketRowProps,
-	TicketRowProps
-} from '@/app/shared/ticket-feat/model/ticket.model';
-import TicketRowActions from './TicketRowActions';
-import { TableCell, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import Modal from '@/app/shared/components/modal/Modal';
+import { TechnicianTicketRowProps } from "@/app/shared/ticket-feat/model/ticket.model";
+import TicketRowActions from "./TicketRowActions";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import Modal from "@/app/shared/components/modal/Modal";
 
 function RequestRow({ data }: TechnicianTicketRowProps) {
-	return (
-		<>
-			{data?.map((row, i) => {
-				const { area, title, user, category } = row.ticket;
-				return (
-					<TableRow key={row.id} className='relative  '>
-						{/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
+  return (
+    <>
+      {data?.map((row, i) => {
+        const { area, title, user, category } = row.ticket;
+        return (
+          <TableRow key={row.id} className="relative  ">
+            {/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
 							<input
 								title="check"
 								id="checkbox-all-search"
@@ -27,88 +24,84 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
 								#
 							</label>
 						</td> */}
-						<TableCell className='font-medium  whitespace-nowrap'>
-							<span>{i + 1}.</span>
-						</TableCell>
-						<TableCell colSpan={3}>
-							<span title={title} className='block '>
-								{title}
-							</span>
-						</TableCell>
-						<TableCell colSpan={2}>
-							<span
-								title={user.name}
-								className={
-									'text-sm font-semibold block   mb-1  rounded-3xl'
-								}>
-								{user.name}
-							</span>
-							{/* <span
+            <TableCell className="font-medium  whitespace-nowrap">
+              <span>{i + 1}.</span>
+            </TableCell>
+            <TableCell colSpan={3}>
+              <span title={title} className="block ">
+                {title}
+              </span>
+            </TableCell>
+            <TableCell colSpan={2}>
+              <span
+                title={user.name}
+                className={"text-sm font-semibold block   mb-1  rounded-3xl"}
+              >
+                {user.name}
+              </span>
+              {/* <span
 								title={row.category?.name}
 								className={' ellipsis-overflow text-xs block'}>
 								{row.category?.name}
 							</span> */}
-						</TableCell>
+            </TableCell>
 
-						<TableCell>
-							<span className=' block ' title={category.name}>
-								{category.name}
-							</span>
-						</TableCell>
-						<TableCell>
-							<span
-								className=' block ellipsis-overflow'
-								title={area}>
-								{area}
-							</span>
-						</TableCell>
-						<TableCell>
-							<Badge variant='outline'>
-								{row.status}
-								{/*
+            <TableCell>
+              <span className=" block " title={category.name}>
+                {category.name}
+              </span>
+            </TableCell>
+            <TableCell>
+              <span className=" block ellipsis-overflow" title={area}>
+                {area}
+              </span>
+            </TableCell>
+            <TableCell>
+              <Badge variant="outline">
+                {row.status}
+                {/*
 								<IconLoader/> */}
-							</Badge>
-							{/* <span
+              </Badge>
+              {/* <span
 								style={{
 									backgroundColor: getStatusColor(row.status)
 								}}
 								className='text-[8px] md:text-xs text-primary py-2 px-3 rounded-3xl inline-flex'>
 								{row.status}
 							</span> */}
-						</TableCell>
-						<TableCell>
-							<span className='flex justify-center gap-2 flex-col'>
-								{/* <span className='font-bold'>
+            </TableCell>
+            <TableCell>
+              <span className="flex justify-center gap-2 flex-col">
+                {/* <span className='font-bold'>
 									{row.} Night(s)
 								</span> */}
 
-								<span
-									title={new Date(
-										row.createdAt
-									).toDateString()}
-									className='flex  gap-1'>
-									{/* <span>
+                <span
+                  title={new Date(row.createdAt).toDateString()}
+                  className="flex  gap-1"
+                >
+                  {/* <span>
 										{new Date(row.startDate).toDateString()}{' '}
 										➡️
 									</span> */}
 
-									{/* <span>
+                  {/* <span>
 										{' '}
 										{new Date(row.endDate).toDateString()}
 									</span> */}
-									{new Date(row.createdAt).toDateString()}
-								</span>
-							</span>
-						</TableCell>
+                  {new Date(row.createdAt).toDateString()}
+                </span>
+              </span>
+            </TableCell>
 
-						<Modal>
-							<TicketRowActions technicianRequest={row} />
-						</Modal>
-					</TableRow>
-				);
-			})}
-		</>
-	);
+            <Modal>
+              <TicketRowActions technicianRequest={row} />
+            </Modal>
+          </TableRow>
+        );
+      })}
+    </>
+  );
 }
 
 export default RequestRow;

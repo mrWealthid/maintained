@@ -960,10 +960,8 @@ import {
   MoreHorizontal,
   User,
   VideoIcon,
-  X,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { ManageTicketDetailsProps } from "../model/ticket.model";
 import {
   TECHNICIAN_RESPONSE,
@@ -972,7 +970,7 @@ import {
 } from "../../enums/enums";
 import ConfirmationPage from "../../components/ui/ConfirmationPage";
 import Modal from "../../components/modal/Modal";
-import { useAssignTechnician, useAssignTicket } from "../hooks/ticketHooks";
+import { useAssignTechnician } from "../hooks/ticketHooks";
 
 const ADMIN_ROUTES_DEFINITION = {
   DASHBOARD: {

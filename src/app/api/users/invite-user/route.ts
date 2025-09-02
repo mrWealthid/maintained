@@ -1,7 +1,7 @@
 import { INVITE_STATUS } from "@/app/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import Business from "@/model/businessModel";
-import User from "@/model/userModel";
+import Business from "@/models/businessModel";
+import User from "@/models/userModel";
 import { Emails } from "@/utils/email-resend";
 import { generateInviteToken } from "@/utils/helpers";
 import mongoose from "mongoose";

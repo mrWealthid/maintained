@@ -1,10 +1,12 @@
 import { ROLES, TICKET_STATUS } from "@/app/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ensureTicketRoom } from "@/lib/chat/chat";
+import { pusherServer } from "@/lib/pusher/pusher";
 import MiddlewareFeatures from "@/middlewareFeatures";
-import { TicketActivity } from "@/model/ticketActivity";
-import Ticket from "@/model/ticketModel";
-import User from "@/model/userModel";
-import mongoose from "mongoose";
+import { TicketActivity } from "@/models/ticketActivity";
+import Ticket, { ITicket } from "@/models/ticketModel";
+import User from "@/models/userModel";
+import mongoose, { Types, HydratedDocument } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
@@ -55,7 +57,19 @@ export async function PATCH(
       );
     }
 
-    const previous = await Ticket.findById(ticketId);
+    const previous = (await Ticket.findById(ticketId)
+      .populate<{ user: { name: string; id: string } }>("user", "id name")
+      .populate<{
+        assignedTo?: { name: string; id: string };
+      }>("assignedTo", "id name")
+      .populate<{
+        actionedBy?: { name: string; id: string };
+      }>("actionedBy", "id name")) as HydratedDocument<ITicket> & {
+      user: { name: string; id: string };
+      assignedTo?: { name: string; id: string };
+      actionedBy?: { name: string; id: string };
+    };
+
     if (!previous) {
       return NextResponse.json(
         { error: "No ticket found with id" },
@@ -64,7 +78,7 @@ export async function PATCH(
     }
 
     // send assignment technician request
-    const updatedRequest = await Ticket.findByIdAndUpdate(
+    const updatedRequest = (await Ticket.findByIdAndUpdate(
       ticketId,
       {
         // actionedBy: adminUser.id,
@@ -72,8 +86,20 @@ export async function PATCH(
         status: TICKET_STATUS.assigned,
       },
       { new: true, runValidators: true, context: "query" }
-    );
-
+    )
+      .populate<{ user: { name: string; id: string } }>("user", "id name")
+      .populate<{ assignedTo?: { name: string; id: string } }>(
+        "assignedTo",
+        "id name"
+      )
+      .populate<{ actionedBy?: { name: string; id: string } }>(
+        "actionedBy",
+        "id name"
+      )) as HydratedDocument<ITicket> & {
+      user: { name: string; id: string };
+      assignedTo?: { name: string; id: string };
+      actionedBy?: { name: string; id: string };
+    };
     await TicketActivity.create({
       ticket: ticketId,
       action: "status-changed",
@@ -85,6 +111,32 @@ export async function PATCH(
         current: assignedTo,
       },
     });
+
+    // assertPopulated<typeof Ticket>(updatedRequest, "user");
+
+    const sysText =
+      previous.assignedTo && previous.assignedTo !== updatedRequest?.assignedTo
+        ? `Technician changed from ${previous.assignedTo?.name ?? "previous"} to new technician by ${updatedRequest.assignedTo?.name}.`
+        : `Technician ${updatedRequest.assignedTo?.name} assigned by ${updatedRequest.actionedBy?.name}.`;
+
+    const { room, msg } = await ensureTicketRoom({
+      ticketId: updatedRequest.id,
+      requesterId: new Types.ObjectId(updatedRequest.user?.id),
+      technicianId: new Types.ObjectId(updatedRequest.assignedTo?.id),
+      adminId: new Types.ObjectId(updatedRequest.actionedBy?.id),
+      sysText,
+    });
+
+    try {
+      await pusherServer.trigger(`room-${room._id}`, "message:new", {
+        _id: msg._id,
+        type: msg.type,
+        text: msg.text,
+        createdAt: msg.createdAt,
+      });
+    } catch (e) {
+      // log and move on
+    }
 
     return NextResponse.json({
       message: "Technician assigned successfully",

@@ -10,7 +10,7 @@ import {
 } from "@/app/shared/enums/enums";
 import "./technicanRequest";
 
-interface ITicket extends Document {
+export interface ITicket extends Document {
   title: string;
   area: string;
   description: string;
