@@ -1,5 +1,5 @@
 // models/ChatMessage.ts
-import { CHAT_TYPE } from "@/app/(users)/dashboard/chat/data/enums";
+import { CHAT_TYPE } from "@/app/shared/chat-feat/data/enums";
 import mongoose, { Schema, Types } from "mongoose";
 
 export interface IChatMessage {

@@ -1,14 +1,16 @@
 // app/api/chat/rooms/[roomId]/messages/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import ChatMessage from "@/models/chatMessage";
 // import { authUserOrThrow } from "@/lib/auth";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { CHAT_TYPE } from "@/app/(users)/dashboard/chat/data/enums";
+import { CHAT_TYPE } from "@/app/shared/chat-feat/data/enums";
+import APIFeatures from "@/utils/apiFeatures";
+import { mapToObject } from "@/utils/helpers";
 
 export async function GET(
-  _: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   const verify = await getUserFromCookies();
@@ -17,15 +19,52 @@ export async function GET(
   if (!verify) {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
   }
+  const query: any = { ...request.nextUrl.searchParams };
+
+  const transformedQuery = mapToObject(query);
 
   await assertRoomAccess(roomId, verify.id);
 
-  const messages = await ChatMessage.find({ room: roomId })
-    .populate({ path: "sender", select: "name" })
-    .sort({ createdAt: -1 })
-    .limit(50);
+  const filter = { room: roomId };
 
-  return NextResponse.json({ data: messages.reverse() }, { status: 200 });
+  const chatRequestQuery = ChatMessage.find(filter);
+
+  const features = new APIFeatures(chatRequestQuery, transformedQuery)
+    .filter()
+    .sort("_id")
+    .limitFields()
+    .paginate()
+    .populate({ path: "sender", select: "name" });
+
+  const requests = await features.query;
+
+  let count;
+
+  // console.log( await Model.find(req.query))
+
+  //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
+
+  if (Object.values(transformedQuery).length > 0) {
+    const excludedFields = ["page", "sort", "limit", "fields"];
+    excludedFields.forEach((el) => delete transformedQuery[el]);
+    count = await ChatMessage.find(filter)
+      .find(transformedQuery)
+      .countDocuments();
+  } else {
+    count = await ChatMessage.countDocuments(filter);
+  }
+
+  const response = NextResponse.json(
+    {
+      totalRecords: count,
+      results: requests.length,
+      status: "success",
+      data: requests,
+    },
+    { status: 200 }
+  );
+
+  return response;
 }
 
 export async function POST(

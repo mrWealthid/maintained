@@ -10,6 +10,7 @@ import {
   ChatRoomListFilter,
   ChatRoomMessage,
 } from "../model/chat.model";
+import { normalizeMessage } from "../helper/chatCache";
 
 export async function fetchChatRooms<T>({
   limit = 10,
@@ -47,7 +48,7 @@ export async function fetchChatMessagesByRoomId<T>({
 export async function sendChatMessage(
   roomId: string,
   message: string
-): Promise<ApiResponse<ChatRoomMessage>> {
+): Promise<ApiPaginatedResponse<ChatRoomMessage>> {
   const url = `${API_ROUTES.chat.send_message(roomId)}`;
 
   try {
@@ -57,3 +58,41 @@ export async function sendChatMessage(
     throw new Error(ApiErrorHandler.parse(error));
   }
 }
+
+// export async function fetchChatMessagesByRoomId({
+//   page,
+//   limit,
+//   roomId,
+//   search,
+// }: {
+//   page: number;
+//   limit: number;
+//   roomId: string;
+//   search?: ChatMessageFilter;
+// }): Promise<ApiPaginatedResponse<ChatRoomMessage[]>> {
+//   const qs = new URLSearchParams({
+//     page: String(page),
+//     limit: String(limit),
+//     ...(search ? { search: JSON.stringify(search) } : {}),
+//   });
+//   try {
+//     const res = await axios(`/api/rooms/${roomId}/messages?${qs.toString()}`);
+
+//     const json = res.data as ApiPaginatedResponse<ChatRoomMessage[]>;
+
+//     // Map to internal shape
+//     const data = (json.data ?? []).map(normalizeMessage);
+//     const totalRecords = json.totalRecords ?? data.length;
+//     const results = json.results ?? data.length;
+
+//     return {
+//       data,
+//       totalRecords,
+//       results,
+//       status: json.status,
+//       message: json.message,
+//     };
+//   } catch (error) {
+//     throw new Error(ApiErrorHandler.parse(error));
+//   }
+// }
