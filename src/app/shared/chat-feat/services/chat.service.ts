@@ -11,6 +11,7 @@ import {
   ChatRoomMessage,
 } from "../model/chat.model";
 import { normalizeMessage } from "../helper/chatCache";
+import { getPusherClient } from "@/lib/pusher/pusher";
 
 export async function fetchChatRooms<T>({
   limit = 10,
@@ -51,8 +52,19 @@ export async function sendChatMessage(
 ): Promise<ApiPaginatedResponse<ChatRoomMessage>> {
   const url = `${API_ROUTES.chat.send_message(roomId)}`;
 
+  const socketId = getPusherClient()?.connection.socket_id ?? "";
+
   try {
-    const response = await axios.post(url, { message });
+    const response = await axios.post(
+      url,
+      { message },
+      {
+        headers: {
+          "content-type": "application/json",
+          "X-Socket-Id": socketId, // <- send it
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw new Error(ApiErrorHandler.parse(error));

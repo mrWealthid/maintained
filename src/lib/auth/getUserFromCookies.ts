@@ -26,7 +26,7 @@ export async function getUserFromCookies(
   }
 
   const user = await User.findById(payload.id).select(
-    "memberships currentBusiness"
+    "memberships currentBusiness name"
   );
   if (!user) return null;
 

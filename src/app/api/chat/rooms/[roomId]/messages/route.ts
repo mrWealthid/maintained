@@ -66,13 +66,15 @@ export async function GET(
 
   return response;
 }
-
+export const runtime = "nodejs";
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   const verify = await getUserFromCookies();
   const { roomId } = await params;
+
+  const socketId = req.headers.get("x-socket-id") ?? undefined;
 
   if (!verify) {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
@@ -85,6 +87,8 @@ export async function POST(
     return NextResponse.json({ error: "Empty message" }, { status: 400 });
   }
 
+  console.log(verify.user);
+
   const msg = await ChatMessage.create({
     room: roomId,
     sender: verify.id,
@@ -93,12 +97,21 @@ export async function POST(
     readBy: [verify.id],
   });
 
-  await pusherServer.trigger(`room-${roomId}`, "message:new", {
-    _id: msg._id,
-    sender: verify.id,
-    text: msg.text,
-    createdAt: msg.createdAt,
-  });
+  await pusherServer.trigger(
+    `private-room-${roomId}`,
+    "message:new",
+    {
+      _id: msg._id,
+      sender: {
+        id: verify.id,
+        name: verify.user.name,
+      },
+      text: msg.text,
+      createdAt: msg.createdAt,
+      room: roomId,
+    },
+    { socket_id: socketId }
+  );
 
   return NextResponse.json(
     { status: "success", message: "Message sent successfully", data: msg },

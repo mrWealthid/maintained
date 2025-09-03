@@ -10,8 +10,8 @@ import {
   getMsgId,
 } from "../helper/chatCache";
 import { getPusherClient } from "@/lib/pusher/pusher";
-import { ChatRoomMessage } from "../model/chat.model";
-import { ApiPaginatedResponse } from "../../model/model";
+import type { ChatRoomMessage } from "../model/chat.model";
+import type { ApiPaginatedResponse } from "../../model/model";
 
 export function usePusherChatRoom(roomId?: string | null) {
   const qc = useQueryClient();
@@ -21,7 +21,11 @@ export function usePusherChatRoom(roomId?: string | null) {
     const pusher = getPusherClient();
     if (!pusher) return;
 
-    const channel = pusher.subscribe(`private-room-${roomId}`);
+    // Debug while testing:
+    (pusher.constructor as any).logToConsole = true;
+
+    const channelName = `private-room-${roomId}`;
+    const channel = pusher.subscribe(channelName);
 
     const patchPages = (
       mutator: (items: ChatRoomMessage[]) => ChatRoomMessage[],
@@ -30,19 +34,28 @@ export function usePusherChatRoom(roomId?: string | null) {
       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
         {
           queryKey: ["chatMessages"],
+          // IMPORTANT: your message query **must** use ["chatMessages", { roomId, page, limit, search }]
+          // so we can match on roomId here:
           predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
         },
-        (old) =>
-          old
-            ? {
-                ...old,
-                data: mutator(old.data),
-                total:
-                  typeof adjustTotal === "function"
-                    ? adjustTotal(old.totalRecords ?? 0)
-                    : old.totalRecords,
-              }
-            : old
+        (old) => {
+          if (!old) return old;
+
+          const prevItems = Array.isArray(old.data) ? old.data : [];
+          const nextItems = mutator(prevItems);
+
+          return {
+            ...old,
+            data: nextItems,
+            // keep API contract names:
+            totalRecords:
+              typeof adjustTotal === "function"
+                ? adjustTotal(old.totalRecords ?? prevItems.length)
+                : old.totalRecords,
+            // keep results (items on this page) in sync too:
+            results: nextItems.length,
+          };
+        }
       );
     };
 
@@ -53,7 +66,7 @@ export function usePusherChatRoom(roomId?: string | null) {
         (items) =>
           items.some((m) => getMsgId(m) === getMsgId(msg))
             ? items
-            : [...items, msg],
+            : [...items, msg], // flip to [msg, ...items] if newest-first
         (t) => t + 1
       );
     };
@@ -75,12 +88,16 @@ export function usePusherChatRoom(roomId?: string | null) {
       patchPages((items) => addReader(items, id, readerId));
     };
 
+    channel.bind("pusher:subscription_succeeded", () =>
+      console.log("✅ subscribed:", channelName)
+    );
     channel.bind("message:new", onNew);
     channel.bind("message:edit", onEdit);
     channel.bind("message:delete", onDelete);
     channel.bind("message:read", onRead);
 
     pusher.connection.bind("connected", () => {
+      console.log("✅ pusher connected");
       qc.invalidateQueries({ queryKey: ["chatMessages", { roomId }] });
     });
 
@@ -90,7 +107,7 @@ export function usePusherChatRoom(roomId?: string | null) {
       channel.unbind("message:delete", onDelete);
       channel.unbind("message:read", onRead);
       pusher.connection.unbind("connected");
-      pusher.unsubscribe(`private-room-${roomId}`);
+      pusher.unsubscribe(channelName);
     };
   }, [roomId, qc]);
 }
