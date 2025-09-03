@@ -48,7 +48,7 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
     onCloseModal
   );
 
-  const { data: technicians } = useFetchTechnicians<User>();
+  const { data: technicians } = useFetchTechnicians();
 
   const { isLoading, data: ticketDetails } = useFetchTicketDetails(ticket.id);
 

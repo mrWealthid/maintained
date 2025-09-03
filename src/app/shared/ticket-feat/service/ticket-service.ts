@@ -68,8 +68,8 @@ export async function fetchTechnicians<T>(
   query?: string | null
 ): Promise<ApiResponse<T[]>> {
   const url = query
-    ? `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&name=${query}`
-    : `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}`;
+    ? `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&excludeInactive=true&name=${query}`
+    : `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&excludeInactive=true`;
   try {
     const response = await axios(url);
     const data = await response.data;

@@ -27,6 +27,7 @@ import {
   CreateTicketPayload,
   Ticket,
   TicketType,
+  User,
 } from "../../model/model";
 import { ApiError } from "next/dist/server/api-utils";
 import { IListResponse } from "@/app/shared/components/table/models/table.model";
@@ -152,10 +153,10 @@ export function useAssignTechnician(id: string, close?: () => void) {
   return { isAssigning, handleAssignTechnician };
 }
 
-export function useFetchTechnicians<T>(page: number = 1, limit: number = 50) {
+export function useFetchTechnicians(page: number = 1, limit: number = 50) {
   const { isLoading, data, error, isRefetching } = useQuery({
     queryKey: ["technicians"],
-    queryFn: () => fetchTechnicians<T>(),
+    queryFn: () => fetchTechnicians<User>(),
   });
 
   return {

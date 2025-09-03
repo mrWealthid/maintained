@@ -3,7 +3,6 @@ import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
-import MiddlewareFeatures from "@/middlewareFeatures";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 
@@ -11,105 +10,87 @@ connect();
 
 export async function GET(request: NextRequest) {
   try {
-    let filter: any = {};
-
     const verify = await getUserFromCookies();
     if (!verify) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (verify.isUserRole) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const currentBusinessId = new mongoose.Types.ObjectId(
       verify.currentBusiness
     );
-    if (verify.isAdminRole) {
-      const user = await User.findById(verify.id);
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-      filter = { "memberships.business": currentBusinessId };
-    }
 
-    if (verify.isUserRole) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Base filter: must have a membership for the current business
+    let filter: any = { "memberships.business": currentBusinessId };
 
-    const query: any = request.nextUrl.searchParams;
-    const transformedQuery = mapToObject(query);
+    const query = request.nextUrl.searchParams;
+    const transformedQuery = mapToObject(query as any);
 
-    // 🔐 Exclude current user if excludeSelf=true is passed
-
+    // Exclude current user
     if (query.get("excludeSelf") === "true") {
       filter._id = { $ne: verify.id };
       delete transformedQuery.excludeSelf;
     }
 
-    //This is added for fields that should resolve with partial search
+    // Name (partial)
     if (transformedQuery.name) {
-      const regex = new RegExp(transformedQuery.name, "i"); // 'i' for case-insensitive
-      filter = { ...filter, name: { $regex: regex } };
-      delete transformedQuery.name; // Remove name from transformedQuery so it doesn't get double-filtered
+      filter.name = { $regex: new RegExp(transformedQuery.name, "i") };
+      delete transformedQuery.name;
     }
 
+    // Build one $elemMatch for memberships so we don't overwrite previous filters
+    const elemMatch: any = { business: currentBusinessId };
+
+    // If 'status' is provided, it takes precedence over excludeInactive
     if (transformedQuery.status) {
-      filter.memberships = {
-        $elemMatch: {
-          business: currentBusinessId,
-          status: transformedQuery.status,
-        },
-      };
+      elemMatch.status = transformedQuery.status;
       delete transformedQuery.status;
+    } else if (query.get("excludeInactive") === "true") {
+      // Only active per business
+      elemMatch.status = "ACTIVATED";
+      // remove the flag from query map so it doesn't leak into APIFeatures
+      delete (transformedQuery as any).excludeInactive;
     }
+
     if (transformedQuery.role) {
-      filter.memberships = {
-        $elemMatch: {
-          business: currentBusinessId,
-          role: transformedQuery.role,
-        },
-      };
+      elemMatch.role = transformedQuery.role;
       delete transformedQuery.role;
     }
 
-    const userQuery = User.find(filter);
+    // Apply the $elemMatch only if we added any qualifiers beyond 'business'
+    if (Object.keys(elemMatch).length > 1) {
+      filter.memberships = { $elemMatch: elemMatch };
+    }
 
+    // Query + features
+    const userQuery = User.find(filter);
     const features = new APIFeatures(userQuery, transformedQuery)
       .filter()
       .sort()
       .limitFields()
       .paginate()
       .populate([
-        {
-          path: "currentBusiness",
-          select: "businessName country",
-        },
-        {
-          path: "memberships.business",
-          select: "businessName",
-        },
+        { path: "currentBusiness", select: "businessName country" },
+        { path: "memberships.business", select: "businessName" },
       ]);
 
     const users = await features.query;
 
-    let count;
+    // Count for pagination with same filters
+    const excludedFields = ["page", "sort", "limit", "fields"];
+    excludedFields.forEach((f) => delete transformedQuery[f]);
+    const count = await User.find(filter)
+      .find(transformedQuery)
+      .countDocuments();
 
-    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-    console.log("Query", Object.values(transformedQuery).length);
-    console.log("Query", Object.values(transformedQuery));
-    if (Object.values(transformedQuery).length > 0) {
-      const excludedFields = ["page", "sort", "limit", "fields"];
-      excludedFields.forEach((el) => delete transformedQuery[el]);
-      count = await User.find(filter).find(transformedQuery).countDocuments();
-    } else {
-      count = await User.countDocuments(filter);
-    }
-
-    const response = NextResponse.json({
+    return NextResponse.json({
       status: "success",
       totalRecords: count,
       results: users.length,
       data: users,
     });
-
-    return response;
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
