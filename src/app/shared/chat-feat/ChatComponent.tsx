@@ -65,6 +65,7 @@ import {
   getStatusColor,
 } from "./helper/helper";
 import { useAppContext } from "../contexts/AppContext";
+import { usePusherChatRoom } from "./hooks/usePusherChat";
 
 const mockRooms = [
   {
@@ -320,6 +321,8 @@ export default function ChatComponent() {
     messages,
     error: messagesError,
   } = useFetchChatRoomMessages(1, 50, currentRoom?.id!);
+
+  usePusherChatRoom(currentRoom?.id);
 
   const [selectedTechnician, setSelectedTechnician] = useState("");
   const [showAddTechnician, setShowAddTechnician] = useState(false);

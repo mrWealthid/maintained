@@ -20,8 +20,25 @@ export const pusherServer = new Pusher({
 //   });
 
 // client
-export const getPusherClient = () =>
-  new PusherClient(process.env.PUSHER_KEY!, {
+// export const getPusherClient = () =>
+//   new PusherClient(process.env.PUSHER_KEY!, {
+//     cluster: process.env.PUSHER_CLUSTER!,
+//     forceTLS: true,
+//   });
+
+let client: PusherClient | null = null;
+
+export function getPusherClient() {
+  if (typeof window === "undefined") return null;
+  if (client) return client;
+
+  client = new PusherClient(process.env.PUSHER_KEY!, {
     cluster: process.env.PUSHER_CLUSTER!,
     forceTLS: true,
+    authEndpoint: "/api/pusher/auth", // <-- important
+    // If you need headers (e.g., Bearer), add:
+    // auth: { headers: { Authorization: `Bearer ${token}` } }
   });
+
+  return client;
+}
