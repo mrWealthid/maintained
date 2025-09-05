@@ -15,6 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -46,18 +56,24 @@ import {
   Download,
   Menu,
   X,
+  Trash2,
+  Edit2,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/Theme-Toggle";
 import {
+  useDeleteMessage,
+  useEditMessage,
   useFetchChatRoomMessages,
   useFetchChatRooms,
   useSendMessage,
 } from "./hooks/chatHooks";
-import { ChatRoom } from "./model/chat.model";
+import { ChatRoom, ChatRoomMessage, Participants } from "./model/chat.model";
 import { User } from "@/app/shared/model/model";
 import { CHAT_ROLES } from "./data/enums";
 import {
+  computeAggregateStatus,
   formatDate,
   formatTime,
   getPriorityColor,
@@ -311,6 +327,10 @@ export default function ChatComponent() {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [deleteMessageId, setDeleteMessageId] = useState<string | null>(null);
+
   const {
     mutate: sendMessage,
     isPending,
@@ -323,6 +343,14 @@ export default function ChatComponent() {
   } = useFetchChatRoomMessages(1, 50, currentRoom?.id!);
 
   usePusherChatRoom(currentRoom?.id);
+
+  const { mutate: editMessage } = useEditMessage(currentRoom?.id!);
+  const { mutate: deleteMessage } = useDeleteMessage(currentRoom?.id!);
+
+  const { typingUsers, emitTyping } = usePusherChatRoom(
+    currentRoom?.id,
+    user?.id
+  );
 
   const [selectedTechnician, setSelectedTechnician] = useState("");
   const [showAddTechnician, setShowAddTechnician] = useState(false);
@@ -366,6 +394,56 @@ export default function ChatComponent() {
     setNewMessage("");
   };
 
+  const handleEditMessage = (messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditingContent(content);
+  };
+
+  const handleSaveEdit = () => {
+    const updatedValue = editingContent.trim();
+    if (!updatedValue || !editingMessageId) return;
+
+    // setMessages(
+    //   messages.map((msg) =>
+    //     msg.id === editingMessageId
+    //       ? {
+    //           ...msg,
+    //           content: editingContent,
+    //           timestamp: new Date().toISOString(),
+    //         }
+    //       : msg
+    //   )
+    // );
+    editMessage({ text: updatedValue, id: editingMessageId });
+    setEditingMessageId(null);
+    setEditingContent("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditingContent("");
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    deleteMessage({ id: messageId });
+    // setMessages(messages.filter((msg) => msg.id !== messageId));
+    setDeleteMessageId(null);
+  };
+
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function onChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setNewMessage(e.target.value);
+    emitTyping(true);
+
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => {
+      emitTyping(false);
+      typingTimer.current = null;
+    }, 1200);
+  }
   const handleAddTechnician = () => {
     if (!selectedTechnician) return;
 
@@ -399,27 +477,26 @@ export default function ChatComponent() {
   //   return <div>Room not found</div>;
   // }
 
-  function groupUsersByRole(room: ChatRoom) {
-    const roleMap: Record<
-      string,
-      {
-        user: User;
-        role: CHAT_ROLES;
-        joinedAt: Date;
-      }[]
-    > = {};
+  // function groupUsersByRole(room: ChatRoom) {
+  //   const roleMap: Record<
+  //     string,
+  //     {
+  //       user: User;
+  //       role: CHAT_ROLES;
+  //       joinedAt: Date;
+  //     }[]
+  //   > = {};
 
-    for (let participant of room.participants ?? []) {
-      if (!roleMap[participant.role]) {
-        roleMap[participant.role] = [];
-      }
-      roleMap[participant.role].push(participant);
-    }
+  //   for (let participant of room.participants ?? []) {
+  //     if (!roleMap[participant.role]) {
+  //       roleMap[participant.role] = [];
+  //     }
+  //     roleMap[participant.role].push(participant);
+  //   }
 
-    return roleMap;
+  //   return roleMap;
 
-    // rooms.map((room)=>  room.participants.map((participant)=> {[participant.]}))
-  }
+  // }
 
   function generateAvatar(fullName: string) {
     const placeholder = "/placeholder.svg?height=40&width=40&text=$";
@@ -431,6 +508,68 @@ export default function ChatComponent() {
     return placeholder.replace("$", abbreviation);
   }
 
+  // const renderMessageStatus = (message: any) => {
+  //   if (message.senderRole === "tenant") return null;
+
+  //   return (
+  //     <div className="flex items-center space-x-1 mt-1">
+  //       {message.delivered ? (
+  //         message.read ? (
+  //           <div className="flex items-center space-x-1">
+  //             <Check className="h-3 w-3 text-blue-500" />
+  //             <Check className="h-3 w-3 text-blue-500 -ml-2" />
+  //             <span className="text-xs text-blue-500">Read</span>
+  //           </div>
+  //         ) : (
+  //           <div className="flex items-center space-x-1">
+  //             <Check className="h-3 w-3 text-gray-400" />
+  //             <Check className="h-3 w-3 text-gray-400 -ml-2" />
+  //             <span className="text-xs text-gray-400">Delivered</span>
+  //           </div>
+  //         )
+  //       ) : (
+  //         <div className="flex items-center space-x-1">
+  //           <Check className="h-3 w-3 text-gray-300" />
+  //           <span className="text-xs text-gray-300">Sending...</span>
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
+
+  /** Render ticks ONLY for the current user's own messages */
+  function renderMessageStatus(
+    message: ChatRoomMessage,
+    meId: string,
+    participants: Participants[]
+  ) {
+    if (!message.sender || message.sender.id !== meId) return null;
+
+    const state = computeAggregateStatus(message, participants);
+
+    return (
+      <div className="flex items-center space-x-1 mt-1">
+        {state === "read" ? (
+          <div className="flex items-center space-x-1">
+            <Check className="h-3 w-3 text-blue-500" />
+            <Check className="h-3 w-3 text-blue-500 -ml-2" />
+            <span className="text-xs text-blue-500">Read</span>
+          </div>
+        ) : state === "delivered" ? (
+          <div className="flex items-center space-x-1">
+            <Check className="h-3 w-3 text-gray-400" />
+            <Check className="h-3 w-3 text-gray-400 -ml-2" />
+            <span className="text-xs text-gray-400">Delivered</span>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1">
+            <Check className="h-3 w-3 text-gray-300" />
+            <span className="text-xs text-gray-300">Sending…</span>
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
       <div
@@ -569,7 +708,7 @@ export default function ChatComponent() {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Request Info Bar */}
-            <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+            <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
@@ -667,7 +806,7 @@ export default function ChatComponent() {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages?.map((message) => (
-                <div key={message._id} className="flex space-x-3">
+                <div key={message._id} className="flex space-x-3 group">
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage
                       src={generateAvatar(message.sender?.name || "SYSTEM")}
@@ -692,11 +831,77 @@ export default function ChatComponent() {
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatTime(message.createdAt.toString())}
                       </span>
+
+                      {message.sender && message.sender.id === user?.id && (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleEditMessage(message._id, message.text!)
+                            }
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteMessageId(message._id)}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700">
-                      <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
-                        {message.text}
-                      </p>
+                      {editingMessageId === message._id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editingContent}
+                            onChange={(e) => setEditingContent(e.target.value)}
+                            className="min-h-[60px] resize-none"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSaveEdit();
+                              }
+                              if (e.key === "Escape") {
+                                handleCancelEdit();
+                              }
+                            }}
+                          />
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleSaveEdit}
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Save
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelEdit}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
+                            {message.text}
+                          </p>
+                          {renderMessageStatus(
+                            message,
+                            user?.id!,
+                            currentRoom?.participants!
+                          )}
+                        </>
+                      )}
                       {/* {message.attachments.length > 0 && (
                         <div className="mt-3 space-y-2">
                           {message.attachments.map((attachment) => (
@@ -751,7 +956,8 @@ export default function ChatComponent() {
             </div>
 
             {/* Message Input */}
-            <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+            <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
+              {" "}
               <div className="flex space-x-2">
                 <input
                   title="Upload files"
@@ -772,7 +978,7 @@ export default function ChatComponent() {
                 </Button>
                 <Textarea
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={onChange}
                   placeholder="Type your message..."
                   className="flex-1 min-h-[40px] max-h-32 resize-none"
                   onKeyDown={(e) => {
@@ -793,7 +999,8 @@ export default function ChatComponent() {
             </div>
           </div>
 
-          <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
+          <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col h-full">
+            {" "}
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* Participants */}
               <div>
@@ -919,6 +1126,32 @@ export default function ChatComponent() {
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={!!deleteMessageId}
+        onOpenChange={() => setDeleteMessageId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Message</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this message? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                deleteMessageId && handleDeleteMessage(deleteMessageId)
+              }
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

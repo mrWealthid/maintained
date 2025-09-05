@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteChatMessage,
+  editChatMessage,
   fetchChatMessagesByRoomId,
   fetchChatRooms,
   sendChatMessage,
@@ -11,10 +13,17 @@ import {
   SendChatMessagePayload,
 } from "../model/chat.model";
 import toast from "react-hot-toast";
-import { ApiError, ApiPaginatedResponse, User } from "@/app/shared/model/model";
+import {
+  ApiError,
+  ApiPaginatedResponse,
+  ApiResponse,
+  User,
+} from "@/app/shared/model/model";
 // import { PageResp } from "../helper/chatCache";
 import { CHAT_TYPE } from "../data/enums";
 import { nanoid } from "nanoid";
+import { getPusherClient } from "@/lib/pusher/pusher";
+import { getMsgId } from "../helper/chatCache";
 
 // export function useFetchChatRooms(
 //   onSuccess: (data: ChatRoom[]) => void,
@@ -157,13 +166,96 @@ export function useFetchChatRoomMessages(
 //   };
 // }
 
+// export function useSendMessage(roomId: string, me: User) {
+//   const qc = useQueryClient();
+//   const now = new Date();
+//   return useMutation({
+//     mutationFn: (text: string) => sendChatMessage(roomId, text),
+//     onMutate: async (text) => {
+//       const tempId = `tmp_${nanoid()}`;
+//       const optimistic: ChatRoomMessage = {
+//         id: tempId,
+//         _id: tempId,
+//         room: roomId,
+//         sender: me,
+//         type: CHAT_TYPE.USER,
+//         text,
+//         meta: { tempId },
+//         readBy: [me.id],
+//         // NEW: optimistic receipts (sender is trivially delivered/read)
+//         receipts: [{ userId: me.id as any, deliveredAt: now, readAt: now }],
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       };
+
+//       await qc.cancelQueries({ queryKey: ["chatMessages"] });
+
+//       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+//         {
+//           queryKey: ["chatMessages"],
+//           predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+//         },
+//         (old) =>
+//           old
+//             ? {
+//                 ...old,
+//                 data: [...old.data, optimistic],
+//                 totalRecords: (old.totalRecords ?? 0) + 1,
+//                 results: (old.results ?? 0) + 1,
+//               }
+//             : old
+//       );
+
+//       return { tempId };
+//     },
+//     onError: (_e, _v, ctx) => {
+//       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+//         {
+//           queryKey: ["chatMessages"],
+//           predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+//         },
+//         (old) =>
+//           old
+//             ? {
+//                 ...old,
+//                 data: old.data.filter((m) => m.meta?.tempId !== ctx?.tempId),
+//                 totalRecords: Math.max(0, (old.totalRecords ?? 1) - 1),
+//                 results: Math.max(0, (old.results ?? 1) - 1),
+//               }
+//             : old
+//       );
+//     },
+//     onSuccess: (real, _v, ctx) => {
+//       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+//         {
+//           queryKey: ["chatMessages"],
+//           predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+//         },
+//         (old) =>
+//           old
+//             ? {
+//                 ...old,
+//                 // data: old.data.map((m) =>
+//                 //   m.meta?.tempId === ctx?.tempId ? real.data : m
+//                 // ),
+
+//                 totalRecords: old.totalRecords,
+//                 results: old.results,
+//               }
+//             : old
+//       );
+//     },
+//   });
+// }
 export function useSendMessage(roomId: string, me: User) {
   const qc = useQueryClient();
-
   return useMutation({
     mutationFn: (text: string) => sendChatMessage(roomId, text),
+
     onMutate: async (text) => {
       const tempId = `tmp_${nanoid()}`;
+      const now = new Date();
+
       const optimistic: ChatRoomMessage = {
         id: tempId,
         _id: tempId,
@@ -173,8 +265,9 @@ export function useSendMessage(roomId: string, me: User) {
         text,
         meta: { tempId },
         readBy: [me.id],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        receipts: [{ userId: me.id, deliveredAt: now, readAt: now }],
+        createdAt: now,
+        updatedAt: now,
       };
 
       await qc.cancelQueries({ queryKey: ["chatMessages"] });
@@ -197,6 +290,7 @@ export function useSendMessage(roomId: string, me: User) {
 
       return { tempId };
     },
+
     onError: (_e, _v, ctx) => {
       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
         {
@@ -214,7 +308,12 @@ export function useSendMessage(roomId: string, me: User) {
             : old
       );
     },
+
     onSuccess: (real, _v, ctx) => {
+      const payload = (real as any)?.data ?? real;
+      const serverMsg = Array.isArray(payload) ? payload[0] : payload;
+      if (!serverMsg) return;
+
       qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
         {
           queryKey: ["chatMessages"],
@@ -224,14 +323,133 @@ export function useSendMessage(roomId: string, me: User) {
           old
             ? {
                 ...old,
-                // data: old.data.map((m) =>
-                //   m.meta?.tempId === ctx?.tempId ? real.data : m
-                // ),
-
+                data: old.data.map((m) =>
+                  m.meta?.tempId === ctx?.tempId ? serverMsg : m
+                ),
                 totalRecords: old.totalRecords,
                 results: old.results,
               }
             : old
+      );
+    },
+  });
+}
+
+export function useDeleteMessage(roomId: string) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: string }) => deleteChatMessage(roomId, id),
+
+    // Optimistic remove
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["chatMessages"] });
+
+      const prev = qc.getQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>({
+        queryKey: ["chatMessages"],
+        predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+      });
+
+      qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+        {
+          queryKey: ["chatMessages"],
+          predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+        },
+        (old) => {
+          if (!old) return old;
+          const nextData = old.data.filter((m) => getMsgId(m) !== id);
+          return {
+            ...old,
+            data: nextData,
+            totalRecords: Math.max(0, (old.totalRecords ?? 1) - 1),
+            results: Math.max(0, (old.results ?? 1) - 1),
+          };
+        }
+      );
+
+      return { prev };
+    },
+
+    // Rollback on error
+    onError: (_e, _vars, ctx) => {
+      if (!ctx?.prev) return;
+      for (const [queryKey, snapshot] of ctx.prev) {
+        qc.setQueryData(queryKey, snapshot);
+      }
+    },
+
+    // Nothing extra on success — Pusher already syncs others
+    onSuccess: (res: ApiResponse<{ id: string }>) => {
+      console.log("✅ Deleted", res.data.id);
+    },
+  });
+}
+
+export function useEditMessage(roomId: string) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, text }: { id: string; text: string }) =>
+      editChatMessage(roomId, id, text),
+
+    onMutate: async ({ id, text }) => {
+      await qc.cancelQueries({ queryKey: ["chatMessages"] });
+
+      // snapshot all matching caches to rollback if needed
+      const prev = qc.getQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>({
+        queryKey: ["chatMessages"],
+        predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+      });
+
+      // optimistic patch
+      qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+        {
+          queryKey: ["chatMessages"],
+          predicate: (q) => (q.queryKey?.[1] as any)?.roomId === roomId,
+        },
+        (old) => {
+          if (!old) return old;
+          const nextData = old.data.map((m) =>
+            getMsgId(m) === id
+              ? {
+                  ...m,
+                  text,
+                  updatedAt: new Date(),
+                  meta: { ...(m.meta ?? {}), _optimisticEdit: true },
+                }
+              : m
+          );
+          // totals don’t change on edit
+          return { ...old, data: nextData };
+        }
+      );
+
+      return { prev };
+    },
+
+    onError: (_e, _vars, ctx) => {
+      // rollback all snapshots
+      if (!ctx?.prev) return;
+      for (const [queryKey, snapshot] of ctx.prev) {
+        qc.setQueryData(queryKey, snapshot);
+      }
+    },
+
+    onSuccess: (res: ApiResponse<ChatRoomMessage>) => {
+      const serverMsg = res.data;
+      // replace optimistic item with server version
+      qc.setQueriesData<ApiPaginatedResponse<ChatRoomMessage[]>>(
+        {
+          queryKey: ["chatMessages"],
+          predicate: (q) => (q.queryKey?.[1] as any)?.roomId === serverMsg.room,
+        },
+        (old) => {
+          if (!old) return old;
+          const nextData = old.data.map((m) =>
+            getMsgId(m) === getMsgId(serverMsg) ? serverMsg : m
+          );
+          return { ...old, data: nextData };
+        }
       );
     },
   });

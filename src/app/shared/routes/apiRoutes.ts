@@ -40,6 +40,13 @@ export const API_ROUTES = {
   chat: {
     get_rooms: `${base}/chat/rooms`,
     send_message: (id: string) => `${base}/chat/rooms/${id}/messages`,
+    edit_message: (roomId: string, id: string) =>
+      `${base}/chat/rooms/${roomId}/messages/${id}`,
+    delete_message: (roomId: string, id: string) =>
+      `${base}/chat/rooms/${roomId}/messages/${id}`,
     get_room_messages: (id: string) => `${base}/chat/rooms/${id}/messages`,
+    message_delivered: (roomId: string, messageId: string) =>
+      `/api/chat/rooms/${roomId}/messages/${messageId}/delivered`,
+    message_read: (roomId: string) => `/api/chat/rooms/${roomId}/read`,
   },
 };

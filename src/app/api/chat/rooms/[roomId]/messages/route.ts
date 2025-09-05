@@ -8,6 +8,8 @@ import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { CHAT_TYPE } from "@/app/shared/chat-feat/data/enums";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
+import chatRoom from "@/models/chatRoom";
+import { Types } from "mongoose";
 
 export async function GET(
   request: NextRequest,
@@ -67,6 +69,7 @@ export async function GET(
   return response;
 }
 export const runtime = "nodejs";
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ roomId: string }> }
@@ -87,16 +90,40 @@ export async function POST(
     return NextResponse.json({ error: "Empty message" }, { status: 400 });
   }
 
-  console.log(verify.user);
+  const room = await chatRoom.findById(roomId);
+  if (!room)
+    return NextResponse.json({ error: "Room not found" }, { status: 404 });
+
+  // const isParticipant = room.participants.some(
+  //   (p: any) => String(p.user) === String(verify.id)
+  // );
+
+  // console.log(verify.user);
+
+  // const msg = await ChatMessage.create({
+  //   room: roomId,
+  //   sender: verify.id,
+  //   type: CHAT_TYPE.USER,
+  //   text: message.trim(),
+  //   readBy: [verify.id],
+  // });
+
+  const participantIds = room.participants.map(
+    (p: { user: string }) => new Types.ObjectId(p.user)
+  );
+  const receipts = participantIds.map((uid: Types.ObjectId) => ({
+    userId: uid,
+  })); // deliveredAt/readAt empty
 
   const msg = await ChatMessage.create({
     room: roomId,
     sender: verify.id,
     type: CHAT_TYPE.USER,
     text: message.trim(),
-    readBy: [verify.id],
+    receipts,
   });
 
+  await msg.populate({ path: "sender", select: "_id name photo" });
   await pusherServer.trigger(
     `private-room-${roomId}`,
     "message:new",
@@ -114,7 +141,11 @@ export async function POST(
   );
 
   return NextResponse.json(
-    { status: "success", message: "Message sent successfully", data: msg },
+    {
+      status: "success",
+      message: "Message sent successfully",
+      data: msg,
+    },
     { status: 201 }
   );
 }

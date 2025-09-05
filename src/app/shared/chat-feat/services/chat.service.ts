@@ -38,7 +38,7 @@ export async function fetchChatMessagesByRoomId<T>({
   const url = `${API_ROUTES.chat.get_room_messages(roomId)}?${queryString}`;
 
   try {
-    const response = await axios(url);
+    const response = await axios<ApiPaginatedResponse<T[]>>(url);
     console.log(response.data);
     return response.data;
   } catch (err) {
@@ -108,3 +108,70 @@ export async function sendChatMessage(
 //     throw new Error(ApiErrorHandler.parse(error));
 //   }
 // }
+
+export async function editChatMessage(
+  roomId: string,
+  messageId: string,
+  message: string
+): Promise<ApiResponse<ChatRoomMessage>> {
+  const url = API_ROUTES.chat.edit_message(roomId, messageId);
+  const socketId = getPusherClient()?.connection.socket_id ?? "";
+
+  try {
+    const res = await axios.patch<ApiResponse<ChatRoomMessage>>(
+      url,
+      { message },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Socket-Id": socketId,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    throw new Error(ApiErrorHandler.parse(error));
+  }
+}
+
+/** DELETE: remove a message */
+export async function deleteChatMessage(
+  roomId: string,
+  messageId: string
+): Promise<ApiResponse<{ id: string }>> {
+  const url = API_ROUTES.chat.delete_message(roomId, messageId);
+  const socketId = getPusherClient()?.connection.socket_id ?? "";
+
+  try {
+    // axios.delete supports a config with headers; body is not required
+    const res = await axios.delete<ApiResponse<{ id: string }>>(url, {
+      headers: {
+        "X-Socket-Id": socketId,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error(ApiErrorHandler.parse(error));
+  }
+}
+
+// ---------- DELIVERY ACK ----------
+export async function ackDelivered(roomId: string, messageId: string) {
+  console.log(roomId, messageId);
+  const url = API_ROUTES.chat.message_delivered(roomId, messageId);
+  await axios.post(
+    url,
+    {},
+    { headers: { "content-type": "application/json" } }
+  );
+}
+
+// ---------- READ-UP-TO ----------
+export async function markReadUpTo(roomId: string, lastReadMessageId: string) {
+  const url = API_ROUTES.chat.message_read(roomId);
+  await axios.post(
+    url,
+    { lastReadMessageId },
+    { headers: { "content-type": "application/json" } }
+  );
+}

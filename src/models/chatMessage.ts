@@ -1,23 +1,50 @@
-// models/ChatMessage.ts
-import { CHAT_TYPE } from "@/app/shared/chat-feat/data/enums";
-import mongoose, { Schema, Types } from "mongoose";
+import { Schema, model, Types, models } from "mongoose";
+
+export enum CHAT_TYPE {
+  USER = "USER",
+  SYSTEM = "SYSTEM",
+}
 
 export interface IChatMessage {
+  _id: Types.ObjectId;
   room: Types.ObjectId;
-  sender: Types.ObjectId | null; // null for system
+  sender: Types.ObjectId | null;
   type: CHAT_TYPE;
   text?: string;
-  meta?: Record<string, any>;
+  meta?: any;
+
+  /** Legacy for compatibility with old “seen” UI */
   readBy: Types.ObjectId[];
-  // senderRole:
+
+  /** New: per-recipient receipts */
+  receipts: {
+    userId: Types.ObjectId;
+    deliveredAt?: Date;
+    readAt?: Date;
+  }[];
+
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+const ReceiptSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    deliveredAt: { type: Date },
+    readAt: { type: Date },
+  },
+  { _id: false }
+);
 
 const ChatMessageSchema = new Schema<IChatMessage>(
   {
     room: {
       type: Schema.Types.ObjectId,
       ref: "ChatRoom",
-      index: true,
       required: true,
     },
     sender: { type: Schema.Types.ObjectId, ref: "User", default: null },
@@ -28,23 +55,20 @@ const ChatMessageSchema = new Schema<IChatMessage>(
     },
     text: String,
     meta: Schema.Types.Mixed,
-    readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+
+    // keep existing behavior
+    readBy: [{ type: Schema.Types.ObjectId, ref: "User", index: true }],
+
+    // new receipts
+    receipts: { type: [ReceiptSchema], default: [] },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// ChatMessageSchema.set("toJSON", {
-//   virtuals: true,
-//   versionKey: false,
-//   transform: function (_doc, ret: Record<string, any>) {
-//     ret.id = ret._id?.toString();
-//     delete ret._id;
-//   },
-// });
-
+// Helpful indexes
 ChatMessageSchema.index({ room: 1, createdAt: 1 });
+ChatMessageSchema.index({ room: 1, _id: 1 });
+ChatMessageSchema.index({ "receipts.userId": 1 });
 
-export default mongoose.models.ChatMessage ||
-  mongoose.model("ChatMessage", ChatMessageSchema);
+export default models.ChatMessage ||
+  model<IChatMessage>("ChatMessage", ChatMessageSchema);
