@@ -1,8 +1,8 @@
 // app/api/chat/rooms/[roomId]/read/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 import "@/models/chatRoom";
-import "@/models/chatRoomMessage";
+import "@/models/chatMessage";
 import ChatRoom from "@/models/chatRoom";
 import ChatRoomMessage from "@/models/chatMessage";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
@@ -11,15 +11,15 @@ import { pusherServer } from "@/lib/pusher/pusher";
 type Body = { lastReadMessageId?: string };
 
 export async function POST(
-  req: Request,
-  { params }: { params: { roomId: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
     const me = await getUserFromCookies();
     if (!me?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { roomId } = params;
+    const { roomId } = await params;
     if (!Types.ObjectId.isValid(roomId)) {
       return NextResponse.json({ error: "Invalid room id" }, { status: 400 });
     }
