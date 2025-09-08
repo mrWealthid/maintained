@@ -1,6 +1,6 @@
 import { TICKET_PRIORITY, TICKET_STATUS } from "@/app/shared/enums/enums";
 import { CHAT_ROLES } from "../data/enums";
-import { ChatRoomMessage, Participants } from "../model/chat.model";
+import { ChatRoomMessage, Participant } from "../model/chat.model";
 import { User } from "../../model/model";
 
 export const getRoleColor = (role: CHAT_ROLES) => {
@@ -82,7 +82,7 @@ export const formatDate = (timestamp: string) => {
   });
 };
 
-type Aggregate = "sending" | "delivered" | "read";
+type DeliveryState = "sending" | "sent" | "delivered" | "read";
 
 // Match your ChatRoomSchema shapes you might hydrate with
 type RoomParticipant =
@@ -114,32 +114,34 @@ const extractParticipantIds = (participants: RoomParticipant[]): string[] =>
  * Read = all non-sender participants have readAt
  * Participants are accepted raw; IDs are extracted inside.
  */
-export function computeAggregateStatus(
+export function computeDeliveryState(
   message: ChatRoomMessage,
-  participants: Participants[]
-): Aggregate {
+  participants: RoomParticipant[]
+): DeliveryState {
   if (isTemp(message)) return "sending";
 
   const senderId = message.sender?.id ?? "";
-  const participantIds = extractParticipantIds(participants);
-
-  // everyone except sender
-  const others = participantIds.filter((id) => id && id !== senderId);
-  if (!others.length) return "delivered"; // safe fallback (e.g., 1:1 before hydrate)
-
-  const byId = new Map(
-    (message.receipts ?? []).map((r) => [
-      r.userId,
-      { deliveredAt: r.deliveredAt, readAt: r.readAt },
-    ])
+  const others = extractParticipantIds(participants).filter(
+    (id) => id && id !== senderId
   );
 
+  // If we don't know any recipients yet, consider it "sent" (real id, no delivery info)
+  if (others.length === 0) return "sent";
+
+  const byId = new Map(message.receipts?.map((r) => [r.userId, r]) ?? []);
+
+  // READ: all non-sender participants have readAt
   const allRead = others.every((id) => Boolean(byId.get(id)?.readAt));
   if (allRead) return "read";
 
-  const allDelivered = others.every((id) => Boolean(byId.get(id)?.deliveredAt));
-  if (allDelivered) return "delivered";
+  // DELIVERED: at least one non-sender participant has deliveredAt OR readAt
+  const anyDelivered = others.some((id) => {
+    const r = byId.get(id);
+    return Boolean(r?.deliveredAt || r?.readAt);
+  });
+  if (anyDelivered) return "delivered";
 
-  return "sending";
+  // otherwise it's SENT (saved in DB but nobody has received it yet)
+  return "sent";
 }
 // const isTemp = (m: ChatRoomMessage) => Boolean(m.meta?.tempId);

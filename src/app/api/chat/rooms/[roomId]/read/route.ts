@@ -94,7 +94,7 @@ export async function POST(
 
     return NextResponse.json({
       status: "success",
-      message: "Read cursor updated",
+      message: "Read status updated",
       data: {
         lastReadMessageId: String(lastReadMessageId),
         count: affected.length,

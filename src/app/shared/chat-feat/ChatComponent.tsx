@@ -59,6 +59,7 @@ import {
   Trash2,
   Edit2,
   Check,
+  CheckCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/Theme-Toggle";
@@ -69,11 +70,11 @@ import {
   useFetchChatRooms,
   useSendMessage,
 } from "./hooks/chatHooks";
-import { ChatRoom, ChatRoomMessage, Participants } from "./model/chat.model";
+import { ChatRoom, ChatRoomMessage, Participant } from "./model/chat.model";
 import { User } from "@/app/shared/model/model";
 import { CHAT_ROLES } from "./data/enums";
 import {
-  computeAggregateStatus,
+  computeDeliveryState,
   formatDate,
   formatTime,
   getPriorityColor,
@@ -82,6 +83,8 @@ import {
 } from "./helper/helper";
 import { useAppContext } from "../contexts/AppContext";
 import { usePusherChatRoom } from "./hooks/usePusherChat";
+import { TypingIndicator } from "./components/TypingIndicator";
+import { useBottomSentinel } from "./hooks/interfaceHooks";
 
 const mockRooms = [
   {
@@ -344,6 +347,8 @@ export default function ChatComponent() {
 
   usePusherChatRoom(currentRoom?.id);
 
+  const bottomRef = useBottomSentinel(currentRoom?.id!, messages.at(-1)?._id);
+
   const { mutate: editMessage } = useEditMessage(currentRoom?.id!);
   const { mutate: deleteMessage } = useDeleteMessage(currentRoom?.id!);
 
@@ -541,24 +546,27 @@ export default function ChatComponent() {
   function renderMessageStatus(
     message: ChatRoomMessage,
     meId: string,
-    participants: Participants[]
+    participants: Participant[]
   ) {
     if (!message.sender || message.sender.id !== meId) return null;
 
-    const state = computeAggregateStatus(message, participants);
+    const state = computeDeliveryState(message, participants);
 
     return (
       <div className="flex items-center space-x-1 mt-1">
         {state === "read" ? (
           <div className="flex items-center space-x-1">
-            <Check className="h-3 w-3 text-blue-500" />
-            <Check className="h-3 w-3 text-blue-500 -ml-2" />
+            <CheckCheck
+              className="h-3 w-3 "
+              color="#4965ee"
+              strokeWidth={1.5}
+            />
+
             <span className="text-xs text-blue-500">Read</span>
           </div>
         ) : state === "delivered" ? (
           <div className="flex items-center space-x-1">
-            <Check className="h-3 w-3 text-gray-400" />
-            <Check className="h-3 w-3 text-gray-400 -ml-2" />
+            <CheckCheck className="h-3 w-3 text-gray-400" strokeWidth={1.5} />
             <span className="text-xs text-gray-400">Delivered</span>
           </div>
         ) : (
@@ -932,6 +940,8 @@ export default function ChatComponent() {
                 </div>
               ))}
 
+              <div ref={bottomRef} />
+              {/* 
               {isTyping && (
                 <div className="flex space-x-3">
                   <Avatar className="h-8 w-8">
@@ -951,7 +961,14 @@ export default function ChatComponent() {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
+
+              <TypingIndicator
+                typingUsers={typingUsers}
+                participants={currentRoom?.participants!}
+                meId={user?.id!}
+              />
+
               <div ref={messagesEndRef} />
             </div>
 

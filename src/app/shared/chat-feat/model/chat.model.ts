@@ -8,14 +8,14 @@ export interface ChatRoomListFilter {
 export interface ChatRoom {
   id: string;
   ticket: Ticket;
-  participants: Participants[];
+  participants: Participant[];
   lastMessageAt?: Date;
   isArchived?: boolean;
   updatedAt: Date;
   createdAt: Date;
 }
 
-export interface Participants {
+export interface Participant {
   user: { id: string; name: string; avatar?: string | null }; // ALWAYS object with id
   role: CHAT_ROLES;
   joinedAt: string;

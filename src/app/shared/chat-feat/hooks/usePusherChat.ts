@@ -169,7 +169,6 @@ export function usePusherChatRoom(roomId?: string | null, meId?: string) {
 
           const prevItems = Array.isArray(old.data) ? old.data : [];
           const nextItems = mutator(prevItems);
-          debugger;
           return {
             ...old,
             data: nextItems,
@@ -259,8 +258,8 @@ export function usePusherChatRoom(roomId?: string | null, meId?: string) {
     channel.bind("message:edit", onEdit);
     channel.bind("message:delete", onDelete);
     channel.bind("message:read", onRead);
-    channel.bind("message:delivered", onDelivered); // ⬅️ NEW
-    channel.bind("client-typing", onTyping); // ⬅️ NEW (client event)
+    channel.bind("message:delivered", onDelivered);
+    channel.bind("client-typing", onTyping);
 
     pusher.connection.bind("connected", () => {
       console.log("✅ pusher connected");
@@ -276,7 +275,7 @@ export function usePusherChatRoom(roomId?: string | null, meId?: string) {
           if (now - ts < 3500) next[u] = ts;
         return next;
       });
-    }, 1000) as unknown as number;
+    }, 1000) as number;
 
     return () => {
       channel.unbind("message:new", onNew);
