@@ -1,5 +1,5 @@
 import { TICKET_PRIORITY, TICKET_STATUS } from "@/app/shared/enums/enums";
-import { CHAT_ROLES } from "../data/enums";
+import { CHAT_MSG_DELIVERY_STATUS, CHAT_ROLES } from "../data/enums";
 import { ChatRoomMessage, Participant } from "../model/chat.model";
 import { User } from "../../model/model";
 
@@ -82,8 +82,6 @@ export const formatDate = (timestamp: string) => {
   });
 };
 
-type DeliveryState = "sending" | "sent" | "delivered" | "read";
-
 // Match your ChatRoomSchema shapes you might hydrate with
 type RoomParticipant =
   | { user: string }
@@ -117,8 +115,8 @@ const extractParticipantIds = (participants: RoomParticipant[]): string[] =>
 export function computeDeliveryState(
   message: ChatRoomMessage,
   participants: RoomParticipant[]
-): DeliveryState {
-  if (isTemp(message)) return "sending";
+): CHAT_MSG_DELIVERY_STATUS {
+  if (isTemp(message)) return CHAT_MSG_DELIVERY_STATUS.SENDING;
 
   const senderId = message.sender?.id ?? "";
   const others = extractParticipantIds(participants).filter(
@@ -126,22 +124,26 @@ export function computeDeliveryState(
   );
 
   // If we don't know any recipients yet, consider it "sent" (real id, no delivery info)
-  if (others.length === 0) return "sent";
+
+  const messageIsSent = message.receipts.every(
+    (msg) => !msg.deliveredAt && !msg.readAt
+  );
+
+  if (messageIsSent) return CHAT_MSG_DELIVERY_STATUS.SENT;
 
   const byId = new Map(message.receipts?.map((r) => [r.userId, r]) ?? []);
 
   // READ: all non-sender participants have readAt
-  const allRead = others.every((id) => Boolean(byId.get(id)?.readAt));
-  if (allRead) return "read";
+  const allRead = others.some((id) => Boolean(byId.get(id)?.readAt));
+  if (allRead) return CHAT_MSG_DELIVERY_STATUS.READ;
 
   // DELIVERED: at least one non-sender participant has deliveredAt OR readAt
   const anyDelivered = others.some((id) => {
     const r = byId.get(id);
     return Boolean(r?.deliveredAt || r?.readAt);
   });
-  if (anyDelivered) return "delivered";
+  if (anyDelivered) return CHAT_MSG_DELIVERY_STATUS.DELIVERED;
 
   // otherwise it's SENT (saved in DB but nobody has received it yet)
-  return "sent";
+  return CHAT_MSG_DELIVERY_STATUS.SENT;
 }
-// const isTemp = (m: ChatRoomMessage) => Boolean(m.meta?.tempId);

@@ -60,6 +60,9 @@ import {
   Edit2,
   Check,
   CheckCheck,
+  RefreshCw,
+  MessageSquare,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/Theme-Toggle";
@@ -72,7 +75,7 @@ import {
 } from "./hooks/chatHooks";
 import { ChatRoom, ChatRoomMessage, Participant } from "./model/chat.model";
 import { User } from "@/app/shared/model/model";
-import { CHAT_ROLES } from "./data/enums";
+import { CHAT_MSG_DELIVERY_STATUS, CHAT_ROLES } from "./data/enums";
 import {
   computeDeliveryState,
   formatDate,
@@ -85,215 +88,9 @@ import { useAppContext } from "../contexts/AppContext";
 import { usePusherChatRoom } from "./hooks/usePusherChat";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { useBottomSentinel } from "./hooks/interfaceHooks";
-
-const mockRooms = [
-  {
-    id: "REQ-001",
-    title: "Kitchen Faucet Leak",
-    description:
-      "The kitchen faucet has been leaking for 2 days. Water is dripping constantly.",
-    status: "in_progress",
-    priority: "high",
-    category: "Plumbing",
-    tenant: {
-      id: "tenant-1",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      apartment: "Apt 4B",
-      phone: "+1 (555) 123-4567",
-      avatar: "/placeholder.svg?height=40&width=40&text=SJ",
-    },
-    assignedTechnician: {
-      id: "tech-1",
-      name: "Mike Rodriguez",
-      email: "mike.rodriguez@maintenance.com",
-      specialty: "Plumbing",
-      phone: "+1 (555) 987-6543",
-      avatar: "/placeholder.svg?height=40&width=40&text=MR",
-    },
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T14:20:00Z",
-    lastMessage: "Great! I'm on my way now. I have all the necessary parts.",
-    unreadCount: 0,
-  },
-  {
-    id: "REQ-002",
-    title: "AC Not Working",
-    description:
-      "Air conditioning unit stopped working yesterday. Very hot in apartment.",
-    status: "open",
-    priority: "high",
-    category: "HVAC",
-    tenant: {
-      id: "tenant-2",
-      name: "John Smith",
-      email: "john.smith@email.com",
-      apartment: "Apt 2A",
-      phone: "+1 (555) 234-5678",
-      avatar: "/placeholder.svg?height=40&width=40&text=JS",
-    },
-    assignedTechnician: null,
-    createdAt: "2024-01-16T09:15:00Z",
-    updatedAt: "2024-01-16T09:15:00Z",
-    lastMessage: "AC unit stopped working yesterday. Need urgent help!",
-    unreadCount: 2,
-  },
-  {
-    id: "REQ-003",
-    title: "Electrical Outlet Issue",
-    description: "Bedroom outlet not working, sparking when plugged in.",
-    status: "completed",
-    priority: "medium",
-    category: "Electrical",
-    tenant: {
-      id: "tenant-3",
-      name: "Emily Davis",
-      email: "emily.davis@email.com",
-      apartment: "Apt 1C",
-      phone: "+1 (555) 345-6789",
-      avatar: "/placeholder.svg?height=40&width=40&text=ED",
-    },
-    assignedTechnician: {
-      id: "tech-2",
-      name: "Lisa Chen",
-      email: "lisa.chen@maintenance.com",
-      specialty: "Electrical",
-      phone: "+1 (555) 876-5432",
-      avatar: "/placeholder.svg?height=40&width=40&text=LC",
-    },
-    createdAt: "2024-01-14T14:20:00Z",
-    updatedAt: "2024-01-15T16:45:00Z",
-    lastMessage: "All fixed! The outlet is working perfectly now.",
-    unreadCount: 0,
-  },
-];
-
-const mockMessagesByRoom = {
-  "REQ-001": [
-    {
-      id: "msg-1",
-      senderId: "tenant-1",
-      senderName: "Sarah Johnson",
-      senderRole: "tenant",
-      content:
-        "Hi, I submitted a maintenance request for my kitchen faucet. It's been leaking for 2 days now and it's getting worse.",
-      timestamp: "2024-01-15T10:30:00Z",
-      attachments: [
-        {
-          id: "att-1",
-          name: "faucet-leak.jpg",
-          type: "image",
-          url: "/placeholder.svg?height=200&width=300&text=Faucet+Leak",
-          size: "2.3 MB",
-        },
-      ],
-    },
-    {
-      id: "msg-2",
-      senderId: "admin-1",
-      senderName: "Admin Support",
-      senderRole: "admin",
-      content:
-        "Thank you for reporting this issue, Sarah. I've received your request and I'm assigning a plumber to handle this. You should expect someone within 24 hours.",
-      timestamp: "2024-01-15T11:15:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-3",
-      senderId: "admin-1",
-      senderName: "Admin Support",
-      senderRole: "admin",
-      content:
-        "I've assigned Mike Rodriguez, our certified plumber, to your case. He'll be in touch shortly to schedule a visit.",
-      timestamp: "2024-01-15T11:16:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-4",
-      senderId: "tech-1",
-      senderName: "Mike Rodriguez",
-      senderRole: "technician",
-      content:
-        "Hi Sarah! I'm Mike, your assigned plumber. I can come by tomorrow between 2-4 PM to fix your faucet. Does that work for you?",
-      timestamp: "2024-01-15T12:30:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-5",
-      senderId: "tenant-1",
-      senderName: "Sarah Johnson",
-      senderRole: "tenant",
-      content:
-        "That works perfectly! I'll be home during that time. Thank you for the quick response.",
-      timestamp: "2024-01-15T13:45:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-6",
-      senderId: "tech-1",
-      senderName: "Mike Rodriguez",
-      senderRole: "technician",
-      content:
-        "Great! I'm on my way now. I have all the necessary parts. This should be a quick fix.",
-      timestamp: "2024-01-15T14:20:00Z",
-      attachments: [],
-    },
-  ],
-  "REQ-002": [
-    {
-      id: "msg-7",
-      senderId: "tenant-2",
-      senderName: "John Smith",
-      senderRole: "tenant",
-      content:
-        "AC unit stopped working yesterday. Need urgent help! Temperature is unbearable.",
-      timestamp: "2024-01-16T09:15:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-8",
-      senderId: "admin-1",
-      senderName: "Admin Support",
-      senderRole: "admin",
-      content:
-        "Hi John, I understand this is urgent. Let me find an HVAC technician for you right away.",
-      timestamp: "2024-01-16T09:30:00Z",
-      attachments: [],
-    },
-  ],
-  "REQ-003": [
-    {
-      id: "msg-9",
-      senderId: "tenant-3",
-      senderName: "Emily Davis",
-      senderRole: "tenant",
-      content:
-        "The bedroom outlet is sparking when I try to plug anything in. This seems dangerous.",
-      timestamp: "2024-01-14T14:20:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-10",
-      senderId: "admin-1",
-      senderName: "Admin Support",
-      senderRole: "admin",
-      content:
-        "This is definitely a safety concern. I'm sending Lisa Chen, our electrician, immediately.",
-      timestamp: "2024-01-14T14:25:00Z",
-      attachments: [],
-    },
-    {
-      id: "msg-11",
-      senderId: "tech-2",
-      senderName: "Lisa Chen",
-      senderRole: "technician",
-      content:
-        "All fixed! The outlet is working perfectly now. The issue was a loose wire connection.",
-      timestamp: "2024-01-15T16:45:00Z",
-      attachments: [],
-    },
-  ],
-};
+import { ChatSkeleton } from "./components/ChatSkeleton";
+import { EmptyChatState } from "./components/EmptyChatState";
+import { EmptyRoomsState } from "./components/EmptyRoomsState";
 
 const mockTechnicians = [
   {
@@ -328,7 +125,6 @@ export default function ChatComponent() {
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
 
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
@@ -363,12 +159,7 @@ export default function ChatComponent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // setCurrentRoom;
     setCurrentRoom(rooms[0]);
-
-    console.log(rooms[0]);
-
-    // setMessages(mockMessagesByRoom[selectedRoomId] || []);
   }, [rooms]);
 
   const scrollToBottom = () => {
@@ -383,18 +174,6 @@ export default function ChatComponent() {
     const trimMessage = newMessage.trim();
     if (!trimMessage) return;
 
-    // const message = {
-    //   id: `msg-${Date.now()}`,
-    //   senderId: "admin-1",
-    //   senderName: "Admin Support",
-    //   senderRole: "admin" as const,
-    //   content: newMessage,
-    //   timestamp: new Date().toISOString(),
-    //   attachments: [],
-    // };
-
-    // setMessages([...messages, message]);
-
     sendMessage(trimMessage);
     setNewMessage("");
   };
@@ -408,17 +187,6 @@ export default function ChatComponent() {
     const updatedValue = editingContent.trim();
     if (!updatedValue || !editingMessageId) return;
 
-    // setMessages(
-    //   messages.map((msg) =>
-    //     msg.id === editingMessageId
-    //       ? {
-    //           ...msg,
-    //           content: editingContent,
-    //           timestamp: new Date().toISOString(),
-    //         }
-    //       : msg
-    //   )
-    // );
     editMessage({ text: updatedValue, id: editingMessageId });
     setEditingMessageId(null);
     setEditingContent("");
@@ -431,7 +199,6 @@ export default function ChatComponent() {
 
   const handleDeleteMessage = (messageId: string) => {
     deleteMessage({ id: messageId });
-    // setMessages(messages.filter((msg) => msg.id !== messageId));
     setDeleteMessageId(null);
   };
 
@@ -455,17 +222,6 @@ export default function ChatComponent() {
     const technician = mockTechnicians.find((t) => t.id === selectedTechnician);
     if (!technician) return;
 
-    // const message = {
-    //   id: `msg-${Date.now()}`,
-    //   senderId: "admin-1",
-    //   senderName: "Admin Support",
-    //   senderRole: "admin" as const,
-    //   content: `${technician.name} (${technician.specialty}) has been added to this conversation.`,
-    //   timestamp: new Date().toISOString(),
-    //   attachments: [],
-    // };
-
-    // setMessages([...messages, message]);
     setSelectedTechnician("");
     setShowAddTechnician(false);
   };
@@ -478,31 +234,6 @@ export default function ChatComponent() {
     console.log("Files selected:", files);
   };
 
-  // if (!currentRoom) {
-  //   return <div>Room not found</div>;
-  // }
-
-  // function groupUsersByRole(room: ChatRoom) {
-  //   const roleMap: Record<
-  //     string,
-  //     {
-  //       user: User;
-  //       role: CHAT_ROLES;
-  //       joinedAt: Date;
-  //     }[]
-  //   > = {};
-
-  //   for (let participant of room.participants ?? []) {
-  //     if (!roleMap[participant.role]) {
-  //       roleMap[participant.role] = [];
-  //     }
-  //     roleMap[participant.role].push(participant);
-  //   }
-
-  //   return roleMap;
-
-  // }
-
   function generateAvatar(fullName: string) {
     const placeholder = "/placeholder.svg?height=40&width=40&text=$";
     const abbreviation = fullName
@@ -512,35 +243,6 @@ export default function ChatComponent() {
 
     return placeholder.replace("$", abbreviation);
   }
-
-  // const renderMessageStatus = (message: any) => {
-  //   if (message.senderRole === "tenant") return null;
-
-  //   return (
-  //     <div className="flex items-center space-x-1 mt-1">
-  //       {message.delivered ? (
-  //         message.read ? (
-  //           <div className="flex items-center space-x-1">
-  //             <Check className="h-3 w-3 text-blue-500" />
-  //             <Check className="h-3 w-3 text-blue-500 -ml-2" />
-  //             <span className="text-xs text-blue-500">Read</span>
-  //           </div>
-  //         ) : (
-  //           <div className="flex items-center space-x-1">
-  //             <Check className="h-3 w-3 text-gray-400" />
-  //             <Check className="h-3 w-3 text-gray-400 -ml-2" />
-  //             <span className="text-xs text-gray-400">Delivered</span>
-  //           </div>
-  //         )
-  //       ) : (
-  //         <div className="flex items-center space-x-1">
-  //           <Check className="h-3 w-3 text-gray-300" />
-  //           <span className="text-xs text-gray-300">Sending...</span>
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // };
 
   /** Render ticks ONLY for the current user's own messages */
   function renderMessageStatus(
@@ -552,34 +254,79 @@ export default function ChatComponent() {
 
     const state = computeDeliveryState(message, participants);
 
+    const statusJSXMap = {
+      [CHAT_MSG_DELIVERY_STATUS.SENDING]: (
+        <div className="flex items-center space-x-1">
+          <RefreshCw
+            className="h-3 w-3 animate-spin text-gray-300"
+            strokeWidth={1.5}
+          />
+          {/* <span className="text-xs capitalize text-gray-300">
+            {CHAT_MSG_DELIVERY_STATUS.SENDING}…
+          </span> */}
+        </div>
+      ),
+      [CHAT_MSG_DELIVERY_STATUS.SENT]: (
+        <div className="flex items-center space-x-1">
+          <Check className="h-3 w-3 text-gray-300" />
+          {/* <span className="text-xs capitalize text-gray-300">
+            {CHAT_MSG_DELIVERY_STATUS.SENT}
+          </span> */}
+        </div>
+      ),
+      [CHAT_MSG_DELIVERY_STATUS.READ]: (
+        <div className="flex items-center space-x-1">
+          <CheckCheck className="h-3 w-3 " color="#4965ee" strokeWidth={1.5} />
+          {/* <span className="text-xs capitalize text-blue-500">
+            {CHAT_MSG_DELIVERY_STATUS.READ}
+          </span> */}
+        </div>
+      ),
+      [CHAT_MSG_DELIVERY_STATUS.DELIVERED]: (
+        <div className="flex items-center space-x-1">
+          <CheckCheck className="h-3 w-3 text-gray-400" strokeWidth={1.5} />
+          {/* <span className="text-xs capitalize text-gray-400">
+            {CHAT_MSG_DELIVERY_STATUS.DELIVERED}
+          </span> */}
+        </div>
+      ),
+    };
+
     return (
       <div className="flex items-center space-x-1 mt-1">
-        {state === "read" ? (
-          <div className="flex items-center space-x-1">
-            <CheckCheck
-              className="h-3 w-3 "
-              color="#4965ee"
-              strokeWidth={1.5}
-            />
-
-            <span className="text-xs text-blue-500">Read</span>
-          </div>
-        ) : state === "delivered" ? (
-          <div className="flex items-center space-x-1">
-            <CheckCheck className="h-3 w-3 text-gray-400" strokeWidth={1.5} />
-            <span className="text-xs text-gray-400">Delivered</span>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-1">
-            <Check className="h-3 w-3 text-gray-300" />
-            <span className="text-xs text-gray-300">Sending…</span>
-          </div>
-        )}
+        {statusJSXMap[state]}
       </div>
     );
   }
+
+  if (rooms.length === 0) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="flex-1 flex flex-col">
+          <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                </Link>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Maintenance Chat
+                </h1>
+              </div>
+              <ThemeToggle />
+            </div>
+          </header>
+          <EmptyRoomsState />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-full bg-gray-50 dark:bg-gray-950">
       <div
         className={`${isSidebarOpen ? "w-80" : "w-0"} transition-all duration-300 overflow-hidden border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col`}
       >
@@ -650,267 +397,312 @@ export default function ChatComponent() {
       </div>
 
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-              <Link href="/dashboard">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
-              <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                  <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {currentRoom?.ticket.title}
-                  </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {currentRoom?.id} •
-                    {/* {currentRoom.id} • {currentRoom.tenant.apartment} */}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(currentRoom?.ticket.status!)}>
-                {currentRoom?.ticket.status.replace("_", " ")}
-              </Badge>
-              <ThemeToggle />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Info className="h-4 w-4 mr-2" />
-                    Request Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Tenant
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Video className="h-4 w-4 mr-2" />
-                    Video Call
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </header>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* Chat Area */}
-          <div className="flex-1 flex flex-col">
-            {/* Request Info Bar */}
-            <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0">
+        {!currentRoom?.id ? (
+          <>
+            <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {/* Created {formatDate(currentRoom?.createdAt.toString()!)} */}
-                      Created {formatDate(currentRoom?.updatedAt.toString()!)}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <AlertCircle className="h-4 w-4 text-orange-500" />
-                    <span
-                      className={`text-sm font-medium ${getPriorityColor(currentRoom?.ticket.priority!)}`}
-                    >
-                      {currentRoom?.ticket.priority!} priority
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {currentRoom?.ticket.category.name}
-                  </Badge>
-                </div>
-                <Dialog
-                  open={showAddTechnician}
-                  onOpenChange={setShowAddTechnician}
-                >
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Add Technician
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                  <Link href="/dashboard">
+                    <Button variant="ghost" size="sm">
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Technician to Chat</DialogTitle>
-                      <DialogDescription>
-                        Select a technician to add to this maintenance request
-                        conversation.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Select
-                        value={selectedTechnician}
-                        onValueChange={setSelectedTechnician}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a technician" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {mockTechnicians.map((tech) => (
-                            <SelectItem key={tech.id} value={tech.id}>
-                              <div className="flex items-center space-x-2">
-                                <Avatar className="h-6 w-6">
-                                  <AvatarImage
-                                    src={tech.avatar || "/placeholder.svg"}
-                                  />
-                                  <AvatarFallback>
-                                    {tech.name
-                                      .split(" ")
-                                      .map((n) => n[0])
-                                      .join("")}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <span className="font-medium">
-                                    {tech.name}
-                                  </span>
-                                  <span className="text-sm text-gray-500 ml-2">
-                                    ({tech.specialty})
-                                  </span>
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowAddTechnician(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleAddTechnician}
-                          disabled={!selectedTechnician}
-                        >
-                          Add to Chat
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                  </Link>
+                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Maintenance Chat
+                  </h1>
+                </div>
+                <ThemeToggle />
               </div>
-            </div>
+            </header>
+            <EmptyChatState />
+          </>
+        ) : (
+          <>
+            {/* Header */}
+            <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                  <Link href="/dashboard">
+                    <Button variant="ghost" size="sm">
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
+                  </Link>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
+                      <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {currentRoom?.ticket.title}
+                      </h1>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {currentRoom?.id} •
+                        {/* {currentRoom.id} • {currentRoom.tenant.apartment} */}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    className={getStatusColor(currentRoom?.ticket.status!)}
+                  >
+                    {currentRoom?.ticket.status.replace("_", " ")}
+                  </Badge>
+                  <ThemeToggle />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Info className="h-4 w-4 mr-2" />
+                        Request Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call Tenant
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Video className="h-4 w-4 mr-2" />
+                        Video Call
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </header>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages?.map((message) => (
-                <div key={message._id} className="flex space-x-3 group">
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage
-                      src={generateAvatar(message.sender?.name || "SYSTEM")}
-                    />
-                    <AvatarFallback>
-                      {message.sender?.name
-                        ?.split(" ")
-                        .map((n) => n[0])
-                        .join("") || "SY"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {message.sender?.name || "SYSTEM"}
-                      </span>
-                      {/* <Badge
+            <div className="flex flex-1 overflow-hidden">
+              {/* Chat Area */}
+              <div className="flex-1 flex flex-col">
+                {/* Request Info Bar */}
+                <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {/* Created {formatDate(currentRoom?.createdAt.toString()!)} */}
+                          Created{" "}
+                          {formatDate(currentRoom?.updatedAt.toString()!)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <AlertCircle className="h-4 w-4 text-orange-500" />
+                        <span
+                          className={`text-sm font-medium ${getPriorityColor(currentRoom?.ticket.priority!)}`}
+                        >
+                          {currentRoom?.ticket.priority!} priority
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {currentRoom?.ticket.category.name}
+                      </Badge>
+                    </div>
+                    <Dialog
+                      open={showAddTechnician}
+                      onOpenChange={setShowAddTechnician}
+                    >
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Add Technician
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add Technician to Chat</DialogTitle>
+                          <DialogDescription>
+                            Select a technician to add to this maintenance
+                            request conversation.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Select
+                            value={selectedTechnician}
+                            onValueChange={setSelectedTechnician}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a technician" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mockTechnicians.map((tech) => (
+                                <SelectItem key={tech.id} value={tech.id}>
+                                  <div className="flex items-center space-x-2">
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage
+                                        src={tech.avatar || "/placeholder.svg"}
+                                      />
+                                      <AvatarFallback>
+                                        {tech.name
+                                          .split(" ")
+                                          .map((n) => n[0])
+                                          .join("")}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <span className="font-medium">
+                                        {tech.name}
+                                      </span>
+                                      <span className="text-sm text-gray-500 ml-2">
+                                        ({tech.specialty})
+                                      </span>
+                                    </div>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowAddTechnician(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleAddTechnician}
+                              disabled={!selectedTechnician}
+                            >
+                              Add to Chat
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+
+                {isFetchingMessages ? (
+                  <ChatSkeleton />
+                ) : (
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages?.map((message) => (
+                      <div key={message._id} className="flex space-x-3 group">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarImage
+                            src={generateAvatar(
+                              message.sender?.name || "SYSTEM"
+                            )}
+                          />
+                          <AvatarFallback>
+                            {message.sender?.name
+                              ?.split(" ")
+                              .map((n) => n[0])
+                              .join("") || "SY"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {message.sender?.name || "SYSTEM"}
+                            </span>
+                            {/* <Badge
                         className={`text-xs ${getRoleColor(message.sender.)}`}
                       >
                         {message.senderRole}
                       </Badge> */}
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatTime(message.createdAt.toString())}
-                      </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatTime(message.createdAt.toString())}
+                            </span>
 
-                      {message.sender && message.sender.id === user?.id && (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleEditMessage(message._id, message.text!)
-                            }
-                            className="h-6 w-6 p-0"
-                          >
-                            <Edit2 className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteMessageId(message._id)}
-                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700">
-                      {editingMessageId === message._id ? (
-                        <div className="space-y-2">
-                          <Textarea
-                            value={editingContent}
-                            onChange={(e) => setEditingContent(e.target.value)}
-                            className="min-h-[60px] resize-none"
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSaveEdit();
-                              }
-                              if (e.key === "Escape") {
-                                handleCancelEdit();
-                              }
-                            }}
-                          />
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleSaveEdit}
-                            >
-                              <Check className="h-3 w-3 mr-1" />
-                              Save
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={handleCancelEdit}
-                            >
-                              Cancel
-                            </Button>
+                            {message.sender &&
+                              message.sender.id === user?.id && (
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleEditMessage(
+                                        message._id,
+                                        message.text!
+                                      )
+                                    }
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Edit2 className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      setDeleteMessageId(message._id)
+                                    }
+                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              )}
                           </div>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
-                            {message.text}
-                          </p>
-                          {renderMessageStatus(
-                            message,
-                            user?.id!,
-                            currentRoom?.participants!
-                          )}
-                        </>
-                      )}
-                      {/* {message.attachments.length > 0 && (
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700">
+                            {editingMessageId === message._id ? (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={editingContent}
+                                  onChange={(e) =>
+                                    setEditingContent(e.target.value)
+                                  }
+                                  className="min-h-[60px] resize-none"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleSaveEdit();
+                                    }
+                                    if (e.key === "Escape") {
+                                      handleCancelEdit();
+                                    }
+                                  }}
+                                />
+                                <div className="flex space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleSaveEdit}
+                                  >
+                                    <Check className="h-3 w-3 mr-1" />
+                                    Save
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
+                                  {message.text}
+                                </p>
+                                {renderMessageStatus(
+                                  message,
+                                  user?.id!,
+                                  currentRoom?.participants!
+                                )}
+                              </>
+                            )}
+                            {/* {message.attachments.length > 0 && (
                         <div className="mt-3 space-y-2">
                           {message.attachments.map((attachment) => (
                             <div
@@ -935,13 +727,13 @@ export default function ChatComponent() {
                           ))}
                         </div>
                       )} */}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
 
-              <div ref={bottomRef} />
-              {/* 
+                    <div ref={bottomRef} />
+                    {/* 
               {isTyping && (
                 <div className="flex space-x-3">
                   <Avatar className="h-8 w-8">
@@ -963,185 +755,190 @@ export default function ChatComponent() {
                 </div>
               )} */}
 
-              <TypingIndicator
-                typingUsers={typingUsers}
-                participants={currentRoom?.participants!}
-                meId={user?.id!}
-              />
+                    <TypingIndicator
+                      typingUsers={typingUsers}
+                      participants={currentRoom?.participants!}
+                      meId={user?.id!}
+                    />
 
-              <div ref={messagesEndRef} />
-            </div>
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
 
-            {/* Message Input */}
-            <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
-              {" "}
-              <div className="flex space-x-2">
-                <input
-                  title="Upload files"
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-shrink-0"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <Textarea
-                  value={newMessage}
-                  onChange={onChange}
-                  placeholder="Type your message..."
-                  className="flex-1 min-h-[40px] max-h-32 resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col h-full">
-            {" "}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              {/* Participants */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Participants ({currentRoom?.participants.length})
-                </h3>
-                <div className="space-y-3">
-                  {currentRoom?.participants.map((participant, i) => (
-                    <div key={i} className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={
-                            generateAvatar(participant.user.name) ||
-                            "/placeholder.svg"
-                          }
-                        />
-                        <AvatarFallback>
-                          {participant.user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {participant.user.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {chatRoleMap[participant.role]} •
-                          {/* Tenant • {currentRoom.tenant.apartment} */}
-                        </p>
-                      </div>
-                      <Badge className={getRoleColor(participant.role)}>
-                        {chatRoleMap[participant.role]}
-                      </Badge>
-                    </div>
-                  ))}
+                {/* Message Input */}
+                <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
+                  {" "}
+                  <div className="flex space-x-2">
+                    <input
+                      title="Upload files"
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      multiple
+                      accept="image/*,.pdf,.doc,.docx"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-shrink-0"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Textarea
+                      value={newMessage}
+                      onChange={onChange}
+                      placeholder="Type your message..."
+                      className="flex-1 min-h-[40px] max-h-32 resize-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Request Details */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Request Details
-                </h3>
-                <Card>
-                  <CardContent className="p-4 space-y-3">
+              {currentRoom.id && (
+                <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col h-full">
+                  {" "}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                    {/* Participants */}
                     <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                        Description
-                      </label>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">
-                        {currentRoom?.ticket.description}
-                      </p>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                        Participants ({currentRoom?.participants.length})
+                      </h3>
+                      <div className="space-y-3">
+                        {currentRoom?.participants.map((participant, i) => (
+                          <div key={i} className="flex items-center space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={
+                                  generateAvatar(participant.user.name) ||
+                                  "/placeholder.svg"
+                                }
+                              />
+                              <AvatarFallback>
+                                {participant.user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {participant.user.name}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {chatRoleMap[participant.role]} •
+                                {/* Tenant • {currentRoom.tenant.apartment} */}
+                              </p>
+                            </div>
+                            <Badge className={getRoleColor(participant.role)}>
+                              {chatRoleMap[participant.role]}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                          Priority
-                        </label>
-                        <p
-                          className={`text-sm font-medium mt-1 ${getPriorityColor(currentRoom?.ticket.priority!)}`}
+
+                    {/* Request Details */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                        Request Details
+                      </h3>
+                      <Card>
+                        <CardContent className="p-4 space-y-3">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              Description
+                            </label>
+                            <p className="text-sm text-gray-900 dark:text-white mt-1">
+                              {currentRoom?.ticket.description}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                Priority
+                              </label>
+                              <p
+                                className={`text-sm font-medium mt-1 ${getPriorityColor(currentRoom?.ticket.priority!)}`}
+                              >
+                                {currentRoom?.ticket.priority}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                Category
+                              </label>
+                              <p className="text-sm text-gray-900 dark:text-white mt-1">
+                                {currentRoom?.ticket.category.name}
+                              </p>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              Status
+                            </label>
+                            <Badge
+                              className={`mt-1 ${getStatusColor(currentRoom?.ticket.status!)}`}
+                            >
+                              {currentRoom?.ticket.status.replace("_", " ")}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                        Quick Actions
+                      </h3>
+                      <div className="space-y-2">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start bg-transparent"
+                          size="sm"
                         >
-                          {currentRoom?.ticket.priority}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                          Category
-                        </label>
-                        <p className="text-sm text-gray-900 dark:text-white mt-1">
-                          {currentRoom?.ticket.category.name}
-                        </p>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark as Complete
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start bg-transparent"
+                          size="sm"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call Tenant
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start bg-transparent"
+                          size="sm"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Assign Technician
+                        </Button>
                       </div>
                     </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                        Status
-                      </label>
-                      <Badge
-                        className={`mt-1 ${getStatusColor(currentRoom?.ticket.status!)}`}
-                      >
-                        {currentRoom?.ticket.status.replace("_", " ")}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Quick Actions
-                </h3>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    size="sm"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Mark as Complete
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    size="sm"
-                  >
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Tenant
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    size="sm"
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Assign Technician
-                  </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <AlertDialog

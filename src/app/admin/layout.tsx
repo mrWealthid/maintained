@@ -21,7 +21,7 @@ export default async function DashboardLayout({
 
   const { routes, crumbLabelMap } = layoutConfig[ROLES.admin];
   return (
-    <section className="h-dvh flex">
+    <section className=" h-dvh flex">
       <SidebarProvider>
         <AppSidebar routes={routes} />
         <section className="flex flex-col overflow-x-hidden w-full">
@@ -29,7 +29,7 @@ export default async function DashboardLayout({
             <SidebarTrigger />
             <Header />
           </header>
-          <section className="overflow-y-auto flex-1 px-4 pt-6 pb-10">
+          <section className="dashboard-body px-4 py-4  ">
             <Breadcrumbs crumbLabelMap={crumbLabelMap} />
             <AppProvider>{children}</AppProvider>
           </section>
