@@ -316,7 +316,6 @@ export default function ChatComponent() {
                   Maintenance Chat
                 </h1>
               </div>
-              <ThemeToggle />
             </div>
           </header>
           <EmptyRoomsState />
@@ -419,7 +418,6 @@ export default function ChatComponent() {
                     Maintenance Chat
                   </h1>
                 </div>
-                <ThemeToggle />
               </div>
             </header>
             <EmptyChatState />
@@ -464,7 +462,7 @@ export default function ChatComponent() {
                   >
                     {currentRoom?.ticket.status.replace("_", " ")}
                   </Badge>
-                  <ThemeToggle />
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">

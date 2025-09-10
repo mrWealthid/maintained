@@ -142,3 +142,62 @@ export const getStatusColor = (status: TICKET_STATUS) => {
       return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
   }
 };
+
+export type ParsedAddress = {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  lat: number | null;
+  lng: number | null;
+  placeId: string;
+  raw?: any;
+};
+
+export function parseGooglePlace(
+  details: google.maps.places.PlaceResult
+): ParsedAddress {
+  const comps = details.address_components ?? [];
+  const get = (type: string, short = false) =>
+    comps.find((c) => c.types.includes(type))?.[
+      short ? "short_name" : "long_name"
+    ] ?? "";
+
+  const line1 = [get("street_number"), get("route")]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const city =
+    get("locality") ||
+    get("sublocality") ||
+    get("postal_town") ||
+    get("administrative_area_level_2");
+  const state = get("administrative_area_level_1", true);
+  const postalCode = get("postal_code");
+  const country = get("country") || "United States";
+  const loc = details.geometry?.location;
+  const lat = loc
+    ? typeof loc.lat === "function"
+      ? loc.lat()
+      : (loc as any).lat
+    : null;
+  const lng = loc
+    ? typeof loc.lng === "function"
+      ? loc.lng()
+      : (loc as any).lng
+    : null;
+
+  return {
+    line1,
+    city,
+    state,
+    postalCode,
+    country,
+    lat,
+    lng,
+    placeId: details.place_id ?? "",
+    raw: details,
+  };
+}

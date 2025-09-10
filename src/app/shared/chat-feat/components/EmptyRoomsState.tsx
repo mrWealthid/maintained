@@ -14,10 +14,10 @@ export const EmptyRoomsState = () => (
         When maintenance requests are submitted, they&apos;ll appear here for
         you to manage and respond to.
       </p>
-      <Button className="bg-blue-600 hover:bg-blue-700">
+      {/* <Button className="bg-blue-600 hover:bg-blue-700">
         <Plus className="h-4 w-4 mr-2" />
         Create New Ticket
-      </Button>
+      </Button> */}
     </div>
   </div>
 );
