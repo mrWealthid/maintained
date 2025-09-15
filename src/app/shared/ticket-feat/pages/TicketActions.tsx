@@ -1,3 +1,4 @@
+"use client";
 import React, { FC, useState } from "react";
 import Link from "next/link";
 import {
@@ -66,7 +67,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
     });
   }
 
-  const { handleCreateTicket } = useCreateTicket(false);
+  const { handleCreateTicket } = useCreateTicket(true, ticket.id);
 
   const methods = useForm<ManageTicketForm>({
     mode: "all",
@@ -123,7 +124,8 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
             <DropdownMenuItem
               className="cursor-pointer"
               onSelect={(e) => {
-                e.stopPropagation();
+                // e.stopPropagation();
+                e.preventDefault();
                 setOpen(true); // you manage open state
               }}
             >

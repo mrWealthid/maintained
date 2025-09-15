@@ -68,7 +68,7 @@ export function useFetchTickets<T>(
   const { isLoading, data, error, isRefetching } = useQuery({
     queryKey: ["tickets", status, search],
     queryFn: () => fetchTickets<T>({ page, limit, status, search }),
-    placeholderData: keepPreviousData,
+    // placeholderData: keepPreviousData,
   });
 
   return {
