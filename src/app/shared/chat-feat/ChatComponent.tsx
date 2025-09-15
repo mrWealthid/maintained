@@ -515,7 +515,7 @@ export default function ChatComponent() {
                         {currentRoom?.ticket.category.name}
                       </Badge>
                     </div>
-                    <Dialog
+                    {/* <Dialog
                       open={showAddTechnician}
                       onOpenChange={setShowAddTechnician}
                     >
@@ -591,7 +591,7 @@ export default function ChatComponent() {
                           </div>
                         </div>
                       </DialogContent>
-                    </Dialog>
+                    </Dialog> */}
                   </div>
                 </div>
 
@@ -906,14 +906,90 @@ export default function ChatComponent() {
                           <Phone className="h-4 w-4 mr-2" />
                           Call Tenant
                         </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start bg-transparent"
-                          size="sm"
+
+                        <Dialog
+                          open={showAddTechnician}
+                          onOpenChange={setShowAddTechnician}
                         >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Assign Technician
-                        </Button>
+                          <DialogTrigger asChild>
+                            <Button
+                              className="w-full justify-start bg-transparent"
+                              variant="outline"
+                              size="sm"
+                            >
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Assign Technician
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add Technician to Chat</DialogTitle>
+                              <DialogDescription>
+                                Select a technician to add to this maintenance
+                                request conversation.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <Select
+                                value={selectedTechnician}
+                                onValueChange={setSelectedTechnician}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a technician" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {technicians?.map((tech) => {
+                                    const membership = getMembershipForBusiness(
+                                      tech,
+                                      tech?.currentBusiness.id!
+                                    );
+                                    return (
+                                      <SelectItem key={tech.id} value={tech.id}>
+                                        <div className="flex items-center space-x-2">
+                                          <Avatar className="h-6 w-6">
+                                            <AvatarImage
+                                              src={generateAvatar(tech.name)}
+                                            />
+                                            <AvatarFallback>
+                                              {tech.name
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div>
+                                            <span className="font-medium">
+                                              {tech.name}
+                                            </span>
+                                            <span className="text-sm text-gray-500 ml-2">
+                                              {membership?.specialties?.[0]}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              <div className="flex justify-end space-x-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setShowAddTechnician(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={handleAddTechnician}
+                                  disabled={!selectedTechnician}
+                                >
+                                  Add to Chat
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        {/* </Button> */}
                       </div>
                     </div>
                   </div>

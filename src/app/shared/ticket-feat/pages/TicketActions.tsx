@@ -9,7 +9,6 @@ import {
   useAssignTicket,
   useCreateTicket,
   useDeleteTicket,
-  useFetchTicketDetails,
 } from "@/app/shared/ticket-feat/hooks/ticketHooks";
 import Modal from "@/app/shared/components/modal/Modal";
 import ConfirmationPage from "@/app/shared/components/ui/ConfirmationPage";
@@ -29,24 +28,20 @@ import {
 import SendTechnicianRequestForm from "@/app/admin/dashboard/ticket-management/SendTechnicianRequestForm";
 import { useAppContext } from "../../contexts/AppContext";
 import HandOffTicketForm from "@/app/admin/dashboard/ticket-management/HandOffTicketForm";
-import { CreateTicketPayload, Ticket } from "../../model/model";
+import { CreateTicketPayload } from "../../model/model";
 import { FormProvider, useForm } from "react-hook-form";
 import TicketForm from "../form/TicketForm";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
-import { X } from "lucide-react";
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
   const { isDeleting, handleDeleteTicket } = useDeleteTicket();
   const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
-  //   const { isLoading, data: ticketDetails } = useFetchTicketDetails(ticket.id);
 
   const [open, setOpen] = useState(false);
 
@@ -124,8 +119,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
             <DropdownMenuItem
               className="cursor-pointer"
               onSelect={(e) => {
-                // e.stopPropagation();
-                e.preventDefault();
+                e.stopPropagation();
                 setOpen(true); // you manage open state
               }}
             >

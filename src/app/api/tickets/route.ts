@@ -22,16 +22,19 @@ export async function GET(request: NextRequest) {
     }
 
     let filter = {};
+    const user = await User.findById(verify.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
     if (verify.isAdminRole) {
-      const user = await User.findById(verify.id);
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
       filter = { business: user.currentBusiness };
     }
 
     if (verify.isUserRole) {
-      filter = { user: new mongoose.Types.ObjectId(verify.id) };
+      filter = {
+        user: new mongoose.Types.ObjectId(verify.id),
+        business: user.currentBusiness,
+      };
     }
 
     if (verify.isTechnicianRole) {

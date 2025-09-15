@@ -113,6 +113,7 @@ export function getMembershipForBusiness(
   user: User,
   businessId: string
 ): Membership | undefined {
+  if (!user) return;
   return user.memberships.find((m) => {
     const businessIdFromMembership =
       typeof m.business === "string" ? m.business : m.business.id;

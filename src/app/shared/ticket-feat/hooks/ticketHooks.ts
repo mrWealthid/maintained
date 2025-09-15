@@ -37,6 +37,7 @@ import {
 import { ApiError } from "next/dist/server/api-utils";
 import { IListResponse } from "@/app/shared/components/table/models/table.model";
 import { TICKET_STATUS } from "@/app/shared/enums/enums";
+import { getMembershipForBusiness } from "@/utils/helpers";
 
 export function useCreateTicket(isEditing: boolean, ticketId?: string) {
   const queryClient = useQueryClient();
@@ -163,13 +164,19 @@ export function useFetchTechnicians(page: number = 1, limit: number = 50) {
   const { isLoading, data, error, isRefetching } = useQuery({
     queryKey: ["technicians"],
     queryFn: () => fetchTechnicians<User>(),
+    select({ data }) {
+      return data.map((user) => ({
+        ...user,
+        membership: getMembershipForBusiness(user, user.currentBusiness.id),
+      }));
+    },
   });
 
   return {
     isLoading,
     error,
     isRefetching,
-    ...data,
+    data,
   };
 }
 export function useFetchTicketDetails(id: string) {
@@ -255,8 +262,8 @@ export function useFetchRequestTypes(page: number = 1, limit: number = 50) {
   const { isLoading, data, error, isRefetching } = useQuery({
     queryKey: ["request-type"],
     queryFn: () => fetchRequestType<TicketType>(),
-    select(data) {
-      return data.data.map((type) => ({
+    select({ data }) {
+      return data.map((type) => ({
         label: type.name,
         value: type.id,
       }));

@@ -14,7 +14,7 @@ const signToken = (user: UserDoc) => {
   return jwt.sign(
     {
       id,
-      role: tenants[0].role || "USER",
+      role: tenants[0].role || ROLES.user,
       tenants,
     },
     process.env.JWT_SECRET!,

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
 import User, { UserDoc } from "@/models/userModel";
 import { ApiErrorHandler } from "@/utils/apiError";
+import { ROLES } from "@/app/shared/enums/enums";
 
 connect();
 
@@ -16,7 +17,7 @@ const signToken = (user: UserDoc) => {
   return jwt.sign(
     {
       id: user.id,
-      role: tenant?.role || "USER",
+      role: tenant?.role || ROLES.user,
       tenants,
     },
     process.env.JWT_SECRET!,

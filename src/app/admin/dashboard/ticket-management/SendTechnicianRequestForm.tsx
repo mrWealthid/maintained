@@ -66,6 +66,10 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
     );
   }
 
+  // function removeSelected(selectedValues: string[], id: string) {
+  //   return selectedValues.filter((v) => v !== id);
+  // }
+
   return (
     <div className="w-full">
       <form
@@ -85,7 +89,7 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className=" w-full justify-between"
+                        className=" w-full justify-between bg-transparent hover:bg-transparent"
                         type="button"
                       >
                         {selectedValues.length > 0
@@ -93,9 +97,56 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                               ?.filter((user) =>
                                 selectedValues.includes(user.id)
                               )
-                              .map((user) => user.name)
-                              .join(", ")
-                          : "Select technicians"}
+                              .map((user) => (
+                                <Badge
+                                  key={user.id}
+                                  variant="outline"
+                                  className="rounded-xl pr-1 bg-button-primary hover:bg-button-accent text-button-primary-foreground"
+                                >
+                                  {user.name}
+                                  <span
+                                    className="  grid h-5 w-5 place-items-center rounded-sm hover:bg-muted"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      field.onChange(
+                                        selectedValues.filter(
+                                          (v) => v !== user.id
+                                        )
+                                      );
+                                    }}
+                                    aria-label={`Remove ${user.id}`}
+                                  >
+                                    <svg
+                                      viewBox="0 0 24 24"
+                                      className="h-3.5 w-3.5"
+                                      aria-hidden
+                                    >
+                                      <path
+                                        d="M18 6L6 18M6 6l12 12"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  </span>
+                                </Badge>
+                                // <Badge
+                                //   onClick={(e) => {
+                                //     e.stopPropagation();
+                                //     field.onChange(
+                                //       selectedValues.filter(
+                                //         (v) => v !== user.id
+                                //       )
+                                //     );
+                                //   }}
+                                //   variant={"outline"}
+                                // >
+                                //   {user.name}
+                                // </Badge>
+                              ))
+                          : // .join(", ")
+                            "Select technicians"}
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </PopoverTrigger>
@@ -129,18 +180,27 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                                   }
                                 }}
                               >
-                                <span className="mr-2">
-                                  {isSelected ? (
-                                    <Check className="h-4 w-4" />
-                                  ) : null}
+                                <span className=" flex flex-col cursor-pointer w-full gap-1">
+                                  <span className="flex gap-2 items-center">
+                                    <span>
+                                      {isSelected ? (
+                                        <Check className="h-4 w-4" />
+                                      ) : null}
+                                    </span>
+                                    {user.name}
+                                    {isSent ? (
+                                      <Badge variant="outline">Sent</Badge>
+                                    ) : (
+                                      ""
+                                    )}
+                                  </span>
+                                  {user.membership?.specialties?.length! >
+                                    0 && (
+                                    <Badge variant="outline">
+                                      {user.membership?.specialties?.[0]}
+                                    </Badge>
+                                  )}
                                 </span>
-                                {user.name}
-
-                                {isSent ? (
-                                  <Badge variant="outline">Sent</Badge>
-                                ) : (
-                                  ""
-                                )}
                               </CommandItem>
                             );
                           })}
