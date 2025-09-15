@@ -40,16 +40,15 @@ const TicketComponent: FC = () => {
         />
       </div>
 
-      {isLoading ||
-        (isRefetching && (
-          <section className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <AnimatedBorderWrapper key={i} loading={isLoading}>
-                <TicketCardLoader key={i} />
-              </AnimatedBorderWrapper>
-            ))}
-          </section>
-        ))}
+      {isLoading && (
+        <section className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <AnimatedBorderWrapper key={i} loading={isLoading}>
+              <TicketCardLoader key={i} />
+            </AnimatedBorderWrapper>
+          ))}
+        </section>
+      )}
 
       {data && data?.length > 0 && (
         <section className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2">
