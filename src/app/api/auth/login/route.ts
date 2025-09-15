@@ -1,15 +1,14 @@
 import { connect } from "@/dbConfig/dbConfig";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { INVITE_STATUS, ROLES } from "@/app/shared/enums/enums";
 import User, { UserDoc } from "@/models/userModel";
+import { ApiErrorHandler } from "@/utils/apiError";
 
 connect();
 
-const signToken = (
-  user: UserDoc,
-  tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
-) => {
+const signToken = (user: UserDoc) => {
+  const tenants = user.tenantsClaim();
+
   const tenant = tenants.find(
     (tenant) => user.currentBusiness.toString() === tenant.business
   );
@@ -71,9 +70,7 @@ export async function POST(request: NextRequest) {
 
     //3) If everything is ok, send token to client
 
-    const tenants = user.tenantsClaim();
-
-    const token = signToken(user, tenants);
+    const token = signToken(user);
 
     const response = NextResponse.json({
       status: "success",
@@ -88,8 +85,10 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
-    console.log(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: ApiErrorHandler.parse(error) },
+      { status: 500 }
+    );
   }
 }

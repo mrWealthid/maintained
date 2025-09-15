@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
         status: INVITE_STATUS.invited,
         inviteToken: hashed,
         inviteTokenExpires: expires,
+        specialties: body.specialties,
       });
 
       // Optional: only update currentBusiness if none is set
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
             status: INVITE_STATUS.invited,
             inviteToken: hashed,
             inviteTokenExpires: expires,
+            specialties: body.specialties,
           },
         ],
         currentBusiness: currentBusinessId,

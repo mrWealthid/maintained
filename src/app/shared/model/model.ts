@@ -121,6 +121,7 @@ export interface User {
 export interface Membership {
   business: { name: string; id: string };
   status?: INVITE_STATUS;
+  specialties?: string[];
   role: ROLES;
   id: string;
   inviteExpired: boolean;
@@ -156,6 +157,7 @@ export interface Business {
 
 export type UserRowActionsProps = {
   user: User;
+  membership?: Membership;
 };
 
 export type UserRowProps = {
@@ -172,6 +174,7 @@ export type UserFilterQuery = {
 
 export interface ManageUserFormProps {
   user?: User | undefined;
+  membership?: Membership;
   onCloseModal?: () => void;
 }
 
@@ -179,9 +182,10 @@ export interface ManageUserForm {
   name: string;
   email: string;
   role: ROLES;
+  specialties: string[];
 }
 
-export type CreateUserPayload = Pick<User, "name" | "email">;
+export interface CreateUserPayload extends ManageUserForm {}
 
 export interface CrumbLabelMap {
   [segment: string]: {

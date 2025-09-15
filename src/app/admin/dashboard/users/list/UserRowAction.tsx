@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { getMembershipForBusiness } from "@/utils/helpers";
 import { INVITE_STATUS } from "@/app/shared/enums/enums";
 
-const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
+const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
   const { isDeleting, deleteUser } = useDeleteUser();
   const { isInviting, reInviteUser } = useReInviteUser();
 
@@ -87,7 +87,7 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user }) => {
         description="Manage your users"
         name="edit-user-form"
       >
-        <UserForm user={user} />
+        <UserForm user={user} membership={membership} />
       </Modal.Window>
 
       <Modal.Window

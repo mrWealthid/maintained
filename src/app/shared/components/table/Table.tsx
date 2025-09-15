@@ -1,314 +1,305 @@
-'use client';
+"use client";
 import React, {
-	cloneElement,
-	useContext,
-	useEffect,
-	useRef,
-	useState
-} from 'react';
-import { createContext } from 'react';
+  cloneElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { createContext } from "react";
 import {
-	IListResponse,
-	ITable,
-	TableColumn,
-	IsearchParams,
-	IselectOptions
-} from './models/table.model';
-import { formatCurrency } from '@/utils/helper';
-import { useTable } from './hooks/useTable';
-import { useForm } from 'react-hook-form';
-import { FcFilledFilter } from 'react-icons/fc';
-import { CiFilter } from 'react-icons/ci';
-import { DownloadTableExcel } from 'react-export-table-to-excel';
-import { IoCloudDownloadOutline } from 'react-icons/io5';
-import Image from 'next/image';
-import TextInput from '../form-elements/Text-Input';
-import Modal from '../modal/Modal';
-import ButtonComponent from '../form-elements/Button';
-import Search from '../search/Search';
-import { useDebounce } from '@uidotdev/usehooks';
-import Empty from '../empty/Empty';
-import AnimatedBorderWrapper from '../animation/AnimatedBorder';
+  IListResponse,
+  ITable,
+  TableColumn,
+  IsearchParams,
+  IselectOptions,
+} from "./models/table.model";
+import { formatCurrency } from "@/utils/helper";
+import { useTable } from "./hooks/useTable";
+import { useForm } from "react-hook-form";
+import { FcFilledFilter } from "react-icons/fc";
+import { CiFilter } from "react-icons/ci";
+import { DownloadTableExcel } from "react-export-table-to-excel";
+import { IoCloudDownloadOutline } from "react-icons/io5";
+import Image from "next/image";
+import TextInput from "../form-elements/Text-Input";
+import Modal from "../modal/Modal";
+import ButtonComponent from "../form-elements/Button";
+import Search from "../search/Search";
+import { useDebounce } from "@uidotdev/usehooks";
+import Empty from "../empty/Empty";
+import AnimatedBorderWrapper from "../animation/AnimatedBorder";
 import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow
-} from '@/components/ui/table';
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
-	Pagination,
-	PaginationContent,
-	PaginationEllipsis,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious
-} from '@/components/ui/pagination';
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const TableContext = createContext({});
 
 function TableComponent<T>({
-	queryKey,
-	children,
-	columns,
-	headerActions,
-	service,
-	limit: limitVal,
-	actionable = true,
-	isDownloadable = true,
-	defaultParams,
-	searchKey
+  queryKey,
+  children,
+  columns,
+  headerActions,
+  service,
+  limit: limitVal,
+  actionable = true,
+  isDownloadable = true,
+  defaultParams,
+  searchKey,
 }: ITable) {
-	const [page, setPage] = useState(1);
-	const [limit, setLimit] = useState(limitVal || 5);
-	const [search, setSearch] = useState<IsearchParams | null>(
-		defaultParams ?? null
-	);
-	const [filterIsActive, setfilterIsActive] = useState(search ?? false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(limitVal || 5);
+  const [search, setSearch] = useState<IsearchParams | null>(
+    defaultParams ?? null
+  );
+  const [filterIsActive, setfilterIsActive] = useState(search ?? false);
 
-	const {
-		isLoading,
-		error,
-		data = [],
-		summary,
-		totalRecords,
-		results,
-		isRefetching
-	}: IListResponse<T> = useTable<T>(page, limit, service, queryKey, search);
+  const {
+    isLoading,
+    error,
+    data = [],
+    summary,
+    totalRecords,
+    results,
+    isRefetching,
+  }: IListResponse<T> = useTable<T>(page, limit, service, queryKey, search);
 
-	//reload my table
-	// function reloadTable() {
-	// 	setPage(1);
-	// 	// Remove all filters
-	// 	setSearch(null);
-	// 	setfilterIsActive(false);
-	// }
+  //reload my table
+  // function reloadTable() {
+  // 	setPage(1);
+  // 	// Remove all filters
+  // 	setSearch(null);
+  // 	setfilterIsActive(false);
+  // }
 
-	function handleFilter(val: IsearchParams | null) {
-		let transformedSearchQuery = '';
-		if (!val) {
-			setfilterIsActive(false);
-			setSearch(null);
-			return;
-		}
+  function handleFilter(val: IsearchParams | null) {
+    let transformedSearchQuery = "";
+    if (!val) {
+      setfilterIsActive(false);
+      setSearch(null);
+      return;
+    }
 
-		// transformedSearchQuery = buildQueryString(val);
+    // transformedSearchQuery = buildQueryString(val);
 
-		// transformedSearchQuery = objectToQueryParams(val);
+    // transformedSearchQuery = objectToQueryParams(val);
 
-		setSearch((search) => ({ ...search, ...val }));
-		setPage(1);
+    setSearch((search) => ({ ...search, ...val }));
+    setPage(1);
 
-		setfilterIsActive(true);
-	}
+    setfilterIsActive(true);
+  }
 
-	function cancelFilter() {
-		setfilterIsActive(false);
-		setSearch(null);
-	}
+  function cancelFilter() {
+    setfilterIsActive(false);
+    setSearch(null);
+  }
 
-	// const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-	function handlePaginate(page: number, limit: number) {
-		setPage(page);
-		setLimit(limit);
-	}
+  function handlePaginate(page: number, limit: number) {
+    setPage(page);
+    setLimit(limit);
+  }
 
-	function updateLimit(val: number) {
-		setLimit(val);
-	}
-	function updatePage(val: number) {
-		setPage(val);
-	}
+  function updateLimit(val: number) {
+    setLimit(val);
+  }
+  function updatePage(val: number) {
+    setPage(val);
+  }
 
-	function removeEmptyKeys(obj: { [key: string]: any }): {
-		[key: string]: any;
-	} {
-		const cleanedObj: { [key: string]: any } = {};
-		Object.keys(obj).forEach((key) => {
-			if (
-				obj[key] !== null &&
-				obj[key] !== undefined &&
-				obj[key] !== ''
-			) {
-				cleanedObj[key] = obj[key];
-			}
-		});
-		return cleanedObj;
-	}
-	function objectToQueryParams(obj: { [key: string]: any }): string {
-		return Object.keys(removeEmptyKeys(obj))
-			.map(
-				(key) =>
-					`${encodeURIComponent(key)}=${encodeURIComponent(
-						obj[key].toString()
-					)}`
-			)
-			.join('&');
-	}
-	const tableRef = useRef(null);
+  function removeEmptyKeys(obj: { [key: string]: any }): {
+    [key: string]: any;
+  } {
+    const cleanedObj: { [key: string]: any } = {};
+    Object.keys(obj).forEach((key) => {
+      if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
+        cleanedObj[key] = obj[key];
+      }
+    });
+    return cleanedObj;
+  }
+  function objectToQueryParams(obj: { [key: string]: any }): string {
+    return Object.keys(removeEmptyKeys(obj))
+      .map(
+        (key) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(
+            obj[key].toString()
+          )}`
+      )
+      .join("&");
+  }
+  const tableRef = useRef(null);
 
-	const CardContent = (
-		<div className='overflow-x-auto bg-card  p-2'>
-			<TableHeaderAction handleFilter={handleFilter}>
-				{headerActions}
-			</TableHeaderAction>
+  const CardContent = (
+    <div className="overflow-x-auto bg-card  p-2">
+      <TableHeaderAction handleFilter={handleFilter}>
+        {headerActions}
+      </TableHeaderAction>
 
-			{!isLoading && !data.length && (
-				<section className='flex justify-center items-center'>
-					<Empty />
-				</section>
-			)}
+      {!isLoading && !data.length && (
+        <section className="flex justify-center items-center">
+          <Empty />
+        </section>
+      )}
 
-			{!isLoading && data.length > 0 && (
-				<Table
-					ref={tableRef}
-					className='w-full overflow-hidden  rounded-xl  border text-xs'>
-					{children}
-				</Table>
-			)}
+      {!isLoading && data.length > 0 && (
+        <Table
+          ref={tableRef}
+          className="w-full overflow-hidden  rounded-xl  border text-xs"
+        >
+          {children}
+        </Table>
+      )}
 
-			{data.length > 0 && (
-				<div className='mt-3 border  rounded-xl text-xs'>
-					<Paginator />
-				</div>
-			)}
-		</div>
-	); // Render it conditionally with/without animation return
+      {data.length > 0 && (
+        <div className="mt-3 border  rounded-xl text-xs">
+          <Paginator />
+        </div>
+      )}
+    </div>
+  ); // Render it conditionally with/without animation return
 
-	return (
-		<TableContext.Provider
-			value={{
-				data,
-				columns,
-				headerActions,
-				service,
-				limit,
-				page,
-				updateLimit,
-				totalRecords,
-				handlePaginate,
-				handleFilter,
-				objectToQueryParams,
-				cancelFilter,
-				filterIsActive,
-				actionable,
-				tableRef,
-				queryKey,
-				isDownloadable,
-				isRefetching,
-				search,
-				searchKey,
-				summary
-			}}>
-			<AnimatedBorderWrapper loading={isLoading}>
-				{CardContent}
-			</AnimatedBorderWrapper>
-		</TableContext.Provider>
-	);
+  return (
+    <TableContext.Provider
+      value={{
+        data,
+        columns,
+        headerActions,
+        service,
+        limit,
+        page,
+        updateLimit,
+        totalRecords,
+        handlePaginate,
+        handleFilter,
+        objectToQueryParams,
+        cancelFilter,
+        filterIsActive,
+        actionable,
+        tableRef,
+        queryKey,
+        isDownloadable,
+        isRefetching,
+        search,
+        searchKey,
+        summary,
+      }}
+    >
+      <AnimatedBorderWrapper loading={isLoading || isRefetching}>
+        {CardContent}
+      </AnimatedBorderWrapper>
+    </TableContext.Provider>
+  );
 }
 
 function TableFilterForm({ column, onCloseModal }: any) {
-	const { handleFilter, cancelFilter, search }: any =
-		useContext(TableContext);
-	const { register, handleSubmit, formState } = useForm({
-		mode: 'onChange',
-		defaultValues: { ...search }
-	});
-	// const { errors, isSubmitting } = formState;
+  const { handleFilter, cancelFilter, search }: any = useContext(TableContext);
+  const { register, handleSubmit, formState } = useForm({
+    mode: "onChange",
+    defaultValues: { ...search },
+  });
+  // const { errors, isSubmitting } = formState;
 
-	const { columns, isRefetching }: any = useContext(TableContext);
+  const { columns, isRefetching }: any = useContext(TableContext);
 
-	async function onSubmit(data: any, onCloseModal: () => void) {
-		handleFilter({ ...search, ...data });
+  async function onSubmit(data: any, onCloseModal: () => void) {
+    handleFilter({ ...search, ...data });
 
-		onCloseModal();
-		// console.log(objectToQueryParams(data));
-	}
+    onCloseModal();
+    // console.log(objectToQueryParams(data));
+  }
 
-	return (
-		<form
-			onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
-			className=' flex flex-col gap-3  items-center"'>
-			<section className=' grid  gap-3 grid-cols-1 '>
-				{columns
-					.slice()
-					.filter((val: TableColumn) => val.searchType)
-					.map((column: TableColumn) => {
-						if (/TEXT/.test(column.searchType!)) {
-							return (
-								<TextInput
-									key={column.accessor}
-									name={column.header}
-									label={column.header}>
-									<input
-										{...register(
-											column.filterKey
-												? column.filterKey
-												: column.header,
-											{}
-										)}
-										className='input-style'
-										placeholder={`Enter ${column.header}`}
-										type='text'
-										id={column.header}
-									/>
-								</TextInput>
-							);
-						}
-						if (/NUMBER/.test(column.searchType!)) {
-							return (
-								<TextInput
-									key={column.accessor}
-									name={column.header}
-									label={column.header}>
-									<input
-										{...register(
-											column.filterKey
-												? column.filterKey
-												: column.header
-										)}
-										className='input-style'
-										type='number'
-										id={column.header}
-									/>
-								</TextInput>
-							);
-						}
-						if (/DROPDOWN/.test(column.searchType!)) {
-							return (
-								<TextInput
-									key={column.accessor}
-									name={column.header}
-									label={column.header}>
-									<select
-										className='input-style'
-										{...register(
-											column.filterKey
-												? column.filterKey
-												: column.header
-										)}>
-										<option value=''>Select Options</option>
-										{column.selectOptions?.map(
-											(options: IselectOptions, i) => (
-												<React.Fragment key={i}>
-													<option
-														value={options.value}>
-														{options.name}
-													</option>
-												</React.Fragment>
-											)
-										)}
-									</select>
-								</TextInput>
-							);
-						}
-					})}
-			</section>
-			{/* <TextInput
+  return (
+    <form
+      onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
+      className=' flex flex-col gap-3  items-center"'
+    >
+      <section className=" grid  gap-3 grid-cols-1 ">
+        {columns
+          .slice()
+          .filter((val: TableColumn) => val.searchType)
+          .map((column: TableColumn) => {
+            if (/TEXT/.test(column.searchType!)) {
+              return (
+                <TextInput
+                  key={column.accessor}
+                  name={column.header}
+                  label={column.header}
+                >
+                  <input
+                    {...register(
+                      column.filterKey ? column.filterKey : column.header,
+                      {}
+                    )}
+                    className="input-style"
+                    placeholder={`Enter ${column.header}`}
+                    type="text"
+                    id={column.header}
+                  />
+                </TextInput>
+              );
+            }
+            if (/NUMBER/.test(column.searchType!)) {
+              return (
+                <TextInput
+                  key={column.accessor}
+                  name={column.header}
+                  label={column.header}
+                >
+                  <input
+                    {...register(
+                      column.filterKey ? column.filterKey : column.header
+                    )}
+                    className="input-style"
+                    type="number"
+                    id={column.header}
+                  />
+                </TextInput>
+              );
+            }
+            if (/DROPDOWN/.test(column.searchType!)) {
+              return (
+                <TextInput
+                  key={column.accessor}
+                  name={column.header}
+                  label={column.header}
+                >
+                  <select
+                    className="input-style"
+                    {...register(
+                      column.filterKey ? column.filterKey : column.header
+                    )}
+                  >
+                    <option value="">Select Options</option>
+                    {column.selectOptions?.map((options: IselectOptions, i) => (
+                      <React.Fragment key={i}>
+                        <option value={options.value}>{options.name}</option>
+                      </React.Fragment>
+                    ))}
+                  </select>
+                </TextInput>
+              );
+            }
+          })}
+      </section>
+      {/* <TextInput
 				name={'description'}
 				placeholder="Enter Description"
 				label="Description"
@@ -324,7 +315,7 @@ function TableFilterForm({ column, onCloseModal }: any) {
 					rows={3}></textarea>
 			</TextInput> */}
 
-			{/* <TextInput
+      {/* <TextInput
 				name={column.header}
 				placeholder={`Enter ${column.header}`}
 				label={column.header}
@@ -338,68 +329,72 @@ function TableFilterForm({ column, onCloseModal }: any) {
 					id={column.header}
 				/>
 			</TextInput> */}
-			<hr className=' my-3' />
-			<section className='flex justify-end  gap-4'>
-				<ButtonComponent
-					type='reset'
-					handleClick={() => {
-						cancelFilter();
-						onCloseModal();
-					}}
-					styles='rounded-3xl'
-					btnText={'Cancel'}></ButtonComponent>
+      <hr className=" my-3" />
+      <section className="flex justify-end  gap-4">
+        <ButtonComponent
+          type="reset"
+          handleClick={() => {
+            cancelFilter();
+            onCloseModal();
+          }}
+          styles="rounded-3xl"
+          btnText={"Cancel"}
+        ></ButtonComponent>
 
-				<ButtonComponent
-					type='submit'
-					loading={isRefetching}
-					styles='rounded-3xl'
-					disabled={!formState.isValid}
-					btnText={`Search
-					`}></ButtonComponent>
-			</section>
-		</form>
-	);
+        <ButtonComponent
+          type="submit"
+          loading={isRefetching}
+          styles="rounded-3xl"
+          disabled={!formState.isValid}
+          btnText={`Search
+					`}
+        ></ButtonComponent>
+      </section>
+    </form>
+  );
 }
 
 function TableFilter() {
-	const { columns, filterIsActive, tableRef }: any = useContext(TableContext);
-	return (
-		<div>
-			<Modal>
-				<Modal.Open opens='filter-form'>
-					<button
-						type='button'
-						className={`  ${
-							filterIsActive
-								? 'ring-1  ring-offset-2 text-success  ring-success'
-								: ''
-						} w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl   font-light  border btn`}>
-						{filterIsActive ? (
-							<FcFilledFilter size={15} color='green' />
-						) : (
-							<CiFilter size={15} />
-						)}
-						Filter
-					</button>
-				</Modal.Open>
+  const { columns, filterIsActive, tableRef }: any = useContext(TableContext);
+  return (
+    <div>
+      <Modal>
+        <Modal.Open opens="filter-form">
+          <button
+            type="button"
+            className={`  ${
+              filterIsActive
+                ? "ring-1  ring-offset-2 text-success  ring-success"
+                : ""
+            } w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl   font-light  border btn`}
+          >
+            {filterIsActive ? (
+              <FcFilledFilter size={15} color="green" />
+            ) : (
+              <CiFilter size={15} />
+            )}
+            Filter
+          </button>
+        </Modal.Open>
 
-				<Modal.Window
-					title='Manage filters'
-					description='Quickly find table records using available filters'
-					name='filter-form'>
-					<TableFilterForm />
-				</Modal.Window>
-			</Modal>
-		</div>
-	);
+        <Modal.Window
+          title="Manage filters"
+          description="Quickly find table records using available filters"
+          name="filter-form"
+        >
+          <TableFilterForm />
+        </Modal.Window>
+      </Modal>
+    </div>
+  );
 }
 
 function TableHeaders() {
-	const { columns, actionable }: any = useContext(TableContext);
-	return (
-		<TableHeader className='bg-muted capitalize sticky  top-0'>
-			<TableRow>
-				{/* <th className="px-2 py-4 uppercase">
+  const { columns, actionable }: any = useContext(TableContext);
+  return (
+    <TableHeader className="bg-muted capitalize sticky  top-0">
+      <TableRow>
+        {/* <th className="px-2 py-4 uppercase">
 					<input
 						title="check"
 						id="checkbox-all-search"
@@ -413,77 +408,78 @@ function TableHeaders() {
 					</label>
 				</th> */}
 
-				<TableHead className=' font-medium px-2  whitespace-nowrap'>
-					<span>S/N</span>
-				</TableHead>
+        <TableHead className=" font-medium px-2  whitespace-nowrap">
+          <span>S/N</span>
+        </TableHead>
 
-				{columns.map((col: TableColumn) => (
-					<TableHead
-						colSpan={col.colspan}
-						key={col.header}
-						className=' px-2 flex-grow'>
-						{col.header}
-					</TableHead>
-				))}
-				{actionable && (
-					<TableHead className='px-2  '>Actions</TableHead>
-				)}
-			</TableRow>
-		</TableHeader>
-	);
+        {columns.map((col: TableColumn) => (
+          <TableHead
+            colSpan={col.colspan}
+            key={col.header}
+            className=" px-2 flex-grow"
+          >
+            {col.header}
+          </TableHead>
+        ))}
+        {actionable && <TableHead className="px-2  ">Actions</TableHead>}
+      </TableRow>
+    </TableHeader>
+  );
 }
 export function TableHeaderAction({ children }: any) {
-	const {
-		handleFilter,
-		tableRef,
-		queryKey,
-		isDownloadable,
-		searchKey,
-		search,
-		summary
-	}: any = useContext(TableContext);
+  const {
+    handleFilter,
+    tableRef,
+    queryKey,
+    isDownloadable,
+    searchKey,
+    search,
+    summary,
+  }: any = useContext(TableContext);
 
-	const [searchValue, setSearchValue] = useState('');
-	const debouncedSearchValue = useDebounce(searchValue, 500);
+  const [searchValue, setSearchValue] = useState("");
+  const debouncedSearchValue = useDebounce(searchValue, 500);
 
-	useEffect(() => {
-		if (debouncedSearchValue !== '') {
-			handleFilter({ ...search, [searchKey]: debouncedSearchValue });
-		} else {
-			handleFilter({ ...search, [searchKey]: undefined });
-		}
-	}, [debouncedSearchValue]);
+  useEffect(() => {
+    if (debouncedSearchValue !== "") {
+      handleFilter({ ...search, [searchKey]: debouncedSearchValue });
+    } else {
+      handleFilter({ ...search, [searchKey]: undefined });
+    }
+  }, [debouncedSearchValue]);
 
-	return (
-		<div className='flex flex-col flex-wrap  gap-6  justify-between mb-2 overflow-x-auto md:flex-row'>
-			<div className='flex-1 items-start'>
-				<Search
-					placeHolder={`Search by ${searchKey}`}
-					handleSearch={(val) => setSearchValue(val)}
-				/>
-			</div>
+  return (
+    <div className="flex flex-col flex-wrap  gap-6  justify-between mb-2 overflow-x-auto md:flex-row">
+      <div className="flex-1 items-start">
+        <Search
+          placeHolder={`Search by ${searchKey}`}
+          handleSearch={(val) => setSearchValue(val)}
+        />
+      </div>
 
-			<div className='flex flex-1 flex-col  flex-wrap items-end  gap-2'>
-				<div className='flex gap-3  justify-end w-full '>
-					<TableFilter />
-					{isDownloadable && (
-						<DownloadTableExcel
-							filename={`${queryKey} table`}
-							sheet={queryKey}
-							currentTableRef={tableRef.current}>
-							<button
-								type='button'
-								className='w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border'>
-								<IoCloudDownloadOutline /> Export
-							</button>
-						</DownloadTableExcel>
-					)}
-				</div>
+      <div className="flex flex-1 flex-col  flex-wrap items-end  gap-2">
+        <div className="flex gap-3  justify-end w-full ">
+          <TableFilter />
+          {isDownloadable && (
+            <DownloadTableExcel
+              filename={`${queryKey} table`}
+              sheet={queryKey}
+              currentTableRef={tableRef.current}
+            >
+              <button
+                type="button"
+                className="w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border"
+              >
+                <IoCloudDownloadOutline /> Export
+              </button>
+            </DownloadTableExcel>
+          )}
+        </div>
 
-				{cloneElement(children, { handleFilter, summary })}
-			</div>
+        {cloneElement(children, { handleFilter, summary })}
+      </div>
 
-			{/* <div className="flex gap-3 items-center">
+      {/* <div className="flex gap-3 items-center">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 512 512"
@@ -492,31 +488,29 @@ export function TableHeaderAction({ children }: any) {
 					</svg>
 					<p className="text-sm w-11">Print</p>
 				</div> */}
-		</div>
-	);
+    </div>
+  );
 }
 function TableRows({ children, customRow }: any) {
-	const { columns, data, actionable }: any = useContext(TableContext);
+  const { columns, data, actionable }: any = useContext(TableContext);
 
-	// if (data?.length < 1) {
-	// 	return (
-	// 		<tbody className=' w-full h-5'>
-	// 			<tr>
-	// 				<td className='  block p-2 text-sm '>No data available</td>
-	// 			</tr>
-	// 		</tbody>
-	// 	);
-	// }
+  // if (data?.length < 1) {
+  // 	return (
+  // 		<tbody className=' w-full h-5'>
+  // 			<tr>
+  // 				<td className='  block p-2 text-sm '>No data available</td>
+  // 			</tr>
+  // 		</tbody>
+  // 	);
+  // }
 
-	return (
-		<TableBody className=''>
-			{!customRow
-				? data?.map((row: any, i: any) => {
-						return (
-							<TableRow
-								key={i}
-								className=' px-2  relative border-b  '>
-								{/* <td className=" font-medium whitespace-nowrap">
+  return (
+    <TableBody className="">
+      {!customRow
+        ? data?.map((row: any, i: any) => {
+            return (
+              <TableRow key={i} className=" px-2  relative border-b  ">
+                {/* <td className=" font-medium whitespace-nowrap">
 									<input
 										title="check"
 										id="checkbox-all-search"
@@ -529,350 +523,328 @@ function TableRows({ children, customRow }: any) {
 										#
 									</label>
 								</td> */}
-								<TableCell className=' font-medium'>
-									<span>{i + 1}.</span>
-								</TableCell>
+                <TableCell className=" font-medium">
+                  <span>{i + 1}.</span>
+                </TableCell>
 
-								{columns.map((column: TableColumn, i: any) => {
-									//This logic helps check for more accessors; double items in a row cell
-									const value = column.accessor
-										?.split('.')
-										.reduce((obj, key) => obj[key], row);
+                {columns.map((column: TableColumn, i: any) => {
+                  //This logic helps check for more accessors; double items in a row cell
+                  const value = column.accessor
+                    ?.split(".")
+                    .reduce((obj, key) => obj[key], row);
 
-									if (column.custom) {
-										if (column.custom.type === 'style') {
-											return (
-												<TableCell
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													}`}
-													key={column.accessor + i}>
-													<span
-														title={value}
-														className='bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex'>
-														{value}
-													</span>
-												</TableCell>
-											);
-										}
-										if (column.custom.type === 'date') {
-											return (
-												<TableCell
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} ellipisis-overflow block`}
-													title={new Date(
-														value
-													).toDateString()}
-													key={column.accessor + i}>
-													{new Date(
-														value
-													).toDateString()}
-												</TableCell>
-											);
-										}
-										if (column.custom.type === 'currency') {
-											return (
-												<TableCell
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													}  `}
-													key={column.accessor + i}>
-													<span
-														title={formatCurrency(
-															value
-														)}
-														className='ellipsis-overflow block'>
-														{formatCurrency(value)}
-													</span>
-												</TableCell>
-											);
-										}
-										if (column.custom.type === 'percent') {
-											return (
-												<TableCell
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} `}
-													title={value}
-													key={column.accessor + i}>
-													{value} %
-												</TableCell>
-											);
-										}
-										if (column.custom.type === 'sentence') {
-											return (
-												<TableCell
-													className={`${
-														column.custom.bolden &&
-														'font-semibold'
-													} `}
-													key={column.accessor + i}>
-													{value} {''}{' '}
-													{column.custom.suffix}
-												</TableCell>
-											);
-										}
-									}
-									return (
-										<TableCell key={column.accessor + i}>
-											<span
-												title={value}
-												className='block ellipsis-overflow'>
-												{value}
-											</span>
-										</TableCell>
-									);
-								})}
+                  if (column.custom) {
+                    if (column.custom.type === "style") {
+                      return (
+                        <TableCell
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          }`}
+                          key={column.accessor + i}
+                        >
+                          <span
+                            title={value}
+                            className="bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
+                          >
+                            {value}
+                          </span>
+                        </TableCell>
+                      );
+                    }
+                    if (column.custom.type === "date") {
+                      return (
+                        <TableCell
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } ellipisis-overflow block`}
+                          title={new Date(value).toDateString()}
+                          key={column.accessor + i}
+                        >
+                          {new Date(value).toDateString()}
+                        </TableCell>
+                      );
+                    }
+                    if (column.custom.type === "currency") {
+                      return (
+                        <TableCell
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          }  `}
+                          key={column.accessor + i}
+                        >
+                          <span
+                            title={formatCurrency(value)}
+                            className="ellipsis-overflow block"
+                          >
+                            {formatCurrency(value)}
+                          </span>
+                        </TableCell>
+                      );
+                    }
+                    if (column.custom.type === "percent") {
+                      return (
+                        <TableCell
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } `}
+                          title={value}
+                          key={column.accessor + i}
+                        >
+                          {value} %
+                        </TableCell>
+                      );
+                    }
+                    if (column.custom.type === "sentence") {
+                      return (
+                        <TableCell
+                          className={`${
+                            column.custom.bolden && "font-semibold"
+                          } `}
+                          key={column.accessor + i}
+                        >
+                          {value} {""} {column.custom.suffix}
+                        </TableCell>
+                      );
+                    }
+                  }
+                  return (
+                    <TableCell key={column.accessor + i}>
+                      <span title={value} className="block ellipsis-overflow">
+                        {value}
+                      </span>
+                    </TableCell>
+                  );
+                })}
 
-								{actionable &&
-									cloneElement(children, { rowData: row })}
-							</TableRow>
-						);
-					})
-				: cloneElement(children, { data })}
-		</TableBody>
-	);
+                {actionable && cloneElement(children, { rowData: row })}
+              </TableRow>
+            );
+          })
+        : cloneElement(children, { data })}
+    </TableBody>
+  );
 }
 
 function Paginator() {
-	const [maxNumPage, setMaxNumPage] = useState(0);
+  const [maxNumPage, setMaxNumPage] = useState(0);
 
-	const {
-		updateLimit,
-		data,
-		limit,
-		page,
-		totalRecords,
-		handlePaginate
-	}: any = useContext(TableContext);
-	// function CalcNumOfPages(data: number, limit: number) {
-	// 	return Math.ceil(data / limit);
-	// }
+  const { updateLimit, data, limit, page, totalRecords, handlePaginate }: any =
+    useContext(TableContext);
+  // function CalcNumOfPages(data: number, limit: number) {
+  // 	return Math.ceil(data / limit);
+  // }
 
-	useEffect(() => {
-		setMaxNumPage(Math.ceil(totalRecords / limit));
-	}, [totalRecords, limit]);
+  useEffect(() => {
+    setMaxNumPage(Math.ceil(totalRecords / limit));
+  }, [totalRecords, limit]);
 
-	// function displayButtons() {
-	// 	let val = CalcNumOfPages(totalRecords, limit);
-	// 	let newArray = Array.from({ length: val }, (value, index) => index + 1);
-	// 	return newArray;
-	// }
+  // function displayButtons() {
+  // 	let val = CalcNumOfPages(totalRecords, limit);
+  // 	let newArray = Array.from({ length: val }, (value, index) => index + 1);
+  // 	return newArray;
+  // }
 
-	const numPages = Math.ceil(totalRecords / limit);
-	const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1);
+  const numPages = Math.ceil(totalRecords / limit);
+  const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1);
 
-	return (
-		// <section className='flex justify-between p-2 items-center'>
-		// 	<section className='flex-col flex  gap-1'>
-		// 		<strong>Summary</strong>
-		// 		<p>
-		// 			{' '}
-		// 			Showing <span>1</span> to <span>{data?.length}</span> of{' '}
-		// 			<span>{totalRecords}</span> results
-		// 		</p>
-		// 		<hr />
-		// 		<div className='font-semibold'>
-		// 			Total: {totalRecords} | Size: {limit} | Page: {page}
-		// 		</div>
-		// 	</section>
-		// 	{data?.length > 0 && (
-		// 		<nav
-		// 			className='flex gap-3'
-		// 			aria-label='Page navigation example'>
-		// 			<section className='flex items-center gap-1'>
-		// 				<span>Rows Per Page</span>
-		// 				<select
-		// 					onChange={(e) => {
-		// 						updateLimit(e.target.value);
-		// 						// service(limit, page);
-		// 						// setLimit(e.target.value);
+  return (
+    // <section className='flex justify-between p-2 items-center'>
+    // 	<section className='flex-col flex  gap-1'>
+    // 		<strong>Summary</strong>
+    // 		<p>
+    // 			{' '}
+    // 			Showing <span>1</span> to <span>{data?.length}</span> of{' '}
+    // 			<span>{totalRecords}</span> results
+    // 		</p>
+    // 		<hr />
+    // 		<div className='font-semibold'>
+    // 			Total: {totalRecords} | Size: {limit} | Page: {page}
+    // 		</div>
+    // 	</section>
+    // 	{data?.length > 0 && (
+    // 		<nav
+    // 			className='flex gap-3'
+    // 			aria-label='Page navigation example'>
+    // 			<section className='flex items-center gap-1'>
+    // 				<span>Rows Per Page</span>
+    // 				<select
+    // 					onChange={(e) => {
+    // 						updateLimit(e.target.value);
+    // 						// service(limit, page);
+    // 						// setLimit(e.target.value);
 
-		// 						// paginate(e.target.value)
-		// 						// handlePaginate(page, e.target.value);
-		// 					}}
-		// 					value={limit}
-		// 					id='sort'
-		// 					name='sort'
-		// 					title='sortdropdown'
-		// 					className='text-xs font-light bg-card p-1  focus-within:ring-0 focus-within:border-none border border-gray-300  rounded'>
-		// 					<option value={5}>5</option>
-		// 					<option value={10}>10</option>
-		// 					<option value={15}>15</option>
-		// 					<option value={20}>20</option>
-		// 				</select>
-		// 			</section>
+    // 						// paginate(e.target.value)
+    // 						// handlePaginate(page, e.target.value);
+    // 					}}
+    // 					value={limit}
+    // 					id='sort'
+    // 					name='sort'
+    // 					title='sortdropdown'
+    // 					className='text-xs font-light bg-card p-1  focus-within:ring-0 focus-within:border-none border border-gray-300  rounded'>
+    // 					<option value={5}>5</option>
+    // 					<option value={10}>10</option>
+    // 					<option value={15}>15</option>
+    // 					<option value={20}>20</option>
+    // 				</select>
+    // 			</section>
 
-		// 			<ul className='flex items-center gap-2 h-10 text-base'>
-		// 				<li
-		// 					onClick={() => {
-		// 						page > 1 && handlePaginate(page - 1, limit);
-		// 					}}>
-		// 					<a
-		// 						className={`${
-		// 							page === 1 && 'cursor-not-allowed'
-		// 						} flex items-center justify-center px-4 h-10 ml-0 leading-tight   border border-gray-300 rounded-l-lg   `}>
-		// 						<span className='sr-only'>Previous</span>
-		// 						<svg
-		// 							className='w-3 h-3'
-		// 							aria-hidden='true'
-		// 							xmlns='http://www.w3.org/2000/svg'
-		// 							fill='none'
-		// 							viewBox='0 0 6 10'>
-		// 							<path
-		// 								stroke='currentColor'
-		// 								strokeLinecap='round'
-		// 								strokeLinejoin='round'
-		// 								strokeWidth='2'
-		// 								d='M5 1 1 5l4 4'
-		// 							/>
-		// 						</svg>
-		// 					</a>
-		// 				</li>
-		// 				{displayButtons()
-		// 					.slice(page - 1, page + 2)
-		// 					.map((val, index) => (
-		// 						<li
-		// 							onClick={() => {
-		// 								handlePaginate(val, limit);
-		// 							}}
-		// 							key={val}>
-		// 							<a
-		// 								className={`${
-		// 									val === page ? '!bg-primary  ' : ''
-		// 								} flex items-center      rounded-3xl justify-center px-4 h-10 leading-tight   cursor-pointer  border border-gray-300 `}>
-		// 								{val}
-		// 							</a>
-		// 						</li>
-		// 					))}
+    // 			<ul className='flex items-center gap-2 h-10 text-base'>
+    // 				<li
+    // 					onClick={() => {
+    // 						page > 1 && handlePaginate(page - 1, limit);
+    // 					}}>
+    // 					<a
+    // 						className={`${
+    // 							page === 1 && 'cursor-not-allowed'
+    // 						} flex items-center justify-center px-4 h-10 ml-0 leading-tight   border border-gray-300 rounded-l-lg   `}>
+    // 						<span className='sr-only'>Previous</span>
+    // 						<svg
+    // 							className='w-3 h-3'
+    // 							aria-hidden='true'
+    // 							xmlns='http://www.w3.org/2000/svg'
+    // 							fill='none'
+    // 							viewBox='0 0 6 10'>
+    // 							<path
+    // 								stroke='currentColor'
+    // 								strokeLinecap='round'
+    // 								strokeLinejoin='round'
+    // 								strokeWidth='2'
+    // 								d='M5 1 1 5l4 4'
+    // 							/>
+    // 						</svg>
+    // 					</a>
+    // 				</li>
+    // 				{displayButtons()
+    // 					.slice(page - 1, page + 2)
+    // 					.map((val, index) => (
+    // 						<li
+    // 							onClick={() => {
+    // 								handlePaginate(val, limit);
+    // 							}}
+    // 							key={val}>
+    // 							<a
+    // 								className={`${
+    // 									val === page ? '!bg-primary  ' : ''
+    // 								} flex items-center      rounded-3xl justify-center px-4 h-10 leading-tight   cursor-pointer  border border-gray-300 `}>
+    // 								{val}
+    // 							</a>
+    // 						</li>
+    // 					))}
 
-		// 				<li>
-		// 					<a
-		// 						onClick={() => {
-		// 							maxNumPage > page &&
-		// 								handlePaginate(page + 1, limit);
-		// 						}}
-		// 						className={`${
-		// 							maxNumPage <= page
-		// 								? 'cursor-not-allowed'
-		// 								: ''
-		// 						} flex items-center  justify-center px-4 h-10 leading-tight   border border-gray-300 rounded-r-lg hover:text-gray-700  dark:border-none  `}>
-		// 						<span className='sr-only'>Next</span>
-		// 						<svg
-		// 							className='w-3 h-3'
-		// 							aria-hidden='true'
-		// 							xmlns='http://www.w3.org/2000/svg'
-		// 							fill='none'
-		// 							viewBox='0 0 6 10'>
-		// 							<path
-		// 								stroke='currentColor'
-		// 								strokeLinecap='round'
-		// 								strokeLinejoin='round'
-		// 								strokeWidth='2'
-		// 								d='m1 9 4-4-4-4'
-		// 							/>
-		// 						</svg>
-		// 					</a>
-		// 				</li>
-		// 			</ul>
-		// 		</nav>
-		// 	)}
-		// </section>
+    // 				<li>
+    // 					<a
+    // 						onClick={() => {
+    // 							maxNumPage > page &&
+    // 								handlePaginate(page + 1, limit);
+    // 						}}
+    // 						className={`${
+    // 							maxNumPage <= page
+    // 								? 'cursor-not-allowed'
+    // 								: ''
+    // 						} flex items-center  justify-center px-4 h-10 leading-tight   border border-gray-300 rounded-r-lg hover:text-gray-700  dark:border-none  `}>
+    // 						<span className='sr-only'>Next</span>
+    // 						<svg
+    // 							className='w-3 h-3'
+    // 							aria-hidden='true'
+    // 							xmlns='http://www.w3.org/2000/svg'
+    // 							fill='none'
+    // 							viewBox='0 0 6 10'>
+    // 							<path
+    // 								stroke='currentColor'
+    // 								strokeLinecap='round'
+    // 								strokeLinejoin='round'
+    // 								strokeWidth='2'
+    // 								d='m1 9 4-4-4-4'
+    // 							/>
+    // 						</svg>
+    // 					</a>
+    // 				</li>
+    // 			</ul>
+    // 		</nav>
+    // 	)}
+    // </section>
 
-		<section className='flex justify-between p-4 items-center w-full'>
-			<div className='flex flex-col gap-1'>
-				<strong>Summary</strong>
-				<p>
-					Showing <span>1</span> to <span>{data?.length}</span> of{' '}
-					<span>{totalRecords}</span> results
-				</p>
-				<div className='text-sm text-muted-foreground'>
-					Total: {totalRecords} | Size: {limit} | Page: {page}
-				</div>
-			</div>
+    <section className="flex justify-between p-4 items-center w-full">
+      <div className="flex flex-col gap-1">
+        <strong>Summary</strong>
+        <p>
+          Showing <span>1</span> to <span>{data?.length}</span> of{" "}
+          <span>{totalRecords}</span> results
+        </p>
+        <div className="text-sm text-muted-foreground">
+          Total: {totalRecords} | Size: {limit} | Page: {page}
+        </div>
+      </div>
 
-			{data?.length > 0 && (
-				<div className='flex items-center gap-4'>
-					<div className='flex w-full items-center gap-2'>
-						<label htmlFor='limit' className='text-sm'>
-							Rows per page
-						</label>
-						<select
-							id='limit'
-							value={limit}
-							onChange={(e) =>
-								updateLimit(Number(e.target.value))
-							}
-							className='text-xs bg-background border rounded px-2 py-1'>
-							{[5, 10, 15, 20].map((size) => (
-								<option key={size} value={size}>
-									{size}
-								</option>
-							))}
-						</select>
-					</div>
+      {data?.length > 0 && (
+        <div className="flex items-center gap-4">
+          <div className="flex w-full items-center gap-2">
+            <label htmlFor="limit" className="text-sm">
+              Rows per page
+            </label>
+            <select
+              id="limit"
+              value={limit}
+              onChange={(e) => updateLimit(Number(e.target.value))}
+              className="text-xs bg-background border rounded px-2 py-1"
+            >
+              {[5, 10, 15, 20].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
 
-					<Pagination>
-						<PaginationContent>
-							<PaginationItem>
-								<PaginationPrevious
-									onClick={() =>
-										page > 1 &&
-										handlePaginate(page - 1, limit)
-									}
-									className={
-										page === 1
-											? 'pointer-events-none cursor-not-allowed opacity-50'
-											: ''
-									}
-								/>
-							</PaginationItem>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => page > 1 && handlePaginate(page - 1, limit)}
+                  className={
+                    page === 1
+                      ? "pointer-events-none cursor-not-allowed opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
 
-							{pageNumbers
-								.slice(Math.max(0, page - 2), page + 1)
-								.map((num) => (
-									<PaginationItem key={num}>
-										<PaginationLink
-											className='cursor-pointer'
-											isActive={page === num}
-											onClick={() =>
-												handlePaginate(num, limit)
-											}>
-											{num}
-										</PaginationLink>
-									</PaginationItem>
-								))}
+              {pageNumbers.slice(Math.max(0, page - 2), page + 1).map((num) => (
+                <PaginationItem key={num}>
+                  <PaginationLink
+                    className="cursor-pointer"
+                    isActive={page === num}
+                    onClick={() => handlePaginate(num, limit)}
+                  >
+                    {num}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
 
-							{numPages > page + 1 && (
-								<PaginationItem>
-									<PaginationEllipsis />
-								</PaginationItem>
-							)}
+              {numPages > page + 1 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
 
-							<PaginationItem>
-								<PaginationNext
-									onClick={() =>
-										page < maxNumPage &&
-										handlePaginate(page + 1, limit)
-									}
-									className={
-										page >= maxNumPage
-											? 'pointer-events-none cursor-not-allowed opacity-50'
-											: ''
-									}
-								/>
-							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				</div>
-			)}
-		</section>
-	);
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    page < maxNumPage && handlePaginate(page + 1, limit)
+                  }
+                  className={
+                    page >= maxNumPage
+                      ? "pointer-events-none cursor-not-allowed opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </section>
+  );
 }
 
 TableComponent.TableHeader = TableHeaders;

@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,8 +60,6 @@ import {
   Check,
   CheckCheck,
   RefreshCw,
-  MessageSquare,
-  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/Theme-Toggle";
@@ -74,7 +71,6 @@ import {
   useSendMessage,
 } from "./hooks/chatHooks";
 import { ChatRoom, ChatRoomMessage, Participant } from "./model/chat.model";
-import { User } from "@/app/shared/model/model";
 import { CHAT_MSG_DELIVERY_STATUS, CHAT_ROLES } from "./data/enums";
 import {
   computeDeliveryState,
@@ -91,27 +87,29 @@ import { useBottomSentinel } from "./hooks/interfaceHooks";
 import { ChatSkeleton } from "./components/ChatSkeleton";
 import { EmptyChatState } from "./components/EmptyChatState";
 import { EmptyRoomsState } from "./components/EmptyRoomsState";
+import { useFetchTechnicians } from "../ticket-feat/hooks/ticketHooks";
+import { getMembershipForBusiness } from "@/utils/helpers";
 
-const mockTechnicians = [
-  {
-    id: "tech-1",
-    name: "Mike Rodriguez",
-    specialty: "Plumbing",
-    avatar: "/placeholder.svg?height=40&width=40&text=MR",
-  },
-  {
-    id: "tech-2",
-    name: "Lisa Chen",
-    specialty: "Electrical",
-    avatar: "/placeholder.svg?height=40&width=40&text=LC",
-  },
-  {
-    id: "tech-3",
-    name: "David Wilson",
-    specialty: "HVAC",
-    avatar: "/placeholder.svg?height=40&width=40&text=DW",
-  },
-];
+// const mockTechnicians = [
+//   {
+//     id: "tech-1",
+//     name: "Mike Rodriguez",
+//     specialty: "Plumbing",
+//     avatar: "/placeholder.svg?height=40&width=40&text=MR",
+//   },
+//   {
+//     id: "tech-2",
+//     name: "Lisa Chen",
+//     specialty: "Electrical",
+//     avatar: "/placeholder.svg?height=40&width=40&text=LC",
+//   },
+//   {
+//     id: "tech-3",
+//     name: "David Wilson",
+//     specialty: "HVAC",
+//     avatar: "/placeholder.svg?height=40&width=40&text=DW",
+//   },
+// ];
 
 const chatRoleMap = {
   [CHAT_ROLES.REQUESTER]: "Tenant",
@@ -135,6 +133,7 @@ export default function ChatComponent() {
     isPending,
     error,
   } = useSendMessage(currentRoom?.id!, user!);
+
   const {
     isFetchingMessages,
     messages,
@@ -153,6 +152,7 @@ export default function ChatComponent() {
     user?.id
   );
 
+  const { data: technicians } = useFetchTechnicians();
   const [selectedTechnician, setSelectedTechnician] = useState("");
   const [showAddTechnician, setShowAddTechnician] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -219,7 +219,7 @@ export default function ChatComponent() {
   const handleAddTechnician = () => {
     if (!selectedTechnician) return;
 
-    const technician = mockTechnicians.find((t) => t.id === selectedTechnician);
+    const technician = technicians?.find((t) => t.id === selectedTechnician);
     if (!technician) return;
 
     setSelectedTechnician("");
@@ -542,31 +542,37 @@ export default function ChatComponent() {
                               <SelectValue placeholder="Select a technician" />
                             </SelectTrigger>
                             <SelectContent>
-                              {mockTechnicians.map((tech) => (
-                                <SelectItem key={tech.id} value={tech.id}>
-                                  <div className="flex items-center space-x-2">
-                                    <Avatar className="h-6 w-6">
-                                      <AvatarImage
-                                        src={tech.avatar || "/placeholder.svg"}
-                                      />
-                                      <AvatarFallback>
-                                        {tech.name
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <span className="font-medium">
-                                        {tech.name}
-                                      </span>
-                                      <span className="text-sm text-gray-500 ml-2">
-                                        ({tech.specialty})
-                                      </span>
+                              {technicians?.map((tech) => {
+                                const membership = getMembershipForBusiness(
+                                  tech,
+                                  tech?.currentBusiness.id!
+                                );
+                                return (
+                                  <SelectItem key={tech.id} value={tech.id}>
+                                    <div className="flex items-center space-x-2">
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarImage
+                                          src={generateAvatar(tech.name)}
+                                        />
+                                        <AvatarFallback>
+                                          {tech.name
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <span className="font-medium">
+                                          {tech.name}
+                                        </span>
+                                        <span className="text-sm text-gray-500 ml-2">
+                                          {membership?.specialties?.[0]}
+                                        </span>
+                                      </div>
                                     </div>
-                                  </div>
-                                </SelectItem>
-                              ))}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                           <div className="flex justify-end space-x-2">
@@ -731,27 +737,6 @@ export default function ChatComponent() {
                     ))}
 
                     <div ref={bottomRef} />
-                    {/* 
-              {isTyping && (
-                <div className="flex space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>...</AvatarFallback>
-                  </Avatar>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              )} */}
 
                     <TypingIndicator
                       typingUsers={typingUsers}

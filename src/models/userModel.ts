@@ -3,7 +3,6 @@ import mongoose, {
   Schema,
   Model,
   Types,
-  ObjectId,
   InferSchemaType,
 } from "mongoose";
 import validator from "validator";
@@ -39,6 +38,7 @@ export interface IUser extends Document {
     status: INVITE_STATUS;
     inviteToken?: string;
     inviteTokenExpires?: Date;
+    specialties?: TechnicianSpecialty[];
   }[];
   currentBusiness: Types.ObjectId;
   tenantsClaim(): Array<{
@@ -48,6 +48,30 @@ export interface IUser extends Document {
   }>;
 }
 
+export const MEMBERSHIP_ROLES = [
+  "USER",
+  "ADMIN",
+  "TECHNICIAN",
+  "OWNER",
+  "SUPER_ADMIN",
+] as const;
+export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
+
+export const STATUS = ["INVITED", "ACTIVATED", "DEACTIVATED"] as const;
+export type UserStatus = (typeof STATUS)[number];
+
+// Customize/expand as needed
+export const TECH_SPECIALTIES = [
+  "ELECTRICIAN",
+  "PLUMBER",
+  "HVAC",
+  "CARPENTER",
+  "PAINTER",
+  "LOCKSMITH",
+  "APPLIANCE_REPAIR",
+  "GENERAL_HANDYMAN",
+] as const;
+export type TechnicianSpecialty = (typeof TECH_SPECIALTIES)[number];
 //subschema
 const MembershipSchema = new Schema(
   {
@@ -58,12 +82,43 @@ const MembershipSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["INVITED", "ACTIVATED", "DEACTIVATED"],
+      enum: STATUS,
     },
     role: {
       type: String,
-      enum: ["USER", "ADMIN", "TECHNICIAN", "OWNER", "SUPER_ADMIN"],
+      enum: MEMBERSHIP_ROLES,
       required: true,
+    },
+
+    // 👇 Multiple specialties (technicians only)
+    specialties: {
+      type: [String], // array of strings
+      enum: TECH_SPECIALTIES, // each item must be one of TECH_SPECIALTIES
+      default: undefined, // omit when not set
+      validate: {
+        validator(this: any, val?: string[]) {
+          if (this.role === MEMBERSHIP_ROLES[2]) {
+            return (
+              Array.isArray(val) &&
+              val.length > 0 &&
+              val.every((s) =>
+                TECH_SPECIALTIES.includes(String(s).toUpperCase().trim() as any)
+              )
+            );
+          }
+          // non-technicians: must be empty or undefined
+          return val === undefined || (Array.isArray(val) && val.length === 0);
+        },
+        message: "Technicians must have at least one valid specialty.",
+      },
+      // normalize values to UPPERCASE, trim, and unique
+      set: (val: unknown) => {
+        if (!Array.isArray(val)) return undefined;
+        const cleaned = val
+          .map((v) => String(v).toUpperCase().trim())
+          .filter(Boolean);
+        return Array.from(new Set(cleaned));
+      },
     },
     inviteToken: { type: String },
     inviteTokenExpires: { type: Date },
@@ -83,6 +138,22 @@ MembershipSchema.virtual("inviteExpired").get(function (this: any) {
     ? new Date(this.inviteTokenExpires)
     : null;
   return !exp || Date.now() > exp.getTime();
+});
+
+// Strip specialties for non-techs; re-apply normalization just in case
+MembershipSchema.pre("validate", function (next) {
+  if (this.role !== "TECHNICIAN") {
+    this.specialties = undefined;
+  } else if (Array.isArray(this.specialties)) {
+    this.specialties = Array.from(
+      new Set(
+        this.specialties
+          .map((s: string) => String(s).toUpperCase().trim())
+          .filter(Boolean)
+      )
+    );
+  }
+  next();
 });
 
 // 2) Seconds left until expiry (negative if already expired, -1 if no expiry set)
@@ -176,6 +247,7 @@ export type UserDoc = mongoose.Document &
       business: Types.ObjectId;
       role: ROLES;
       status: INVITE_STATUS;
+      specialties?: TechnicianSpecialty[];
       inviteToken?: string;
       inviteTokenExpires?: Date;
       inviteExpired?: boolean;
@@ -184,6 +256,8 @@ export type UserDoc = mongoose.Document &
       business: string;
       role: ROLES;
       status: INVITE_STATUS;
+      specialties?: TechnicianSpecialty[];
+      // specialty?: TechnicianSpecialty;
     }>;
   };
 // Hash password before saving
@@ -246,6 +320,12 @@ userSchema.methods.createUserInviteToken = function (): string {
   this.inviteTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hrs
   return inviteToken;
 };
+
+userSchema.index({
+  "memberships.business": 1,
+  "memberships.role": 1,
+  "memberships.specialties": 1,
+});
 
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", userSchema);

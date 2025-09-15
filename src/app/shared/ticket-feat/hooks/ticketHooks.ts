@@ -1,5 +1,10 @@
 import { toast } from "react-hot-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   assignTechnician,
   assignTicket,
@@ -63,6 +68,7 @@ export function useFetchTickets<T>(
   const { isLoading, data, error, isRefetching } = useQuery({
     queryKey: ["tickets", status, search],
     queryFn: () => fetchTickets<T>({ page, limit, status, search }),
+    placeholderData: keepPreviousData,
   });
 
   return {

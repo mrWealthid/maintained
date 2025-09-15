@@ -1,121 +1,324 @@
-'use client';
-import React, { FC } from 'react';
-import { useForm } from 'react-hook-form';
-import { useCreateUser } from './hooks/userHooks';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import EmailInput from '@/app/shared/components/form-elements/Email-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
-import { ROLES } from '@/app/shared/enums/enums';
-import { ManageUserForm, ManageUserFormProps } from '@/app/shared/model/model';
-import { useAppContext } from '@/app/shared/contexts/AppContext';
+"use client";
+import React, { FC, useMemo } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useCreateUser } from "./hooks/userHooks";
+import { ROLES } from "@/app/shared/enums/enums";
+import { ManageUserForm, ManageUserFormProps } from "@/app/shared/model/model";
+import { useAppContext } from "@/app/shared/contexts/AppContext";
 
-const UserForm: FC<ManageUserFormProps> = ({ user, onCloseModal }) => {
-	const isEditing = !!user?.id;
+// shadcn/ui
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
-	const { role } = useAppContext();
+// Keep your existing ButtonComponent for actions
+import ButtonComponent from "@/app/shared/components/form-elements/Button";
 
-	const { register, handleSubmit, formState } = useForm<ManageUserForm>({
-		mode: 'all',
-		defaultValues: isEditing ? { ...user, role } : {}
-	});
+// ----------------------
+// Config
+// ----------------------
+const SPECIALTIES = [
+  "Electrician",
+  "Plumber",
+  "Carpenter",
+  "HVAC",
+  "Painter",
+  "Locksmith",
+  "Roofer",
+  "Appliance Repair",
+  "General Contractor",
+  "Landscaper",
+  "Pest Control",
+] as const;
 
-	const { errors, isSubmitting, isValid, isDirty } = formState;
-	const { isCreating, createUser } = useCreateUser(
-		isEditing,
-		onCloseModal,
-		user?.id
-	);
+// Clickable badge multi-select ----------------------
+const SpecialtyBadges: FC<{
+  value: string[];
+  onChange: (next: string[]) => void;
+  disabled?: boolean;
+  error?: string;
+}> = ({ value = [], onChange, disabled, error }) => {
+  const selected = useMemo(() => new Set(value), [value]);
 
-	async function onSubmit(data: ManageUserForm) {
-		createUser(data);
-	}
+  function toggle(item: string) {
+    const next = new Set(selected);
+    if (next.has(item)) next.delete(item);
+    else next.add(item);
+    onChange(Array.from(next));
+  }
 
-	function onError(err: unknown) {
-		console.log(err);
-	}
+  const selectedList = Array.from(selected);
+  const collapsed = selectedList.length > 4;
+  const visibleSelected = collapsed ? selectedList.slice(0, 3) : selectedList;
+  const hiddenCount = collapsed ? selectedList.length - 3 : 0;
 
-	return (
-		<div className='w-full'>
-			<form
-				onSubmit={handleSubmit(onSubmit, onError)}
-				className=' flex flex-1 items-center'>
-				<section className='flex-col flex gap-2 w-full'>
-					<div className='w-full flex gap-4'>
-						<TextInput
-							name={'name'}
-							label='Enter Name'
-							error={errors?.['name']?.message?.toString()}>
-							<input
-								{...register('name', {
-									required: 'This field is required'
-								})}
-								className='input-style'
-								type='text'
-								id='name'
-								placeholder='Enter Full Name'
-							/>
-						</TextInput>
-					</div>
-					<div className='w-full flex gap-4'>
-						<EmailInput
-							name={'email'}
-							label='Email'
-							error={errors?.['email']?.message?.toString()}>
-							<input
-								{...register('email', {
-									required: 'This field is required',
-									pattern: {
-										value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-										message: 'Invalid email address'
-									}
-								})}
-								className='input-style  '
-								type='email'
-								id='email'
-								placeholder='johndoe@gmail.com'
-							/>
-						</EmailInput>
-					</div>
+  return (
+    <div className="w-full space-y-2">
+      <Label>Specialties</Label>
 
-					<div className='w-full flex gap-4'>
-						<TextInput
-							name={'role'}
-							label='Role'
-							required={true}
-							error={errors?.['role']?.message?.toString()}>
-							<select
-								className='input-style cursor-pointer'
-								{...register('role', {
-									required: 'This field is required'
-								})}>
-								<option value=''>Select Role</option>
-								<option> {ROLES.user}</option>
-								<option> {ROLES.admin}</option>
-								<option> {ROLES.technician}</option>
-							</select>
-						</TextInput>
-					</div>
-					<hr className='my-3' />
-					<section className='flex justify-end  gap-4'>
-						<ButtonComponent
-							type='reset'
-							handleClick={() => onCloseModal?.()}
-							styles='rounded-3xl'
-							btnText={'Cancel'}></ButtonComponent>
+      {/* Selection grid: clickable chips with a checkmark when selected */}
+      <div className="flex flex-wrap gap-2">
+        {SPECIALTIES.map((sp) => {
+          const isOn = selected.has(sp);
+          return (
+            <button
+              key={sp}
+              type="button"
+              disabled={disabled}
+              onClick={() => toggle(sp)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toggle(sp);
+                }
+              }}
+              aria-pressed={isOn}
+              aria-label={`${sp} ${isOn ? "selected" : "not selected"}`}
+              className={[
+                "inline-flex items-center gap-2 rounded-2xl border px-3 py-1 text-sm transition",
+                "focus:outline-none focus:ring-1  focus:ring-offset-2",
+                isOn
+                  ? " bg-button-primary hover:bg-button-accent text-button-primary-foreground "
+                  : "bg-background text-foreground border-muted",
+                disabled ? "opacity-60 cursor-not-allowed" : "hover:shadow-sm",
+              ].join(" ")}
+            >
+              {isOn ? (
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary-foreground/20">
+                  <svg viewBox="0 0 24 24" className="h-3 w-3" aria-hidden>
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              ) : null}
+              <span>{sp}</span>
+            </button>
+          );
+        })}
+      </div>
 
-						<ButtonComponent
-							type='submit'
-							styles='rounded-3xl'
-							disabled={!isValid || isSubmitting || !isDirty}
-							loading={isCreating}
-							btnText={` ${
-								isEditing ? 'Update User' : ' Create User'
-							}`}></ButtonComponent>
-					</section>
-				</section>
-			</form>
-		</div>
-	);
+      {/* Selected summary badges */}
+      {!!selectedList.length && (
+        <div
+          className="flex flex-wrap items-center gap-2 pt-1"
+          aria-live="polite"
+        >
+          <span className="text-sm font-semi">Selected:</span>
+          {visibleSelected.map((sp) => (
+            <Badge key={sp} variant="outline" className="rounded-xl pr-1">
+              {sp}
+              <button
+                type="button"
+                className="ml-1 grid h-5 w-5 place-items-center rounded-sm hover:bg-muted"
+                onClick={() => toggle(sp)}
+                aria-label={`Remove ${sp}`}
+              >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden>
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </Badge>
+          ))}
+          {collapsed && (
+            <Badge variant="outline" className="rounded-xl">
+              {selectedList.length} selected (+{hiddenCount} more)
+            </Badge>
+          )}
+          {!collapsed && selectedList.length === 4 && (
+            <Badge variant="outline" className="rounded-xl">
+              4 selected
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {error ? (
+        <p className="text-sm text-destructive" aria-live="polite">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+const UserForm: FC<ManageUserFormProps> = ({
+  user,
+  membership,
+  onCloseModal,
+}) => {
+  const isEditing = !!user?.id;
+
+  const { control, register, handleSubmit, watch, formState, setValue } =
+    useForm<ManageUserForm>({
+      mode: "all",
+      defaultValues: isEditing ? { ...user, ...membership } : {},
+    });
+
+  const currentRole = watch("role");
+  const { errors, isSubmitting, isValid, isDirty } = formState;
+  const { isCreating, createUser } = useCreateUser(
+    isEditing,
+    onCloseModal,
+    user?.id
+  );
+
+  function onSubmit(data: ManageUserForm) {
+    const payload: ManageUserForm = {
+      ...data,
+      ...(data.role === ROLES.technician ? {} : { specialties: [] as any }),
+    } as ManageUserForm;
+    createUser(payload);
+  }
+
+  function onError(err: unknown) {
+    console.log(err);
+  }
+
+  return (
+    <div className="w-full">
+      <form
+        onSubmit={handleSubmit(onSubmit, onError)}
+        className="flex flex-1 items-center"
+      >
+        <section className="flex-col flex gap-4 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Enter Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter Full Name"
+                {...register("name", { required: "This field is required" })}
+              />
+              {errors.name?.message && (
+                <p className="text-sm text-destructive">
+                  {String(errors.name.message)}
+                </p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="johndoe@gmail.com"
+                {...register("email", {
+                  required: "This field is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email address",
+                  },
+                })}
+              />
+              {errors.email?.message && (
+                <p className="text-sm text-destructive">
+                  {String(errors.email.message)}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Role */}
+          <div className="space-y-2">
+            <Label>Role</Label>
+            <Controller
+              name="role"
+              control={control}
+              rules={{ required: "This field is required" }}
+              render={({ field }) => (
+                <Select
+                  value={String(field.value ?? "")}
+                  onValueChange={(val) => {
+                    field.onChange(val as ManageUserForm["role"]);
+                    if (val !== ROLES.technician)
+                      setValue("specialties" as any, []);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* <SelectItem>Select Role</SelectItem> */}
+                    <SelectItem value={ROLES.user}>{ROLES.user}</SelectItem>
+                    <SelectItem value={ROLES.admin}>{ROLES.admin}</SelectItem>
+                    <SelectItem value={ROLES.technician}>
+                      {ROLES.technician}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.role?.message && (
+              <p className="text-sm text-destructive">
+                {String(errors.role.message)}
+              </p>
+            )}
+          </div>
+
+          {/* Specialties as clickable badges (Technician only) */}
+          {watch("role") === ROLES.technician && (
+            <Controller
+              name="specialties"
+              control={control}
+              rules={{
+                validate: (arr) =>
+                  (Array.isArray(arr) && arr.length > 0) ||
+                  "Select at least one specialty",
+              }}
+              render={({ field }) => (
+                <SpecialtyBadges
+                  value={(field.value as unknown as string[]) ?? []}
+                  onChange={field.onChange as (next: string[]) => void}
+                  error={errors.specialties?.message as string}
+                />
+              )}
+            />
+          )}
+
+          <hr className="my-3" />
+
+          <section className="flex justify-end gap-3">
+            <ButtonComponent
+              type="reset"
+              handleClick={() => onCloseModal?.()}
+              styles="rounded-3xl"
+              btnText={"Cancel"}
+            />
+
+            <ButtonComponent
+              type="submit"
+              styles="rounded-3xl"
+              disabled={!isValid || isSubmitting || !isDirty}
+              loading={isCreating}
+              btnText={`${isEditing ? "Update User" : "Create User"}`}
+            />
+          </section>
+        </section>
+      </form>
+    </div>
+  );
 };
 
 export default UserForm;

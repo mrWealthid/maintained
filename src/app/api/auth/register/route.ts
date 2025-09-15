@@ -4,16 +4,16 @@ import Business from "@/models/businessModel";
 import { NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { INVITE_STATUS, ROLES } from "@/app/shared/enums/enums";
+import { ApiErrorHandler } from "@/utils/apiError";
 
 connect();
 
-const signToken = (
-  id: string,
-  tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
-) => {
+const signToken = (user: UserDoc) => {
+  const { id } = user;
+  const tenants = user.tenantsClaim();
   return jwt.sign(
     {
-      id: id,
+      id,
       role: tenants[0].role || "USER",
       tenants,
     },
@@ -22,12 +22,8 @@ const signToken = (
   );
 };
 
-const createSendToken = (
-  user: UserDoc,
-  statusCode: number,
-  tenants: Array<{ business: string; role: ROLES; status: INVITE_STATUS }>
-) => {
-  const token = signToken(user.id, tenants);
+const createSendToken = (user: UserDoc, statusCode: number) => {
+  const token = signToken(user);
 
   //Remove password from output
   delete (user as any).password;
@@ -54,7 +50,6 @@ const createSendToken = (
 export async function POST(request: Request) {
   try {
     const req = await request.json();
-    console.log("Incoming Request:", req);
 
     // Check user existence
     const existingUser = await User.findOne({ email: req.email });
@@ -69,13 +64,13 @@ export async function POST(request: Request) {
       name: req.businessName,
       registrationId: req.registrationId,
       contact: req.businessContact,
+      countryCode: req.countryCode,
       country: req.country,
       address: req.businessAddress,
       email: req.businessEmail,
       creator: req.name,
     });
 
-    console.log(business);
     if (!business) {
       return NextResponse.json(
         { error: "Business could not be created" },
@@ -98,15 +93,10 @@ export async function POST(request: Request) {
       currentBusiness: business.id,
     });
 
-    const tenants = newUser.tenantsClaim();
-
-    console.log(newUser);
-
-    return createSendToken(newUser, 201, tenants);
+    return createSendToken(newUser, 201);
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
-      { error: "Server error occurred" },
+      { error: ApiErrorHandler.parse(error) },
       { status: 500 }
     );
   }

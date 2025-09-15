@@ -128,8 +128,8 @@ export default function AddressField({
           render={({ field }) => (
             <div>
               <Select
-                onValueChange={field.onChange} // ✅ RHF wiring
-                value={field.value} // ✅ controlled value
+                onValueChange={field.onChange}
+                value={field.value}
                 defaultValue={field.value}
               >
                 <SelectTrigger>
@@ -179,7 +179,7 @@ export default function AddressField({
       </div>
 
       {/* hidden/readonly meta */}
-      <div className="grid grid-cols-3 gap-3 mt-5 ">
+      <div className="hidden grid-cols-3 gap-3 mt-5 ">
         <Controller
           name={path(namePrefix, "lat")}
           control={control}

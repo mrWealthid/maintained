@@ -298,7 +298,7 @@ const Window = ({
                   : null}
             </div> */}
 
-            <div className="overflow-y-hidden max-h-[80vh]">
+            <div className=" max-h-[80vh]">
               {React.isValidElement(children)
                 ? cloneElement(children as any, {
                     onCloseModal: close,
