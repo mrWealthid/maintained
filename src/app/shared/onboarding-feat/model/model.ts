@@ -10,6 +10,10 @@ export interface CreatePropertyPayload {
   propertyAddress?: string;
 }
 
+export interface CreateMultiplePropertiesPayload {
+  properties: CreatePropertyPayload[];
+}
+
 // export interface OnboardingPropWrapper<T> extends T {
 
 //   successCallback: () => void;

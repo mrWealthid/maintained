@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   ChecklistState,
   CreatePropertyPayload,
+  CreateMultiplePropertiesPayload,
   CreateUnitPayload,
   Property,
 } from "../model/model";
@@ -13,6 +14,17 @@ import { ApiError } from "next/dist/server/api-utils";
 export async function handleCreateProperty(payload: CreatePropertyPayload) {
   try {
     const res = await axios.post(`/api/properties`, payload);
+    return res.data;
+  } catch (err: unknown) {
+    throw new Error(ApiErrorHandler.parse(err));
+  }
+}
+
+export async function handleCreateMultipleProperties(
+  payload: CreateMultiplePropertiesPayload
+) {
+  try {
+    const res = await axios.post(`/api/properties`, payload.properties);
     return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));

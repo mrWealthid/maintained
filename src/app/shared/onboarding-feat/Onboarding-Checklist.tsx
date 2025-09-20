@@ -51,6 +51,7 @@ import { useAppContext } from "../contexts/AppContext";
 import UserForm from "@/app/admin/dashboard/users/UserForm";
 import { ROLES } from "../enums/enums";
 import PropertyForm from "./components/PropertyForm";
+import MultiplePropertyForm from "./components/MultiplePropertyForm";
 import UnitForm from "./components/UnitForm";
 import { useOnboardingChecklist } from "./hooks/onboardingHooks";
 
@@ -300,18 +301,32 @@ export function OnboardingChecklistContent({
         enabled: emailCompleted, // Can only add property after email verification
         estimatedTime: "3 min",
         cta: (
-          <PropertyWizardDialog
-            businessId={currentBusinessId!}
-            onCreated={() => {
-              // optional toast lives inside your dialog wrapper already
-            }}
-            trigger={
-              <Button size="sm" variant="outline" disabled={!emailCompleted}>
-                <Plus className="h-4 w-4 mr-1" />
-                Add property
-              </Button>
-            }
-          />
+          <div className="flex gap-2">
+            <PropertyWizardDialog
+              businessId={currentBusinessId!}
+              onCreated={() => {
+                // optional toast lives inside your dialog wrapper already
+              }}
+              trigger={
+                <Button size="sm" variant="outline" disabled={!emailCompleted}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add property
+                </Button>
+              }
+            />
+            <MultiplePropertyQuickAddDialog
+              businessId={currentBusinessId!}
+              onCreated={() => {
+                // optional toast lives inside your dialog wrapper already
+              }}
+              trigger={
+                <Button size="sm" variant="outline" disabled={!emailCompleted}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add multiple
+                </Button>
+              }
+            />
+          </div>
         ),
       },
       {
@@ -613,6 +628,43 @@ function PropertyWizardDialog({
         <PropertyForm
           businessId={businessId} // user={undefined as any}
           // membership={{ business: businessId, role: ROLES.admin } as any}
+          successCallback={() => {
+            setOpen(false); // close only on success
+            onCreated?.(); // refresh checklist/counters
+          }}
+          onCloseModal={() => {
+            setOpen(false);
+          }} // still allow manual cancel to close
+          errorCallback={(e) => {
+            // optional: toast with your existing system
+            // toast.error(getErrorMessage(e));
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MultiplePropertyQuickAddDialog({
+  businessId,
+  trigger,
+  onCreated,
+}: {
+  businessId: string;
+  trigger: React.ReactNode;
+  onCreated?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
+        <DialogHeader>
+          <DialogTitle>Add multiple properties</DialogTitle>
+        </DialogHeader>
+        <MultiplePropertyForm
+          businessId={businessId}
           successCallback={() => {
             setOpen(false); // close only on success
             onCreated?.(); // refresh checklist/counters

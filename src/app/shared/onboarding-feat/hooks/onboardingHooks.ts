@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CreatePropertyPayload, CreateUnitPayload } from "../model/model";
+import {
+  CreatePropertyPayload,
+  CreateMultiplePropertiesPayload,
+  CreateUnitPayload,
+} from "../model/model";
 import {
   fetchOnboardingChecklist,
   fetchProperties,
   fetchUnits,
   handleCreateProperty,
+  handleCreateMultipleProperties,
   handleCreateUnits,
 } from "../service/onboarding-service";
 import toast from "react-hot-toast";
@@ -26,6 +31,30 @@ export function useCreateProperty(isEditing: boolean, close?: () => void) {
   });
 
   return { isCreating, createProperty };
+}
+
+export function useCreateMultipleProperties(
+  isEditing: boolean,
+  close?: () => void
+) {
+  const queryClient = useQueryClient();
+  const { isPending: isCreating, mutate: createMultipleProperties } =
+    useMutation({
+      mutationFn: (payload: CreateMultiplePropertiesPayload) =>
+        handleCreateMultipleProperties(payload),
+
+      onSuccess: (data) => {
+        // Invalidate relevant queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ["properties"] });
+        queryClient.invalidateQueries({ queryKey: ["checklist"] });
+        queryClient.invalidateQueries({ queryKey: ["Users"] });
+        toast.success(`Successfully created ${data.count} properties`);
+        close?.();
+      },
+      onError: (err: any) => toast.error(err.message),
+    });
+
+  return { isCreating, createMultipleProperties };
 }
 
 export function useCreatePropertyUnit(isEditing: boolean, close?: () => void) {

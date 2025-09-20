@@ -12,37 +12,64 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const business = me.currentBusiness;
-    const { type, name, address, code, meta } = await req.json();
+    const body = await req.json();
 
-    if (!business || !type || !name) {
+    // Check if it's bulk creation or single creation
+    const isBulk = Array.isArray(body);
+    const propertiesData = isBulk ? body : [body];
+
+    if (!business) {
       return NextResponse.json(
-        { error: "business, type, name are required" },
+        { error: "business is required" },
         { status: 400 }
       );
     }
 
-    const property = await Property.create({
-      business,
-      type,
-      name,
-      address,
-      code,
-      meta,
-      isActive: true,
-    });
+    // Validate all properties data
+    for (const propertyData of propertiesData) {
+      const { type, name, address } = propertyData;
+      if (!type || !name || !address) {
+        return NextResponse.json(
+          { error: "type, name, and address are required for each property" },
+          { status: 400 }
+        );
+      }
+    }
 
-    if (PROPERTY_TYPES[0].includes(property.type)) {
-      const defaultUnit = await Unit.create({
-        business: property.business,
-        property: property._id,
-        label: "Home", // or "Main", configurable
+    // Create all properties
+    const createdProperties = [];
+    for (const propertyData of propertiesData) {
+      const { type, name, address, code, meta } = propertyData;
+
+      const property = await Property.create({
+        business,
+        type,
+        name,
+        address,
+        code,
+        meta,
+        isActive: true,
       });
-      property.defaultUnit = defaultUnit._id;
-      await property.save();
+
+      if (PROPERTY_TYPES[0].includes(property.type)) {
+        const defaultUnit = await Unit.create({
+          business: property.business,
+          property: property._id,
+          label: "Home", // or "Main", configurable
+        });
+        property.defaultUnit = defaultUnit._id;
+        await property.save();
+      }
+
+      createdProperties.push(property);
     }
 
     return NextResponse.json(
-      { status: "success", data: property },
+      {
+        status: "success",
+        data: isBulk ? createdProperties : createdProperties[0],
+        count: createdProperties.length,
+      },
       { status: 201 }
     );
   } catch (error) {
