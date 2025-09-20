@@ -13,6 +13,7 @@ import { useLogout } from "@/app/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { OnboardingChecklistContent } from "./Onboarding-Checklist";
 import { ChecklistState } from "./model/model";
+import { ThemeToggle } from "@/components/Theme-Toggle";
 
 interface OnboardingModalProps {
   emailVerified: boolean;
@@ -47,16 +48,20 @@ export default function OnboardingModal({
             <DialogTitle className="text-lg font-semibold">
               Getting Started - {user?.currentBusiness?.name || "Your Business"}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-              {isLoggingOut ? "Logging out..." : "Logout"}
-            </Button>
+            <div className="flex gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 

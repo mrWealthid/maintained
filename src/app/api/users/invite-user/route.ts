@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         currentBusiness: currentBusinessId,
       });
 
-      inviteToken = newUser.createUserInviteToken();
+      // inviteToken = newUser.createUserInviteToken();
       await newUser.save({ validateBeforeSave: false });
 
       userToInvite = newUser;
