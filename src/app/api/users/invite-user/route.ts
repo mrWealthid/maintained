@@ -29,88 +29,145 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const capitalize = (str: string) =>
-      str.replace(/\b\w/g, (char) => char.toUpperCase());
+    // Check if it's bulk creation or single creation
+    const isBulk = Array.isArray(body);
+    const usersData = isBulk ? body : [body];
 
-    const existingUser = await User.findOne({ email: body.email });
-    const activeBusiness = await Business.findById(currentBusinessId);
-
-    let inviteToken = "";
-    let userToInvite;
-
-    const { token, hashed, expires } = generateInviteToken();
-
-    if (existingUser) {
-      const alreadyMember = existingUser.memberships.some(
-        (m) => m.business.toString() === currentBusinessId.toString()
-      );
-
-      if (alreadyMember) {
+    // Validate all users data
+    for (const userData of usersData) {
+      const { name, email, role } = userData;
+      if (!name || !email || !role) {
         return NextResponse.json(
-          { error: "User already belongs to this business" },
+          { error: "name, email, and role are required for each user" },
           { status: 400 }
         );
       }
-      const businessObjectId = new mongoose.Types.ObjectId(currentBusinessId);
+    }
 
-      // Append the new membership
-      existingUser.memberships.push({
-        business: businessObjectId,
-        role: body.role,
-        status: INVITE_STATUS.invited,
-        inviteToken: hashed,
-        inviteTokenExpires: expires,
-        specialties: body.specialties,
-      });
+    const capitalize = (str: string) =>
+      str.replace(/\b\w/g, (char) => char.toUpperCase());
 
-      // Optional: only update currentBusiness if none is set
-      if (!existingUser.currentBusiness) {
-        existingUser.currentBusiness = businessObjectId;
-      }
+    const activeBusiness = await Business.findById(currentBusinessId);
+    const results = [];
+    const errors = [];
 
-      // Refresh invite status and generate token
-      // existingUser.status = INVITE_STATUS.invited;
-      // inviteToken = existingUser.createUserInviteToken();
-      await existingUser.save({ validateBeforeSave: false });
-      userToInvite = existingUser;
-    } else {
-      // New user
-      const newUser = new User({
-        name: capitalize(body.name),
-        email: body.email,
-        dateOfBirth: body.dateOfBirth,
-        memberships: [
-          {
-            business: currentBusinessId,
-            role: body.role,
+    // Process each user
+    for (let i = 0; i < usersData.length; i++) {
+      const userData = usersData[i];
+
+      try {
+        const existingUser = await User.findOne({ email: userData.email });
+
+        if (existingUser) {
+          const alreadyMember = existingUser.memberships.some(
+            (m) => m.business.toString() === currentBusinessId.toString()
+          );
+
+          if (alreadyMember) {
+            errors.push({
+              index: i,
+              email: userData.email,
+              error: "User already belongs to this business",
+            });
+            continue;
+          }
+
+          const businessObjectId = new mongoose.Types.ObjectId(
+            currentBusinessId
+          );
+          const { token, hashed, expires } = generateInviteToken();
+
+          // Append the new membership
+          existingUser.memberships.push({
+            business: businessObjectId,
+            role: userData.role,
             status: INVITE_STATUS.invited,
             inviteToken: hashed,
             inviteTokenExpires: expires,
-            specialties: body.specialties,
-          },
-        ],
-        currentBusiness: currentBusinessId,
-      });
+            specialties: userData.specialties || [],
+            property: userData.propertyId,
+            unit: userData.unitId,
+          });
 
-      // inviteToken = newUser.createUserInviteToken();
-      await newUser.save({ validateBeforeSave: false });
+          // Optional: only update currentBusiness if none is set
+          if (!existingUser.currentBusiness) {
+            existingUser.currentBusiness = businessObjectId;
+          }
 
-      userToInvite = newUser;
+          await existingUser.save({ validateBeforeSave: false });
+
+          // Construct invite URL
+          const inviteURL =
+            process.env.NODE_ENV === "development"
+              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
+              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
+
+          // Send invite email
+          await new Emails(
+            existingUser,
+            inviteURL,
+            activeBusiness
+          ).sendInviteUser();
+
+          results.push({
+            email: userData.email,
+            status: "success",
+            url: inviteURL,
+          });
+        } else {
+          // New user
+          const { token, hashed, expires } = generateInviteToken();
+
+          const newUser = new User({
+            name: capitalize(userData.name),
+            email: userData.email,
+            dateOfBirth: userData.dateOfBirth,
+            memberships: [
+              {
+                business: currentBusinessId,
+                role: userData.role,
+                status: INVITE_STATUS.invited,
+                inviteToken: hashed,
+                inviteTokenExpires: expires,
+                specialties: userData.specialties || [],
+                property: userData.propertyId,
+                unit: userData.unitId,
+              },
+            ],
+            currentBusiness: currentBusinessId,
+          });
+
+          await newUser.save({ validateBeforeSave: false });
+
+          // Construct invite URL
+          const inviteURL =
+            process.env.NODE_ENV === "development"
+              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
+              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
+
+          // Send invite email
+          await new Emails(newUser, inviteURL, activeBusiness).sendInviteUser();
+
+          results.push({
+            email: userData.email,
+            status: "success",
+            url: inviteURL,
+          });
+        }
+      } catch (error: any) {
+        errors.push({
+          index: i,
+          email: userData.email,
+          error: error.message,
+        });
+      }
     }
-
-    // Construct invite URL
-    const inviteURL =
-      process.env.NODE_ENV === "development"
-        ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-        : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-    // Send invite email
-    await new Emails(userToInvite, inviteURL, activeBusiness).sendInviteUser();
 
     return NextResponse.json({
       status: "success",
-      message: "Invite sent successfully",
-      url: inviteURL,
+      data: isBulk ? results : results[0],
+      count: results.length,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error: any) {
     console.error("[INVITE_USER_ERROR]", error);

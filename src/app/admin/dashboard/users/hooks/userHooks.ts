@@ -2,10 +2,15 @@ import { toast } from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   handleCreateUser,
+  handleCreateMultipleUsers,
   handleDeleteUser,
   handleReInviteUser,
 } from "../service/user.service";
-import { ApiError, CreateUserPayload } from "@/app/shared/model/model";
+import {
+  ApiError,
+  CreateMultipleUsersPayload,
+  CreateUserPayload,
+} from "@/app/shared/model/model";
 
 export function useCreateUser(
   isEditing: boolean,
@@ -29,6 +34,30 @@ export function useCreateUser(
   });
 
   return { isCreating, createUser };
+}
+
+export function useCreateMultipleUsers(isEditing: boolean, close?: () => void) {
+  const queryClient = useQueryClient();
+  const { isPending: isCreating, mutate: createMultipleUsers } = useMutation({
+    mutationFn: (payload: CreateMultipleUsersPayload) =>
+      handleCreateMultipleUsers(payload),
+
+    onSuccess: (data) => {
+      toast.success(`Successfully created ${data.count} user invites`);
+      queryClient.invalidateQueries({
+        queryKey: ["Users"],
+      });
+
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`${data.errors.length} users failed to create`);
+      }
+
+      close?.();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  return { isCreating, createMultipleUsers };
 }
 
 export function useDeleteUser() {

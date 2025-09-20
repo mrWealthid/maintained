@@ -87,11 +87,15 @@ const MultiplePropertyForm: FC<
     defaultValues: {
       properties: [
         {
+          name: "",
+          type: undefined,
           address: {
             line1: "",
             line2: "",
             city: "",
+            state: "CA",
             postalCode: "",
+            country: "United States",
             lat: null,
             lng: null,
             placeId: "",
@@ -165,11 +169,15 @@ const MultiplePropertyForm: FC<
 
   const addProperty = () => {
     append({
+      name: "",
+      type: undefined,
       address: {
         line1: "",
         line2: "",
         city: "",
+        state: "CA", // Default to a valid state abbreviation
         postalCode: "",
+        country: "United States",
         lat: null,
         lng: null,
         placeId: "",
@@ -256,11 +264,20 @@ const MultiplePropertyForm: FC<
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.properties?.[index]?.type && (
-                          <p className="text-xs text-destructive">
-                            {errors.properties[index]?.type?.message as string}
-                          </p>
-                        )}
+
+                        {typeof errors.properties?.[index]?.type === "object" &&
+                          "message" in
+                            (errors.properties?.[index]?.type ?? {}) && (
+                            <p className="text-xs text-destructive">
+                              {
+                                (
+                                  errors.properties?.[index]?.type as {
+                                    message?: string;
+                                  }
+                                )?.message
+                              }
+                            </p>
+                          )}
                       </div>
 
                       {/* Property Name */}
@@ -298,8 +315,8 @@ const MultiplePropertyForm: FC<
                       {showMapPreview && (
                         <div className="mt-4">
                           <MapPreview
-                            lat={address.lat}
-                            lng={address.lng}
+                            lat={address.lat ?? null}
+                            lng={address.lng ?? null}
                             address={formatSingleLineAddress(address)}
                           />
                         </div>

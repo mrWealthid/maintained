@@ -1,5 +1,6 @@
 import {
   ApiPaginatedResponse,
+  CreateMultipleUsersPayload,
   CreateUserPayload,
 } from "@/app/shared/model/model";
 import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
@@ -37,6 +38,22 @@ export async function handleCreateUser(
           payload
         )
       : await axios.post(`${API_ROUTES.userManagement.invite_user}`, payload);
+
+    const data = await response.data;
+    return data;
+  } catch (err: unknown) {
+    throw new Error(ApiErrorHandler.parse(err));
+  }
+}
+
+export async function handleCreateMultipleUsers(
+  payload: CreateMultipleUsersPayload
+) {
+  try {
+    const response = await axios.post(
+      `${API_ROUTES.userManagement.invite_user}`,
+      payload.users
+    );
 
     const data = await response.data;
     return data;

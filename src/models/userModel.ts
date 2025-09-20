@@ -38,6 +38,8 @@ export interface IUser extends Document {
     inviteToken?: string;
     inviteTokenExpires?: Date;
     specialties?: TechnicianSpecialty[];
+    property?: Types.ObjectId;
+    unit?: Types.ObjectId;
   }[];
   currentBusiness: Types.ObjectId;
   tenantsClaim(): Array<{

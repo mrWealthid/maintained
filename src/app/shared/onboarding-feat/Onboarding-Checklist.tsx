@@ -53,6 +53,7 @@ import { ROLES } from "../enums/enums";
 import PropertyForm from "./components/PropertyForm";
 import MultiplePropertyForm from "./components/MultiplePropertyForm";
 import UnitForm from "./components/UnitForm";
+import MultipleUserForm from "@/app/admin/dashboard/users/MultipleUserForm";
 import { useOnboardingChecklist } from "./hooks/onboardingHooks";
 
 // --- Types -----------------------------------------------------------------
@@ -359,16 +360,28 @@ export function OnboardingChecklistContent({
         enabled: unitsCompleted, // Can only invite team after adding units
         estimatedTime: "2 min",
         cta: (
-          <InviteUserDialog
-            businessId={currentBusinessId!}
-            onInvited={() => {}}
-            trigger={
-              <Button size="sm" variant="outline" disabled={!unitsCompleted}>
-                <Plus className="h-4 w-4 mr-1" />
-                Invite
-              </Button>
-            }
-          />
+          <div className="flex gap-2">
+            <InviteUserDialog
+              businessId={currentBusinessId!}
+              onInvited={() => {}}
+              trigger={
+                <Button size="sm" variant="outline" disabled={!unitsCompleted}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Invite
+                </Button>
+              }
+            />
+            <MultipleInviteUserDialog
+              businessId={currentBusinessId!}
+              onInvited={() => {}}
+              trigger={
+                <Button size="sm" variant="outline" disabled={!unitsCompleted}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Invite Multiple
+                </Button>
+              }
+            />
+          </div>
         ),
       },
       // Commented out invite tenant flow - working with 4 steps
@@ -794,6 +807,42 @@ function InviteUserDialog({
         <UserForm
           // user={undefined as any}
           // membership={{ business: businessId, role: ROLES.admin } as any}
+          successCallback={() => {
+            setOpen(false); // close only on success
+            onInvited?.(); // refresh checklist/counters
+          }}
+          onCloseModal={() => {
+            setOpen(false);
+          }} // still allow manual cancel to close
+          errorCallback={(e) => {
+            // optional: toast with your existing system
+            // toast.error(getErrorMessage(e));
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MultipleInviteUserDialog({
+  businessId,
+  trigger,
+  onInvited,
+}: {
+  businessId: string;
+  trigger: React.ReactNode;
+  onInvited?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
+        <DialogHeader>
+          <DialogTitle>Invite multiple users</DialogTitle>
+        </DialogHeader>
+        <MultipleUserForm
           successCallback={() => {
             setOpen(false); // close only on success
             onInvited?.(); // refresh checklist/counters

@@ -191,6 +191,10 @@ export interface ManageUserForm {
 
 export interface CreateUserPayload extends ManageUserForm {}
 
+export interface CreateMultipleUsersPayload {
+  users: CreateUserPayload[];
+}
+
 export interface CrumbLabelMap {
   [segment: string]: {
     label: string;
