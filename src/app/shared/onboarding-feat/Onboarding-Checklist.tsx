@@ -606,7 +606,7 @@ function PropertyWizardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
         <DialogHeader>
           <DialogTitle>Add property</DialogTitle>
         </DialogHeader>
