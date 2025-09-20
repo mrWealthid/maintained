@@ -31,8 +31,7 @@ export async function createTicket(
         )
       : await axios.post(`${API_ROUTES.ticketManagement.create_ticket}`, data);
 
-    const resData = await res.data;
-    return resData;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -47,8 +46,7 @@ export async function fetchTicketCategory<T>(
   try {
     const response = await axios(url);
 
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -58,8 +56,7 @@ export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
   try {
     const response = await axios(url);
 
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -72,8 +69,7 @@ export async function fetchTechnicians<T>(
     : `${API_ROUTES.userManagement.get_users}?role=${ROLES.technician}&excludeInactive=true`;
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -84,8 +80,7 @@ export async function fetchTicketDetails(
   const url = `${API_ROUTES.ticketManagement.ticketById(id)}`;
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -98,8 +93,7 @@ export async function fetchAdmins<T>(
     : `${API_ROUTES.userManagement.get_users}?role=${ROLES.admin}&excludeSelf=true`;
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -137,8 +131,7 @@ export async function fetchTicketList<T>({
 
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -153,8 +146,7 @@ export async function fetchRequestTicketList<T>({
 
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -165,8 +157,7 @@ export async function deleteTicket(id: string) {
     const res = await axios.delete(
       `${API_ROUTES.ticketManagement.ticketById(id)}`
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -180,8 +171,7 @@ export async function assignTicket(
       `${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
       payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -195,8 +185,7 @@ export async function handOffTicket(
       `${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
       payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -211,8 +200,7 @@ export async function ProcessTechnicianResponse(
       `${API_ROUTES.ticketManagement.process_technician_response(id)}`,
       payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -226,8 +214,7 @@ export async function assignTechnician(
       `${API_ROUTES.ticketManagement.assign_technician(id)}`,
       payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -242,8 +229,7 @@ export async function sendTechnicianRequest(
       `${API_ROUTES.ticketManagement.send_technician_request(id)}`,
       payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }

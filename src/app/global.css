@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shimmer animation keyframes */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 :root {
   /* --primary-color: #1f295a;
 	--primary-color-light: #62698c;

@@ -57,7 +57,7 @@ export interface AddressStructured {
   city: string;
   state: USState; // US-only for now
   postalCode: string; // ZIP or ZIP+4
-  country: "United States";
+  country: string;
   placeId?: string; // Google Place ID
   location?: {
     // GeoJSON Point (for $near, etc.)

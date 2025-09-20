@@ -13,8 +13,7 @@ import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
 export async function handleLogin(payload: LoginPayload) {
   try {
     const res = await axios.post(`${API_ROUTES.auth.login}`, payload);
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -23,9 +22,7 @@ export async function handleLogin(payload: LoginPayload) {
 export async function handleRegister(payload: RegisterPayload) {
   try {
     const res = await axios.post(`/api/auth/register`, payload);
-    const data = await res.data;
-
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -33,8 +30,7 @@ export async function handleRegister(payload: RegisterPayload) {
 export async function handleForgetPassword(payload: IResetPassword) {
   try {
     const res = await axios.post(`/api/auth/forgotPassword`, payload);
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -43,9 +39,7 @@ export async function handleUpdatePassword(payload: IUpdatePassword) {
   try {
     const res = await axios.post(`/api/auth/updatePassword`, payload);
 
-    const data = await res.data;
-
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -53,8 +47,7 @@ export async function handleUpdatePassword(payload: IUpdatePassword) {
 export async function handleResetPassword(payload: IUpdatePassword) {
   try {
     const res = await axios.post(`/api/auth/resetPassword`, payload);
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -62,8 +55,7 @@ export async function handleResetPassword(payload: IUpdatePassword) {
 export async function handleOnboardUser(payload: OnboardUser) {
   try {
     const res = await axios.post(`/api/auth/onboard`, payload);
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }

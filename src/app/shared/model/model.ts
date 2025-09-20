@@ -176,6 +176,8 @@ export interface ManageUserFormProps {
   user?: User | undefined;
   membership?: Membership;
   onCloseModal?: () => void;
+  successCallback?: (result?: User) => void;
+  errorCallback?: (err: unknown) => void;
 }
 
 export interface ManageUserForm {
@@ -183,6 +185,8 @@ export interface ManageUserForm {
   email: string;
   role: ROLES;
   specialties: string[];
+  propertyId: string;
+  unitId: string;
 }
 
 export interface CreateUserPayload extends ManageUserForm {}

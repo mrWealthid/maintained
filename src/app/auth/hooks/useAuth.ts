@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   handleForgetPassword,
   handleLogin,
@@ -60,13 +60,20 @@ import { User } from "@/app/shared/model/model";
 
 export function useLogin() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     isPending: isLoading,
     mutate: login,
     data,
   } = useMutation({
     mutationFn: (payload: LoginPayload) => handleLogin(payload),
-    onSuccess: () => router.refresh(),
+    onSuccess: () => {
+      // Invalidate and refetch checklist data after successful login
+      queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      queryClient.invalidateQueries({ queryKey: ["Users"] });
+      router.refresh();
+    },
     onError: (err: ApiError) => toast.error(err.message),
   });
 
@@ -91,9 +98,14 @@ export function useRegister() {
   };
 }
 export function useLogout(router: any) {
+  const queryClient = useQueryClient();
   const { isPending: isLoading, mutate: logOut } = useMutation({
     mutationFn: () => handleLogout(),
-    onSuccess: () => router.push("/auth/login"),
+    onSuccess: () => {
+      // Clear all cached data on logout
+      queryClient.clear();
+      router.push("/auth/login");
+    },
     onError: (err: ApiError) => toast.error(err.message),
   });
 

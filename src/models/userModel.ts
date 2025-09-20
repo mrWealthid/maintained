@@ -20,8 +20,7 @@ export interface IUser extends Document {
   // business: mongoose.Types.ObjectId;
   createdAt: Date;
   dateOfBirth?: Date;
-  inviteToken?: string;
-  inviteTokenExpires?: Date;
+
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -30,7 +29,7 @@ export interface IUser extends Document {
   changedPasswordAfter(JWTTimestamp: number): Promise<boolean>;
   correctPassword(newPassword: string, userPassword: string): Promise<boolean>;
   createPasswordResetToken(): string;
-  createUserInviteToken(): string;
+  // createUserInviteToken(): string;
   passwordConfirm: string;
   memberships: {
     business: Types.ObjectId;
@@ -73,16 +72,91 @@ export const TECH_SPECIALTIES = [
 ] as const;
 export type TechnicianSpecialty = (typeof TECH_SPECIALTIES)[number];
 //subschema
+// const MembershipSchema = new Schema(
+//   {
+//     business: {
+//       type: Schema.Types.ObjectId,
+//       ref: Business, // or keep your `ref: Business` if you prefer
+//       required: true,
+//     },
+//     status: {
+//       type: String,
+//       enum: STATUS,
+//     },
+//     role: {
+//       type: String,
+//       enum: MEMBERSHIP_ROLES,
+//       required: true,
+//     },
+
+//     // 👇 Multiple specialties (technicians only)
+//     specialties: {
+//       type: [String], // array of strings
+//       enum: TECH_SPECIALTIES, // each item must be one of TECH_SPECIALTIES
+//       default: undefined, // omit when not set
+//       validate: {
+//         validator(this: any, val?: string[]) {
+//           if (this.role === MEMBERSHIP_ROLES[2]) {
+//             return (
+//               Array.isArray(val) &&
+//               val.length > 0 &&
+//               val.every((s) =>
+//                 TECH_SPECIALTIES.includes(String(s).toUpperCase().trim() as any)
+//               )
+//             );
+//           }
+//           // non-technicians: must be empty or undefined
+//           return val === undefined || (Array.isArray(val) && val.length === 0);
+//         },
+//         message: "Technicians must have at least one valid specialty.",
+//       },
+//       // normalize values to UPPERCASE, trim, and unique
+//       set: (val: unknown) => {
+//         if (!Array.isArray(val)) return undefined;
+//         const cleaned = val
+//           .map((v) => String(v).toUpperCase().trim())
+//           .filter(Boolean);
+//         return Array.from(new Set(cleaned));
+//       },
+//     },
+//     inviteToken: { type: String },
+//     inviteTokenExpires: { type: Date },
+//   },
+//   {
+//     _id: false,
+//     toJSON: { virtuals: true },
+//     toObject: { virtuals: true },
+//   }
+// );
+const LocationSnapshot = new Schema(
+  {
+    propertyName: String,
+    unitLabel: String,
+    address: {
+      line1: String,
+      line2: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: String,
+      lat: Number,
+      lng: Number,
+    },
+  },
+  { _id: false }
+);
+
 const MembershipSchema = new Schema(
   {
     business: {
       type: Schema.Types.ObjectId,
-      ref: Business, // or keep your `ref: Business` if you prefer
+      ref: Business,
       required: true,
     },
     status: {
       type: String,
       enum: STATUS,
+      default: "INVITED",
     },
     role: {
       type: String,
@@ -90,14 +164,21 @@ const MembershipSchema = new Schema(
       required: true,
     },
 
-    // 👇 Multiple specialties (technicians only)
+    // 🔴 NEW — required for tenants (role === USER)
+    property: { type: Schema.Types.ObjectId, ref: "Property" },
+    unit: { type: Schema.Types.ObjectId, ref: "Unit" },
+
+    // 🔵 NEW — optional: allow multi-unit tenants (admin-assigned)
+    accessibleUnits: [{ type: Schema.Types.ObjectId, ref: "Unit" }],
+
+    // keep your technician specialties exactly as you had
     specialties: {
-      type: [String], // array of strings
-      enum: TECH_SPECIALTIES, // each item must be one of TECH_SPECIALTIES
-      default: undefined, // omit when not set
+      type: [String],
+      enum: TECH_SPECIALTIES,
+      default: undefined,
       validate: {
         validator(this: any, val?: string[]) {
-          if (this.role === MEMBERSHIP_ROLES[2]) {
+          if (this.role === "TECHNICIAN") {
             return (
               Array.isArray(val) &&
               val.length > 0 &&
@@ -106,12 +187,10 @@ const MembershipSchema = new Schema(
               )
             );
           }
-          // non-technicians: must be empty or undefined
           return val === undefined || (Array.isArray(val) && val.length === 0);
         },
         message: "Technicians must have at least one valid specialty.",
       },
-      // normalize values to UPPERCASE, trim, and unique
       set: (val: unknown) => {
         if (!Array.isArray(val)) return undefined;
         const cleaned = val
@@ -120,8 +199,13 @@ const MembershipSchema = new Schema(
         return Array.from(new Set(cleaned));
       },
     },
+
+    // Invite tokens (scoped to this business membership)
     inviteToken: { type: String },
     inviteTokenExpires: { type: Date },
+
+    // 🟣 NEW — snapshot to keep old tickets readable after renames/moves
+    locationSnapshot: { type: LocationSnapshot },
   },
   {
     _id: false,
@@ -153,6 +237,10 @@ MembershipSchema.pre("validate", function (next) {
       )
     );
   }
+  // 🔒 Enforce property/unit for tenants
+  if (this.role === ROLES.user && (!this.property || !this.unit)) {
+    return next(new Error("Tenant membership requires property and unit"));
+  }
   next();
 });
 
@@ -165,7 +253,7 @@ MembershipSchema.pre("validate", function (next) {
 //   return Math.floor((exp.getTime() - Date.now()) / 1000);
 // });
 
-// // 3) Friendly UI status
+// 3) Friendly UI status
 // MembershipSchema.virtual("inviteStatus").get(function (this: any) {
 //   if (this.status === "ACTIVATED") return "activated";
 //   return this.inviteExpired ? "expired" : "pending";
@@ -251,6 +339,23 @@ export type UserDoc = mongoose.Document &
       inviteToken?: string;
       inviteTokenExpires?: Date;
       inviteExpired?: boolean;
+      property?: Types.ObjectId;
+      unit?: Types.ObjectId;
+      accessibleUnits?: Types.ObjectId[];
+      locationSnapshot?: {
+        propertyName?: string;
+        unitLabel?: string;
+        address?: {
+          line1?: string;
+          line2?: string;
+          city?: string;
+          state?: string;
+          postalCode?: string;
+          country?: string;
+          lat?: number;
+          lng?: number;
+        };
+      };
     }>;
     tenantsClaim(): Array<{
       business: string;

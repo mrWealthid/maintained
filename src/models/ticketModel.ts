@@ -3,12 +3,23 @@ import type { ObjectId } from "mongoose";
 import Business from "./businessModel";
 import User from "./userModel";
 import Category from "./ticketCategoryModel";
-import {
-  TECHNICIAN_RESPONSE,
-  TICKET_PRIORITY,
-  TICKET_STATUS,
-} from "@/app/shared/enums/enums";
+import { TICKET_PRIORITY, TICKET_STATUS } from "@/app/shared/enums/enums";
 import "./technicanRequest";
+
+export interface LocationSnapshot {
+  propertyName?: string;
+  unitLabel?: string;
+  address?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    lat?: number;
+    lng?: number;
+  };
+}
 
 export interface ITicket extends Document {
   title: string;
@@ -27,6 +38,13 @@ export interface ITicket extends Document {
   relatedTo?: ObjectId;
   type: ObjectId;
   priority: TICKET_PRIORITY;
+
+  // NEW — location linkage + denorm labels + snapshot
+  property: ObjectId;
+  unit: ObjectId;
+  propertyName?: string;
+  unitLabel?: string;
+  locationSnapshot?: LocationSnapshot;
 }
 
 const allowedTransitions: Record<string, string[]> = {
@@ -99,26 +117,38 @@ const TicketSchema = new Schema<ITicket>(
       default: TICKET_PRIORITY.medium,
     },
 
-    // sentRequests: [
-    // 	{
-    // 		technician: {
-    // 			type: mongoose.Schema.Types.ObjectId,
-    // 			ref: 'User',
-    // 			required: true
-    // 		},
-    // 		requestedAt: {
-    // 			type: Date,
-    // 			default: Date.now
-    // 		},
-    // 		response: {
-    // 			type: String,
-    // 			enum: TECHNICIAN_RESPONSE,
-    // 			default: null
-    // 		},
-    // 		message: String,
-    // 		respondedAt: Date
-    // 	}
-    // ]
+    property: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Property",
+      required: [true, "Request must belong to a property"],
+      index: true,
+    },
+    unit: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Unit",
+      required: [true, "Request must belong to a unit"],
+      index: true,
+    },
+
+    // Denormalized labels for fast list rendering
+    propertyName: { type: String },
+    unitLabel: { type: String },
+
+    // Immutable snapshot (optional but helpful: keeps address stable over time)
+    locationSnapshot: {
+      propertyName: String,
+      unitLabel: String,
+      address: {
+        line1: String,
+        line2: String,
+        city: String,
+        state: String,
+        postalCode: String,
+        country: String,
+        lat: Number,
+        lng: Number,
+      },
+    },
   },
   {
     timestamps: true,
@@ -126,6 +156,8 @@ const TicketSchema = new Schema<ITicket>(
     toObject: { virtuals: true },
   }
 );
+
+TicketSchema.index({ business: 1, property: 1, unit: 1, createdAt: -1 });
 
 TicketSchema.set("toJSON", {
   virtuals: true,
@@ -155,6 +187,34 @@ TicketSchema.pre("findOneAndUpdate", async function (next) {
     );
   }
   next();
+});
+
+TicketSchema.pre("save", async function (next) {
+  if (!this.isNew) return next();
+  try {
+    const Unit = (await import("./unitModel")).default;
+    const Property = (await import("./propertyModel")).default;
+
+    const unit = await Unit.findById(this.unit).lean();
+    const prop = await Property.findById(this.property).lean();
+    if (!unit || Array.isArray(unit) || !prop || Array.isArray(prop)) {
+      return next(new Error("Invalid property/unit"));
+    }
+
+    this.propertyName = prop.name;
+    this.unitLabel = unit.label;
+
+    if (prop.address) {
+      this.locationSnapshot = {
+        propertyName: prop.name,
+        unitLabel: unit.label,
+        address: prop.address,
+      };
+    }
+    next();
+  } catch (e: any) {
+    next(e);
+  }
 });
 
 TicketSchema.virtual("requests", {
