@@ -186,7 +186,7 @@ const MultiplePropertyForm: FC<
   };
 
   return (
-    <div className="h-screen flex items-center justify-center p-6">
+    <div className="flex items-center justify-center">
       <div className="w-full max-w-6xl">
         {/* Header */}
         <div className="mb-8">

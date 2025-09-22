@@ -351,6 +351,8 @@ import { Badge } from "@/components/ui/badge";
 
 // Keep your existing ButtonComponent for actions
 import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 // ----------------------
 // Config
@@ -526,7 +528,7 @@ const UserForm: FC<ManageUserFormProps> = ({
 
   const { control, register, handleSubmit, watch, formState, setValue } =
     useForm<ManageUserForm>({
-      mode: "all",
+      mode: "onChange",
       defaultValues: isEditing
         ? { ...user, ...membership }
         : { ...(membership as any) },
@@ -799,24 +801,25 @@ const UserForm: FC<ManageUserFormProps> = ({
             </div>
           )}
 
-          <hr className="my-3" />
+          <Separator />
+          <DialogFooter>
+            <section className="flex justify-end gap-3">
+              <ButtonComponent
+                type="reset"
+                handleClick={() => onCloseModal?.()}
+                styles="rounded-3xl"
+                btnText={"Cancel"}
+              />
 
-          <section className="flex justify-end gap-3">
-            <ButtonComponent
-              type="reset"
-              handleClick={() => onCloseModal?.()}
-              styles="rounded-3xl"
-              btnText={"Cancel"}
-            />
-
-            <ButtonComponent
-              type="submit"
-              styles="rounded-3xl"
-              disabled={!isValid || isSubmitting || !isDirty}
-              loading={isCreating}
-              btnText={`${isEditing ? "Update User" : "Create User"}`}
-            />
-          </section>
+              <ButtonComponent
+                type="submit"
+                styles="rounded-3xl"
+                disabled={!isValid || isSubmitting || !isDirty}
+                loading={isCreating}
+                btnText={`${isEditing ? "Update User" : "Create User"}`}
+              />
+            </section>
+          </DialogFooter>
         </section>
       </form>
     </div>

@@ -169,7 +169,7 @@ const PropertyForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-6">
+    <div className="flex items-center justify-center">
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="mb-8">

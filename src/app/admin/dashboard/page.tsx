@@ -55,9 +55,9 @@ export default function Home() {
         </section>
 
         {/* Onboarding Modal Skeleton */}
-        <div className="w-full h-screen bg-background border rounded-lg overflow-hidden">
+        <div className="w-full h-screen bg-card border rounded-lg overflow-hidden">
           {/* Modal Header Skeleton */}
-          <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b p-4">
+          <div className="sticky top-0 z-50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b p-4">
             <div className="flex items-center justify-between">
               <ShimmerSkeleton className="h-6 w-48" />
               <ShimmerSkeleton className="h-8 w-20" />

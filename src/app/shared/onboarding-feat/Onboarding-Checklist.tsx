@@ -634,25 +634,27 @@ function PropertyWizardDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
-        <DialogHeader>
+      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 overflow-hidden">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>Add property</DialogTitle>
         </DialogHeader>
-        <PropertyForm
-          businessId={businessId} // user={undefined as any}
-          // membership={{ business: businessId, role: ROLES.admin } as any}
-          successCallback={() => {
-            setOpen(false); // close only on success
-            onCreated?.(); // refresh checklist/counters
-          }}
-          onCloseModal={() => {
-            setOpen(false);
-          }} // still allow manual cancel to close
-          errorCallback={(e) => {
-            // optional: toast with your existing system
-            // toast.error(getErrorMessage(e));
-          }}
-        />
+        <div className="flex-1 overflow-y-auto p-6 pt-4">
+          <PropertyForm
+            businessId={businessId} // user={undefined as any}
+            // membership={{ business: businessId, role: ROLES.admin } as any}
+            successCallback={() => {
+              setOpen(false); // close only on success
+              onCreated?.(); // refresh checklist/counters
+            }}
+            onCloseModal={() => {
+              setOpen(false);
+            }} // still allow manual cancel to close
+            errorCallback={(e) => {
+              // optional: toast with your existing system
+              // toast.error(getErrorMessage(e));
+            }}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -672,24 +674,26 @@ function MultiplePropertyQuickAddDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
-        <DialogHeader>
+      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 overflow-hidden">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>Add multiple properties</DialogTitle>
         </DialogHeader>
-        <MultiplePropertyForm
-          businessId={businessId}
-          successCallback={() => {
-            setOpen(false); // close only on success
-            onCreated?.(); // refresh checklist/counters
-          }}
-          onCloseModal={() => {
-            setOpen(false);
-          }} // still allow manual cancel to close
-          errorCallback={(e) => {
-            // optional: toast with your existing system
-            // toast.error(getErrorMessage(e));
-          }}
-        />
+        <div className="flex-1 overflow-y-auto p-6 pt-4">
+          <MultiplePropertyForm
+            businessId={businessId}
+            successCallback={() => {
+              setOpen(false); // close only on success
+              onCreated?.(); // refresh checklist/counters
+            }}
+            onCloseModal={() => {
+              setOpen(false);
+            }} // still allow manual cancel to close
+            errorCallback={(e) => {
+              // optional: toast with your existing system
+              // toast.error(getErrorMessage(e));
+            }}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -713,13 +717,14 @@ function UnitsQuickAddDialog({
         className="
       left-0 top-0 -translate-x-0 -translate-y-0
       w-screen h-[100dvh] max-w-none
-      rounded-none p-0
+      rounded-none p-0 overflow-hidden
     "
       >
-        <DialogHeader>
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>Add units</DialogTitle>
         </DialogHeader>
-        {/* <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">
+        <div className="flex-1 overflow-y-auto p-6 pt-4">
+          {/* <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">
           <div className="grid gap-2">
             <Label>Property</Label>
             <Select onValueChange={(v) => form.setValue("propertyId", v)}>
@@ -764,20 +769,21 @@ function UnitsQuickAddDialog({
           </DialogFooter>
         </form> */}
 
-        <UnitForm
-          businessId={businessId}
-          successCallback={() => {
-            setOpen(false); // close only on success
-            onAdded?.(); // refresh checklist/counters
-          }}
-          // onCloseModal={() => {
-          //   setOpen(false);
-          // }} // still allow manual cancel to close
-          errorCallback={(e) => {
-            // optional: toast with your existing system
-            // toast.error(getErrorMessage(e));
-          }}
-        />
+          <UnitForm
+            businessId={businessId}
+            successCallback={() => {
+              setOpen(false); // close only on success
+              onAdded?.(); // refresh checklist/counters
+            }}
+            // onCloseModal={() => {
+            //   setOpen(false);
+            // }} // still allow manual cancel to close
+            errorCallback={(e) => {
+              // optional: toast with your existing system
+              // toast.error(getErrorMessage(e));
+            }}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -280,13 +280,13 @@ const MultipleUserForm: FC<MultipleUserFormProps> = ({
   };
 
   return (
-    <div className="h-screen flex items-center justify-center p-6">
+    <div className="flex items-center justify-center">
       <div className="w-full max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Users className="h-6 w-6 text-primary" />
+              <Users className="h-6 w-6 " />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Add Multiple Users</h1>

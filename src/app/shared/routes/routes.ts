@@ -5,6 +5,7 @@ import { Routes } from '../model/model';
 import { GrVmMaintenance } from 'react-icons/gr';
 import { HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
 import { PiUsersThree } from 'react-icons/pi';
+import { Building2 } from 'lucide-react';
 
 export const ROUTES_DEFINITION = {
 	DASHBOARD: {
@@ -34,6 +35,7 @@ export const ADMIN_ROUTES_DEFINITION = {
 		TICKETS: '/admin/dashboard/ticket-management',
 		CHAT: '/admin/dashboard/chat',
 		USERS: '/admin/dashboard/users',
+		PROPERTIES: '/admin/dashboard/properties',
 		SETTINGS: '/admin/dashboard/settings'
 	}
 };
@@ -86,11 +88,15 @@ export const adminRoutes: Routes[] = [
 		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
 		icon: GrVmMaintenance
 	},
-
 	{
 		name: 'User Management',
 		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.USERS,
 		icon: PiUsersThree
+	},
+	{
+		name: 'Property Management',
+		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.PROPERTIES,
+		icon: Building2
 	},
 	{
 		name: 'Chat',
