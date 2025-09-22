@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import UnitForm from "@/app/shared/property-feat/form/UnitForm";
+import EditUnitForm from "@/app/shared/property-feat/form/UnitForm";
 import UnitView from "@/app/shared/property-feat/components/UnitView";
 import { useAppContext } from "@/app/shared/contexts/AppContext";
 import { useCreateUnit } from "@/app/shared/property-feat/hooks/unitHooks";
 import { Unit } from "@/app/shared/property-feat/service/unit-service";
+import UnitForm from "@/app/shared/onboarding-feat/components/UnitForm";
 
 interface UnitDialogProps {
   open: boolean;
@@ -74,14 +75,19 @@ const UnitDialog: React.FC<UnitDialogProps> = ({
         <div className="flex-1 overflow-y-auto p-6 pt-4">
           {mode === "create" && (
             <UnitForm
-              unit={undefined}
-              onSubmit={handleSubmit}
-              isLoading={isCreating}
+              businessId={businessId}
+              successCallback={() => {
+                onOpenChange(false);
+              }}
+
+              // unit={undefined}
+              // onSubmit={handleSubmit}
+              // isLoading={isCreating}
             />
           )}
 
           {mode === "edit" && (
-            <UnitForm
+            <EditUnitForm
               unit={unit}
               onSubmit={handleSubmit}
               isLoading={isCreating}

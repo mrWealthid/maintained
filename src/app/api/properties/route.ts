@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Property from "@/models/propertyModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiErrorHandler } from "@/utils/apiError";
 import { PROPERTY_TYPES } from "@/app/shared/onboarding-feat/data/data";
 import Unit from "@/models/unitModel";
+import APIFeatures from "@/utils/apiFeatures";
+import { mapToObject } from "@/utils/helpers";
 
 export async function POST(req: Request) {
   try {
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const me = await getUserFromCookies();
     if (!me?.id)
@@ -108,59 +110,85 @@ export async function GET(req: Request) {
       isActive: true,
     };
 
+    const query: any = req.nextUrl.searchParams;
+
+    const transformedQuery = mapToObject(query);
+
     if (name) {
       filter.name = { $regex: name, $options: "i" };
+      delete transformedQuery.name;
     }
     if (type) {
       filter.type = { $regex: type, $options: "i" };
+      delete transformedQuery.type;
     }
     if (city) {
       filter["address.city"] = { $regex: city, $options: "i" };
+      delete transformedQuery.city;
     }
     if (state) {
       filter["address.state"] = { $regex: state, $options: "i" };
+      delete transformedQuery.state;
     }
 
-    // Calculate pagination
-    const skip = (page - 1) * limit;
+    const requestQuery = Property.find(filter);
+
+    const features = new APIFeatures(requestQuery, transformedQuery)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
     // Get total count
-    const totalRecords = await Property.countDocuments(filter);
 
     // Get properties with pagination
-    const properties = await Property.find(filter)
-      .select("_id name type address isActive code createdAt updatedAt")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    // const properties = await Property.find(filter)
+    //   .select("_id name type address isActive code createdAt updatedAt")
+    //   .sort({ createdAt: -1 })
+    //   .skip(skip)
+    //   .limit(limit)
+    //   .lean();
 
     // Get units count for each property
-    const propertiesWithUnits = await Promise.all(
-      properties.map(async (property) => {
-        const unitsCount = await Unit.countDocuments({
-          property: property._id,
-          isActive: true,
-        });
-        return {
-          ...property,
-          units: unitsCount,
-        };
-      })
-    );
+    // const propertiesWithUnits = await Promise.all(
+    //   properties.map(async (property) => {
+    //     const unitsCount = await Unit.countDocuments({
+    //       property: property._id,
+    //       isActive: true,
+    //     });
+    //     return {
+    //       ...property,
+    //       units: unitsCount,
+    //     };
+    //   })
+    // );
+    const properties = await features.query;
 
-    return NextResponse.json({
-      status: "success",
-      data: propertiesWithUnits,
-      pagination: {
-        page,
-        limit,
-        totalRecords,
-        totalPages: Math.ceil(totalRecords / limit),
-        hasNext: page < Math.ceil(totalRecords / limit),
-        hasPrev: page > 1,
+    let count;
+
+    // console.log( await Model.find(req.query))
+
+    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
+
+    if (Object.values(transformedQuery).length > 0) {
+      const excludedFields = ["page", "sort", "limit", "fields"];
+      excludedFields.forEach((el) => delete transformedQuery[el]);
+      count = await Property.find(filter)
+        .find(transformedQuery)
+        .countDocuments();
+    } else {
+      count = await Property.countDocuments(filter);
+    }
+
+    return NextResponse.json(
+      {
+        totalRecords: count,
+        results: properties.length,
+        status: "success",
+        data: properties,
       },
-    });
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
       { error: ApiErrorHandler.parse(error) },
