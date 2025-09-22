@@ -353,6 +353,14 @@ import { Badge } from "@/components/ui/badge";
 import ButtonComponent from "@/app/shared/components/form-elements/Button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import {
+  fetchProperties,
+  fetchUnits,
+} from "@/app/shared/onboarding-feat/service/onboarding-service";
+import {
+  useFetchProperties,
+  useFetchUnits,
+} from "@/app/shared/onboarding-feat/hooks/onboardingHooks";
 
 // ----------------------
 // Config
@@ -371,26 +379,26 @@ const SPECIALTIES = [
   "Pest Control",
 ] as const;
 
-// React Query fetchers (swap to your own hooks if you already have them)
-async function fetchProperties(businessId: string) {
-  const res = await fetch(`/api/properties?businessId=${businessId}`);
-  if (!res.ok) throw new Error("Failed to load properties");
-  const json = await res.json();
-  return (json.data ?? []) as Array<{ _id: string; name: string }>;
-}
+// // React Query fetchers (swap to your own hooks if you already have them)
+// async function fetchProperties(businessId: string) {
+//   const res = await fetch(`/api/properties?businessId=${businessId}`);
+//   if (!res.ok) throw new Error("Failed to load properties");
+//   const json = await res.json();
+//   return (json.data ?? []) as Array<{ _id: string; name: string }>;
+// }
 
-async function fetchUnits(businessId: string, propertyId: string) {
-  const res = await fetch(
-    `/api/units?businessId=${businessId}&propertyId=${propertyId}`
-  );
-  if (!res.ok) throw new Error("Failed to load units");
-  const json = await res.json();
-  return (json.data ?? []) as Array<{
-    _id: string;
-    label: string;
-    property: string;
-  }>;
-}
+// async function fetchUnits(businessId: string, propertyId: string) {
+//   const res = await fetch(
+//     `/api/units?businessId=${businessId}&propertyId=${propertyId}`
+//   );
+//   if (!res.ok) throw new Error("Failed to load units");
+//   const json = await res.json();
+//   return (json.data ?? []) as Array<{
+//     _id: string;
+//     label: string;
+//     property: string;
+//   }>;
+// }
 
 // Clickable badge multi-select ----------------------
 const SpecialtyBadges: FC<{
@@ -538,23 +546,12 @@ const UserForm: FC<ManageUserFormProps> = ({
   const selectedPropertyId = watch("propertyId");
 
   // React Query: list properties for business (only when inviting a USER)
-  const { data: properties = [], isFetching: isPropsFetching } = useQuery({
-    queryKey: ["properties", businessId],
-    queryFn: () => fetchProperties(businessId as string),
-    enabled: Boolean(businessId && currentRole === ROLES.user),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: properties, isFetchingProperties } = useFetchProperties();
+
+  useFetchProperties();
 
   // React Query: list units for the chosen property
-  const { data: units = [], isFetching: isUnitsFetching } = useQuery({
-    queryKey: ["units", businessId, selectedPropertyId],
-    queryFn: () =>
-      fetchUnits(businessId as string, selectedPropertyId as string),
-    enabled: Boolean(
-      businessId && currentRole === ROLES.user && selectedPropertyId
-    ),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { units, isFetchingUnits } = useFetchUnits(selectedPropertyId);
 
   const { errors, isSubmitting, isValid, isDirty } = formState;
   const { isCreating, createUser } = useCreateUser(
@@ -722,21 +719,21 @@ const UserForm: FC<ManageUserFormProps> = ({
                           shouldValidate: true,
                         });
                       }}
-                      disabled={!businessId || isPropsFetching}
+                      disabled={!businessId || isFetchingProperties}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue
                           placeholder={
-                            isPropsFetching
+                            isFetchingProperties
                               ? "Loading properties..."
-                              : properties.length
+                              : properties?.data.length
                                 ? "Select property"
                                 : "No properties found"
                           }
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {properties.map((p) => (
+                        {properties?.data.map((p) => (
                           <SelectItem key={p._id} value={p._id}>
                             {p.name}
                           </SelectItem>
@@ -767,15 +764,15 @@ const UserForm: FC<ManageUserFormProps> = ({
                     <Select
                       value={(field.value as any) ?? ""}
                       onValueChange={field.onChange}
-                      disabled={!selectedPropertyId || isUnitsFetching}
+                      disabled={!selectedPropertyId || isFetchingUnits}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue
                           placeholder={
-                            isUnitsFetching
+                            isFetchingUnits
                               ? "Loading units..."
                               : selectedPropertyId
-                                ? units.length
+                                ? units?.length
                                   ? "Select unit"
                                   : "No units found"
                                 : "Select property first"
@@ -783,7 +780,7 @@ const UserForm: FC<ManageUserFormProps> = ({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {units.map((u) => (
+                        {units?.map((u) => (
                           <SelectItem key={u._id} value={u._id}>
                             {u.label}
                           </SelectItem>

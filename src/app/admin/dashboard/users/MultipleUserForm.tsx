@@ -1,27 +1,16 @@
 "use client";
 import React, { FC, useMemo } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { Plus, Users, Loader2, Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCreateMultipleUsers } from "./hooks/userHooks";
 import { ROLES } from "@/app/shared/enums/enums";
-
 import { useAppContext } from "@/app/shared/contexts/AppContext";
-
-// Keep your existing ButtonComponent for actions
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
 import { CreateMultipleUsersPayload } from "@/app/shared/model/model";
+import { useFetchProperties } from "@/app/shared/onboarding-feat/hooks/onboardingHooks";
+import SingleForm from "./SingleForm";
 
 // ----------------------
 // Config
@@ -40,29 +29,8 @@ const SPECIALTIES = [
   "Pest Control",
 ] as const;
 
-// React Query fetchers
-async function fetchProperties(businessId: string) {
-  const res = await fetch(`/api/properties?businessId=${businessId}`);
-  if (!res.ok) throw new Error("Failed to load properties");
-  const json = await res.json();
-  return (json.data ?? []) as Array<{ _id: string; name: string }>;
-}
-
-async function fetchUnits(businessId: string, propertyId: string) {
-  const res = await fetch(
-    `/api/units?businessId=${businessId}&propertyId=${propertyId}`
-  );
-  if (!res.ok) throw new Error("Failed to load units");
-  const json = await res.json();
-  return (json.data ?? []) as Array<{
-    _id: string;
-    label: string;
-    property: string;
-  }>;
-}
-
 // Clickable badge multi-select for specialties
-const SpecialtyBadges: FC<{
+export const SpecialtyBadges: FC<{
   value: string[];
   onChange: (next: string[]) => void;
   disabled?: boolean;
@@ -213,11 +181,7 @@ const MultipleUserForm: FC<MultipleUserFormProps> = ({
     },
   });
 
-  const {
-    control,
-    watch,
-    formState: { errors },
-  } = form;
+  const { control } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -226,36 +190,7 @@ const MultipleUserForm: FC<MultipleUserFormProps> = ({
 
   const { createMultipleUsers, isCreating } = useCreateMultipleUsers(false);
 
-  // Watch all users for property/unit dependencies
-  const watchedUsers = watch("users");
-
-  // React Query: list properties for business (only when inviting USERS)
-  const { data: properties = [], isFetching: isPropsFetching } = useQuery({
-    queryKey: ["properties", businessId],
-    queryFn: () => fetchProperties(businessId as string),
-    enabled: Boolean(businessId),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Get all unique property IDs that need units loaded
-  const propertyIds = watchedUsers
-    .filter((user) => user?.role === ROLES.user && user?.propertyId)
-    .map((user) => user.propertyId)
-    .filter(Boolean);
-
-  // React Query: list units for all selected properties
-  const { data: allUnits = [], isFetching: isUnitsFetching } = useQuery({
-    queryKey: ["units", businessId, propertyIds],
-    queryFn: async () => {
-      const unitsPromises = propertyIds.map((propertyId) =>
-        fetchUnits(businessId as string, propertyId as string)
-      );
-      const unitsArrays = await Promise.all(unitsPromises);
-      return unitsArrays.flat();
-    },
-    enabled: Boolean(businessId && propertyIds.length > 0),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: properties, isFetchingProperties } = useFetchProperties();
 
   function onSubmit(data: CreateMultipleUsersPayload) {
     createMultipleUsers(data, {
@@ -297,314 +232,89 @@ const MultipleUserForm: FC<MultipleUserFormProps> = ({
           </div>
         </div>
 
-        <form
-          onSubmit={form.handleSubmit(onSubmit, onError)}
-          className="space-y-6"
-        >
-          {/* Users List */}
-          <div className="space-y-6">
-            {fields.map((field, index) => {
-              const currentUser = watchedUsers[index];
-              const currentRole = currentUser?.role;
-
-              // Filter units for the current user's selected property
-              const units = allUnits.filter(
-                (unit) => unit.property === currentUser?.propertyId
-              );
-
-              return (
-                <div key={field.id} className="border rounded-lg p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">User {index + 1}</h3>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Name */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`users.${index}.name`}
-                        className="text-sm font-medium"
-                      >
-                        Enter Name
-                      </Label>
-                      <Input
-                        {...form.register(`users.${index}.name`, {
-                          required: "This field is required",
-                        })}
-                        placeholder="Enter Full Name"
-                        className="h-11"
-                      />
-                      {errors.users?.[index]?.name && (
-                        <p className="text-xs text-destructive">
-                          {errors.users[index]?.name?.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`users.${index}.email`}
-                        className="text-sm font-medium"
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        {...form.register(`users.${index}.email`, {
-                          required: "This field is required",
-                          pattern: {
-                            value:
-                              /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                            message: "Invalid email address",
-                          },
-                        })}
-                        placeholder="johndoe@gmail.com"
-                        className="h-11"
-                      />
-                      {errors.users?.[index]?.email && (
-                        <p className="text-xs text-destructive">
-                          {errors.users[index]?.email?.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Role */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Role</Label>
-                    <Controller
-                      name={`users.${index}.role`}
-                      control={control}
-                      rules={{ required: "This field is required" }}
-                      render={({ field }) => (
-                        <Select
-                          value={field.value}
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            // Clear specialties if not technician
-                            if (val !== ROLES.technician) {
-                              form.setValue(
-                                `users.${index}.specialties` as any,
-                                []
-                              );
-                            }
-                            // Clear property/unit if not user
-                            if (val !== ROLES.user) {
-                              form.setValue(
-                                `users.${index}.propertyId` as any,
-                                ""
-                              );
-                              form.setValue(`users.${index}.unitId` as any, "");
-                            }
-                          }}
+        <FormProvider {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onError)}
+            className="space-y-6"
+          >
+            {/* Users List */}
+            <div className="space-y-6">
+              {fields.map((field, index) => {
+                return (
+                  <div
+                    key={field.id}
+                    className="border rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        User {index + 1}
+                      </h3>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(index)}
+                          className="text-destructive hover:text-destructive"
                         >
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Select Role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={ROLES.user}>
-                              {ROLES.user}
-                            </SelectItem>
-                            <SelectItem value={ROLES.admin}>
-                              {ROLES.admin}
-                            </SelectItem>
-                            <SelectItem value={ROLES.technician}>
-                              {ROLES.technician}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       )}
-                    />
-                    {errors.users?.[index]?.role && (
-                      <p className="text-xs text-destructive">
-                        {errors.users[index]?.role?.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Specialties as clickable badges (Technician only) */}
-                  {currentRole === ROLES.technician && (
-                    <Controller
-                      name={`users.${index}.specialties`}
-                      control={control}
-                      rules={{
-                        validate: (arr) =>
-                          (Array.isArray(arr) && arr.length > 0) ||
-                          "Select at least one specialty",
-                      }}
-                      render={({ field }) => (
-                        <SpecialtyBadges
-                          value={field.value ?? []}
-                          onChange={field.onChange}
-                          error={errors.users?.[index]?.specialties?.message}
-                        />
-                      )}
-                    />
-                  )}
-
-                  {/* Property + Unit (User only) */}
-                  {currentRole === ROLES.user && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Property</Label>
-                        <Controller
-                          name={`users.${index}.propertyId`}
-                          control={control}
-                          rules={{
-                            validate: (v) =>
-                              currentRole === ROLES.user
-                                ? !!v || "Property is required"
-                                : true,
-                          }}
-                          render={({ field }) => (
-                            <Select
-                              value={field.value ?? ""}
-                              onValueChange={(val) => {
-                                field.onChange(val);
-                                // Clear unit when property changes
-                                form.setValue(
-                                  `users.${index}.unitId` as any,
-                                  ""
-                                );
-                              }}
-                              disabled={!businessId || isPropsFetching}
-                            >
-                              <SelectTrigger className="h-11">
-                                <SelectValue
-                                  placeholder={
-                                    isPropsFetching
-                                      ? "Loading properties..."
-                                      : properties.length
-                                        ? "Select property"
-                                        : "No properties found"
-                                  }
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {properties.map((p) => (
-                                  <SelectItem key={p._id} value={p._id}>
-                                    {p.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                        {errors.users?.[index]?.propertyId && (
-                          <p className="text-xs text-destructive">
-                            {errors.users[index]?.propertyId?.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Unit</Label>
-                        <Controller
-                          name={`users.${index}.unitId`}
-                          control={control}
-                          rules={{
-                            validate: (v) =>
-                              currentRole === ROLES.user
-                                ? !!v || "Unit is required"
-                                : true,
-                          }}
-                          render={({ field }) => (
-                            <Select
-                              value={field.value ?? ""}
-                              onValueChange={field.onChange}
-                              disabled={
-                                !currentUser?.propertyId || isUnitsFetching
-                              }
-                            >
-                              <SelectTrigger className="h-11">
-                                <SelectValue
-                                  placeholder={
-                                    isUnitsFetching
-                                      ? "Loading units..."
-                                      : currentUser?.propertyId
-                                        ? units.length
-                                          ? "Select unit"
-                                          : "No units found"
-                                        : "Select property first"
-                                  }
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {units.map((u) => (
-                                  <SelectItem key={u._id} value={u._id}>
-                                    {u.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
-                        {errors.users?.[index]?.unitId && (
-                          <p className="text-xs text-destructive">
-                            {errors.users[index]?.unitId?.message}
-                          </p>
-                        )}
-                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    <SingleForm
+                      field={field}
+                      index={index}
+                      properties={properties?.data!}
+                      isFetchingProperties={isFetchingProperties}
+                    />
+                  </div>
+                );
+              })}
+            </div>
 
-          {/* Add User Button */}
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addUser}
-              className="px-8"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Another User
-            </Button>
-          </div>
+            {/* Add User Button */}
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addUser}
+                className="px-8"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Another User
+              </Button>
+            </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-6">
-            <Button
-              onClick={() => onCloseModal?.()}
-              type="button"
-              variant="outline"
-              className="px-8"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={!form.formState.isValid || isCreating}
-              className="px-8"
-            >
-              {isCreating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating {fields.length} User Invites...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create {fields.length} User Invites
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+            {/* Actions */}
+            <div className="flex justify-end gap-2 pt-6">
+              <Button
+                onClick={() => onCloseModal?.()}
+                type="button"
+                variant="outline"
+                className="px-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!form.formState.isValid || isCreating}
+                className="px-8"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creating {fields.length} User Invites...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create {fields.length} User Invites
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );

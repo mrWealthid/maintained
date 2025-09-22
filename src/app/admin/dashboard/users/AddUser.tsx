@@ -53,7 +53,7 @@ const AddUser: FC = () => {
 
       {/* Multiple Users Dialog */}
       <Dialog open={multipleUsersOpen} onOpenChange={setMultipleUsersOpen}>
-        <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 overflow-hidden">
+        <DialogContent className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>Add Multiple Users</DialogTitle>
           </DialogHeader>

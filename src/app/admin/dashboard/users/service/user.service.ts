@@ -19,8 +19,7 @@ export async function fetchUsers<T>({
   const url = `${API_ROUTES.userManagement.get_users}?${queryString}`;
   try {
     const response = await axios(url);
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -39,8 +38,7 @@ export async function handleCreateUser(
         )
       : await axios.post(`${API_ROUTES.userManagement.invite_user}`, payload);
 
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -54,9 +52,7 @@ export async function handleCreateMultipleUsers(
       `${API_ROUTES.userManagement.invite_user}`,
       payload.users
     );
-
-    const data = await response.data;
-    return data;
+    return response.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -66,8 +62,7 @@ export async function handleDeleteUser(id: string) {
   try {
     const res = await axios.delete(`${API_ROUTES.userManagement.userById(id)}`);
 
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }
@@ -78,10 +73,10 @@ export async function handleReInviteUser(payload: {
 }) {
   try {
     const res = await axios.patch(
-      `${(API_ROUTES.userManagement.invite_user, payload)}`
+      `${API_ROUTES.userManagement.invite_user}`,
+      payload
     );
-    const data = await res.data;
-    return data;
+    return res.data;
   } catch (err: unknown) {
     throw new Error(ApiErrorHandler.parse(err));
   }

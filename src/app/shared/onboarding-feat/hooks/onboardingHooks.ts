@@ -136,6 +136,7 @@ export function useFetchUnits(propertyId: string) {
   const { data: units, isFetching: isFetchingUnits } = useQuery({
     queryKey: ["units", propertyId],
     queryFn: () => fetchUnits(propertyId),
+    enabled: !!propertyId,
   });
   return { units, isFetchingUnits };
 }

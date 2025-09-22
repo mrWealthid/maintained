@@ -104,7 +104,7 @@ body {
 }
 
 input:not([type="email"])::placeholder {
-  @apply text-xs capitalize;
+  @apply text-xs;
 }
 
 .input-error-msg {

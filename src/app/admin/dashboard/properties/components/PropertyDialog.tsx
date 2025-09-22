@@ -55,7 +55,7 @@ const PropertyDialog: React.FC<PropertyDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 overflow-hidden">
+      <DialogContent className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>
             {mode === "create"
@@ -77,7 +77,7 @@ const PropertyDialog: React.FC<PropertyDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-6 pt-4">
+        <div className="flex-1  overflow-y-auto p-6 pt-4">
           <div className="space-y-6">
             {/* Toggle for single vs multiple */}
             <div className="flex justify-center">

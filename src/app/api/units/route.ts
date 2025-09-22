@@ -11,9 +11,7 @@ export async function GET(req: NextRequest) {
     if (!me?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const url = new URL(req.url);
     const businessId = me.currentBusiness;
-    const propertyId = url.searchParams.get("propertyId");
 
     if (!businessId)
       return NextResponse.json(
@@ -21,47 +19,30 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
 
-    // // Get query parameters
-    // const page = parseInt(url.searchParams.get("page") || "1");
-    // const limit = parseInt(url.searchParams.get("limit") || "10");
-    // const label = url.searchParams.get("label");
-    // const property = url.searchParams.get("property");
-    // const status = url.searchParams.get("status");
-    // const tenant = url.searchParams.get("tenant");
-
     // Build filter object
     const filter: any = { business: businessId, isActive: true };
     const query: any = req.nextUrl.searchParams;
 
     const transformedQuery = mapToObject(query);
-    if (propertyId) filter.property = propertyId;
+    console.log(transformedQuery);
 
+    if (transformedQuery.propertyId) {
+      filter.property = transformedQuery.propertyId;
+      delete transformedQuery.propertyId;
+    }
     // if (transformedQuery.property) filter.property = transformedQuery.property;
     if (transformedQuery.label) {
       filter.label = { $regex: transformedQuery.label, $options: "i" };
 
       delete transformedQuery.label;
     }
-    if (
-      transformedQuery.status !== null &&
-      transformedQuery.status !== undefined
-    ) {
-      filter.tenantActive = transformedQuery.status === "true";
-    }
-    if (transformedQuery.tenant) {
-      filter["tenantUser.name"] = {
-        $regex: transformedQuery.tenant,
-        $options: "i",
-      };
-      delete transformedQuery.label;
-    }
-    if (
-      transformedQuery.status !== null &&
-      transformedQuery.status !== undefined
-    ) {
-      filter.tenantActive = transformedQuery.status === "true";
-      delete transformedQuery.status;
-    }
+    // if (
+    //   transformedQuery.status !== null &&
+    //   transformedQuery.status !== undefined
+    // ) {
+    //   filter.tenantActive = transformedQuery.status === "true";
+    // }
+
     if (transformedQuery.tenant) {
       filter["tenantUser.name"] = {
         $regex: transformedQuery.tenant,
@@ -69,24 +50,6 @@ export async function GET(req: NextRequest) {
       };
       delete transformedQuery.tenant;
     }
-    if (transformedQuery.label) {
-      filter.label = { $regex: transformedQuery.label, $options: "i" };
-      filter.tenantActive = status === "true";
-      delete transformedQuery.label;
-    }
-    if (transformedQuery.tenant) {
-      filter["tenantUser.name"] = {
-        $regex: transformedQuery.tenant,
-        $options: "i",
-      };
-      delete transformedQuery.tenant;
-    }
-
-    // // Calculate pagination
-    // const skip = (page - 1) * limit;
-
-    // // Get total count
-    // const totalRecords = await Unit.countDocuments(filter);
 
     const requestQuery = Unit.find(filter);
 
@@ -102,8 +65,6 @@ export async function GET(req: NextRequest) {
     const units = await features.query;
 
     let count;
-
-    // console.log( await Model.find(req.query))
 
     //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
 
