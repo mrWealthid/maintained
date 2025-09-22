@@ -40,6 +40,7 @@ export interface IUser extends Document {
     specialties?: TechnicianSpecialty[];
     property?: Types.ObjectId;
     unit?: Types.ObjectId;
+    accessibleUnits?: Types.ObjectId[];
   }[];
   currentBusiness: Types.ObjectId;
   tenantsClaim(): Array<{

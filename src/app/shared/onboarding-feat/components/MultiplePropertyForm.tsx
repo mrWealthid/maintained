@@ -192,7 +192,7 @@ const MultiplePropertyForm: FC<
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Building2 className="h-6 w-6 text-primary" />
+              <Building2 className="h-6 w-6" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Add Multiple Properties</h1>

@@ -13,24 +13,63 @@ export async function GET(req: Request) {
     const businessId = me.currentBusiness;
     const propertyId = url.searchParams.get("propertyId");
 
-    console.log(url);
-    console.log(businessId);
     if (!businessId)
       return NextResponse.json(
         { error: "businessId required" },
         { status: 400 }
       );
 
-    const q: any = { business: businessId, isActive: true };
-    if (propertyId) q.property = propertyId;
+    // Get query parameters
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const label = url.searchParams.get("label");
+    const property = url.searchParams.get("property");
+    const status = url.searchParams.get("status");
+    const tenant = url.searchParams.get("tenant");
 
-    const units = await Unit.find(q)
-      .select("_id label property tenantActive tenantUser")
+    // Build filter object
+    const filter: any = { business: businessId, isActive: true };
+
+    if (propertyId) filter.property = propertyId;
+    if (property) filter.property = property;
+    if (label) filter.label = { $regex: label, $options: "i" };
+    if (status !== null && status !== undefined) {
+      filter.tenantActive = status === "true";
+    }
+    if (tenant) {
+      filter["tenantUser.name"] = { $regex: tenant, $options: "i" };
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count
+    const totalRecords = await Unit.countDocuments(filter);
+
+    // Get units with pagination and populate property and tenant data
+    const units = await Unit.find(filter)
+      .populate("property", "name")
+      .populate("tenantUser", "name email")
+      .select(
+        "_id label floor isActive property tenantUser tenantActive tenants tags createdAt updatedAt"
+      )
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
-    console.log(units);
-
-    return NextResponse.json({ status: "success", data: units });
+    return NextResponse.json({
+      status: "success",
+      data: units,
+      pagination: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        hasNext: page < Math.ceil(totalRecords / limit),
+        hasPrev: page > 1,
+      },
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 });
   }

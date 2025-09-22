@@ -94,14 +94,73 @@ export async function GET(req: Request) {
         { status: 400 }
       );
 
-    const properties = await Property.find({
+    // Get query parameters
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const name = url.searchParams.get("name");
+    const type = url.searchParams.get("type");
+    const city = url.searchParams.get("city");
+    const state = url.searchParams.get("state");
+
+    // Build filter object
+    const filter: any = {
       business: businessId,
       isActive: true,
-    })
-      .select("_id name type address isActive code")
+    };
+
+    if (name) {
+      filter.name = { $regex: name, $options: "i" };
+    }
+    if (type) {
+      filter.type = { $regex: type, $options: "i" };
+    }
+    if (city) {
+      filter["address.city"] = { $regex: city, $options: "i" };
+    }
+    if (state) {
+      filter["address.state"] = { $regex: state, $options: "i" };
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count
+    const totalRecords = await Property.countDocuments(filter);
+
+    // Get properties with pagination
+    const properties = await Property.find(filter)
+      .select("_id name type address isActive code createdAt updatedAt")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
-    return NextResponse.json({ status: "success", data: properties });
+    // Get units count for each property
+    const propertiesWithUnits = await Promise.all(
+      properties.map(async (property) => {
+        const unitsCount = await Unit.countDocuments({
+          property: property._id,
+          isActive: true,
+        });
+        return {
+          ...property,
+          units: unitsCount,
+        };
+      })
+    );
+
+    return NextResponse.json({
+      status: "success",
+      data: propertiesWithUnits,
+      pagination: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        hasNext: page < Math.ceil(totalRecords / limit),
+        hasPrev: page > 1,
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: ApiErrorHandler.parse(error) },

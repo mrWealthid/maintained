@@ -49,4 +49,10 @@ export const API_ROUTES = {
       `/api/chat/rooms/${roomId}/messages/${messageId}/delivered`,
     message_read: (roomId: string) => `/api/chat/rooms/${roomId}/read`,
   },
+  propertyManagement: {
+    get_properties: `${base}/properties`,
+    propertyById: (id: string) => resourceById("properties")(id),
+    get_units: `${base}/units`,
+    unitById: (id: string) => resourceById("units")(id),
+  },
 };
