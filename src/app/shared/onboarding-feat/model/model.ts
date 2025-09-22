@@ -56,3 +56,15 @@ export type ChecklistState = {
   techniciansCount: number;
   tenantsCount: number;
 };
+
+// --- Main Component --------------------------------------------------------
+
+export interface OnboardingChecklistProps {
+  emailVerified: boolean;
+}
+
+export interface OnboardingChecklistContentProps {
+  emailVerified: boolean;
+  onCompleted?: () => void;
+  checklistData?: ChecklistState;
+}

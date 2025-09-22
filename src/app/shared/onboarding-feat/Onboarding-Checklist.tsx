@@ -7,238 +7,35 @@ import {
   Building2,
   ListPlus,
   Users,
-  UserPlus,
   CheckCircle2,
   Sparkles,
   ArrowRight,
   Clock,
   Target,
-  LogOut,
 } from "lucide-react";
-
-// shadcn/ui
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import { useAppContext } from "../contexts/AppContext";
 import UserForm from "@/app/admin/dashboard/users/UserForm";
-import { ROLES } from "../enums/enums";
 import PropertyForm from "./components/PropertyForm";
 import MultiplePropertyForm from "./components/MultiplePropertyForm";
 import UnitForm from "./components/UnitForm";
 import MultipleUserForm from "@/app/admin/dashboard/users/MultipleUserForm";
-import { useOnboardingChecklist } from "./hooks/onboardingHooks";
-
-// --- Types -----------------------------------------------------------------
-
-type ChecklistState = {
-  emailVerified: boolean;
-  propertiesCount: number;
-  unitsCount: number;
-  adminsCount: number;
-  techniciansCount: number;
-  tenantsCount: number;
-};
-
-// --- Main Component --------------------------------------------------------
-
-interface OnboardingChecklistProps {
-  emailVerified: boolean;
-}
-
-// export default function OnboardingChecklist({
-//   emailVerified,
-// }: OnboardingChecklistProps) {
-//   // const [loading, setLoading] = useState(false);
-//   const [state, setState] = useState<ChecklistState | null>(null);
-//   const { user } = useAppContext();
-//   const currentBusinessId = user?.currentBusiness?.id;
-
-//   const { data, isFetchingChecklist } = useOnboardingChecklist();
-
-//   const totalTasks = 5; // adjust if you add more tasks
-//   const completed = useMemo(() => {
-//     if (!data) return 0;
-//     let done = 0;
-//     if (data.emailVerified) done++;
-//     if (data.propertiesCount > 0) done++;
-//     if (data.unitsCount > 0) done++;
-//     if (data.adminsCount > 0) done++;
-//     if (data.tenantsCount > 0 || data.techniciansCount > 0) done++;
-//     return done;
-//   }, [data]);
-
-//   return (
-//     <Card className="w-full">
-//       <CardHeader className="flex flex-row items-center justify-between">
-//         <div>
-//           <CardTitle>Getting started</CardTitle>
-//           <CardDescription>
-//             Complete these steps to start managing requests.
-//           </CardDescription>
-//         </div>
-//         <Badge
-//           variant={completed === totalTasks ? "default" : "secondary"}
-//           className="text-xs"
-//         >
-//           {completed}/{totalTasks} done
-//         </Badge>
-//       </CardHeader>
-//       <CardContent className="space-y-4">
-//         <Progress value={(completed / totalTasks) * 100} />
-//         <div className="space-y-3">
-//           <TaskRow
-//             icon={<MailCheck className="h-4 w-4" />}
-//             title="Verify email"
-//             desc="Confirm your email to secure your account."
-//             done={!!data?.emailVerified}
-//             cta={
-//               <Button
-//                 asChild
-//                 variant="outline"
-//                 size="sm"
-//                 disabled={!!data?.emailVerified}
-//               >
-//                 <a href="/verify-email">Open</a>
-//               </Button>
-//             }
-//           />
-
-//           <Separator />
-
-//           <TaskRow
-//             icon={<Building2 className="h-4 w-4" />}
-//             title="Add a property"
-//             desc="Create your first property (e.g., apartment, office, warehouse)."
-//             done={(data?.propertiesCount ?? 0) > 0}
-//             cta={
-//               <PropertyWizardDialog
-//                 businessId={currentBusinessId!}
-//                 onCreated={async () => {
-//                   // await refreshChecklist();
-//                   toast("Property created", {
-//                     description: "Add units or invite users next.",
-//                   });
-//                 }}
-//                 trigger={
-//                   <Button variant="outline" size="sm">
-//                     <Plus className="h-4 w-4 mr-1" /> Add property
-//                   </Button>
-//                 }
-//               />
-//             }
-//           />
-
-//           <Separator />
-
-//           <TaskRow
-//             icon={<ListPlus className="h-4 w-4" />}
-//             title="Add units"
-//             desc="Add apartments/rooms/bays under a property."
-//             done={(data?.unitsCount ?? 0) > 0}
-//             cta={
-//               <UnitsQuickAddDialog
-//                 businessId={currentBusinessId!}
-//                 onAdded={async () => {
-//                   // await refreshChecklist();
-//                   toast("Units added", {
-//                     description: "You can now invite tenants to these units.",
-//                   });
-//                 }}
-//                 trigger={
-//                   <Button variant="outline" size="sm">
-//                     <Plus className="h-4 w-4 mr-1" /> Add units
-//                   </Button>
-//                 }
-//               />
-//             }
-//           />
-
-//           <Separator />
-
-//           <TaskRow
-//             icon={<UserPlus className="h-4 w-4" />}
-//             title="Invite team (admins/technicians)"
-//             desc="Invite teammates who help manage requests."
-//             done={(data?.adminsCount ?? 0) > 0}
-//             cta={
-//               <InviteUserDialog
-//                 businessId={currentBusinessId!}
-//                 onInvited={async () => {
-//                   // await refreshChecklist();
-//                   toast("Invitation sent", {
-//                     description: "They'll receive an email with next steps.",
-//                   });
-//                 }}
-//                 trigger={
-//                   <Button variant="outline" size="sm">
-//                     <Plus className="h-4 w-4 mr-1" /> Invite
-//                   </Button>
-//                 }
-//               />
-//             }
-//           />
-
-//           <Separator />
-
-//           <TaskRow
-//             icon={<Users className="h-4 w-4" />}
-//             title="Invite tenants"
-//             desc="Invite tenants to specific units so they can file requests."
-//             done={(data?.tenantsCount ?? 0) > 0}
-//             cta={
-//               <InviteUserDialog
-//                 businessId={currentBusinessId!}
-//                 forceRole="USER"
-//                 // onInvited={refreshChecklist}
-//                 trigger={
-//                   <Button size="sm">
-//                     <Plus className="h-4 w-4 mr-1" /> Invite tenant
-//                   </Button>
-//                 }
-//               />
-//             }
-//           />
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// --- Task Row --------------------------------------------------------------
-
-interface OnboardingChecklistContentProps {
-  emailVerified: boolean;
-  onCompleted?: () => void;
-  checklistData?: ChecklistState;
-}
+import { OnboardingChecklistContentProps } from "./model/model";
 
 export function OnboardingChecklistContent({
   emailVerified,
@@ -587,39 +384,6 @@ export function OnboardingChecklistContent({
   );
 }
 
-// function TaskRow({
-//   icon,
-//   title,
-//   desc,
-//   done,
-//   cta,
-// }: {
-//   icon: React.ReactNode;
-//   title: string;
-//   desc: string;
-//   done?: boolean;
-//   cta?: React.ReactNode;
-// }) {
-//   return (
-//     <div className="flex items-start gap-3">
-//       <div
-//         className={`mt-1 ${done ? "text-green-600" : "text-muted-foreground"}`}
-//       >
-//         {done ? <CheckCircle2 className="h-5 w-5" /> : icon}
-//       </div>
-//       <div className="flex-1">
-//         <div className="flex items-center justify-between">
-//           <div>
-//             <p className="font-medium leading-none">{title}</p>
-//             <p className="text-sm text-muted-foreground">{desc}</p>
-//           </div>
-//           <div className="flex items-center gap-2">{cta}</div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 function PropertyWizardDialog({
   businessId,
   trigger,
@@ -641,7 +405,6 @@ function PropertyWizardDialog({
         <div className="flex-1 overflow-y-auto p-6 pt-4">
           <PropertyForm
             businessId={businessId} // user={undefined as any}
-            // membership={{ business: businessId, role: ROLES.admin } as any}
             successCallback={() => {
               setOpen(false); // close only on success
               onCreated?.(); // refresh checklist/counters
@@ -724,51 +487,6 @@ function UnitsQuickAddDialog({
           <DialogTitle>Add units</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto p-6 pt-4">
-          {/* <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3">
-          <div className="grid gap-2">
-            <Label>Property</Label>
-            <Select onValueChange={(v) => form.setValue("propertyId", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select property" />
-              </SelectTrigger>
-              <SelectContent>
-                {properties.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label>Unit labels</Label>
-            <Textarea
-              placeholder={"Apt A\nApt B\nApt C"}
-              {...form.register("labels")}
-              rows={6}
-            />
-            <p className="text-xs text-muted-foreground">
-              One unit per line. You can edit or add more later.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Add"
-              )}
-            </Button>
-          </DialogFooter>
-        </form> */}
-
           <UnitForm
             businessId={businessId}
             successCallback={() => {
@@ -811,8 +529,6 @@ function InviteUserDialog({
         </DialogHeader>
 
         <UserForm
-          // user={undefined as any}
-          // membership={{ business: businessId, role: ROLES.admin } as any}
           successCallback={() => {
             setOpen(false); // close only on success
             onInvited?.(); // refresh checklist/counters

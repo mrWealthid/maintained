@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Check, X as XIcon, Plus, Save } from "lucide-react";
-
 import { useUpdateUnitLabel, useDeleteUnit } from "../hooks/onboardingHooks"; // update path if placed elsewhere
 import { UnitOption } from "./PropertyUnitGroupArray";
 
@@ -99,8 +98,6 @@ export function EditableUnitChip({
       ) : (
         <>
           <span className="font-medium">{unit.label}</span>
-
-          {/* Select / unselect (kept from your earlier flow) */}
 
           {/* Edit */}
 

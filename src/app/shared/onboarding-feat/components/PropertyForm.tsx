@@ -1,20 +1,8 @@
-import React, { FC, useState, useEffect, useRef } from "react";
+import React, { FC } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Plus,
-  MailCheck,
-  Building2,
-  ListPlus,
-  Users,
-  UserPlus,
-  CheckCircle2,
-  Loader2,
-  MapPin,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Plus, Building2, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,19 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { AddressSchema } from "@/lib/validation/address";
 import AddressField from "../../components/address/AddressField";
 import { useCreateProperty } from "../hooks/onboardingHooks";
@@ -86,7 +63,6 @@ const MapPreview: FC<{
 };
 
 const PropertyForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
-  businessId,
   successCallback,
   errorCallback,
   onCloseModal,
@@ -122,7 +98,6 @@ const PropertyForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
 
   // Watch address values for map preview
   const address = watch("address");
-  const showMapPreview = address?.lat && address?.lng;
 
   function formatSingleLineAddress(a: z.infer<typeof AddressSchema>) {
     const cityStateZip = [a.city, a.state, a.postalCode]
@@ -146,22 +121,19 @@ const PropertyForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
       lat: address.lat ?? null,
       lng: address.lng ?? null,
     };
-    try {
-      createProperty(
-        {
-          address: addressStructured,
-          type: type,
-          name: name,
-          propertyAddress: formatSingleLineAddress(address),
-        },
-        {
-          onSuccess: () => successCallback?.(),
-          onError: (err) => errorCallback?.(err),
-        }
-      );
-    } catch (e: any) {
-      toast("Failed to create property", { description: e.message });
-    }
+
+    createProperty(
+      {
+        address: addressStructured,
+        type: type,
+        name: name,
+        propertyAddress: formatSingleLineAddress(address),
+      },
+      {
+        onSuccess: () => successCallback?.(),
+        onError: (err) => errorCallback?.(err),
+      }
+    );
   }
 
   function onError(err: any) {

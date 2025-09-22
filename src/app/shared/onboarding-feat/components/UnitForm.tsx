@@ -1,224 +1,4 @@
-// // import * as React from "react";
-// // import { FC } from "react";
-// // import { z } from "zod";
-// // import { useForm, type UseFormReturn } from "react-hook-form";
-// // import { zodResolver } from "@hookform/resolvers/zod";
-// // import { Label } from "@/components/ui/label";
-// // import { Button } from "@/components/ui/button";
-// // import { Loader2 } from "lucide-react";
-
-// // import { OnboardingPropWrapper } from "../model/model";
-// // import { useCreatePropertyUnit } from "../hooks/onboardingHooks";
-// // import { PropertyUnitGroupsFieldArray } from "./PropertyUnitGroupArray";
-
-// // // ⬅️ Import the field-array you already have (the generic version)
-
-// // // ---------- Types ----------
-
-// // // Group: { propertyId, units[] }
-// // export type PropertyUnitsGroup = {
-// //   propertyId: string;
-// //   units: string[]; // unit IDs
-// // };
-
-// // // Form: { businessId, propertyAccess[] }
-// // const unitsSchema = z.object({
-// //   //   businessId: z.string().min(1, "businessId is required"),
-// //   propertyAccess: z
-// //     .array(
-// //       z.object({
-// //         propertyId: z.string().min(1, "Property is required"),
-// //         units: z.array(z.string().min(1)).min(1, "Select at least one unit"),
-// //       })
-// //     )
-// //     .min(1, "Add at least one property"),
-// // });
-
-// // export type UnitsFormValues = z.infer<typeof unitsSchema>;
-
-// // // ---------- Component ----------
-
-// // /**
-// //  * Collects one or more `{ propertyId, units: string[] }` groups and submits them.
-// //  * The submit payload matches:
-// //  * {
-// //  *   businessId: string,
-// //  *   properties: Array<{ propertyId: string; units: string[] }>
-// //  * }
-// //  */
-// // const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
-// //   businessId,
-// //   successCallback,
-// //   errorCallback,
-// // }) => {
-// //   const form = useForm<UnitsFormValues>({
-// //     resolver: zodResolver(unitsSchema),
-// //     defaultValues: {
-// //       //   businessId,
-// //       propertyAccess: [{ propertyId: "", units: [] }],
-// //     },
-// //     mode: "onChange",
-// //   });
-
-// //   // If your hook returns different names, adjust here
-// //   const { createUnit, isCreating } = useCreatePropertyUnit(false);
-
-// //   async function onSubmit(values: UnitsFormValues) {
-// //     try {
-// //       // Map to your API payload. If your API expects "labels" instead of unit IDs,
-// //       // transform here accordingly.
-// //       const payload = {
-// //         // businessId: values.businessId,
-// //         properties: values.propertyAccess.map((g) => ({
-// //           propertyId: g.propertyId,
-// //           units: g.units,
-// //         })),
-// //       };
-
-// //       createUnit(payload);
-// //       successCallback?.();
-// //     } catch (err) {
-// //       errorCallback?.(err);
-// //     }
-// //   }
-
-// //   return (
-// //     <form
-// //       onSubmit={form.handleSubmit(onSubmit)}
-// //       className="grid gap-4"
-// //       noValidate
-// //     >
-// //       {/* Readonly business id (optional to show) */}
-// //       <div className="space-y-1">
-// //         <Label>Business</Label>
-// //         <div className="text-sm text-muted-foreground">{businessId ?? "—"}</div>
-// //       </div>
-
-// //       {/* 🔌 Property + Units (multi groups) */}
-// //       <PropertyUnitGroupsFieldArray
-// //         form={form as UseFormReturn<UnitsFormValues>}
-// //         businessId={businessId}
-// //         // name prop is optional; defaults to "propertyAccess"
-// //       />
-
-// //       {/* Actions */}
-// //       <div className="flex justify-end gap-2">
-// //         <Button type="submit" disabled={!form.formState.isValid || isCreating}>
-// //           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-// //         </Button>
-// //       </div>
-// //     </form>
-// //   );
-// // };
-
-// // export default UnitForm;
-// import * as React from "react";
-// import { FC } from "react";
-// import { z } from "zod";
-// import { useForm, type UseFormReturn } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { Label } from "@/components/ui/label";
-// import { Button } from "@/components/ui/button";
-// import { Loader2 } from "lucide-react";
-
-// import { OnboardingPropWrapper } from "../model/model";
-// import { useCreatePropertyUnit } from "../hooks/onboardingHooks";
-// import { PropertyUnitGroupsFieldArray } from "./PropertyUnitGroupArray"; // keep your existing path
-
-// // --- Types -----------------------------------------------------------------
-
-// // Group in the form: selected existing units + inline new unit labels
-// export type PropertyUnitsGroup = {
-//   propertyId: string;
-//   units: string[]; // existing unit IDs
-//   newUnits: { label: string }[]; // inline, unsaved inputs
-// };
-
-// // Form value
-// const unitsSchema = z.object({
-//   propertyAccess: z
-//     .array(
-//       z.object({
-//         propertyId: z.string().min(1, "Property is required"),
-//         units: z.array(z.string().min(1)).default([]),
-//         newUnits: z
-//           .array(
-//             z.object({
-//               label: z.string().min(1, "Unit label is required"),
-//             })
-//           )
-//           .default([]),
-//       })
-//     )
-//     .min(1, "Add at least one property"),
-// });
-
-// export type UnitsFormValues = z.infer<typeof unitsSchema>;
-
-// // --- Component -------------------------------------------------------------
-
-// const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
-//   businessId,
-//   successCallback,
-//   errorCallback,
-// }) => {
-//   const form = useForm<UnitsFormValues>({
-//     resolver: zodResolver(unitsSchema) as any,
-//     defaultValues: {
-//       propertyAccess: [{ propertyId: "", units: [], newUnits: [] }],
-//     },
-//     mode: "onChange",
-//   });
-
-//   const { createUnit, isCreating } = useCreatePropertyUnit(false);
-
-//   async function onSubmit(values: UnitsFormValues) {
-//     try {
-//       const payload = {
-//         businessId,
-//         properties: values.propertyAccess.map((g) => ({
-//           propertyId: g.propertyId,
-//           unitIds: g.units, // existing selections
-//           newUnitLabels: g.newUnits.map((n) => n.label), // inline new inputs
-//         })),
-//       };
-//       await createUnit(payload);
-//       successCallback?.();
-//     } catch (err) {
-//       errorCallback?.(err);
-//     }
-//   }
-
-//   return (
-//     <form
-//       onSubmit={form.handleSubmit(onSubmit)}
-//       className="grid gap-4"
-//       noValidate
-//     >
-//       <div className="space-y-1">
-//         <Label>Business</Label>
-//         <div className="text-sm text-muted-foreground">{businessId ?? "—"}</div>
-//       </div>
-
-//       {/* Property + Units (multi groups; includes inline add/remove new unit inputs) */}
-//       <PropertyUnitGroupsFieldArray
-//         form={form as UseFormReturn<UnitsFormValues>}
-//         businessId={businessId}
-//       />
-
-//       <div className="flex justify-end gap-2">
-//         <Button type="submit" disabled={!form.formState.isValid || isCreating}>
-//           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-//         </Button>
-//       </div>
-//     </form>
-//   );
-// };
-
-// export default UnitForm;
-
 "use client";
-
 import * as React from "react";
 import { FC, useMemo, useState } from "react";
 import { z } from "zod";
@@ -233,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Building2, Home, Check, MapPin } from "lucide-react";
 
@@ -241,7 +20,6 @@ import { OnboardingPropWrapper } from "../model/model";
 import {
   useCreatePropertyUnit,
   useFetchProperties,
-  useFetchUnits,
 } from "../hooks/onboardingHooks";
 import {
   PropertyUnitGroupsFieldArray,
@@ -305,20 +83,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
 
   // fetch all properties for grid selection
   const { data: properties, isFetchingProperties } = useFetchProperties();
-  // const allProps: Array<{
-  //   _id: string;
-  //   name: string;
-  //   addressLine?: string;
-  //   type?: string;
-  // }> = (properties?.data ?? []).map((p: any) => ({
-  //   _id: p._id,
-  //   name: p.name,
-  //   addressLine: p?.address?.line1 ?? "",
-  //   type: p?.type,
-  // }));
-  // const { units = [], isFetchingUnits } = useFetchUnits(propertyId);
 
-  // toggle a property into propertyAccess[]
   const toggleProperty = (propertyId: string) => {
     const existingIdx = groups.findIndex((g) => g.propertyId === propertyId);
     if (existingIdx >= 0) {
