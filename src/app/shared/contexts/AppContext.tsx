@@ -10,7 +10,8 @@ interface AppContextType {
   user: User | undefined;
   isLoading: boolean;
   error: any;
-  role: ROLES | undefined;
+  role: ROLES;
+  isCreator: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -25,7 +26,6 @@ export const useAppContext = () => {
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: user, isLoading, error } = useProfile<User>();
-  const router = useRouter();
 
   // function getUserRoleForCurrentBusiness(
   // 	user: User | undefined
@@ -45,10 +45,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // }
 
   {
-    const role = getMembershipForBusiness(
+    const { role, isCreator } = getMembershipForBusiness(
       user!,
       user?.currentBusiness.id!
-    )?.role;
+    );
+
     return (
       <AppContext.Provider
         value={{
@@ -56,6 +57,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           isLoading,
           error,
           role,
+          isCreator,
         }}
       >
         {children}

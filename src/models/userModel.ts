@@ -41,6 +41,7 @@ export interface IUser extends Document {
     property?: Types.ObjectId;
     unit?: Types.ObjectId;
     accessibleUnits?: Types.ObjectId[];
+    isCreator: boolean;
   }[];
   currentBusiness: Types.ObjectId;
   tenantsClaim(): Array<{
@@ -165,6 +166,10 @@ const MembershipSchema = new Schema(
       type: String,
       enum: MEMBERSHIP_ROLES,
       required: true,
+    },
+    isCreator: {
+      type: Boolean,
+      default: false,
     },
 
     // 🔴 NEW — required for tenants (role === USER)

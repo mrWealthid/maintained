@@ -39,7 +39,7 @@ export default function OnboardingModal({
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal={true}>
       <DialogContent
-        className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-8"
+        className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >

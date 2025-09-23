@@ -68,10 +68,6 @@ export function useLogin() {
   } = useMutation({
     mutationFn: (payload: LoginPayload) => handleLogin(payload),
     onSuccess: () => {
-      // Invalidate and refetch checklist data after successful login
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
-      queryClient.invalidateQueries({ queryKey: ["properties"] });
-      queryClient.invalidateQueries({ queryKey: ["Users"] });
       router.refresh();
     },
     onError: (err: ApiError) => toast.error(err.message),
@@ -88,7 +84,6 @@ export function useRegister() {
   const { isPending: isLoading, mutate: registering } = useMutation({
     mutationFn: (payload: RegisterPayload) => handleRegister(payload),
     onSuccess: () => router.refresh(),
-
     onError: (err: ApiError) => toast.error(err.message),
   });
 
@@ -102,7 +97,6 @@ export function useLogout(router: any) {
   const { isPending: isLoading, mutate: logOut } = useMutation({
     mutationFn: () => handleLogout(),
     onSuccess: () => {
-      // Clear all cached data on logout
       queryClient.clear();
       router.push("/auth/login");
     },

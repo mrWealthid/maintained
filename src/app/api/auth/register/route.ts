@@ -88,6 +88,7 @@ export async function POST(request: Request) {
           business: business.id,
           role: ROLES.admin,
           status: INVITE_STATUS.activated,
+          isCreator: true,
         },
       ],
       currentBusiness: business.id,

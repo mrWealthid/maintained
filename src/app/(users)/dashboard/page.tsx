@@ -8,9 +8,9 @@ export default function Home() {
         <h1 className="title"> Overview </h1>
       </section>
 
-      <OnboardingChecklistContent emailVerified={true} />
+      {/* <OnboardingChecklistContent emailVerified={true} /> */}
 
-      {/* <TicketComponent /> */}
+      <TicketComponent />
     </main>
   );
 }

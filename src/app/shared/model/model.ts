@@ -125,6 +125,7 @@ export interface Membership {
   role: ROLES;
   id: string;
   inviteExpired: boolean;
+  isCreator: boolean;
 }
 
 //how to create a User interface without a populated response object

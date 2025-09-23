@@ -4,6 +4,7 @@ import OnboardingModal from "@/app/shared/onboarding-feat/OnboardingModal";
 import TicketComponent from "@/app/shared/ticket-feat/pages/TicketComponent";
 import { useOnboardingChecklist } from "@/app/shared/onboarding-feat/hooks/onboardingHooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAppContext } from "@/app/shared/contexts/AppContext";
 
 // Shimmer skeleton component with enhanced animation
 const ShimmerSkeleton = ({
@@ -21,6 +22,7 @@ const ShimmerSkeleton = ({
 export default function Home() {
   const { data: checklistData, isFetchingChecklist } = useOnboardingChecklist();
 
+  const { user, isCreator } = useAppContext();
   // Determine if onboarding is completed
   const isOnboardingCompleted = useMemo(() => {
     if (!checklistData) return false;
@@ -134,15 +136,15 @@ export default function Home() {
         </p>
       </section>
 
-      {isOnboardingCompleted ? (
-        <TicketComponent />
-      ) : (
+      {!isOnboardingCompleted && isCreator ? (
         <OnboardingModal
           emailVerified={true}
           isOpen={!isOnboardingCompleted}
           onClose={() => {}}
           checklistData={checklistData}
         />
+      ) : (
+        <TicketComponent />
       )}
     </main>
   );

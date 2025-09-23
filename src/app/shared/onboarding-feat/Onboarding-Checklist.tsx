@@ -227,7 +227,7 @@ export function OnboardingChecklistContent({
       <div className="border-b bg-card/50 backdrop-blur-sm rounded-t-lg">
         <div className="px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Building2 className="h-4 w-4" />
             </div>
             <h1 className="text-xl font-semibold">Getting Started</h1>
@@ -240,7 +240,7 @@ export function OnboardingChecklistContent({
       </div>
 
       {/* Welcome / progress summary */}
-      <Card className="mt-4 border-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent">
+      <Card className="mt-4 border-0 bg-card/50 backdrop-blur-sm ">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -255,19 +255,22 @@ export function OnboardingChecklistContent({
 
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-2xl font-bold">
                   {completed}/{totalTasks}
                 </div>
-                <div className="text-xs text-muted-foreground">completed</div>
+                <div className="text-xs ">Completed</div>
               </div>
               <div className="w-32">
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-medium">
+                  <span className="">Progress</span>
+                  <span className=" font-medium">
                     {Math.round(progressPct)}%
                   </span>
                 </div>
-                <Progress value={progressPct} className="h-2" />
+                <Progress
+                  value={progressPct}
+                  className="h-3 block bg-green-700"
+                />
               </div>
             </div>
           </div>
@@ -303,7 +306,7 @@ export function OnboardingChecklistContent({
                       step.completed
                         ? "bg-emerald-600 text-white"
                         : step.enabled
-                          ? "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                          ? "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-button-primary"
                           : "bg-muted/50 text-muted-foreground/50"
                     }`}
                   >
