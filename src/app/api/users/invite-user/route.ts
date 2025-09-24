@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
             specialties: userData.specialties || [],
             property: userData.propertyId,
             unit: userData.unitId,
+            isCreator: false,
           });
 
           // Optional: only update currentBusiness if none is set
