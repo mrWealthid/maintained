@@ -317,9 +317,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
                 <div className="text-2xl font-bold text-success">
                   {groups.reduce((sum, g) => sum + g.units.length, 0)}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Existing Units Selected
-                </div>
+                <div className="text-sm">Existing Units Selected</div>
               </CardContent>
             </Card>
             <Card>
@@ -327,9 +325,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
                 <div className="text-2xl font-bold text-primary">
                   {groups.reduce((sum, g) => sum + g.newUnits.length, 0)}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  New Units to Create
-                </div>
+                <div className="text-sm">New Units to Create</div>
               </CardContent>
             </Card>
           </div>

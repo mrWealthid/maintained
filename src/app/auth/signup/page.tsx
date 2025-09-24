@@ -431,7 +431,7 @@ export default function SignupComponent() {
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"
-                    className="text-primary underline-offset-4 hover:underline"
+                    className=" underline-offset-4 hover:underline"
                   >
                     Login
                   </Link>

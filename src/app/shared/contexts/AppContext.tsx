@@ -45,10 +45,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // }
 
   {
-    const { role, isCreator } = getMembershipForBusiness(
+    const membership = getMembershipForBusiness(
       user!,
       user?.currentBusiness.id!
-    );
+    )!;
 
     return (
       <AppContext.Provider
@@ -56,8 +56,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           user,
           isLoading,
           error,
-          role,
-          isCreator,
+          role: membership?.role,
+          isCreator: membership?.isCreator,
         }}
       >
         {children}

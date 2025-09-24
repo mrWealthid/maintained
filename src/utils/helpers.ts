@@ -112,14 +112,14 @@ export function generateInviteToken() {
 export function getMembershipForBusiness(
   user: User,
   businessId: string
-): Membership {
-  // if (!user) return;
+): Membership | undefined {
+  if (!user) return;
   return user.memberships.find((m) => {
     const businessIdFromMembership =
       typeof m.business === "string" ? m.business : m.business.id;
 
     return businessIdFromMembership === businessId;
-  })!;
+  });
 }
 
 export const getStatusColor = (status: TICKET_STATUS) => {
