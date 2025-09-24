@@ -46,6 +46,8 @@ export async function getUserFromCookies(
     currentBusiness: user.currentBusiness,
     role: currentMembership.role,
     user,
+    property: currentMembership.property,
+    unit: currentMembership.unit,
     isAdminRole: currentMembership.role === "ADMIN",
     isUserRole: currentMembership.role === "USER",
     isSuperAdminRole: currentMembership.role === "SUPER_ADMIN",

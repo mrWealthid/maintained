@@ -86,6 +86,14 @@ export async function GET(request: NextRequest) {
           path: "actionedBy",
           select: "name",
         },
+        // {
+        //   path: "property",
+        //   select: "name",
+        // },
+        // {
+        //   path: "unit",
+        //   select: "name",
+        // },
       ]);
     const requests = await features.query;
 
@@ -157,6 +165,8 @@ export async function POST(request: NextRequest, { params }: any) {
     //create Ticket
     const data = await Ticket.create({
       ...body,
+      property: verify.property,
+      unit: verify.unit,
       user: verify.id,
       business: user.currentBusiness,
     });

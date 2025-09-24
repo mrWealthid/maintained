@@ -37,19 +37,26 @@ export interface Ticket {
   actionedBy?: Pick<User, "id" | "id" | "name">;
   type: string;
   priority: TICKET_PRIORITY;
+  propertyName: string;
+  unitLabel: string;
 }
 
 export interface TicketDetails extends Ticket {
   requests: TechnicianRequest[];
 }
-// export interface TicketCardProps extends Ticket {
-// 	role: ROLES;
-// }
 
 export interface CreateTicketPayload
   extends Omit<
     Ticket,
-    "id" | "createdAt" | "id" | "category" | "user" | "status" | "priority"
+    | "id"
+    | "createdAt"
+    | "id"
+    | "category"
+    | "user"
+    | "status"
+    | "priority"
+    | "propertyName"
+    | "unitLabel"
   > {
   status?: TICKET_STATUS;
   category: string;

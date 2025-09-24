@@ -106,6 +106,8 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
     files,
     media,
     actionedBy,
+    unitLabel,
+    propertyName,
   } = ticket as any;
 
   const imageCount = Array.isArray(images) ? images.length : 0;
@@ -127,9 +129,18 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
               <Badge
                 variant="outline"
                 title={area}
-                className="max-w-[180px] truncate"
+                className="max-w-[180px] capitalize truncate"
               >
                 {area}
+              </Badge>
+            ) : null}
+            {unitLabel ? (
+              <Badge
+                variant="outline"
+                title={unitLabel}
+                className="max-w-[180px] truncate"
+              >
+                {propertyName} - {unitLabel}
               </Badge>
             ) : null}
           </div>
