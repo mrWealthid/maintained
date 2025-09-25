@@ -450,8 +450,8 @@ export default function ChatComponent() {
                         {currentRoom?.ticket.title}
                       </h1>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {currentRoom?.id} •
-                        {/* {currentRoom.id} • {currentRoom.tenant.apartment} */}
+                        {currentRoom.ticket.propertyName} •
+                        {currentRoom.ticket.unitLabel}
                       </p>
                     </div>
                   </div>
@@ -505,11 +505,12 @@ export default function ChatComponent() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <AlertCircle className="h-4 w-4 text-orange-500" />
-                        <span
+                        <Badge
+                          variant={"outline"}
                           className={`text-sm font-medium ${getPriorityColor(currentRoom?.ticket.priority!)}`}
                         >
-                          {currentRoom?.ticket.priority!} priority
-                        </span>
+                          {currentRoom?.ticket.priority!}
+                        </Badge>
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {currentRoom?.ticket.category.name}
@@ -822,10 +823,18 @@ export default function ChatComponent() {
                               <p className="text-sm font-medium text-gray-900 dark:text-white">
                                 {participant.user.name}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {chatRoleMap[participant.role]} •
-                                {/* Tenant • {currentRoom.tenant.apartment} */}
-                              </p>
+                              {participant.role === CHAT_ROLES.REQUESTER ? (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {chatRoleMap[participant.role]} •{" "}
+                                  {currentRoom.ticket.propertyName} •{" "}
+                                  {currentRoom.ticket.unitLabel}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {" "}
+                                  {chatRoleMap[participant.role]}
+                                </p>
+                              )}
                             </div>
                             <Badge className={getRoleColor(participant.role)}>
                               {chatRoleMap[participant.role]}
@@ -852,14 +861,15 @@ export default function ChatComponent() {
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              <label className="text-xs block font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                 Priority
                               </label>
-                              <p
+                              <Badge
+                                variant={"outline"}
                                 className={`text-sm font-medium mt-1 ${getPriorityColor(currentRoom?.ticket.priority!)}`}
                               >
                                 {currentRoom?.ticket.priority}
-                              </p>
+                              </Badge>
                             </div>
                             <div>
                               <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -871,7 +881,7 @@ export default function ChatComponent() {
                             </div>
                           </div>
                           <div>
-                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            <label className="text-xs block font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                               Status
                             </label>
                             <Badge
@@ -907,7 +917,7 @@ export default function ChatComponent() {
                           Call Tenant
                         </Button>
 
-                        <Dialog
+                        {/* <Dialog
                           open={showAddTechnician}
                           onOpenChange={setShowAddTechnician}
                         >
@@ -961,8 +971,19 @@ export default function ChatComponent() {
                                             <span className="font-medium">
                                               {tech.name}
                                             </span>
-                                            <span className="text-sm text-gray-500 ml-2">
-                                              {membership?.specialties?.[0]}
+                                            <span className="flex gap-1 flex-wrap">
+                                              {membership?.specialties
+                                                ?.length! > 0 &&
+                                                membership?.specialties?.map(
+                                                  (speciality) => (
+                                                    <Badge
+                                                      key={speciality}
+                                                      variant={"secondary"}
+                                                    >
+                                                      {speciality}
+                                                    </Badge>
+                                                  )
+                                                )}
                                             </span>
                                           </div>
                                         </div>
@@ -988,7 +1009,7 @@ export default function ChatComponent() {
                               </div>
                             </div>
                           </DialogContent>
-                        </Dialog>
+                        </Dialog> */}
                         {/* </Button> */}
                       </div>
                     </div>

@@ -50,7 +50,7 @@ export async function GET(req: Request) {
       .select("ticket participants lastMessageAt updatedAt _id")
       .populate({
         path: "ticket",
-        select: "title status priority _id, category",
+        select: "title status priority _id category propertyName unitLabel",
         populate: [
           { path: "category", select: "name _id" },
           { path: "user", select: "name _id email" },

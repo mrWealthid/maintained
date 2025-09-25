@@ -23,6 +23,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const ModalContext = createContext<ModalContextProps>({
   openName: "",
@@ -152,6 +153,8 @@ const Window = ({
             >
               <X className="h-4 w-4" />
             </Button>
+
+            <Separator />
 
             {/* Content */}
             <CardContent className="max-h-[80vh] overflow-y-auto">

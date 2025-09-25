@@ -13,6 +13,8 @@ export interface ChatRoom {
   isArchived?: boolean;
   updatedAt: Date;
   createdAt: Date;
+  unitLabel: string;
+  propertyName: string;
 }
 
 export interface Participant {

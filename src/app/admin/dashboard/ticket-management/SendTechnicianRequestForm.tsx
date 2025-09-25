@@ -194,12 +194,21 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                                       ""
                                     )}
                                   </span>
-                                  {user.membership?.specialties?.length! >
-                                    0 && (
-                                    <Badge variant="outline">
-                                      {user.membership?.specialties?.[0]}
-                                    </Badge>
-                                  )}
+
+                                  <span className="flex gap-1 flex-wrap">
+                                    {user.membership?.specialties?.length! >
+                                      0 &&
+                                      user.membership?.specialties?.map(
+                                        (speciality) => (
+                                          <Badge
+                                            key={speciality}
+                                            variant={"secondary"}
+                                          >
+                                            {speciality}
+                                          </Badge>
+                                        )
+                                      )}
+                                  </span>
                                 </span>
                               </CommandItem>
                             );

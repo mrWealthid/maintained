@@ -1233,14 +1233,7 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                       <h4 className="font-medium text-card-foreground">
                         {request.technician.name}
                       </h4>
-                      <Badge
-                        variant={
-                          request.status === TECHNICIAN_RESPONSE.applied
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="mt-1 text-xs"
-                      >
+                      <Badge variant={"outline"} className="mt-1 text-xs">
                         {request.status === TECHNICIAN_RESPONSE.applied && (
                           <Check className="h-3 w-3 mr-1" />
                         )}
@@ -1251,14 +1244,17 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                       </Badge>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem>
+                  <div className="flex gap-2">
+                    <Badge variant={"outline"} className="mt-1 text-xs">
+                      {ticket.status}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="">
                         <DropdownMenuItem>
                           <Modal.Open
                             opens="assign-technician"
@@ -1269,30 +1265,31 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                             </button>
                           </Modal.Open>
                         </DropdownMenuItem>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Modal.Open opens="self-assign">
-                          <button type="button" className="w-full text-left">
-                            Withdraw
-                          </button>
-                        </Modal.Open>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Modal.Open opens="self-assign">
-                          <button type="button" className="w-full text-left">
-                            Update Schedule
-                          </button>
-                        </Modal.Open>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Modal.Open opens="send-request-technicians">
-                          <button type="button" className="w-full text-left">
-                            Decline
-                          </button>
-                        </Modal.Open>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+
+                        <DropdownMenuItem>
+                          <Modal.Open opens="self-assign">
+                            <button type="button" className="w-full text-left">
+                              Withdraw
+                            </button>
+                          </Modal.Open>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Modal.Open opens="self-assign">
+                            <button type="button" className="w-full text-left">
+                              Update Schedule
+                            </button>
+                          </Modal.Open>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Modal.Open opens="send-request-technicians">
+                            <button type="button" className="w-full text-left">
+                              Decline
+                            </button>
+                          </Modal.Open>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
 
                 {request.quote.cost.length > 0 && (

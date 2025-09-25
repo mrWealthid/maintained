@@ -449,16 +449,16 @@ export function TableHeaderAction({ children }: any) {
   }, [debouncedSearchValue]);
 
   return (
-    <div className="flex flex-col flex-wrap  gap-6  justify-between mb-2 overflow-x-auto md:flex-row">
-      <div className="flex-1 items-start">
-        <Search
-          placeHolder={`Search by ${searchKey}`}
-          handleSearch={(val) => setSearchValue(val)}
-        />
-      </div>
+    <div className="flex flex-col flex-wrap  gap-1  justify-between mb-2 overflow-x-auto">
+      <div className="flex flex-wrap">
+        <div className="w-1/2 items-start">
+          <Search
+            placeHolder={`Search by ${searchKey}`}
+            handleSearch={(val) => setSearchValue(val)}
+          />
+        </div>
 
-      <div className="flex flex-1 flex-col  flex-wrap items-end  gap-2">
-        <div className="flex gap-3  justify-end w-full ">
+        <div className=" flex flex-1 flex-wrap justify-end  gap-2">
           <TableFilter />
           {isDownloadable && (
             <DownloadTableExcel
@@ -475,7 +475,10 @@ export function TableHeaderAction({ children }: any) {
             </DownloadTableExcel>
           )}
         </div>
+      </div>
 
+      <div className="flex justify-end">
+        {" "}
         {cloneElement(children, { handleFilter, summary })}
       </div>
 
