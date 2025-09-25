@@ -4,6 +4,7 @@ import {
   editChatMessage,
   fetchChatMessagesByRoomId,
   fetchChatRooms,
+  markReadUpTo,
   sendChatMessage,
 } from "../services/chat.service";
 import {
@@ -453,4 +454,19 @@ export function useEditMessage(roomId: string) {
       );
     },
   });
+}
+
+export function useReadChatMessages(roomId: string) {
+  const queryClient = useQueryClient();
+  const { isPending: isUpdating, mutate: handleMarkReadUpTo } = useMutation({
+    mutationFn: (lastMessageId: string) => markReadUpTo(roomId, lastMessageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["chat-rooms"],
+      });
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
+
+  return { isUpdating, handleMarkReadUpTo };
 }

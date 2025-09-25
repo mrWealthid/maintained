@@ -166,8 +166,10 @@ export async function ackDelivered(roomId: string, messageId: string) {
   );
 }
 
+const isTemp = (m: string) => /tmp/.test(m);
 // ---------- READ-UP-TO ----------
 export async function markReadUpTo(roomId: string, lastReadMessageId: string) {
+  if (isTemp(lastReadMessageId)) return false;
   const url = API_ROUTES.chat.message_read(roomId);
   await axios.post(
     url,

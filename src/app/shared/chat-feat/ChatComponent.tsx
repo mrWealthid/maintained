@@ -362,16 +362,22 @@ export default function ChatComponent() {
                     <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {title}
                     </h3>
+
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {/* {room.id} */}
-                      {/* {room.id} • {room.tenant.apartment} */}
+                      {room.ticket.propertyName} • {room.ticket.unitLabel}
                     </p>
                   </div>
-                  {/* {room.unreadCount > 0 && (
+                  {/* {
+                    <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {3}
+                    </Badge>
+                  } */}
+                  {room.unreadCount > 0 && (
                     <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                       {room.unreadCount}
                     </Badge>
-                  )} */}
+                  )}
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <Badge className={getStatusColor(status)} variant="secondary">

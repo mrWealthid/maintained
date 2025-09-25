@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import { markReadUpTo } from "../services/chat.service";
+// import { useReadChatMessages } from "./chatHooks";
 
 export function useBottomSentinel(roomId: string, lastMessageId?: string) {
   const sentRef = useRef<HTMLDivElement | null>(null);
   const lastSentRef = useRef<string | null>(null);
+
+  // const { handleMarkReadUpTo } = useReadChatMessages(roomId);
 
   useEffect(() => {
     if (!sentRef.current || !lastMessageId) return;
@@ -13,6 +16,15 @@ export function useBottomSentinel(roomId: string, lastMessageId?: string) {
           entries[0].isIntersecting &&
           lastMessageId !== lastSentRef.current
         ) {
+          // handleMarkReadUpTo(lastMessageId, {
+          //   onSuccess() {
+          //     lastSentRef.current = lastMessageId;
+          //   },
+
+          //   onError() {
+          //     lastSentRef.current = null;
+          //   },
+          // });
           markReadUpTo(roomId, lastMessageId)
             .then(() => {
               lastSentRef.current = lastMessageId;

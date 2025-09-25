@@ -15,6 +15,7 @@ export interface ChatRoom {
   createdAt: Date;
   unitLabel: string;
   propertyName: string;
+  unreadCount: number;
 }
 
 export interface Participant {

@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import ChatRoom from "@/models/chatRoom";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import Ticket from "@/models/ticketModel";
+import ChatMessage from "@/models/chatMessage";
 
 export async function GET(req: Request) {
   try {
@@ -41,12 +42,34 @@ export async function GET(req: Request) {
     }
 
     // 2) rooms for those tickets + user is a participant
+    // const roomsRaw = await ChatRoom.find({
+    //   ticket: { $in: ticketIds },
+    //   "participants.user": new Types.ObjectId(verify.id),
+    //   $or: [{ isArchived: { $exists: false } }, { isArchived: false }],
+    // })
+    //   // keep _id so we can convert to id during normalization
+    //   .select("ticket participants lastMessageAt updatedAt _id")
+    //   .populate({
+    //     path: "ticket",
+    //     select: "title status priority _id category propertyName unitLabel",
+    //     populate: [
+    //       { path: "category", select: "name _id" },
+    //       { path: "user", select: "name _id email" },
+    //     ],
+    //   })
+    //   .populate({ path: "participants.user", select: "name photo _id" })
+    //   .sort({ lastMessageAt: -1, updatedAt: -1 })
+    //   .limit(limit)
+    //   .lean();
+
+    // const data = roomsRaw.map(normalizeChatRoom);
+    // return NextResponse.json({ data }, { status: 200 });
+
     const roomsRaw = await ChatRoom.find({
       ticket: { $in: ticketIds },
       "participants.user": new Types.ObjectId(verify.id),
       $or: [{ isArchived: { $exists: false } }, { isArchived: false }],
     })
-      // keep _id so we can convert to id during normalization
       .select("ticket participants lastMessageAt updatedAt _id")
       .populate({
         path: "ticket",
@@ -61,7 +84,37 @@ export async function GET(req: Request) {
       .limit(limit)
       .lean();
 
-    const data = roomsRaw.map(normalizeChatRoom);
+    // For each room, compute unreadCount
+    const data = await Promise.all(
+      roomsRaw.map(async (doc) => {
+        const viewerP = doc.participants.find(
+          (p: any) => String(p.user?._id ?? p.user) === verify.id
+        );
+
+        let unreadCount = 0;
+        if (viewerP) {
+          const baseMatch: any = {
+            room: doc._id,
+            sender: { $ne: new Types.ObjectId(verify.id) },
+          };
+
+          if (viewerP.lastReadMessageId) {
+            baseMatch._id = {
+              $gt: new Types.ObjectId(viewerP.lastReadMessageId),
+            };
+          } else if (viewerP.joinedAt) {
+            baseMatch.createdAt = { $gte: viewerP.joinedAt };
+          }
+
+          unreadCount = await ChatMessage.countDocuments(baseMatch);
+        }
+
+        const out = normalizeChatRoom(doc);
+        out.unreadCount = unreadCount;
+        return out;
+      })
+    );
+
     return NextResponse.json({ data }, { status: 200 });
   } catch (err: any) {
     const msg = err?.message || "Failed to fetch chat rooms";
