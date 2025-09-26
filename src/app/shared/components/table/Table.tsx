@@ -148,7 +148,7 @@ function TableComponent<T>({
   const tableRef = useRef(null);
 
   const CardContent = (
-    <div className="overflow-x-auto bg-card  p-2">
+    <div className=" bg-card  p-2">
       <TableHeaderAction handleFilter={handleFilter}>
         {headerActions}
       </TableHeaderAction>
@@ -449,7 +449,7 @@ export function TableHeaderAction({ children }: any) {
   }, [debouncedSearchValue]);
 
   return (
-    <div className="flex flex-col flex-wrap  gap-1  justify-between mb-2 overflow-x-auto">
+    <div className="flex flex-col flex-wrap  gap-1  justify-between mb-2 ">
       <div className="flex flex-wrap">
         <div className="w-1/2 items-start">
           <Search

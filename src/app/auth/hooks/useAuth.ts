@@ -23,6 +23,8 @@ import { useState } from "react";
 import axios from "axios";
 import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
 import { User } from "@/app/shared/model/model";
+import { NextRouter } from "next/router";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 // export function useLogins(): {
 //   handleLogins: ({
@@ -92,7 +94,7 @@ export function useRegister() {
     registering,
   };
 }
-export function useLogout(router: any) {
+export function useLogout(router: AppRouterInstance) {
   const queryClient = useQueryClient();
   const { isPending: isLoading, mutate: logOut } = useMutation({
     mutationFn: () => handleLogout(),

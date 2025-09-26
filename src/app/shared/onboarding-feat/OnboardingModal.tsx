@@ -11,15 +11,15 @@ import { LogOut } from "lucide-react";
 import { useAppContext } from "../contexts/AppContext";
 import { useLogout } from "@/app/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { OnboardingChecklistContent } from "./Onboarding-Checklist";
 import { ChecklistState } from "./model/model";
 import { ThemeToggle } from "@/components/Theme-Toggle";
+import { OnboardingMultiStep } from "./OnboardingMultiStep";
 
 interface OnboardingModalProps {
   emailVerified: boolean;
   isOpen: boolean;
   onClose?: () => void;
-  checklistData?: ChecklistState;
+  checklistData?: ChecklistState; // pass fresh counters here so auto-advance works
 }
 
 export default function OnboardingModal({
@@ -37,7 +37,7 @@ export default function OnboardingModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}} modal={true}>
+    <Dialog open={isOpen} onOpenChange={() => {}} modal>
       <DialogContent
         className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
@@ -46,7 +46,7 @@ export default function OnboardingModal({
         <DialogHeader className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="flex items-center justify-between p-4">
             <DialogTitle className="text-lg font-semibold">
-              Getting Started - {user?.currentBusiness?.name || "Your Business"}
+              Getting Started – {user?.currentBusiness?.name || "Your Business"}
             </DialogTitle>
             <div className="flex gap-2">
               <ThemeToggle />
@@ -58,7 +58,6 @@ export default function OnboardingModal({
                 className="gap-2 text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4" />
-
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
@@ -66,10 +65,10 @@ export default function OnboardingModal({
         </DialogHeader>
 
         <div className="pt-16 h-full overflow-y-auto">
-          <OnboardingChecklistContent
+          <OnboardingMultiStep
             emailVerified={emailVerified}
-            onCompleted={onClose}
             checklistData={checklistData}
+            onCloseModal={onClose}
           />
         </div>
       </DialogContent>

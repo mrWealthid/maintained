@@ -123,7 +123,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-primary/10 rounded-lg">
-            <Building2 className="h-6 w-6 text-primary" />
+            <Building2 className="h-6 w-6 " />
           </div>
           <div>
             <h1 className="text-3xl font-bold">Property Units Setup</h1>
@@ -188,7 +188,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <Home className="h-5 w-5 text-primary" />
+                        <Home className="h-5 w-5 " />
                         <CardTitle className="text-lg">
                           {property.name}
                         </CardTitle>
@@ -304,9 +304,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {selectedIds.size}
-                </div>
+                <div className="text-2xl font-bold ">{selectedIds.size}</div>
                 <div className="text-sm text-muted-foreground">
                   Properties Selected
                 </div>
@@ -322,7 +320,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-2xl font-bold ">
                   {groups.reduce((sum, g) => sum + g.newUnits.length, 0)}
                 </div>
                 <div className="text-sm">New Units to Create</div>

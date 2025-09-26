@@ -373,11 +373,11 @@ export default function ChatComponent() {
                       {3}
                     </Badge>
                   } */}
-                  {room.unreadCount > 0 && (
+                  {/* {room.unreadCount > 0 && (
                     <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                       {room.unreadCount}
                     </Badge>
-                  )}
+                  )} */}
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <Badge className={getStatusColor(status)} variant="secondary">
