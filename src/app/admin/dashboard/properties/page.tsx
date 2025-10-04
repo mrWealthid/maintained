@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Home, Plus } from "lucide-react";
+import { Building2, Home } from "lucide-react";
 import PropertyList from "./components/PropertyList";
 import UnitList from "./components/UnitList";
-import { Button } from "@/components/ui/button";
 
 const PropertyManagementPage = () => {
   const [activeTab, setActiveTab] = useState("properties");

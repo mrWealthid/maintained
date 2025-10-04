@@ -1,13 +1,13 @@
 "use client";
-import React, { FC, useMemo, useState } from "react";
+import React, { FC, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import ButtonComponent from "@/app/shared/components/form-elements/Button";
 import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
-import { useProcessTechnicianResponse } from "@/app/shared/ticket-feat/hooks/ticketHooks";
+import { useProcessTechnicianResponse } from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
 import {
   ApplyTechnicianFormControls,
   ApplyTicketFormProps,
-} from "@/app/shared/ticket-feat/model/ticket.model";
+} from "@/app/shared/features/ticket-feat/model/ticket.model";
 import { Button } from "@/components/ui/button";
 import {
   Popover,

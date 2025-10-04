@@ -16,8 +16,8 @@ import {
   type FieldArrayWithId,
 } from "react-hook-form";
 import { SpecialtyBadges } from "./MultipleUserForm";
-import { Property } from "@/app/shared/onboarding-feat/model/model";
-import { useFetchUnits } from "@/app/shared/onboarding-feat/hooks/onboardingHooks";
+import { Property } from "@/app/shared/features/onboarding-feat/model/model";
+import { useFetchUnits } from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
 
 const SingleForm = ({
   field,

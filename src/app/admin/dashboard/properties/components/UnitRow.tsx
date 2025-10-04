@@ -1,4 +1,4 @@
-import { UnitRowProps } from "@/app/shared/property-feat/model/unit.model";
+import { UnitRowProps } from "@/app/shared/features/property-feat/model/unit.model";
 import UnitRowActions from "./UnitRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

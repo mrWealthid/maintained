@@ -1,17 +1,7 @@
 "use client";
-import React, { FC, Fragment } from "react";
-import { Menu, Transition } from "@headlessui/react";
+import React, { FC } from "react";
 import Link from "next/link";
-import { HiEye } from "react-icons/hi2";
-import {
-  TechnicianRowActionsProps,
-  TicketRowActionsProps,
-} from "@/app/shared/ticket-feat/model/ticket.model";
-import {
-  useAssignTicket,
-  useDeleteTicket,
-  useProcessTechnicianResponse,
-} from "@/app/shared/ticket-feat/hooks/ticketHooks";
+import { TechnicianRowActionsProps } from "@/app/shared/features/ticket-feat/model/ticket.model";
 import Modal from "@/app/shared/components/modal/Modal";
 import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/app/shared/enums/enums";
 import { TfiMore } from "react-icons/tfi";
@@ -21,7 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -31,25 +20,6 @@ import { TECHNICIAN_ROUTES_DEFINITION } from "@/app/shared/routes/routes";
 const TicketRowActions: FC<TechnicianRowActionsProps> = ({
   technicianRequest,
 }) => {
-  // const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
-
-  // const { isProcessing, processResponse } = useProcessTechnicianResponse(
-  // 	technicianRequest.id
-  // );
-  // function handleProcessResponse(onCloseModal: () => void) {
-  // 	const payload = { response: TECHNICIAN_RESPONSE.applied };
-  // 	processResponse(payload, {
-  // 		onSuccess: () => onCloseModal()
-  // 	});
-  // }
-
-  // function handleAssign(onCloseModal: () => void) {
-  // 	const payload = { status: TICKET_STATUS.processing };
-  // 	handleAssignTicket(payload, {
-  // 		onSuccess: () => onCloseModal()
-  // 	});
-  // }
-
   return (
     <TableCell className="md:px-2 py-2 space-x-3">
       <DropdownMenu>

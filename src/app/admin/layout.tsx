@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Header from "@/app/shared/components/header/Header";
 import Breadcrumbs from "@/app/shared/components/breadcrumbs/BreadCrumbs";
 import { layoutConfig } from "@/app/shared/data/data";
-import { AppSidebar } from "../shared/components/sidebar/AppSidebar";
+import AppSidebar from "../shared/components/sidebar/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppProvider } from "../shared/contexts/AppContext";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";

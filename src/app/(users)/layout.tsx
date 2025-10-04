@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import Header from "@/app/shared/components/header/Header";
 import Breadcrumbs from "@/app/shared/components/breadcrumbs/BreadCrumbs";
 import { layoutConfig } from "@/app/shared/data/data";
-import { AppSidebar } from "../shared/components/sidebar/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { AppProvider } from "../shared/contexts/AppContext";
 import { ROLES } from "../shared/enums/enums";
+import AppSidebar from "../shared/components/sidebar/AppSidebar";
 
 export default async function DashboardLayout({
   children,

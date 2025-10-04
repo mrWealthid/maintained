@@ -7,7 +7,7 @@ import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
 import axios from "axios";
 import { UserListFilter } from "../model/user.model";
 import { buildQueryString } from "@/utils/helpers";
-import { ListQueryParams } from "@/app/shared/ticket-feat/model/ticket.model";
+import { ListQueryParams } from "@/app/shared/features/ticket-feat/model/ticket.model";
 import { ApiErrorHandler } from "@/utils/apiError";
 
 export async function fetchUsers<T>({

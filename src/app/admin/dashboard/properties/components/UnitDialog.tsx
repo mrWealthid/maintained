@@ -8,14 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import EditUnitForm from "@/app/shared/property-feat/form/UnitForm";
-import UnitView from "@/app/shared/property-feat/components/UnitView";
+import EditUnitForm from "@/app/shared/features/property-feat/form/UnitForm";
+import UnitView from "@/app/shared/features/property-feat/components/UnitView";
 import { useAppContext } from "@/app/shared/contexts/AppContext";
-import { useCreateUnit } from "@/app/shared/property-feat/hooks/unitHooks";
-import { Unit } from "@/app/shared/property-feat/service/unit-service";
-import UnitForm from "@/app/shared/onboarding-feat/components/UnitForm";
+import { useCreateUnit } from "@/app/shared/features/property-feat/hooks/unitHooks";
+import { Unit } from "@/app/shared/features/property-feat/service/unit-service";
+import UnitForm from "@/app/shared/features/onboarding-feat/components/UnitForm";
 
 interface UnitDialogProps {
   open: boolean;

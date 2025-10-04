@@ -1,23 +1,21 @@
-import { API_ROUTES } from '@/app/shared/routes/apiRoutes';
-import { findData } from '@/utils/apiRequests';
-import { FC } from 'react';
-import ApplyForm from '../../ApplyForm';
-import { TechnicianRequest } from '@/app/shared/ticket-feat/model/ticket.model';
+import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
+import { findData } from "@/utils/apiRequests";
+import { FC } from "react";
+import ApplyForm from "../../ApplyForm";
+import { TechnicianRequest } from "@/app/shared/features/ticket-feat/model/ticket.model";
 
 const Page: FC<{ params: Promise<{ requestId: string }> }> = async ({
-	params
+  params,
 }) => {
-	const { requestId } = await params;
-	const response = await findData<TechnicianRequest>(
-		API_ROUTES.ticketManagement.fetch_technician_requestDetails,
-		requestId
-	);
+  const { requestId } = await params;
+  const response = await findData<TechnicianRequest>(
+    API_ROUTES.ticketManagement.fetch_technician_requestDetails,
+    requestId
+  );
 
-	console.log('Ticket response:', response?.data);
+  console.log("Ticket response:", response?.data);
 
-	return (
-		<>{response?.data && <ApplyForm ticketRequest={response?.data} />}</>
-	);
+  return <>{response?.data && <ApplyForm ticketRequest={response?.data} />}</>;
 };
 
 export default Page;

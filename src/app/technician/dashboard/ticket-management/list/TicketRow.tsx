@@ -1,4 +1,4 @@
-import { TechnicianTicketRowProps } from "@/app/shared/ticket-feat/model/ticket.model";
+import { TechnicianTicketRowProps } from "@/app/shared/features/ticket-feat/model/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

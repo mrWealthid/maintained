@@ -6,7 +6,7 @@ import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 
 import ChatMessage from "@/models/chatMessage";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
-import { CHAT_TYPE } from "@/app/shared/chat-feat/data/enums";
+import { CHAT_TYPE } from "@/app/shared/features/chat-feat/data/enums";
 
 // If your Pusher server SDK needs Node:
 export const runtime = "nodejs";

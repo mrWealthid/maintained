@@ -75,63 +75,7 @@ export const TECH_SPECIALTIES = [
   "GENERAL_HANDYMAN",
 ] as const;
 export type TechnicianSpecialty = (typeof TECH_SPECIALTIES)[number];
-//subschema
-// const MembershipSchema = new Schema(
-//   {
-//     business: {
-//       type: Schema.Types.ObjectId,
-//       ref: Business, // or keep your `ref: Business` if you prefer
-//       required: true,
-//     },
-//     status: {
-//       type: String,
-//       enum: STATUS,
-//     },
-//     role: {
-//       type: String,
-//       enum: MEMBERSHIP_ROLES,
-//       required: true,
-//     },
 
-//     // 👇 Multiple specialties (technicians only)
-//     specialties: {
-//       type: [String], // array of strings
-//       enum: TECH_SPECIALTIES, // each item must be one of TECH_SPECIALTIES
-//       default: undefined, // omit when not set
-//       validate: {
-//         validator(this: any, val?: string[]) {
-//           if (this.role === MEMBERSHIP_ROLES[2]) {
-//             return (
-//               Array.isArray(val) &&
-//               val.length > 0 &&
-//               val.every((s) =>
-//                 TECH_SPECIALTIES.includes(String(s).toUpperCase().trim() as any)
-//               )
-//             );
-//           }
-//           // non-technicians: must be empty or undefined
-//           return val === undefined || (Array.isArray(val) && val.length === 0);
-//         },
-//         message: "Technicians must have at least one valid specialty.",
-//       },
-//       // normalize values to UPPERCASE, trim, and unique
-//       set: (val: unknown) => {
-//         if (!Array.isArray(val)) return undefined;
-//         const cleaned = val
-//           .map((v) => String(v).toUpperCase().trim())
-//           .filter(Boolean);
-//         return Array.from(new Set(cleaned));
-//       },
-//     },
-//     inviteToken: { type: String },
-//     inviteTokenExpires: { type: Date },
-//   },
-//   {
-//     _id: false,
-//     toJSON: { virtuals: true },
-//     toObject: { virtuals: true },
-//   }
-// );
 const LocationSnapshot = new Schema(
   {
     propertyName: String,

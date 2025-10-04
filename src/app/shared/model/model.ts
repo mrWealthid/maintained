@@ -4,7 +4,7 @@ import {
   TICKET_PRIORITY,
   TICKET_STATUS,
 } from "@/app/shared/enums/enums";
-import { TechnicianRequest } from "../ticket-feat/model/ticket.model";
+import { TechnicianRequest } from "../features/ticket-feat/model/ticket.model";
 import { IUser } from "@/models/userModel";
 
 export interface Category {

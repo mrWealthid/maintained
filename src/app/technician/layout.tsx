@@ -3,7 +3,7 @@ import Header from "@/app/shared/components/header/Header";
 import Breadcrumbs from "@/app/shared/components/breadcrumbs/BreadCrumbs";
 import { layoutConfig } from "@/app/shared/data/data";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "../shared/components/sidebar/AppSidebar";
+import AppSidebar from "../shared/components/sidebar/AppSidebar";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { AppProvider } from "../shared/contexts/AppContext";
 import { ROLES } from "../shared/enums/enums";

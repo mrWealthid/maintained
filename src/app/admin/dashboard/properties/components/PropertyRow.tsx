@@ -1,4 +1,4 @@
-import { PropertyRowProps } from "@/app/shared/property-feat/model/property.model";
+import { PropertyRowProps } from "@/app/shared/features/property-feat/model/property.model";
 import PropertyRowActions from "./PropertyRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

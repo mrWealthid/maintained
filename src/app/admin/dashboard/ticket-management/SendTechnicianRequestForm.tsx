@@ -6,12 +6,11 @@ import {
   useFetchTechnicians,
   useFetchTicketDetails,
   useSendTechnicianRequest,
-} from "@/app/shared/ticket-feat/hooks/ticketHooks";
+} from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
 import {
   SendTechnicianRequestFormControls,
   SendTechnicianRequestFormProps,
-} from "@/app/shared/ticket-feat/model/ticket.model";
-import { User } from "@/app/shared/model/model";
+} from "@/app/shared/features/ticket-feat/model/ticket.model";
 import {
   PopoverTrigger,
   Popover,
@@ -65,10 +64,6 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
       ticketDetails?.requests?.some((r) => r.technician?.id === id) ?? false
     );
   }
-
-  // function removeSelected(selectedValues: string[], id: string) {
-  //   return selectedValues.filter((v) => v !== id);
-  // }
 
   return (
     <div className="w-full">
@@ -131,22 +126,8 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                                     </svg>
                                   </span>
                                 </Badge>
-                                // <Badge
-                                //   onClick={(e) => {
-                                //     e.stopPropagation();
-                                //     field.onChange(
-                                //       selectedValues.filter(
-                                //         (v) => v !== user.id
-                                //       )
-                                //     );
-                                //   }}
-                                //   variant={"outline"}
-                                // >
-                                //   {user.name}
-                                // </Badge>
                               ))
-                          : // .join(", ")
-                            "Select technicians"}
+                          : "Select technicians"}
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </PopoverTrigger>
@@ -271,71 +252,6 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                 }}
               />
             </div>
-
-            {/* <div className=' flex flex-col md:flex-row justify-between  gap-3'>
-							<section className='flex-1'>
-								{' '}
-								<Label htmlFor='startTime' className='px-1'>
-									Start Time
-								</Label>
-								<Controller
-									control={control}
-									name='schedule.startTime'
-									render={({ field }) => (
-										<Input
-											type='time'
-											id='startTime'
-											step='1'
-											disabled={!scheduleEnabled}
-											{...field}
-											className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-										/>
-									)}
-								/>
-							</section>
-
-							<section className='flex-1'>
-								<Label htmlFor='endTime' className='px-1'>
-									End Time
-								</Label>
-								<Controller
-									control={control}
-									name='schedule.endTime'
-									rules={{
-										validate: (value) => {
-											if (!scheduleEnabled) return true;
-											if (!startTime || !value)
-												return 'Please enter both times';
-
-											return (
-												value > startTime ||
-												'End time must be after start time'
-											);
-										}
-									}}
-									render={({ field }) => (
-										<>
-											<Input
-												type='time'
-												id='end-time'
-												step='1'
-												{...field}
-												className='w-full bg-transparent hover:bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
-											/>
-
-											{errors.schedule?.endTime && (
-												<ErrorMessage
-													errorMsg={
-														errors.schedule.endTime
-															?.message ?? ''
-													}
-												/>
-											)}
-										</>
-									)}
-								/>
-							</section>
-						</div> */}
           </section>
           <hr className="my-3" />
           <section className="flex justify-end  gap-4">

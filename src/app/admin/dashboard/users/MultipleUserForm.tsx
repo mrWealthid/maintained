@@ -9,7 +9,7 @@ import { useCreateMultipleUsers } from "./hooks/userHooks";
 import { ROLES } from "@/app/shared/enums/enums";
 import { useAppContext } from "@/app/shared/contexts/AppContext";
 import { CreateMultipleUsersPayload } from "@/app/shared/model/model";
-import { useFetchProperties } from "@/app/shared/onboarding-feat/hooks/onboardingHooks";
+import { useFetchProperties } from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
 import SingleForm from "./SingleForm";
 
 // ----------------------
