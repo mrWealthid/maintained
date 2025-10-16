@@ -175,11 +175,11 @@ export function InteractiveTicketChat({
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      startConversation();
-    }
-  }, [isOpen]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     startConversation();
+  //   }
+  // }, [isOpen]);
 
   // Text-to-speech function with better voice selection
   const speakMessage = (text: string) => {
@@ -320,6 +320,7 @@ export function InteractiveTicketChat({
   };
 
   const startConversation = () => {
+    // if (messages.length > 0) return;
     addBotMessage(
       "Hi! I'm here to help you submit a maintenance request. Let's start by identifying what type of request you'll like to submit.",
       {
@@ -1034,7 +1035,13 @@ Would you like to submit this request?`;
   const field = lastMessage?.field as keyof ManageTicketForm;
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(val) => {
+        setIsOpen(val);
+        startConversation();
+      }}
+    >
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="right"

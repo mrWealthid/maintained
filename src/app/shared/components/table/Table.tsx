@@ -1,8 +1,10 @@
 "use client";
 import React, {
   cloneElement,
+  experimental_useEffectEvent,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -437,16 +439,23 @@ export function TableHeaderAction({ children }: any) {
     summary,
   }: any = useContext(TableContext);
 
-  const [searchValue, setSearchValue] = useState("");
-  const debouncedSearchValue = useDebounce(searchValue, 500);
+  // const [searchValue, setSearchValue] = useState("");
 
-  useEffect(() => {
-    if (debouncedSearchValue !== "") {
-      handleFilter({ ...search, [searchKey]: debouncedSearchValue });
-    } else {
-      handleFilter({ ...search, [searchKey]: undefined });
-    }
-  }, [debouncedSearchValue]);
+  function debounce<T extends (...args: any[]) => void>(fn: T, delay = 500) {
+    let t: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<T>) => {
+      if (t) clearTimeout(t);
+      t = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  const debouncedFilter = useMemo(
+    () =>
+      debounce((value: string) => {
+        handleFilter({ ...search, [searchKey]: value ?? undefined });
+      }, 500),
+    [handleFilter, search, searchKey]
+  );
 
   return (
     <div className="flex flex-col flex-wrap  gap-1  justify-between mb-2 ">
@@ -454,7 +463,10 @@ export function TableHeaderAction({ children }: any) {
         <div className="w-1/2 items-start">
           <Search
             placeHolder={`Search by ${searchKey}`}
-            handleSearch={(val) => setSearchValue(val)}
+            onSearch={(val) => {
+              // setSearchValue(val); // keep local UI responsive
+              debouncedFilter(val); // side-effect at the event boundary
+            }}
           />
         </div>
 
