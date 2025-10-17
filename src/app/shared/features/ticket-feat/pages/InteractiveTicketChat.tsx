@@ -1009,13 +1009,13 @@ Would you like to submit this request?`;
   useEffect(() => {
     // Ensure voices are loaded (some browsers load them asynchronously)
     const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        console.log(
-          "Available voices:",
-          voices.map((v) => `${v.name} (${v.lang})`)
-        );
-      }
+      window.speechSynthesis.getVoices();
+      // if (voices.length > 0) {
+      //   console.log(
+      //     "Available voices:",
+      //     voices.map((v) => `${v.name} (${v.lang})`)
+      //   );
+      // }
     };
 
     if (typeof window !== "undefined") {
