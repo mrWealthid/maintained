@@ -25,6 +25,12 @@ export interface IUser extends Document {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   active?: boolean;
+  notificationPreferences?: {
+    mode: "SMS" | "EMAIL" | "PHONE";
+    smsEnabled: boolean;
+    emailEnabled: boolean;
+    phoneEnabled: boolean;
+  };
   // status?: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
   changedPasswordAfter(JWTTimestamp: number): Promise<boolean>;
   correctPassword(newPassword: string, userPassword: string): Promise<boolean>;
@@ -250,6 +256,25 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: true,
       select: false,
+    },
+    notificationPreferences: {
+      mode: {
+        type: String,
+        enum: ["SMS", "EMAIL", "PHONE"],
+        default: "SMS",
+      },
+      smsEnabled: {
+        type: Boolean,
+        default: true,
+      },
+      emailEnabled: {
+        type: Boolean,
+        default: false,
+      },
+      phoneEnabled: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {

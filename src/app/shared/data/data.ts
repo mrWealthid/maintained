@@ -5,6 +5,7 @@ import { adminRoutes, routes, technicianRoutes } from "../routes/routes";
 export const crumbLabelMap: CrumbLabelMap = {
   dashboard: { label: "Dashboard" },
   "ticket-management": { label: "Ticket Management" },
+  settings: { label: "Settings" },
 };
 
 export const adminCrumbLabelMap: CrumbLabelMap = {
@@ -12,11 +13,13 @@ export const adminCrumbLabelMap: CrumbLabelMap = {
   dashboard: { label: "Dashboard" },
   "ticket-management": { label: "Ticket Management" },
   users: { label: "Users" },
+  settings: { label: "Settings" },
 };
 export const technicianCrumbLabelMap: CrumbLabelMap = {
   technician: { label: "", hide: true },
   dashboard: { label: "Dashboard" },
   "ticket-management": { label: "Ticket Management" },
+  settings: { label: "Settings" },
 };
 
 export const layoutConfig: Record<

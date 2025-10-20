@@ -12,12 +12,18 @@ export interface Category {
   name: string;
   description?: string;
   createdAt?: Date;
+  business: string;
+  isActive: boolean;
+  isDefault: boolean;
 }
 export interface TicketType {
   name: string;
   description?: string;
   createdAt?: Date;
   id: string;
+  isActive: boolean;
+  isDefault: boolean;
+  business: string;
 }
 
 export interface Ticket {

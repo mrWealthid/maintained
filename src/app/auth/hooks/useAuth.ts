@@ -70,7 +70,9 @@ export function useLogin() {
   } = useMutation({
     mutationFn: (payload: LoginPayload) => handleLogin(payload),
     onSuccess: () => {
+      console.time("start");
       router.refresh();
+      console.timeEnd("start");
     },
     onError: (err: ApiError) => toast.error(err.message),
   });

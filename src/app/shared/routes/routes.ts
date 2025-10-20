@@ -1,111 +1,122 @@
-'use client';
-import { RiHomeLine } from 'react-icons/ri';
-import { CiSettings } from 'react-icons/ci';
-import { Routes } from '../model/model';
-import { GrVmMaintenance } from 'react-icons/gr';
-import { HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
-import { PiUsersThree } from 'react-icons/pi';
-import { Building2 } from 'lucide-react';
+"use client";
+import { Routes } from "../model/model";
+import {
+  Home,
+  Settings,
+  Wrench,
+  MessageSquare,
+  Users,
+  Building2,
+} from "lucide-react";
 
 export const ROUTES_DEFINITION = {
-	DASHBOARD: {
-		OVERVIEW: '/dashboard',
-		TICKETS: '/dashboard/ticket-management',
-		MANAGE_TICKET: '/dashboard/ticket-management/manage',
-		CHAT: '/dashboard/chat'
-	},
-	AUTH: {
-		LOGIN: '/auth/login',
-		REGISTER: '/auth/register'
-	}
+  DASHBOARD: {
+    OVERVIEW: "/dashboard",
+    TICKETS: "/dashboard/ticket-management",
+    MANAGE_TICKET: "/dashboard/ticket-management/manage",
+    CHAT: "/dashboard/chat",
+    SETTINGS: "/dashboard/settings",
+  },
+  AUTH: {
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+  },
 };
 
 export const TECHNICIAN_ROUTES_DEFINITION = {
-	DASHBOARD: {
-		OVERVIEW: '/technician/dashboard',
-		TICKETS: '/technician/dashboard/ticket-management'
-		// MANAGE_TICKET: '/dashboard/ticket-management/manage',
-		// CHAT: '/dashboard/chat'
-	}
+  DASHBOARD: {
+    OVERVIEW: "/technician/dashboard",
+    TICKETS: "/technician/dashboard/ticket-management",
+    CHAT: "/dashboard/chat",
+    SETTINGS: "/technician/dashboard/settings",
+  },
 };
 
 export const ADMIN_ROUTES_DEFINITION = {
-	DASHBOARD: {
-		OVERVIEW: '/admin/dashboard',
-		TICKETS: '/admin/dashboard/ticket-management',
-		CHAT: '/admin/dashboard/chat',
-		USERS: '/admin/dashboard/users',
-		PROPERTIES: '/admin/dashboard/properties',
-		SETTINGS: '/admin/dashboard/settings'
-	}
+  DASHBOARD: {
+    OVERVIEW: "/admin/dashboard",
+    TICKETS: "/admin/dashboard/ticket-management",
+    CHAT: "/admin/dashboard/chat",
+    USERS: "/admin/dashboard/users",
+    PROPERTIES: "/admin/dashboard/properties",
+    SETTINGS: "/admin/dashboard/settings",
+  },
 };
 
 export const routes: Routes[] = [
-	{
-		name: 'Overview',
-		path: ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
-		icon: RiHomeLine
-	},
-	{
-		name: 'Tickets',
-		path: ROUTES_DEFINITION.DASHBOARD.TICKETS,
-		icon: GrVmMaintenance
-	},
-
-	{
-		name: 'Chat',
-		path: ROUTES_DEFINITION.DASHBOARD.CHAT,
-		icon: HiOutlineChatBubbleLeftRight
-	}
+  {
+    name: "Overview",
+    path: ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
+    icon: Home,
+  },
+  {
+    name: "Tickets",
+    path: ROUTES_DEFINITION.DASHBOARD.TICKETS,
+    icon: Wrench,
+  },
+  {
+    name: "Chat",
+    path: ROUTES_DEFINITION.DASHBOARD.CHAT,
+    icon: MessageSquare,
+  },
+  {
+    name: "Settings",
+    path: ROUTES_DEFINITION.DASHBOARD.SETTINGS,
+    icon: Settings,
+  },
 ];
 export const technicianRoutes: Routes[] = [
-	{
-		name: 'Overview',
-		path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
-		icon: RiHomeLine
-	},
-	{
-		name: 'Tickets',
-		path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
-		icon: GrVmMaintenance
-	},
-
-	{
-		name: 'Chat',
-		path: ROUTES_DEFINITION.DASHBOARD.CHAT,
-		icon: HiOutlineChatBubbleLeftRight
-	}
+  {
+    name: "Overview",
+    path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
+    icon: Home,
+  },
+  {
+    name: "Tickets",
+    path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
+    icon: Wrench,
+  },
+  {
+    name: "Chat",
+    path: ROUTES_DEFINITION.DASHBOARD.CHAT,
+    icon: MessageSquare,
+  },
+  {
+    name: "Settings",
+    path: TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.SETTINGS,
+    icon: Settings,
+  },
 ];
 
 export const adminRoutes: Routes[] = [
-	{
-		name: 'Overview',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
-		icon: RiHomeLine
-	},
-	{
-		name: 'Tickets',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
-		icon: GrVmMaintenance
-	},
-	{
-		name: 'User Management',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.USERS,
-		icon: PiUsersThree
-	},
-	{
-		name: 'Property Management',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.PROPERTIES,
-		icon: Building2
-	},
-	{
-		name: 'Chat',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.CHAT,
-		icon: HiOutlineChatBubbleLeftRight
-	},
-	{
-		name: 'Settings',
-		path: ADMIN_ROUTES_DEFINITION.DASHBOARD.SETTINGS,
-		icon: CiSettings
-	}
+  {
+    name: "Overview",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.OVERVIEW,
+    icon: Home,
+  },
+  {
+    name: "Tickets",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS,
+    icon: Wrench,
+  },
+  {
+    name: "User Management",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.USERS,
+    icon: Users,
+  },
+  {
+    name: "Property Management",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.PROPERTIES,
+    icon: Building2,
+  },
+  {
+    name: "Chat",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.CHAT,
+    icon: MessageSquare,
+  },
+  {
+    name: "Settings",
+    path: ADMIN_ROUTES_DEFINITION.DASHBOARD.SETTINGS,
+    icon: Settings,
+  },
 ];
