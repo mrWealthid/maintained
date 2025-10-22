@@ -53,3 +53,54 @@ export async function PUT(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ typeId: string }> }
+) {
+  try {
+    const verify = await getUserFromCookies();
+
+    if (!verify) {
+      return NextResponse.json(
+        { error: "Unauthorized access" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin
+    if (verify.role !== ROLES.admin && verify.role !== ROLES.super_admin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const { typeId } = await params;
+
+    const ticketType = await TicketType.findById(typeId);
+    if (!ticketType) {
+      return NextResponse.json(
+        { error: "Ticket type not found" },
+        { status: 404 }
+      );
+    }
+
+    // Prevent deletion of default ticket types
+    if (ticketType.isDefault) {
+      return NextResponse.json(
+        { error: "Cannot delete default ticket types" },
+        { status: 400 }
+      );
+    }
+
+    await TicketType.findByIdAndDelete(typeId);
+
+    return NextResponse.json({
+      status: "success",
+      message: "Ticket type deleted successfully",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import { mapToObject } from "@/utils/helpers";
-import MiddlewareFeatures from "@/middlewareFeatures";
 import User from "@/models/userModel";
 import TicketType from "@/models/ticketTypeModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";

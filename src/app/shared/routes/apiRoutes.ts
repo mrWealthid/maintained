@@ -18,6 +18,8 @@ export const API_ROUTES = {
     invite_user: `${base}/users/invite-user`,
     userById: (id: string) => resourceById("users")(id),
     switch_currentBusiness: `${base}/users/switch-business`,
+    notification_preferences: `${base}/user/notification-preferences`,
+    change_password: `${base}/user/change-password`,
   },
 
   ticketManagement: {

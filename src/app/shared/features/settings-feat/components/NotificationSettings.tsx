@@ -14,58 +14,35 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { notificationModes } from "../data/settings.data";
 import { NotificationPreferences } from "../model/settings.model";
-import { toast } from "sonner";
+import {
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+} from "../hooks/settingsHooks";
 
 const NotificationSettings: React.FC = () => {
-  const [preferences, setPreferences] = useState<NotificationPreferences>({
-    mode: "SMS",
-    smsEnabled: true,
-    emailEnabled: false,
-    phoneEnabled: false,
-  });
-  const [loading, setLoading] = useState(false);
+  const { data: preferences, isLoading } = useNotificationPreferences();
+  const updatePreferences = useUpdateNotificationPreferences();
+
+  const [localPreferences, setLocalPreferences] =
+    useState<NotificationPreferences>({
+      mode: "SMS",
+      smsEnabled: true,
+      emailEnabled: false,
+      phoneEnabled: false,
+    });
 
   useEffect(() => {
-    // Load user preferences from API
-    loadPreferences();
-  }, []);
-
-  const loadPreferences = async () => {
-    try {
-      const response = await fetch("/api/user/notification-preferences");
-      const data = await response.json();
-      if (data.status === "success") {
-        setPreferences(data.data);
-      }
-    } catch (error) {
-      console.error("Failed to load preferences:", error);
+    if (preferences) {
+      setLocalPreferences(preferences);
     }
-  };
+  }, [preferences]);
 
   const handleSave = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/user/notification-preferences", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(preferences),
-      });
-
-      if (response.ok) {
-        toast.success("Notification preferences updated successfully");
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to update preferences");
-      }
-    } catch (error) {
-      toast.error("Failed to update preferences");
-    } finally {
-      setLoading(false);
-    }
+    await updatePreferences.mutateAsync(localPreferences);
   };
 
   const handleModeChange = (mode: "SMS" | "EMAIL" | "PHONE") => {
-    setPreferences((prev) => ({
+    setLocalPreferences((prev) => ({
       ...prev,
       mode,
       smsEnabled: mode === "SMS",
@@ -75,7 +52,7 @@ const NotificationSettings: React.FC = () => {
   };
 
   const handleToggle = (type: keyof Omit<NotificationPreferences, "mode">) => {
-    setPreferences((prev) => ({
+    setLocalPreferences((prev) => ({
       ...prev,
       [type]: !prev[type],
     }));
@@ -97,7 +74,7 @@ const NotificationSettings: React.FC = () => {
               Preferred Notification Method
             </Label>
             <RadioGroup
-              value={preferences.mode}
+              value={localPreferences.mode}
               onValueChange={handleModeChange}
               className="mt-3"
             >
@@ -129,7 +106,7 @@ const NotificationSettings: React.FC = () => {
                 </div>
                 <Switch
                   id="sms-toggle"
-                  checked={preferences.smsEnabled}
+                  checked={localPreferences.smsEnabled}
                   onCheckedChange={() => handleToggle("smsEnabled")}
                 />
               </div>
@@ -143,7 +120,7 @@ const NotificationSettings: React.FC = () => {
                 </div>
                 <Switch
                   id="email-toggle"
-                  checked={preferences.emailEnabled}
+                  checked={localPreferences.emailEnabled}
                   onCheckedChange={() => handleToggle("emailEnabled")}
                 />
               </div>
@@ -157,7 +134,7 @@ const NotificationSettings: React.FC = () => {
                 </div>
                 <Switch
                   id="phone-toggle"
-                  checked={preferences.phoneEnabled}
+                  checked={localPreferences.phoneEnabled}
                   onCheckedChange={() => handleToggle("phoneEnabled")}
                 />
               </div>
@@ -165,8 +142,11 @@ const NotificationSettings: React.FC = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? "Saving..." : "Save Preferences"}
+            <Button
+              onClick={handleSave}
+              disabled={updatePreferences.isPending || isLoading}
+            >
+              {updatePreferences.isPending ? "Saving..." : "Save Preferences"}
             </Button>
           </div>
         </CardContent>

@@ -59,8 +59,8 @@ function AppSidebar({ routes }: { routes: Routes[] }) {
                         href={link.path}
                         className={`hover:translate-x-1  rounded-lg text-sm transition-all duration-500 flex items-center gap-2 ${
                           isActive
-                            ? "bg-sidebar-accent text-button-primary"
-                            : ""
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                            : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                         }`}
                       >
                         {link.icon &&
