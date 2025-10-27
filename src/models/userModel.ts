@@ -24,6 +24,8 @@ export interface IUser extends Document {
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  passwordChangePasscode?: string;
+  passwordChangePasscodeExpires?: Date;
   active?: boolean;
   notificationPreferences?: {
     mode: "SMS" | "EMAIL" | "PHONE";
@@ -35,6 +37,7 @@ export interface IUser extends Document {
   changedPasswordAfter(JWTTimestamp: number): Promise<boolean>;
   correctPassword(newPassword: string, userPassword: string): Promise<boolean>;
   createPasswordResetToken(): string;
+  createPasswordChangePasscode(): string;
   // createUserInviteToken(): string;
   passwordConfirm: string;
   memberships: {
@@ -55,6 +58,8 @@ export interface IUser extends Document {
     role: ROLES;
     status: INVITE_STATUS;
   }>;
+
+  currentBusinessName: string;
 }
 
 export const MEMBERSHIP_ROLES = [
@@ -252,6 +257,8 @@ const userSchema = new Schema<IUser>(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    passwordChangePasscode: String,
+    passwordChangePasscodeExpires: Date,
     active: {
       type: Boolean,
       default: true,
@@ -276,6 +283,7 @@ const userSchema = new Schema<IUser>(
         default: false,
       },
     },
+    currentBusinessName: String,
   },
   {
     timestamps: true,
@@ -356,6 +364,20 @@ userSchema.pre<IUser>("save", function (next) {
   next();
 });
 
+// userSchema.pre("save", async function (next) {
+//   if (!this.isNew) return next();
+//   try {
+//     const Business = (await import("./businessModel")).default;
+
+//     const business = await Business.findById(this.currentBusiness).lean();
+//     if (business) this.currentBusinessName = business.name;
+
+//     next();
+//   } catch (e: any) {
+//     next(e);
+//   }
+// });
+
 // Exclude inactive users from queries
 userSchema.pre(/^find/, function (next) {
   (this as mongoose.Query<any, any>).where({ active: { $ne: false } });
@@ -391,6 +413,18 @@ userSchema.methods.createPasswordResetToken = function (): string {
     .digest("hex");
   this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
   return resetToken;
+};
+
+userSchema.methods.createPasswordChangePasscode = function (): string {
+  // Generate a 6-digit passcode
+  const passcode = Math.floor(100000 + Math.random() * 900000).toString();
+  // Hash the passcode for storage
+  this.passwordChangePasscode = crypto
+    .createHash("sha256")
+    .update(passcode)
+    .digest("hex");
+  this.passwordChangePasscodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  return passcode;
 };
 
 userSchema.methods.createUserInviteToken = function (): string {

@@ -4,6 +4,7 @@ import { verifyToken } from "./token";
 import { cookies as getCookiesHeader } from "next/headers";
 import User from "@/models/userModel";
 import { ROLES } from "@/app/shared/enums/enums";
+import Business from "@/models/businessModel";
 
 export async function getUserFromCookies(
   request?: NextRequest,
@@ -36,6 +37,12 @@ export async function getUserFromCookies(
 
   if (!currentMembership) return null;
 
+  const currentBusiness = await Business.findById(
+    currentMembership.business
+  ).select("name");
+
+  if (!currentBusiness) return null;
+
   // Check required role(s)
   if (requiredRoles && !requiredRoles.includes(currentMembership.role)) {
     return null;
@@ -46,6 +53,7 @@ export async function getUserFromCookies(
     currentBusiness: user.currentBusiness,
     role: currentMembership.role,
     user,
+    currentBusinessName: currentBusiness.name,
     property: currentMembership.property,
     unit: currentMembership.unit,
     isAdminRole: currentMembership.role === "ADMIN",

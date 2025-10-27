@@ -1,149 +1,204 @@
-'use client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { FC, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useUpdatePassword } from '../../hooks/useAuth';
-import { IUpdatePassword } from '../../model/model';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
-
+"use client";
+import Link from "next/link";
+import React, { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useUpdatePassword } from "../../hooks/useAuth";
+import { IUpdatePassword } from "../../model/model";
+import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import AuthWrapper from "../../AuthWrapper";
+import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
 export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
-	const { register, handleSubmit, formState } = useForm({
-		mode: 'onChange'
-	});
+  const form = useForm<{ currentPassword: string; newPassword: string }>({
+    mode: "onChange",
+  });
 
-	const router = useRouter();
-	const { isLoading, updatePassword } = useUpdatePassword();
+  const { isLoading, updatePassword } = useUpdatePassword();
 
-	async function onSubmit(payload: any) {
-		const data: IUpdatePassword = {
-			...payload,
-			resetToken: token
-		};
+  async function onSubmit(payload: any) {
+    const data: IUpdatePassword = {
+      ...payload,
+      resetToken: token,
+    };
+    updatePassword(data);
+  }
 
-		updatePassword(data, { onSuccess: () => router.push('/auth/login') });
-	}
+  const {
+    formState: { errors, isValid },
+  } = form;
 
-	const { errors, isValid } = formState;
+  function onError(err: any) {
+    console.log(err);
+  }
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
-	function onError(err: any) {
-		console.log(err);
-	}
-	const [showPassword, setShowPassword] = useState(false);
+  return (
+    <AuthWrapper>
+      <section className="w-full dashboard-body flex gap-4 flex-col items-center justify-center">
+        <div className="text-center space-y-2">
+          {/* <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Update Password Today
+            </h1> */}
+          {/* <p className="text-gray-600 dark:text-gray-400">
+              Seamlessly update password in few steps
+            </p> */}
+        </div>
 
-	const togglePassword = () => {
-		setShowPassword(!showPassword);
-	};
-	return (
-		<>
-			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='border bg-card w-5/6 md:w-4/6 lg:w-1/3 xl:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
-					<p className='text-center font-bold text-2xl'>
-						Update Password
-					</p>
+        <Card className="border-gray-200 dark:border-gray-700 w-full lg:w-1/3 bg-white dark:bg-gray-900">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
+              Update Password
+            </CardTitle>
+            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+              Enter new password to complete reset
+            </CardDescription>
+          </CardHeader>
 
-					<section className='w-full'>
-						<form
-							onSubmit={handleSubmit(onSubmit, onError)}
-							action=''
-							className='w-full flex flex-col justify-center gap-2 items-center'>
-							<TextInput
-								name={'psw'}
-								label='Password'
-								error={errors?.[
-									'password'
-								]?.message?.toString()}>
-								<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
-									<input
-										className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
-										type={
-											showPassword ? 'text' : 'password'
-										}
-										{...register('password', {
-											required: 'This field is required'
-										})}
-										id='psw'
-										autoFocus
-									/>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="w-full flex flex-col justify-center gap-4 items-stretch"
+              >
+                {/* Password */}
+                <FormField
+                  control={form.control}
+                  name="currentPassword"
+                  rules={{
+                    required: "This field is required",
+                    minLength: { value: 8, message: "Min 8 characters" },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            value={field.value ?? ""} // prevent null warnings
+                            placeholder="Enter password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((s) => !s)}
+                            className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
+                          >
+                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage>
+                        {errors.currentPassword && (
+                          <ErrorMessage
+                            errorMsg={errors.currentPassword.message!}
+                          />
+                        )}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="newPassword"
+                  rules={{
+                    required: "This field is required",
+                    minLength: { value: 8, message: "Min 8 characters" },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showNewPassword ? "text" : "password"}
+                            value={field.value ?? ""} // prevent null warnings
+                            placeholder="Enter password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword((s) => !s)}
+                            className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                            aria-label={
+                              showNewPassword
+                                ? "Hide password"
+                                : "Show password"
+                            }
+                          >
+                            {showNewPassword ? <FaEye /> : <FaEyeSlash />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage>
+                        {errors.newPassword && (
+                          <ErrorMessage
+                            errorMsg={errors.newPassword.message!}
+                          />
+                        )}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
 
-									{!showPassword ? (
-										<FaEyeSlash
-											className='text-primary cursor-pointer'
-											onClick={togglePassword}
-										/>
-									) : (
-										<FaEye
-											className='text-primary cursor-pointer'
-											onClick={togglePassword}
-										/>
-									)}
-								</div>
-							</TextInput>
-							<TextInput
-								name={'newpsw'}
-								label='Password'
-								error={errors?.[
-									'password'
-								]?.message?.toString()}>
-								<div className='input-style !p-0 !pr-2 !overflow-hidden'>
-									<input
-										className='w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 '
-										// type={
-										// 	showPassword ? 'text' : 'password'
-										// }
-										{...register('newPassword', {
-											required: 'This field is required'
-										})}
-										id='newpsw'
-										placeholder='Enter New  Password'
-									/>
-								</div>
-							</TextInput>
-							<TextInput
-								name={'confirmPassword'}
-								label='Password'
-								error={errors?.[
-									'password'
-								]?.message?.toString()}>
-								<div className='input-style !p-0 !pr-2 !overflow-hidden'>
-									<input
-										className='w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 '
-										// type={
-										// 	showPassword ? 'text' : 'password'
-										// }
-										{...register('confirmNewPassword', {
-											required: 'This field is required'
-										})}
-										placeholder='Confirm New Password'
-										id='confirmPassword'
-									/>
-								</div>
-							</TextInput>
+                <ButtonComponent
+                  styles="w-full mt-4"
+                  btnText="Login"
+                  loading={isLoading}
+                  type="submit"
+                  disabled={!isValid || isLoading}
+                />
 
-							<section className=' '>
-								<ButtonComponent
-									styles='rounded-3xl 2xl:w-1/5'
-									btnText='Update'
-									loading={isLoading}
-									type='submit'
-									disabled={!isValid || isLoading}
-								/>
-							</section>
+                <p className="flex gap-3 text-sm justify-center">
+                  Need An Account?
+                  <Link href="/auth/signup" className="text-blue-600 text-sm">
+                    Sign up
+                  </Link>
+                </p>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
 
-							<p className='flex gap-3 text-sm'>
-								Need An Account ?
-								<Link
-									href={'/auth/signup'}
-									className='text-blue-600 text-sm'>
-									Sign up
-								</Link>
-							</p>
-						</form>
-					</section>
-				</section>
-			</section>
-		</>
-	);
+        <div className="text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            By signing in, you agree to our{" "}
+            <Link
+              href=""
+              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href=""
+              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
+      </section>
+    </AuthWrapper>
+  );
 };

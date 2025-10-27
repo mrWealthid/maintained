@@ -1,19 +1,30 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
+import User, { UserDoc } from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { Emails } from "@/utils/email-resend";
+import { ROLES } from "@/app/shared/enums/enums";
 
 connect();
 
-const signToken = (id: any) =>
-  jwt.sign({ id }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  } as SignOptions);
+const signToken = (user: UserDoc) => {
+  const tenants = user.tenantsClaim();
 
+  const tenant = tenants.find(
+    (tenant) => user.currentBusiness.toString() === tenant.business
+  );
+
+  return jwt.sign(
+    {
+      id: user.id,
+      role: tenant?.role || ROLES.user,
+      tenants,
+    },
+    process.env.JWT_SECRET!,
+    { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
+  );
+};
 export async function POST(request: NextRequest) {
-  const { email, newPassword, currentPassword, confirmNewPassword } =
-    await request.json();
+  const { email, newPassword, currentPassword } = await request.json();
   try {
     const user = await User.findOne({ email }).select("+password");
 
@@ -34,7 +45,7 @@ export async function POST(request: NextRequest) {
     user.passwordConfirm = newPassword;
     await user.save();
 
-    const token = signToken(user.id);
+    const token = signToken(user);
     const response = NextResponse.json({
       status: "success",
       message: "Token sent to email",

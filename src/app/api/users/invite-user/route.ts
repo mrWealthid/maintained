@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const capitalize = (str: string) =>
       str.replace(/\b\w/g, (char) => char.toUpperCase());
 
-    const activeBusiness = await Business.findById(currentBusinessId);
+    // const activeBusiness = await Business.findById(currentBusinessId);
     const results = [];
     const errors = [];
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
           await new Emails(
             existingUser,
             inviteURL,
-            activeBusiness
+            verify.currentBusinessName
           ).sendInviteUser();
 
           results.push({
@@ -147,7 +147,11 @@ export async function POST(request: NextRequest) {
               : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
 
           // Send invite email
-          await new Emails(newUser, inviteURL, activeBusiness).sendInviteUser();
+          await new Emails(
+            newUser,
+            verify.currentBusinessName,
+            inviteURL
+          ).sendInviteUser();
 
           results.push({
             email: userData.email,
@@ -204,13 +208,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     // 3) Ensure business exists (optional but nice for safety)
-    const activeBusiness = await Business.findById(currentBusinessId);
-    if (!activeBusiness) {
-      return NextResponse.json(
-        { error: "Business not found" },
-        { status: 404 }
-      );
-    }
+    // const activeBusiness = await Business.findById(currentBusinessId);
+    // if (!activeBusiness) {
+    //   return NextResponse.json(
+    //     { error: "Business not found" },
+    //     { status: 404 }
+    //   );
+    // }
 
     // 4) Find the user and their membership for this business
     const user = await User.findOne({ email });
@@ -281,7 +285,11 @@ export async function PATCH(request: NextRequest) {
         : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
 
     // 9) Send the invite email
-    await new Emails(user, inviteURL, activeBusiness).sendInviteUser();
+    await new Emails(
+      user,
+      verify.currentBusinessName,
+      inviteURL
+    ).sendInviteUser();
 
     return NextResponse.json({
       status: "success",

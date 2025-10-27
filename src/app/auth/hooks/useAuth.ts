@@ -125,9 +125,13 @@ export function useResetPassword() {
   };
 }
 export function useUpdatePassword() {
+  const router = useRouter();
   const { isPending: isLoading, mutate: updatePassword } = useMutation({
     mutationFn: (payload: IUpdatePassword) => handleResetPassword(payload),
-    onSuccess: (data) => toast.success(data.message),
+    onSuccess: (data) => {
+      // router.refresh();
+      toast.success(data.message);
+    },
     onError: (err: ApiError) => toast.error(err.message),
   });
 

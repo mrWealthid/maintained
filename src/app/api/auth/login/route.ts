@@ -47,30 +47,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    //Email configuration
-
-    // const data = await resend.emails.send({
-    // 	from: 'support',
-    // 	to: user.email,
-    // 	subject: 'Password Reset',
-    // 	text:
-    // 	react:WaitlistEmail({ name: "Bu" })
-    // });
-
-    // resend.emails.send({
-    // 	from: 'onboarding@resend.dev',
-    // 	to: 'wealthiduwe@gmail.com',
-    // 	subject: 'Hello World',
-
-    // 	html: '<p>yeaaa</p>'
-    // });
-
-    // new Email(user, 'www.test.com').sendMyMail();
-    // await new Emails(user, 'www.test.com').sendPasswordReset();
-    // console.log(emails);
-
-    //3) If everything is ok, send token to client
-
     const token = signToken(user);
 
     const response = NextResponse.json({

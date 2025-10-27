@@ -1,165 +1,161 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { FC, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useOnboardUser } from '../../hooks/useAuth';
-import { OnboardUserForm } from '../../model/model';
-import TextInput from '@/app/shared/components/form-elements/Text-Input';
-import ButtonComponent from '@/app/shared/components/form-elements/Button';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useOnboardUser } from "../../hooks/useAuth";
+import { OnboardUserForm } from "../../model/model";
+import ButtonComponent from "@/app/shared/components/form-elements/Button";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
+import AuthWrapper from "../../AuthWrapper";
 const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
-	const { register, handleSubmit, formState } = useForm<OnboardUserForm>({
-		mode: 'onChange'
-	});
+  const form = useForm<OnboardUserForm>({
+    mode: "onChange",
+  });
 
-	const router = useRouter();
-	const { isLoading, onboardUser } = useOnboardUser();
+  const {
+    formState: { errors, isValid },
+  } = form;
 
-	async function onSubmit(payload: any) {
-		const data = {
-			...payload,
-			inviteToken: inviteToken
-		};
+  const router = useRouter();
+  const { isLoading, onboardUser } = useOnboardUser();
 
-		onboardUser(data, { onSuccess: () => router.push('/auth/login') });
-	}
+  async function onSubmit(payload: any) {
+    const data = {
+      ...payload,
+      inviteToken: inviteToken,
+    };
 
-	const { errors, isValid } = formState;
+    onboardUser(data, { onSuccess: () => router.push("/auth/login") });
+  }
 
-	function onError(err: any) {
-		console.log(err);
-	}
-	const [showPassword, setShowPassword] = useState(false);
+  function onError(err: any) {
+    console.log(err);
+  }
+  const [showPassword, setShowPassword] = useState(false);
 
-	const togglePassword = () => {
-		setShowPassword(!showPassword);
-	};
-	return (
-		<>
-			<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-				<section className='border bg-card  w-5/6 md:w-4/6 lg:w-2/3 xl:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
-					<p className='text-center  font-bold text-2xl'>
-						Activate User
-					</p>
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
+  return (
+    <AuthWrapper>
+      <section className="w-full dashboard-body flex gap-4 flex-col items-center justify-center">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Welcome back
+          </h1>
+          {/* <p className="text-gray-600 dark:text-gray-400">Activate User</p> */}
+        </div>
 
-					<section className='w-full'>
-						<form
-							onSubmit={handleSubmit(onSubmit, onError)}
-							className='w-full flex flex-col justify-center gap-2 items-center'>
-							{/* <TextInput
-								name={'dateOfBirth'}
-								label='Date Of Birth'
-								error={errors?.[
-									'dateOfBirth'
-								]?.message?.toString()}>
-								<input
-									{...register('dateOfBirth', {
-										required: 'This field is required'
-									})}
-									className='input-style'
-									type='date'
-									id='dateOfBirth'
-									autoFocus
-								/>
-							</TextInput> */}
+        <Card className="border-gray-200 dark:border-gray-700 w-full lg:w-1/3 bg-white dark:bg-gray-900">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
+              Activate User
+            </CardTitle>
+            {/* <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+                Enter your credentials to access your account
+              </CardDescription> */}
+          </CardHeader>
 
-							<TextInput
-								name={'psw'}
-								label='Password'
-								error={errors?.[
-									'password'
-								]?.message?.toString()}>
-								<div className='flex border mt-1 pr-1  input-style flex-1 cursor-pointer items-center '>
-									<input
-										className='w-full bg-transparent cursor-pointer  border-none outline-none focus:ring-0 ring-0 '
-										type={
-											showPassword ? 'text' : 'password'
-										}
-										{...register('password', {
-											required: 'This field is required'
-										})}
-										id='psw'
-									/>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="w-full flex flex-col justify-center gap-4 items-stretch"
+              >
+                {/* Password */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  rules={{
+                    required: "This field is required",
+                    minLength: { value: 8, message: "Min 8 characters" },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            value={field.value ?? ""} // prevent null warnings
+                            placeholder="Enter password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((s) => !s)}
+                            className="absolute inset-y-0 right-3 flex items-center text-muted-foreground"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
+                          >
+                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage>
+                        {errors.password && (
+                          <ErrorMessage errorMsg={errors.password.message!} />
+                        )}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
 
-									{!showPassword ? (
-										<FaEyeSlash
-											className=' cursor-pointer'
-											onClick={togglePassword}
-										/>
-									) : (
-										<FaEye
-											className='cursor-pointer'
-											onClick={togglePassword}
-										/>
-									)}
-								</div>
-							</TextInput>
-							{/* <TextInput
-                                name={'password'}
-                                label="Password"
-                                error={errors?.[
-                                    'password'
-                                ]?.message?.toString()}>
-                                <div className="input-style !p-0 !pr-2 !overflow-hidden">
-                                    <input
-                                        className="w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 "
-                                        // type={
-                                        // 	showPassword ? 'text' : 'password'
-                                        // }
-                                        {...register('newPassword', {
-                                            required: 'This field is required'
-                                        })}
-                                        id="newPassword"
-                                        placeholder="Enter New  Password"
-                                    />
-                                </div>
-                            </TextInput>
-                            <TextInput
-                                name={'password'}
-                                label="Password"
-                                error={errors?.[
-                                    'password'
-                                ]?.message?.toString()}>
-                                <div className="input-style !p-0 !pr-2 !overflow-hidden">
-                                    <input
-                                        className="w-full  dark:bg-transparent   border-none outline-none focus:ring-0 ring-0 "
-                                        // type={
-                                        // 	showPassword ? 'text' : 'password'
-                                        // }
-                                        {...register('confirmNewPassword', {
-                                            required: 'This field is required'
-                                        })}
-                                        placeholder="Confirm New Password"
-                                        id="confirmPassword"
-                                    />
-                                </div>
-                            </TextInput> */}
+                <ButtonComponent
+                  styles="w-full mt-4"
+                  btnText="Login"
+                  loading={isLoading}
+                  type="submit"
+                  disabled={!isValid || isLoading}
+                />
 
-							<ButtonComponent
-								styles='w-full mt-4'
-								btnText='Submit'
-								loading={isLoading}
-								type='submit'
-								disabled={!isValid || isLoading}
-							/>
+                <p className="flex gap-3 text-sm justify-center">
+                  Need An Account?
+                  <Link href="/auth/signup" className="text-blue-600 text-sm">
+                    Sign up
+                  </Link>
+                </p>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
 
-							<p className='flex gap-3 text-sm '>
-								Need An Account ?
-								<Link
-									href={'/auth/signup'}
-									className='text-blue-600 text-sm'>
-									Sign up
-								</Link>
-							</p>
-						</form>
-					</section>
-				</section>
-			</section>
-		</>
-	);
+        <div className="text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            By signing in, you agree to our{" "}
+            <Link
+              href=""
+              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href=""
+              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
+      </section>
+    </AuthWrapper>
+  );
 };
 
 export default OnboardingForm;

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { settingsTabs } from "../data/settings.data";
 import { useAppContext } from "@/app/shared/contexts/AppContext";
+import { ROLES } from "@/app/shared/enums/enums";
 
 interface SettingsSidebarProps {
   activeTab: string;
@@ -14,17 +15,19 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  const { user, role } = useAppContext();
-  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  const { role } = useAppContext();
 
-  const filteredTabs = settingsTabs.filter((tab) => !tab.adminOnly || isAdmin);
+  const filteredTabs = useMemo(() => {
+    const isAdmin = role === ROLES.admin || role === ROLES.super_admin;
+    return settingsTabs.filter((tab) => !tab.adminOnly || isAdmin);
+  }, [role]);
 
   return (
-    <div className="w-64 bg-background border-r border-gray-200 dark:border-gray-700 h-full">
+    <div className="w-64 bg-background  border-gray-200 dark:border-gray-700 h-full">
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        {/* <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
           Settings
-        </h2>
+        </h2> */}
         <nav className="space-y-2">
           {filteredTabs.map((tab) => {
             const Icon = tab.icon;
@@ -42,7 +45,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                 {/* {React.createElement(Icon, {
                             className: "text-xl w-5 h-5",
                           })} */}
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className="mr-3 h-4 w-4" />
                 {tab.label}
               </button>
             );

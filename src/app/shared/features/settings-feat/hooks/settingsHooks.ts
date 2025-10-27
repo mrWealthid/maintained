@@ -9,6 +9,8 @@ import {
   fetchNotificationPreferences,
   updateNotificationPreferences,
   changePassword,
+  initiatePasswordChange,
+  verifyPasscodeAndChangePassword,
   fetchCategories,
   createCategory,
   updateCategory,
@@ -48,6 +50,32 @@ export function useUpdateNotificationPreferences() {
 export function useChangePassword() {
   return useMutation({
     mutationFn: changePassword,
+    onSuccess: () => {
+      toast.success("Password changed successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+// Step 1: Initiate password change and send passcode
+export function useInitiatePasswordChange() {
+  return useMutation({
+    mutationFn: initiatePasswordChange,
+    onSuccess: () => {
+      toast.success("Verification passcode sent to your email");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+// Step 2: Verify passcode and complete password change
+export function useVerifyPasscodeAndChangePassword() {
+  return useMutation({
+    mutationFn: verifyPasscodeAndChangePassword,
     onSuccess: () => {
       toast.success("Password changed successfully");
     },

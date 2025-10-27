@@ -38,7 +38,38 @@ export async function updateNotificationPreferences(
   }
 }
 
-// Password Change
+// Password Change - Step 1: Initiate password change
+export async function initiatePasswordChange(
+  data: Omit<SecuritySettings, "confirmPassword" | "passcode">
+): Promise<ApiResponse<void>> {
+  try {
+    const response = await axios.post(
+      API_ROUTES.userManagement.change_password,
+      data
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw new Error(ApiErrorHandler.parse(err));
+  }
+}
+
+// Password Change - Step 2: Verify passcode and complete password change
+export async function verifyPasscodeAndChangePassword(data: {
+  passcode: string;
+  newPassword: string;
+}): Promise<ApiResponse<void>> {
+  try {
+    const response = await axios.put(
+      API_ROUTES.userManagement.change_password,
+      data
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw new Error(ApiErrorHandler.parse(err));
+  }
+}
+
+// Legacy function kept for backward compatibility
 export async function changePassword(
   data: Omit<SecuritySettings, "confirmPassword">
 ): Promise<ApiResponse<void>> {

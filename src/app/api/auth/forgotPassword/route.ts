@@ -34,29 +34,27 @@ export async function POST(request: NextRequest) {
     }
 
     const resetToken = user.createPasswordResetToken();
+
     await user.save({ validateBeforeSave: false });
 
-    let resetURL =
+    const resetURL =
       process.env.NODE_ENV === "development"
-        ? `http://localhost:3000/auth/updatePassword/${resetToken}`
-        : `https://hotel-app-blush-beta.vercel.app/auth/updatePassword/${resetToken}`;
+        ? `${process.env.DEVELOPMENT_URL}/auth/updatePassword/${resetToken}`
+        : `${process.env.PRODUCTION_URL}/auth/updatePassword/${resetToken}`;
 
-    await new Emails(user, resetURL).sendPasswordReset();
+    await new Emails(user, null, resetURL).sendPasswordReset();
 
-    //3) If everything is ok, send token to client
-
-    const token = signToken(user.id);
     const response = NextResponse.json({
       status: "success",
       message: "Token sent to email",
     });
 
-    const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-    const expires = new Date(Date.now() + timeInMs);
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      expires,
-    });
+    // const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
+    // const expires = new Date(Date.now() + timeInMs);
+    // response.cookies.set("token", token, {
+    //   httpOnly: true,
+    //   expires,
+    // });
 
     return response;
   } catch (error: any) {
