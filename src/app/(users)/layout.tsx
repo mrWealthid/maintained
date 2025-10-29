@@ -8,6 +8,7 @@ import { ROLES } from "../shared/enums/enums";
 import { AppShell } from "../shared/shells/AppShell";
 import { HeaderBar } from "../shared/components/header/Headerbar";
 
+const { routes, crumbLabelMap } = layoutConfig[ROLES.user];
 export default async function DashboardLayout({
   children,
 }: {
@@ -18,8 +19,6 @@ export default async function DashboardLayout({
   if (!verify) {
     redirect("/auth/login");
   }
-
-  const { routes, crumbLabelMap } = layoutConfig[ROLES.user];
 
   return (
     <section className=" h-dvh flex">
