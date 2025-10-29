@@ -27,7 +27,7 @@ const TicketComponent: FC = () => {
   );
   const handleSearchValue = useCallback(
     (val: string) => setSearch(val),
-    [setStatus]
+    [setSearch]
   );
 
   return (

@@ -2,13 +2,13 @@ import { ThemeToggle } from "@/components/Theme-Toggle";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
-export default function AuthWrapper({
+export default React.memo(function AuthWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  console.log("I rendered");
   return (
     <div className="max-h-screen overflow-y-auto bg-gray-50 dark:bg-gray-950 flex flex-col">
       {/* Header */}
@@ -42,4 +42,4 @@ export default function AuthWrapper({
       </div>
     </div>
   );
-}
+});

@@ -2,7 +2,6 @@
 import React, {
   cloneElement,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -22,18 +21,15 @@ import { FcFilledFilter } from "react-icons/fc";
 import { CiFilter } from "react-icons/ci";
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import { IoCloudDownloadOutline } from "react-icons/io5";
-import Image from "next/image";
 import TextInput from "../form-elements/Text-Input";
 import Modal from "../modal/Modal";
 import ButtonComponent from "../form-elements/Button";
 import Search from "../search/Search";
-import { useDebounce } from "@uidotdev/usehooks";
 import Empty from "../empty/Empty";
 import AnimatedBorderWrapper from "../animation/AnimatedBorder";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -50,6 +46,38 @@ import {
 } from "@/components/ui/pagination";
 
 const TableContext = createContext({});
+
+// type TableContextValue<T> = {
+//   data: T[];
+//   columns: Array<Column<T>>;
+//   headerActions: React.ReactNode;        // or a typed array if applicable
+//   service: Service | null;
+
+//   // state
+//   limit: number;
+//   page: number;
+//   totalRecords: number;
+
+//   // actions (memoized)
+//   updateLimit: (n: number) => void;
+//   handlePaginate: (p: number) => void;
+//   onFilter: (q: Record<string, unknown>) => void;
+//   cancelFilter: () => void;
+
+//   // utilities (stable)
+//   objectToQueryParams: (o: Record<string, unknown>) => string;
+
+//   // flags / misc
+//   filterIsActive: boolean;
+//   actionable: boolean;
+//   tableRef: React.RefObject<HTMLDivElement>;
+//   queryKey: string;
+//   isDownloadable: boolean;
+//   isRefetching: boolean;
+//   search: string;
+//   searchKey: string;
+//   summary: Summary | null;
+// };
 
 function TableComponent<T>({
   queryKey,
@@ -88,71 +116,81 @@ function TableComponent<T>({
   // 	setfilterIsActive(false);
   // }
 
-  function handleFilter(val: IsearchParams | null) {
-    let transformedSearchQuery = "";
+  // function onFilter(val: IsearchParams | null) {
+  //   let transformedSearchQuery = "";
+  //   if (!val) {
+  //     setfilterIsActive(false);
+  //     setSearch(null);
+  //     return;
+  //   }
+
+  //   // transformedSearchQuery = buildQueryString(val);
+
+  //   // transformedSearchQuery = objectToQueryParams(val);
+
+  //   setSearch((search) => ({ ...search, ...val }));
+  //   setPage(1);
+
+  //   setfilterIsActive(true);
+  // }
+
+  // const queryClient = useQueryClient();
+
+  // function updatePage(val: number) {
+  //   setPage(val);
+  // }
+
+  // --- actions (memoize) ---
+  const updateLimit = React.useCallback((n: number) => setLimit(n), []);
+  const handlePaginate = React.useCallback((page: number, limit: number) => {
+    setPage(page);
+    setLimit(limit);
+  }, []);
+  const onFilter = React.useCallback((val: IsearchParams | null) => {
+    // let transformedSearchQuery = "";
     if (!val) {
       setfilterIsActive(false);
       setSearch(null);
       return;
     }
 
-    // transformedSearchQuery = buildQueryString(val);
-
-    // transformedSearchQuery = objectToQueryParams(val);
-
     setSearch((search) => ({ ...search, ...val }));
     setPage(1);
 
     setfilterIsActive(true);
-  }
+  }, []);
 
-  function cancelFilter() {
+  const cancelFilter = React.useCallback(() => {
     setfilterIsActive(false);
     setSearch(null);
-  }
+  }, []);
 
-  // const queryClient = useQueryClient();
-
-  function handlePaginate(page: number, limit: number) {
-    setPage(page);
-    setLimit(limit);
-  }
-
-  function updateLimit(val: number) {
-    setLimit(val);
-  }
-  function updatePage(val: number) {
-    setPage(val);
-  }
-
-  function removeEmptyKeys(obj: { [key: string]: any }): {
-    [key: string]: any;
-  } {
-    const cleanedObj: { [key: string]: any } = {};
-    Object.keys(obj).forEach((key) => {
-      if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
-        cleanedObj[key] = obj[key];
-      }
-    });
-    return cleanedObj;
-  }
-  function objectToQueryParams(obj: { [key: string]: any }): string {
-    return Object.keys(removeEmptyKeys(obj))
-      .map(
-        (key) =>
-          `${encodeURIComponent(key)}=${encodeURIComponent(
-            obj[key].toString()
-          )}`
-      )
-      .join("&");
-  }
+  // function removeEmptyKeys(obj: { [key: string]: any }): {
+  //   [key: string]: any;
+  // } {
+  //   const cleanedObj: { [key: string]: any } = {};
+  //   Object.keys(obj).forEach((key) => {
+  //     if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
+  //       cleanedObj[key] = obj[key];
+  //     }
+  //   });
+  //   return cleanedObj;
+  // }
+  // function objectToQueryParams(obj: { [key: string]: any }): string {
+  //   return Object.keys(removeEmptyKeys(obj))
+  //     .map(
+  //       (key) =>
+  //         `${encodeURIComponent(key)}=${encodeURIComponent(
+  //           obj[key].toString()
+  //         )}`
+  //     )
+  //     .join("&");
+  // }
   const tableRef = useRef(null);
 
   const CardContent = (
     <div className=" bg-card  p-2">
-      <TableHeaderAction handleFilter={handleFilter}>
-        {headerActions}
-      </TableHeaderAction>
+      <TableHeaderAction onFilter={onFilter}>{headerActions}</TableHeaderAction>
 
       {!isLoading && !data.length && (
         <section className="flex justify-center items-center">
@@ -177,6 +215,54 @@ function TableComponent<T>({
     </div>
   ); // Render it conditionally with/without animation return
 
+  const memoizedValue = useMemo(
+    () => ({
+      data,
+      columns,
+      headerActions,
+      service,
+      limit,
+      page,
+      updateLimit,
+      totalRecords,
+      handlePaginate,
+      onFilter,
+      // objectToQueryParams,
+      cancelFilter,
+      filterIsActive,
+      actionable,
+      tableRef,
+      queryKey,
+      isDownloadable,
+      isRefetching,
+      search,
+      searchKey,
+      summary,
+    }),
+    [
+      data,
+      columns,
+      headerActions,
+      service,
+      limit,
+      page,
+      updateLimit,
+      totalRecords,
+      handlePaginate,
+      onFilter,
+      // objectToQueryParams,
+      cancelFilter,
+      filterIsActive,
+      actionable,
+      tableRef,
+      queryKey,
+      isDownloadable,
+      isRefetching,
+      search,
+      searchKey,
+      summary,
+    ]
+  );
   return (
     <TableContext.Provider
       value={{
@@ -189,8 +275,8 @@ function TableComponent<T>({
         updateLimit,
         totalRecords,
         handlePaginate,
-        handleFilter,
-        objectToQueryParams,
+        onFilter,
+        // objectToQueryParams,
         cancelFilter,
         filterIsActive,
         actionable,
@@ -211,7 +297,7 @@ function TableComponent<T>({
 }
 
 function TableFilterForm({ column, onCloseModal }: any) {
-  const { handleFilter, cancelFilter, search }: any = useContext(TableContext);
+  const { onFilter, cancelFilter, search }: any = useContext(TableContext);
   const { register, handleSubmit, formState } = useForm({
     mode: "onChange",
     defaultValues: { ...search },
@@ -221,7 +307,7 @@ function TableFilterForm({ column, onCloseModal }: any) {
   const { columns, isRefetching }: any = useContext(TableContext);
 
   async function onSubmit(data: any, onCloseModal: () => void) {
-    handleFilter({ ...search, ...data });
+    onFilter({ ...search, ...data });
 
     onCloseModal();
     // console.log(objectToQueryParams(data));
@@ -429,7 +515,7 @@ function TableHeaders() {
 }
 export function TableHeaderAction({ children }: any) {
   const {
-    handleFilter,
+    onFilter,
     tableRef,
     queryKey,
     isDownloadable,
@@ -451,9 +537,9 @@ export function TableHeaderAction({ children }: any) {
   const debouncedFilter = useMemo(
     () =>
       debounce((value: string) => {
-        handleFilter({ ...search, [searchKey]: value ?? undefined });
+        onFilter({ ...search, [searchKey]: value ?? undefined });
       }, 500),
-    [handleFilter, search, searchKey]
+    [onFilter, search, searchKey]
   );
 
   return (
@@ -462,10 +548,7 @@ export function TableHeaderAction({ children }: any) {
         <div className="w-1/2 items-start">
           <Search
             placeHolder={`Search by ${searchKey}`}
-            onSearch={(val) => {
-              // setSearchValue(val); // keep local UI responsive
-              debouncedFilter(val); // side-effect at the event boundary
-            }}
+            onSearch={debouncedFilter}
           />
         </div>
 
@@ -490,7 +573,7 @@ export function TableHeaderAction({ children }: any) {
 
       <div className="flex justify-end">
         {" "}
-        {cloneElement(children, { handleFilter, summary })}
+        {cloneElement(children, { onFilter, summary })}
       </div>
 
       {/* <div className="flex gap-3 items-center">

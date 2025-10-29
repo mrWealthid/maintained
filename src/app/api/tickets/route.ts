@@ -1,6 +1,7 @@
 import APIFeatures from "@/utils/apiFeatures";
 import { NextRequest, NextResponse } from "next/server";
 import Ticket from "@/models/ticketModel";
+import Category from "@/models/ticketCategoryModel";
 import { connect } from "@/dbConfig/dbConfig";
 import { mapToObject } from "@/utils/helpers";
 import MiddlewareFeatures from "@/middlewareFeatures";
@@ -55,11 +56,31 @@ export async function GET(request: NextRequest) {
     const query: any = request.nextUrl.searchParams;
 
     const transformedQuery = mapToObject(query);
-
+    //handling nested filters / partial match
     if (transformedQuery.title) {
       const regex = new RegExp(transformedQuery.title, "i"); // 'i' for case-insensitive
       filter = { ...filter, title: { $regex: regex } };
       delete transformedQuery.title; // Remove name from transformedQuery so it doesn't get double-filtered
+    }
+
+    if ("category" in transformedQuery) {
+      const categoryName = String(transformedQuery["category"]).trim();
+      const categoryFound = await Category.findOne({
+        name: new RegExp(categoryName, "i"),
+      }).select("_id");
+      // keep your same pattern:
+      transformedQuery["category"] = categoryFound ? categoryFound._id : null;
+      // If you prefer “no matches” to truly return none, you could delete the key instead:
+      // if (!categoryFound) delete transformedQuery["category"];
+    }
+
+    if ("user" in transformedQuery) {
+      const userName = String(transformedQuery["user"]).trim();
+      const userFound = await User.findOne({
+        name: new RegExp(userName, "i"),
+      }).select("_id");
+      transformedQuery["user"] = userFound ? userFound._id : null;
+      // Optionally: if (!userFound) delete transformedQuery["user"];
     }
 
     const requestQuery = Ticket.find(filter);

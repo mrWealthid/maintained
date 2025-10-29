@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import { useProfile, useSwitchBusiness } from "../profile/hooks/useProfile";
 import { User } from "../../model/model";
 import { ChevronDown, CircleCheck, LoaderCircle } from "lucide-react";
 
-export const SwitchBusiness = React.memo(() => {
+function SwitchBusiness() {
   const [open, setOpen] = useState(false);
   const { data, isLoading, error, isRefetching } = useProfile<User>();
 
@@ -91,4 +91,6 @@ export const SwitchBusiness = React.memo(() => {
       </div>
     </section>
   );
-});
+}
+
+export default React.memo(SwitchBusiness);

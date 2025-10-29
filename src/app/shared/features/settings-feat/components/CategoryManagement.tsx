@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Card,
   CardContent,
@@ -54,11 +54,11 @@ const CategoryManagement: React.FC = () => {
     setSelectedCategory(category);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     handleDeleteCategory(selectedCategory?.id!, {
       onSuccess: () => setSelectedCategory(null),
     });
-  };
+  }, []);
 
   const handleToggleStatus = async (category: Category) => {
     await updateCategory.mutateAsync({
@@ -70,6 +70,10 @@ const CategoryManagement: React.FC = () => {
       },
     });
   };
+
+  const handleClose = useCallback(() => {
+    setSelectedCategory(null);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -164,7 +168,7 @@ const CategoryManagement: React.FC = () => {
 
       <DeleteConfirmationModal
         isOpen={isOpen}
-        onClose={() => setSelectedCategory(null)}
+        onClose={handleClose}
         onConfirm={confirmDelete}
         title="Delete Category"
         description="Are you sure you want to delete this category? This action cannot be undone."

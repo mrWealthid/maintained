@@ -31,7 +31,6 @@ function DeleteConfirmationModal({
   itemName,
   isLoading,
 }: DeleteConfirmationModalProps) {
-  console.log("I rendered- DeleteConfirmation");
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>

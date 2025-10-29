@@ -10,17 +10,14 @@ import { ticketListFilterData } from "@/app/shared/features/ticket-feat/data/dat
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-const TicketHeaderActions: FC<TicketQueryprops> = ({
-  handleFilter,
-  summary,
-}) => {
+const TicketHeaderActions: FC<TicketQueryprops> = ({ onFilter, summary }) => {
   const [query, setQuery] = useState<TicketFilterQuery | null>({
     status: TICKET_STATUS.pending,
   });
 
   async function handleClick(query: TicketFilterQuery | null) {
     setQuery(query);
-    handleFilter?.(query);
+    onFilter?.(query);
   }
 
   return (

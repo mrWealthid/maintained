@@ -40,7 +40,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         role: membership?.role,
         isCreator: membership?.isCreator,
       };
-    }, [user]);
+    }, [user, isLoading, error]);
 
     return (
       <AppContext.Provider value={memoizedValue}>

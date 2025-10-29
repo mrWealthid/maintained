@@ -42,8 +42,6 @@ const TicketTypeManagement: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  console.log("I rendered - TicketManagement");
-
   const handleCreate = () => {
     setEditingType(null);
     setIsModalOpen(true);
@@ -55,11 +53,11 @@ const TicketTypeManagement: React.FC = () => {
     setSelectedTicket(ticketType);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     handleDeleteTicketType(selectedTicket?.id!, {
       onSuccess: () => setSelectedTicket(null),
     });
-  };
+  }, []);
 
   const handleToggleStatus = async (ticketType: TicketType) => {
     await updateTicketType.mutateAsync({

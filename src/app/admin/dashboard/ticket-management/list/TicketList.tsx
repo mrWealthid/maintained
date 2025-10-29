@@ -1,7 +1,7 @@
 import { TableColumn } from "@/app/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
 import { TICKET_STATUS } from "@/app/shared/enums/enums";
-import { FC } from "react";
+import React, { FC } from "react";
 import { fetchTicketList } from "@/app/shared/features/ticket-feat/service/ticket-service";
 import Table from "@/app/shared/components/table/Table";
 import { Ticket } from "@/app/shared/model/model";
@@ -69,4 +69,4 @@ const TicketList: FC = () => {
   );
 };
 
-export default TicketList;
+export default React.memo(TicketList);

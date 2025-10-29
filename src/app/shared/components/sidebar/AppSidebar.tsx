@@ -26,7 +26,7 @@ import {
 import Profile from "@/app/shared/components/profile/Profile";
 import Logout from "@/app/shared/components/header/Logout";
 import { Separator } from "@/components/ui/separator";
-import { SwitchBusiness } from "./SwitchBusiness";
+import SwitchBusiness from "./SwitchBusiness";
 
 function AppSidebar({ routes }: { routes: Routes[] }) {
   const pathname = usePathname();
