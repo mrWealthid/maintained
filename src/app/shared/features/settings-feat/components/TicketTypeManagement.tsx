@@ -53,11 +53,11 @@ const TicketTypeManagement: React.FC = () => {
     setSelectedTicket(ticketType);
   };
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = () => {
     handleDeleteTicketType(selectedTicket?.id!, {
       onSuccess: () => setSelectedTicket(null),
     });
-  }, []);
+  };
 
   const handleToggleStatus = async (ticketType: TicketType) => {
     await updateTicketType.mutateAsync({

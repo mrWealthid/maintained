@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import TicketList from "@/app/admin/dashboard/ticket-management/list/TicketList";
 import ToggleView from "@/app/shared/components/toggle-views/ToggleView";
 import TicketComponent from "@/app/shared/features/ticket-feat/pages/TicketComponent";
@@ -34,9 +34,9 @@ export default function Home() {
   const [isList, setIsList] = useState(false);
   const [open, setOpen] = useState(false);
 
-  function handleChangeView(val: boolean) {
+  const handleChangeView = useCallback((val: boolean) => {
     setIsList(val);
-  }
+  }, []);
 
   const { isCreating, handleCreateTicket } = useCreateTicket(false);
 
@@ -119,7 +119,7 @@ export default function Home() {
           </Sheet>
         </FormProvider>
 
-        <ToggleView isList={isList} handleChangeView={handleChangeView} />
+        <ToggleView isList={isList} onChangeView={handleChangeView} />
       </section>
       {isList ? (
         <TransitionReveal keyId="list">

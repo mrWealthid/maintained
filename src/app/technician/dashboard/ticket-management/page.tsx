@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import TicketList from "./list/TicketList";
 import ToggleView from "@/app/shared/components/toggle-views/ToggleView";
 import TransitionReveal from "@/app/shared/components/animation/TransitionReveal";
@@ -8,9 +7,9 @@ import TicketComponent from "@/app/shared/features/ticket-feat/pages/TicketCompo
 
 export default function Home() {
   const [isList, setIsList] = useState(true);
-  function handleChangeView(val: boolean) {
+  const handleChangeView = useCallback((val: boolean) => {
     setIsList(val);
-  }
+  }, []);
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -18,7 +17,7 @@ export default function Home() {
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <ToggleView isList={isList} handleChangeView={handleChangeView} />
+        <ToggleView isList={isList} onChangeView={handleChangeView} />
       </div>
       {isList ? (
         <TransitionReveal keyId="list">

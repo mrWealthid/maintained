@@ -8,7 +8,7 @@ import {
 import { technicianListFilter } from "@/app/shared/features/ticket-feat/data/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
-  handleFilter,
+  onFilter,
 }) => {
   const [query, setQuery] =
     useState<TicketFilterQuery<TECHNICIAN_RESPONSE> | null>({
@@ -19,7 +19,7 @@ const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
     query: TicketFilterQuery<TECHNICIAN_RESPONSE> | null
   ) {
     setQuery(query);
-    handleFilter?.(query);
+    onFilter?.(query);
   }
 
   return (

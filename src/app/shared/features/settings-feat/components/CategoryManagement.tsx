@@ -54,11 +54,11 @@ const CategoryManagement: React.FC = () => {
     setSelectedCategory(category);
   };
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = () => {
     handleDeleteCategory(selectedCategory?.id!, {
       onSuccess: () => setSelectedCategory(null),
     });
-  }, []);
+  };
 
   const handleToggleStatus = async (category: Category) => {
     await updateCategory.mutateAsync({
