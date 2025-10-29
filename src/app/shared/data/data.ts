@@ -25,18 +25,18 @@ export const technicianCrumbLabelMap: CrumbLabelMap = {
 export const layoutConfig: Record<
   ROLES.user | ROLES.admin | ROLES.technician,
   { routes: Routes[]; crumbLabelMap: CrumbLabelMap }
-> = {
-  [ROLES.user]: {
+> = Object.freeze({
+  [ROLES.user]: Object.freeze({
     routes: routes,
     crumbLabelMap: crumbLabelMap,
-  },
-  [ROLES.admin]: {
+  }),
+  [ROLES.admin]: Object.freeze({
     routes: adminRoutes,
     crumbLabelMap: adminCrumbLabelMap,
-  },
+  }),
 
-  [ROLES.technician]: {
+  [ROLES.technician]: Object.freeze({
     routes: technicianRoutes,
     crumbLabelMap: technicianCrumbLabelMap,
-  },
-};
+  }),
+});

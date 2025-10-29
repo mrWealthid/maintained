@@ -1,7 +1,7 @@
 "use client";
 import React, { FC } from "react";
 import { CiUser } from "react-icons/ci";
-import { Ticket } from "@/app/shared/model/model";
+import { Ticket, TicketDetails } from "@/app/shared/model/model";
 import Modal from "@/app/shared/components/modal/Modal";
 import { TicketActions } from "./TicketActions";
 
@@ -27,69 +27,14 @@ import {
   FileText,
   UserCheck,
 } from "lucide-react";
-
-// Optional: tiny utility for date formatting
-function formatDate(d: string | number | Date) {
-  try {
-    return new Date(d).toLocaleDateString();
-  } catch {
-    return "";
-  }
-}
-
-/** Colored pill classes for status */
-function statusPillClasses(status?: string) {
-  switch ((status || "").toUpperCase()) {
-    case "PENDING":
-      return "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100";
-    case "PROCESSING":
-      return "bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100";
-    case "ASSIGNED":
-      return "bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100";
-    case "SCHEDULED":
-      return "bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-100";
-    case "COMPLETED":
-      return "bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100";
-    case "DECLINED":
-      return "bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100";
-    default:
-      return "bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100";
-  }
-}
-
-/** Colored pill classes for priority */
-function priorityPillClasses(priority?: string) {
-  switch ((priority || "").toUpperCase()) {
-    case "LOW":
-      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100";
-    case "MEDIUM":
-      return "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100";
-    case "HIGH":
-      return "bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100";
-    case "URGENT":
-      return "bg-rose-100 text-rose-900 dark:bg-rose-900 dark:text-rose-100";
-    default:
-      return "bg-muted text-foreground";
-  }
-}
-
-/** Detect presence of any attachments across common fields */
-function hasAnyFiles(t: any) {
-  const pools = [
-    t?.attachments,
-    t?.files,
-    t?.media,
-    t?.images,
-    t?.videos,
-    t?.documents,
-  ];
-  return pools.some((arr: any) =>
-    Array.isArray(arr) ? arr.length > 0 : !!arr
-  );
-}
+import {
+  formatDate,
+  hasAnyFiles,
+  priorityPillClasses,
+  statusPillClasses,
+} from "../helpers/helpers";
 
 const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
-  // Extend typing a bit to surface optional fields
   const {
     title,
     description,
@@ -108,22 +53,23 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
     actionedBy,
     unitLabel,
     propertyName,
-  } = ticket as any;
+  } = ticket as TicketDetails;
 
-  const imageCount = Array.isArray(images) ? images.length : 0;
-  const videoCount = Array.isArray(videos) ? videos.length : 0;
-  const docCount = Array.isArray(documents) ? documents.length : 0;
-  const attachCount = Array.isArray(attachments) ? attachments.length : 0;
-  const filesCount = Array.isArray(files) ? files.length : 0;
-  const mediaCount = Array.isArray(media) ? media.length : 0;
+  const imageCount = images?.length ?? 0;
+  const videoCount = videos?.length ?? 0;
+  const docCount = documents?.length ?? 0;
+  const attachCount = attachments?.length ?? 0;
+  const filesCount = files?.length ?? 0;
+  const mediaCount = media?.length ?? 0;
+
   const totalAttachments =
     imageCount + videoCount + docCount + attachCount + filesCount + mediaCount;
 
   return (
     <Card className="w-full transition hover:shadow-md cursor-pointer">
       <CardHeader className="space-y-2">
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center flex-wrap  justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3">
             <time title={String(createdAt)}>{formatDate(createdAt)}</time>
             {area ? (
               <Badge

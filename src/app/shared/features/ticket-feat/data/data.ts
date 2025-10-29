@@ -1,59 +1,59 @@
-import { TECHNICIAN_RESPONSE, TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/app/shared/enums/enums";
 
-export const ticketListFilter = [
-	{
-		label: 'All',
-		value: TICKET_STATUS.all
-	},
-	{
-		label: 'Pending',
-		value: TICKET_STATUS.pending
-	},
-	{
-		label: 'Processing',
-		value: TICKET_STATUS.processing
-	},
-	{
-		label: 'Pending Assigment',
-		value: TICKET_STATUS.pending_assignment
-	},
-	{
-		label: 'Assigned',
-		value: TICKET_STATUS.assigned
-	},
-	{
-		label: 'Scheduled',
-		value: TICKET_STATUS.scheduled
-	},
-	{
-		label: 'Declined',
-		value: TICKET_STATUS.declined
-	},
-	{
-		label: 'Completed',
-		value: TICKET_STATUS.completed
-	}
+export const ticketListFilterData = [
+  {
+    label: "All",
+    value: TICKET_STATUS.all,
+  },
+  {
+    label: "Pending",
+    value: TICKET_STATUS.pending,
+  },
+  {
+    label: "Processing",
+    value: TICKET_STATUS.processing,
+  },
+  {
+    label: "Pending Assigment",
+    value: TICKET_STATUS.pending_assignment,
+  },
+  {
+    label: "Assigned",
+    value: TICKET_STATUS.assigned,
+  },
+  {
+    label: "Scheduled",
+    value: TICKET_STATUS.scheduled,
+  },
+  {
+    label: "Declined",
+    value: TICKET_STATUS.declined,
+  },
+  {
+    label: "Completed",
+    value: TICKET_STATUS.completed,
+  },
 ];
 export const technicianListFilter = [
-	{
-		label: 'All',
-		value: TECHNICIAN_RESPONSE.all
-	},
-	{
-		label: 'Pending',
-		value: TECHNICIAN_RESPONSE.pending
-	},
-	{
-		label: 'Applied',
-		value: TECHNICIAN_RESPONSE.applied
-	},
-	{
-		label: 'Selected',
-		value: TECHNICIAN_RESPONSE.selected
-	},
+  {
+    label: "All",
+    value: TECHNICIAN_RESPONSE.all,
+  },
+  {
+    label: "Pending",
+    value: TECHNICIAN_RESPONSE.pending,
+  },
+  {
+    label: "Applied",
+    value: TECHNICIAN_RESPONSE.applied,
+  },
+  {
+    label: "Selected",
+    value: TECHNICIAN_RESPONSE.selected,
+  },
 
-	{
-		label: 'Declined',
-		value: TECHNICIAN_RESPONSE.declined
-	}
+  {
+    label: "Declined",
+    value: TECHNICIAN_RESPONSE.declined,
+  },
 ];

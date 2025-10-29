@@ -1,11 +1,11 @@
 import React, { FC } from "react";
-import { CiSearch } from "react-icons/ci";
+import { SearchIcon } from "lucide-react";
 
 const Search: FC<SearchProps> = ({ placeHolder, onSearch }) => {
   return (
     <div className="flex bg-card dark:bg-transparent flex-1  border  cursor-pointer items-center pl-3  rounded-3xl overflow-hidden">
       <label htmlFor="search" className="cursor-pointer">
-        <CiSearch size={15} color={"gray"} />
+        <SearchIcon width={14} height={14} />
       </label>
       <input
         type="search"
@@ -20,7 +20,7 @@ const Search: FC<SearchProps> = ({ placeHolder, onSearch }) => {
   );
 };
 
-export default Search;
+export default React.memo(Search);
 
 interface SearchProps {
   placeHolder: string;

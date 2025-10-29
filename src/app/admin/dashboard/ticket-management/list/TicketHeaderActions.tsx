@@ -6,7 +6,7 @@ import {
   TicketFilterQuery,
   TicketQueryprops,
 } from "@/app/shared/features/ticket-feat/model/ticket.model";
-import { ticketListFilter } from "@/app/shared/features/ticket-feat/data/data";
+import { ticketListFilterData } from "@/app/shared/features/ticket-feat/data/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
@@ -35,7 +35,7 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({
         className="w-auto"
       >
         <TabsList className="bg-muted p-1 rounded-full shadow-sm">
-          {ticketListFilter.map((tab) => (
+          {ticketListFilterData.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}

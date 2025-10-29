@@ -1,9 +1,9 @@
 "use client";
-import React, { FC, useState } from "react";
+import React, { FC, useCallback, useState } from "react";
 import TicketCard from "./TicketCard";
 import { TICKET_STATUS } from "@/app/shared/enums/enums";
 import { Ticket } from "@/app/shared/model/model";
-import { ticketListFilter } from "../data/data";
+import { ticketListFilterData } from "../data/data";
 import FilterTabs from "@/app/shared/components/tabs/FilterTabs";
 import Search from "@/app/shared/components/search/Search";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -21,19 +21,24 @@ const TicketComponent: FC = () => {
   const { isLoading, error, data, totalRecords, results, isRefetching } =
     useFetchTickets<Ticket>(status, { title: debouncedSearchTerm });
 
-  function handleClick(val: TICKET_STATUS) {
-    setStatus(val);
-  }
+  const handleSelectedValue = useCallback(
+    (val: TICKET_STATUS) => setStatus(val),
+    [setStatus]
+  );
+  const handleSearchValue = useCallback(
+    (val: string) => setSearch(val),
+    [setStatus]
+  );
 
   return (
     <section>
       <div className="flex flex-col md:flex-row overflow-x-auto gap-2   mb-3 md:justify-between flex-wrap  md:items-center">
-        <Search placeHolder="Enter title" onSearch={(val) => setSearch(val)} />
+        <Search placeHolder="Enter title" onSearch={handleSearchValue} />
 
         <FilterTabs
           status={status}
-          handleClick={handleClick}
-          data={ticketListFilter}
+          onSelectValue={handleSelectedValue}
+          data={ticketListFilterData}
         />
       </div>
 

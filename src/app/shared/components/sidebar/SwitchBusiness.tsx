@@ -10,7 +10,7 @@ import { useProfile, useSwitchBusiness } from "../profile/hooks/useProfile";
 import { User } from "../../model/model";
 import { ChevronDown, CircleCheck, LoaderCircle } from "lucide-react";
 
-export const SwitchBusiness = () => {
+export const SwitchBusiness = React.memo(() => {
   const [open, setOpen] = useState(false);
   const { data, isLoading, error, isRefetching } = useProfile<User>();
 
@@ -91,4 +91,4 @@ export const SwitchBusiness = () => {
       </div>
     </section>
   );
-};
+});

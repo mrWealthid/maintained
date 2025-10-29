@@ -49,6 +49,9 @@ export interface Ticket {
 
 export interface TicketDetails extends Ticket {
   requests: TechnicianRequest[];
+  attachments?: string[];
+  files?: string[];
+  media?: string[];
 }
 
 export interface CreateTicketPayload
@@ -100,7 +103,7 @@ export interface ITab {
 }
 
 export interface ButtonGroupTabsProps<T = string> {
-  handleClick: (type: TICKET_STATUS) => void;
+  onSelectValue: (type: TICKET_STATUS) => void;
   status: TICKET_STATUS;
   data: TabData<T>[];
 }
