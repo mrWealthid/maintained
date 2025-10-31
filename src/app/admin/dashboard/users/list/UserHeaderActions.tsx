@@ -1,46 +1,45 @@
-'use client';
-import React, { FC, useState } from 'react';
-import { FaCircle } from 'react-icons/fa';
-import { INVITE_STATUS } from '@/app/shared/enums/enums';
-import { UserFilterQuery, UserQueryprops } from '@/app/shared/model/model';
-import { userListFilter } from '../data/user.data';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+"use client";
+import React, { FC, useState } from "react";
+import { INVITE_STATUS } from "@/app/shared/enums/enums";
+import { UserFilterQuery, UserQueryprops } from "@/app/shared/model/model";
+import { userListFilter } from "../data/user.data";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
-	const [query, setQuery] = useState<UserFilterQuery | null>({
-		status: INVITE_STATUS.invited
-	});
+const UserHeaderActions: FC<UserQueryprops> = ({ onFilter }) => {
+  const [query, setQuery] = useState<UserFilterQuery | null>({
+    status: INVITE_STATUS.invited,
+  });
 
-	async function handleClick(query: UserFilterQuery | null) {
-		setQuery(query);
-		handleFilter?.(query);
-	}
+  async function handleClick(query: UserFilterQuery | null) {
+    setQuery(query);
+    onFilter?.(query);
+  }
 
-	return (
-		<>
-			<Tabs
-				value={query?.status ?? INVITE_STATUS.all}
-				onValueChange={(val) =>
-					handleClick(
-						val === INVITE_STATUS.all
-							? null
-							: { status: val as INVITE_STATUS }
-					)
-				}
-				className='w-auto'>
-				<TabsList className='bg-muted p-1 rounded-full shadow-sm space-x-1'>
-					{userListFilter.map((tab) => (
-						<TabsTrigger
-							key={tab.value}
-							value={tab.value}
-							className='rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all'>
-							{tab.label}
-						</TabsTrigger>
-					))}
-				</TabsList>
-			</Tabs>
+  return (
+    <>
+      <Tabs
+        value={query?.status ?? INVITE_STATUS.all}
+        onValueChange={(val) =>
+          handleClick(
+            val === INVITE_STATUS.all ? null : { status: val as INVITE_STATUS }
+          )
+        }
+        className="w-auto"
+      >
+        <TabsList className="bg-muted p-1 rounded-full shadow-sm space-x-1">
+          {userListFilter.map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="rounded-full text-xs px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-foreground transition-all"
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-			{/*
+      {/*
 			<select
 				id="sort"
 				name="sort"
@@ -51,8 +50,8 @@ const UserHeaderActions: FC<UserQueryprops> = ({ handleFilter }) => {
 				<option value="">Sort By Date(Recent)</option>
 				<option value="">Sort By Date(Lowest)</option>
 			</select> */}
-		</>
-	);
+    </>
+  );
 };
 
 export default UserHeaderActions;

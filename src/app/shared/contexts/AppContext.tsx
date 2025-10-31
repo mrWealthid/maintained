@@ -1,9 +1,8 @@
 "use client";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { ROLES } from "../enums/enums";
 import { User } from "../model/model";
 import { useProfile } from "../components/profile/hooks/useProfile";
-import { useRouter } from "next/navigation";
 import { getMembershipForBusiness } from "@/utils/helpers";
 
 interface AppContextType {

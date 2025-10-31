@@ -380,7 +380,7 @@ userSchema.pre<IUser>("save", function (next) {
 
 // Exclude inactive users from queries
 userSchema.pre(/^find/, function (next) {
-  (this as mongoose.Query<any, any>).where({ active: { $ne: false } });
+  (this as mongoose.Query<IUser, IUser>).where({ active: { $ne: false } });
   next();
 });
 

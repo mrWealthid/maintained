@@ -18,13 +18,9 @@ import {
   OnboardUser,
   RegisterPayload,
 } from "../model/model";
-import { ApiError } from "next/dist/server/api-utils";
-import { useState } from "react";
-import axios from "axios";
-import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
-import { User } from "@/app/shared/model/model";
-import { NextRouter } from "next/router";
+
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ApiError } from "@/app/shared/model/model";
 
 // export function useLogins(): {
 //   handleLogins: ({

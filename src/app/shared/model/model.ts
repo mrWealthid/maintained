@@ -182,7 +182,7 @@ export type UserRowProps = {
 };
 
 export type UserQueryprops = {
-  handleFilter?: (query: { status?: INVITE_STATUS } | null) => void;
+  onFilter?: (query: { status?: INVITE_STATUS } | null) => void;
 };
 
 export type UserFilterQuery = {
