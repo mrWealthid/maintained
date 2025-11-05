@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useOnboardUser } from "../../hooks/useAuth";
 import { OnboardUserForm } from "../../model/model";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import AuthWrapper from "../../AuthWrapper";
 const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
   const form = useForm<OnboardUserForm>({

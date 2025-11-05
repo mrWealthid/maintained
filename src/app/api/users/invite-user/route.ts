@@ -1,4 +1,4 @@
-import { INVITE_STATUS } from "@/app/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import Business from "@/models/businessModel";
 import User from "@/models/userModel";

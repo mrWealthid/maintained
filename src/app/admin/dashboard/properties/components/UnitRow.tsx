@@ -1,8 +1,8 @@
-import { UnitRowProps } from "@/app/shared/features/property-feat/model/unit.model";
+import { UnitRowProps } from "@/features/property-feat/model/unit.model";
 import UnitRowActions from "./UnitRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/app/shared/components/modal/Modal";
+import Modal from "@/shared/components/modal/Modal";
 import { Home, Building2, Users } from "lucide-react";
 
 function UnitRow({ data }: UnitRowProps) {

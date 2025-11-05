@@ -1,7 +1,7 @@
 // middleware.ts
 import { NextResponse, NextRequest } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { INVITE_STATUS, ROLES } from "./app/shared/enums/enums";
+import { INVITE_STATUS, ROLES } from "./shared/enums/enums";
 
 type Role = "ADMIN" | "TECHNICIAN" | "USER" | string | null;
 type TenantsClaim = Array<{

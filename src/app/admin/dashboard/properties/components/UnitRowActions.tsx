@@ -1,7 +1,7 @@
 import React, { FC } from "react";
-import { UnitRowActionsProps } from "@/app/shared/features/property-feat/model/unit.model";
+import { UnitRowActionsProps } from "@/features/property-feat/model/unit.model";
 import { TableCell } from "@/components/ui/table";
-import UnitActions from "@/app/shared/features/property-feat/pages/UnitActions";
+import UnitActions from "@/features/property-feat/pages/UnitActions";
 
 const UnitRowActions: FC<UnitRowActionsProps> = ({ unit }) => {
   return (

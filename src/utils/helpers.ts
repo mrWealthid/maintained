@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import crypto from "crypto";
-import { INVITE_STATUS, ROLES, TICKET_STATUS } from "@/app/shared/enums/enums";
-import { Membership, User } from "@/app/shared/model/model";
+import { INVITE_STATUS, ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { Membership, User } from "@/shared/model/model";
 
 export function mapToObject(map: Map<string, any>): { [key: string]: any } {
   const obj: { [key: string]: any } = {};

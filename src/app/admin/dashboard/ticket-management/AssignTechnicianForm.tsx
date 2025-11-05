@@ -1,16 +1,16 @@
 "use client";
 import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import TextInput from "@/app/shared/components/form-elements/Text-Input";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
-import { useAssignTechnician } from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
+import TextInput from "@/shared/components/form-elements/Text-Input";
+import ButtonComponent from "@/shared/components/form-elements/Button";
+import { useAssignTechnician } from "@/features/ticket-feat/hooks/ticketHooks";
 import {
   AssignTechnicianFormControls,
   AssignTechnicianFormProps,
-} from "@/app/shared/features/ticket-feat/model/ticket.model";
-import AutoComplete from "@/app/shared/components/auto-complete/AutoComplete";
-import { User } from "@/app/shared/model/model";
-import { fetchTechnicians } from "@/app/shared/features/ticket-feat/service/ticket-service";
+} from "@/features/ticket-feat/model/ticket.model";
+import AutoComplete from "@/shared/components/auto-complete/AutoComplete";
+import { User } from "@/shared/model/model";
+import { fetchTechnicians } from "@/features/ticket-feat/service/ticket-service";
 
 const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
   ticket,

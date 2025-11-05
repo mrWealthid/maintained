@@ -2,10 +2,10 @@
 
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import OnboardingModal from "@/app/shared/features/onboarding-feat/OnboardingModal";
-import TicketComponent from "@/app/shared/features/ticket-feat/pages/TicketComponent";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
-import { useOnboardingChecklist } from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
+import OnboardingModal from "@/features/onboarding-feat/OnboardingModal";
+import TicketComponent from "@/features/ticket-feat/pages/TicketComponent";
+import { useAppContext } from "@/shared/contexts/AppContext";
+import { useOnboardingChecklist } from "@/features/onboarding-feat/hooks/onboardingHooks";
 
 export default function Home() {
   const pathname = usePathname();

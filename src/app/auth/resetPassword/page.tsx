@@ -4,7 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useResetPassword } from "../hooks/useAuth";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import { IResetPassword } from "../model/model";
 import {
   Card,
@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import AuthWrapper from "../AuthWrapper";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import { EmailRegex } from "../data/data";
 
 const ResetPasswordComponent = () => {

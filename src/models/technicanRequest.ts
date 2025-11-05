@@ -1,4 +1,4 @@
-import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface ITechnicianRequest extends Document {

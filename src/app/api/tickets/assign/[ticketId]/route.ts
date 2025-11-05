@@ -1,4 +1,4 @@
-import { ROLES, TICKET_STATUS } from "@/app/shared/enums/enums";
+import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ensureTicketRoom } from "@/lib/chat/chat";
 import { pusherServer } from "@/lib/pusher/pusher";

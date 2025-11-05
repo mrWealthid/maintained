@@ -1,16 +1,16 @@
 "use client";
 import React, { FC, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import {
   useFetchTechnicians,
   useFetchTicketDetails,
   useSendTechnicianRequest,
-} from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
+} from "@/features/ticket-feat/hooks/ticketHooks";
 import {
   SendTechnicianRequestFormControls,
   SendTechnicianRequestFormProps,
-} from "@/app/shared/features/ticket-feat/model/ticket.model";
+} from "@/features/ticket-feat/model/ticket.model";
 import {
   PopoverTrigger,
   Popover,

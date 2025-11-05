@@ -1,9 +1,9 @@
-import { TableColumn } from "@/app/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/table/models/table.model";
 import UnitRow from "./UnitRow";
 import { FC } from "react";
-import { fetchUnitList } from "@/app/shared/features/property-feat/service/unit-service";
-import Table from "@/app/shared/components/table/Table";
-import { Unit } from "@/app/shared/features/property-feat/service/unit-service";
+import { fetchUnitList } from "@/features/property-feat/service/unit-service";
+import Table from "@/shared/components/table/Table";
+import { Unit } from "@/features/property-feat/service/unit-service";
 import UnitHeaderActions from "./UnitHeaderActions";
 
 const UnitList: FC = () => {

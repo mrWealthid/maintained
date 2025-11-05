@@ -1,12 +1,12 @@
-import { TableColumn } from "@/app/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
-import { TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import React, { FC } from "react";
-import { fetchTicketList } from "@/app/shared/features/ticket-feat/service/ticket-service";
-import Table from "@/app/shared/components/table/Table";
-import { Ticket } from "@/app/shared/model/model";
+import { fetchTicketList } from "@/features/ticket-feat/service/ticket-service";
+import Table from "@/shared/components/table/Table";
+import { Ticket } from "@/shared/model/model";
 import TicketHeaderActions from "./TicketHeaderActions";
-import TableComponent from "@/app/shared/components/table/Table";
+import TableComponent from "@/shared/components/table/Table";
 
 const TicketList: FC = () => {
   const columns: TableColumn[] = [

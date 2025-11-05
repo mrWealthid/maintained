@@ -1,9 +1,9 @@
-import { TableColumn } from "@/app/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/table/models/table.model";
 import PropertyRow from "./PropertyRow";
 import { FC } from "react";
-import { fetchPropertyList } from "@/app/shared/features/property-feat/service/property-service";
-import Table from "@/app/shared/components/table/Table";
-import { Property } from "@/app/shared/features/property-feat/service/property-service";
+import { fetchPropertyList } from "@/features/property-feat/service/property-service";
+import Table from "@/shared/components/table/Table";
+import { Property } from "@/features/property-feat/service/property-service";
 import PropertyHeaderActions from "./PropertyHeaderActions";
 
 const PropertyList: FC = () => {

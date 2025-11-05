@@ -6,10 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCreateMultipleUsers } from "./hooks/userHooks";
-import { ROLES } from "@/app/shared/enums/enums";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
-import { CreateMultipleUsersPayload } from "@/app/shared/model/model";
-import { useFetchProperties } from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
+import { ROLES } from "@/shared/enums/enums";
+import { useAppContext } from "@/shared/contexts/AppContext";
+import { CreateMultipleUsersPayload } from "@/shared/model/model";
+import { useFetchProperties } from "@/features/onboarding-feat/hooks/onboardingHooks";
 import SingleForm from "./SingleForm";
 
 // ----------------------

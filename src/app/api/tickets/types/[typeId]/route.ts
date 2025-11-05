@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import TicketType from "@/models/ticketTypeModel";
-import { ROLES } from "@/app/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 
 connect();
 

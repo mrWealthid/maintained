@@ -1,10 +1,10 @@
 import React, { FC } from "react";
 
-import { TicketRowActionsProps } from "@/app/shared/features/ticket-feat/model/ticket.model";
+import { TicketRowActionsProps } from "@/features/ticket-feat/model/ticket.model";
 
 import { TableCell } from "@/components/ui/table";
 
-import { TicketActions } from "@/app/shared/features/ticket-feat/pages/TicketActions";
+import { TicketActions } from "@/features/ticket-feat/pages/TicketActions";
 
 const TicketRowActions: FC<TicketRowActionsProps> = ({ ticket }) => {
   return (

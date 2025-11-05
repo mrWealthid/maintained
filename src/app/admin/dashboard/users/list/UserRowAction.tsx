@@ -1,7 +1,7 @@
 import React, { FC } from "react";
-import { UserRowActionsProps } from "@/app/shared/model/model";
-import Modal from "@/app/shared/components/modal/Modal";
-import ConfirmationPage from "@/app/shared/components/ui/ConfirmationPage";
+import { UserRowActionsProps } from "@/shared/model/model";
+import Modal from "@/shared/components/modal/Modal";
+import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
 import { useDeleteUser, useReInviteUser } from "../hooks/userHooks";
 import UserForm from "../UserForm";
 import { TfiMore } from "react-icons/tfi";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { getMembershipForBusiness } from "@/utils/helpers";
-import { INVITE_STATUS } from "@/app/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 
 const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
   const { isDeleting, deleteUser } = useDeleteUser();

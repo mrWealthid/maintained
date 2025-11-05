@@ -2,7 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User, { UserDoc } from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { INVITE_STATUS } from "@/app/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 
 connect();
 

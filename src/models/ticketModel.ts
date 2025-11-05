@@ -3,7 +3,7 @@ import type { ObjectId } from "mongoose";
 import Business from "./businessModel";
 import User from "./userModel";
 import Category from "./ticketCategoryModel";
-import { TICKET_PRIORITY, TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TICKET_PRIORITY, TICKET_STATUS } from "@/shared/enums/enums";
 import "./technicanRequest";
 
 export interface LocationSnapshot {

@@ -1,12 +1,12 @@
-import { UserRowProps } from "@/app/shared/model/model";
+import { UserRowProps } from "@/shared/model/model";
 import UserRowAction from "./UserRowAction";
-import Modal from "@/app/shared/components/modal/Modal";
+import Modal from "@/shared/components/modal/Modal";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getMembershipForBusiness } from "@/utils/helpers";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
+import { useAppContext } from "@/shared/contexts/AppContext";
 import { CircleCheck, Loader } from "lucide-react";
-import { INVITE_STATUS } from "@/app/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 
 function UserRow({ data }: UserRowProps) {
   const { user } = useAppContext();

@@ -4,7 +4,7 @@ import "./global.css";
 import Provider from "@/utils/Provider";
 import { Toaster } from "react-hot-toast";
 import { Toaster as Toasts } from "@/components/ui/sonner";
-import { ThemeProvider } from "./shared/contexts/ThemeProvider";
+import { ThemeProvider } from "../shared/contexts/ThemeProvider";
 
 const raleway = Raleway({ subsets: ["latin"] });
 

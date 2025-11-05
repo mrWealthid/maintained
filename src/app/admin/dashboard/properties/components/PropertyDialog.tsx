@@ -9,12 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import PropertyForm from "@/app/shared/features/property-feat/form/PropertyForm";
-import MultiplePropertyForm from "@/app/shared/features/onboarding-feat/components/MultiplePropertyForm";
-import PropertyView from "@/app/shared/features/property-feat/components/PropertyView";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
-import { useCreateProperty } from "@/app/shared/features/property-feat/hooks/propertyHooks";
-import { Property } from "@/app/shared/features/property-feat/service/property-service";
+import PropertyForm from "@/features/property-feat/form/PropertyForm";
+import MultiplePropertyForm from "@/features/onboarding-feat/components/MultiplePropertyForm";
+import PropertyView from "@/features/property-feat/components/PropertyView";
+import { useAppContext } from "@/shared/contexts/AppContext";
+import { useCreateProperty } from "@/features/property-feat/hooks/propertyHooks";
+import { Property } from "@/features/property-feat/service/property-service";
 
 interface PropertyDialogProps {
   open: boolean;

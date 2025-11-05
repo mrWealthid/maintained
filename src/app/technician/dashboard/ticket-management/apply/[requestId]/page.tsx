@@ -1,8 +1,8 @@
-import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
+import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { findData } from "@/utils/apiRequests";
 import { FC } from "react";
 import ApplyForm from "../../ApplyForm";
-import { TechnicianRequest } from "@/app/shared/features/ticket-feat/model/ticket.model";
+import { TechnicianRequest } from "@/features/ticket-feat/model/ticket.model";
 
 const Page: FC<{ params: Promise<{ requestId: string }> }> = async ({
   params,

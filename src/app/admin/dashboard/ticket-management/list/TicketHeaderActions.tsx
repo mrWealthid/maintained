@@ -1,12 +1,12 @@
 "use client";
 
 import React, { FC, useState } from "react";
-import { TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import {
   TicketFilterQuery,
   TicketQueryprops,
-} from "@/app/shared/features/ticket-feat/model/ticket.model";
-import { ticketListFilterData } from "@/app/shared/features/ticket-feat/data/data";
+} from "@/features/ticket-feat/model/ticket.model";
+import { ticketListFilterData } from "@/features/ticket-feat/data/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 

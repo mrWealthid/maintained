@@ -1,9 +1,9 @@
 "use client";
 import React, { FC } from "react";
 import Link from "next/link";
-import { TechnicianRowActionsProps } from "@/app/shared/features/ticket-feat/model/ticket.model";
-import Modal from "@/app/shared/components/modal/Modal";
-import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TechnicianRowActionsProps } from "@/features/ticket-feat/model/ticket.model";
+import Modal from "@/shared/components/modal/Modal";
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/shared/enums/enums";
 import { TfiMore } from "react-icons/tfi";
 import DeclineForm from "../DeclineForm";
 import { TableCell } from "@/components/ui/table";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import ApplyForm from "../ApplyForm";
-import { TECHNICIAN_ROUTES_DEFINITION } from "@/app/shared/routes/routes";
+import { TECHNICIAN_ROUTES_DEFINITION } from "@/shared/routes/routes";
 
 const TicketRowActions: FC<TechnicianRowActionsProps> = ({
   technicianRequest,

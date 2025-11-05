@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddressSchema } from "@/lib/validation/address";
-import AddressField from "@/app/shared/components/address/AddressField";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import AddressField from "@/shared/components/address/AddressField";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import { RegisterPayload } from "../model/model";
-import { InternationalPhoneField } from "@/app/shared/components/phone-number/International-phonefield";
+import { InternationalPhoneField } from "@/shared/components/phone-number/International-phonefield";
 import parsePhoneNumberFromString, { CountryCode } from "libphonenumber-js";
 import { CODES, EmailRegex } from "../data/data";
 

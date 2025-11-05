@@ -1,5 +1,5 @@
 import React from "react";
-import TicketCardLoader from "@/app/shared/features/ticket-feat/loaders/TicketCardLoader";
+import TicketCardLoader from "@/features/ticket-feat/loaders/TicketCardLoader";
 
 const loading = () => {
   return (

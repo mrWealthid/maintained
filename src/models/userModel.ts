@@ -9,7 +9,7 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import Business from "./businessModel";
-import { INVITE_STATUS, ROLES } from "@/app/shared/enums/enums";
+import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
 
 export interface IUser extends Document {
   name: string;

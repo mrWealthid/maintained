@@ -2,9 +2,9 @@
 import React, { FC, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useCreateUser } from "./hooks/userHooks";
-import { ROLES } from "@/app/shared/enums/enums";
-import { ManageUserForm, ManageUserFormProps } from "@/app/shared/model/model";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
+import { ROLES } from "@/shared/enums/enums";
+import { ManageUserForm, ManageUserFormProps } from "@/shared/model/model";
+import { useAppContext } from "@/shared/contexts/AppContext";
 
 // shadcn/ui
 import { Label } from "@/components/ui/label";
@@ -19,17 +19,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 // Keep your existing ButtonComponent for actions
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import {
   fetchProperties,
   fetchUnits,
-} from "@/app/shared/features/onboarding-feat/service/onboarding-service";
+} from "@/features/onboarding-feat/service/onboarding-service";
 import {
   useFetchProperties,
   useFetchUnits,
-} from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
+} from "@/features/onboarding-feat/hooks/onboardingHooks";
 
 // ----------------------
 // Config

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useUpdatePassword } from "../../hooks/useAuth";
 import { IUpdatePassword } from "../../model/model";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import AuthWrapper from "../../AuthWrapper";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
   const form = useForm<{ currentPassword: string; newPassword: string }>({
     mode: "onChange",

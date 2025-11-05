@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Property from "@/models/propertyModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiErrorHandler } from "@/utils/apiError";
-import { PROPERTY_TYPES } from "@/app/shared/features/onboarding-feat/data/data";
+import { PROPERTY_TYPES } from "@/features/onboarding-feat/data/data";
 import Unit from "@/models/unitModel";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";

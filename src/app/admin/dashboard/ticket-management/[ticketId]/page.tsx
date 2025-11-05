@@ -1,9 +1,9 @@
-import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
+import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { findData } from "@/utils/apiRequests";
 import { FC } from "react";
-import TicketDetails from "@/app/shared/features/ticket-feat/pages/TicketDetails";
-import { TicketDetailsResponse } from "@/app/shared/features/ticket-feat/model/ticket.model";
-import Modal from "@/app/shared/components/modal/Modal";
+import TicketDetails from "@/features/ticket-feat/pages/TicketDetails";
+import { TicketDetailsResponse } from "@/features/ticket-feat/model/ticket.model";
+import Modal from "@/shared/components/modal/Modal";
 
 const Page: FC<{ params: Promise<{ ticketId: string }> }> = async ({
   params,

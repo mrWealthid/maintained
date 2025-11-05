@@ -8,7 +8,7 @@ import MiddlewareFeatures from "@/middlewareFeatures";
 import { Types } from "mongoose";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
-import { TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 

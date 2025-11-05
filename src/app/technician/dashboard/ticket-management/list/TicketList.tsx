@@ -1,11 +1,11 @@
 "use client";
-import { TableColumn } from "@/app/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
-import { TICKET_STATUS } from "@/app/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import { FC } from "react";
-import { fetchRequestTicketList } from "@/app/shared/features/ticket-feat/service/ticket-service";
-import TableComponent from "@/app/shared/components/table/Table";
-import { Ticket } from "@/app/shared/model/model";
+import { fetchRequestTicketList } from "@/features/ticket-feat/service/ticket-service";
+import TableComponent from "@/shared/components/table/Table";
+import { Ticket } from "@/shared/model/model";
 import TicketHeaderActions from "./TicketHeaderActions";
 
 const TicketList: FC = () => {

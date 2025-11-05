@@ -24,8 +24,8 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 

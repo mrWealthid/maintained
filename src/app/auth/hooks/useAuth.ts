@@ -20,7 +20,7 @@ import {
 } from "../model/model";
 
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ApiError } from "@/app/shared/model/model";
+import { ApiError } from "@/shared/model/model";
 
 // export function useLogins(): {
 //   handleLogins: ({

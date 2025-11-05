@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyDialog from "./PropertyDialog";
 import { useState } from "react";
-import { useAppContext } from "@/app/shared/contexts/AppContext";
+import { useAppContext } from "@/shared/contexts/AppContext";
 
 const PropertyHeaderActions: FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

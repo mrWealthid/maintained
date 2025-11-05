@@ -8,7 +8,7 @@ import {
   RegisterPayload,
 } from "../model/model";
 import { ApiErrorHandler } from "@/utils/apiError";
-import { API_ROUTES } from "@/app/shared/routes/apiRoutes";
+import { API_ROUTES } from "@/shared/routes/apiRoutes";
 
 export async function handleLogin(payload: LoginPayload) {
   try {

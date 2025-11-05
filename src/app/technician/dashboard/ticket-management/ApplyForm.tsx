@@ -1,13 +1,13 @@
 "use client";
 import React, { FC, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
-import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
-import { useProcessTechnicianResponse } from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
+import ButtonComponent from "@/shared/components/form-elements/Button";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
+import { useProcessTechnicianResponse } from "@/features/ticket-feat/hooks/ticketHooks";
 import {
   ApplyTechnicianFormControls,
   ApplyTicketFormProps,
-} from "@/app/shared/features/ticket-feat/model/ticket.model";
+} from "@/features/ticket-feat/model/ticket.model";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -22,7 +22,7 @@ import { format } from "date-fns/format";
 import { formatISO } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import ErrorMessage from "@/app/shared/components/form-elements/ErrorMessage";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import {
   Table,
   TableBody,
@@ -32,7 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { TECHNICIAN_ROUTES_DEFINITION } from "@/app/shared/routes/routes";
+import { TECHNICIAN_ROUTES_DEFINITION } from "@/shared/routes/routes";
 
 const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
   const { isProcessing, processResponse } = useProcessTechnicianResponse(

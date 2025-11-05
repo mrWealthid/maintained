@@ -1,7 +1,7 @@
 import React, { FC } from "react";
-import { PropertyRowActionsProps } from "@/app/shared/features/property-feat/model/property.model";
+import { PropertyRowActionsProps } from "@/features/property-feat/model/property.model";
 import { TableCell } from "@/components/ui/table";
-import PropertyActions from "@/app/shared/features/property-feat/pages/PropertyActions";
+import PropertyActions from "@/features/property-feat/pages/PropertyActions";
 
 const PropertyRowActions: FC<PropertyRowActionsProps> = ({ property }) => {
   return (

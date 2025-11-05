@@ -1,5 +1,5 @@
-import { ROLES } from "@/app/shared/enums/enums";
-import { CreateMultipleUsersPayload } from "@/app/shared/model/model";
+import { ROLES } from "@/shared/enums/enums";
+import { CreateMultipleUsersPayload } from "@/shared/model/model";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,8 +16,8 @@ import {
   type FieldArrayWithId,
 } from "react-hook-form";
 import { SpecialtyBadges } from "./MultipleUserForm";
-import { Property } from "@/app/shared/features/onboarding-feat/model/model";
-import { useFetchUnits } from "@/app/shared/features/onboarding-feat/hooks/onboardingHooks";
+import { Property } from "@/features/onboarding-feat/model/model";
+import { useFetchUnits } from "@/features/onboarding-feat/hooks/onboardingHooks";
 
 const SingleForm = ({
   field,

@@ -10,7 +10,7 @@ import {
   ApiError,
   CreateMultipleUsersPayload,
   CreateUserPayload,
-} from "@/app/shared/model/model";
+} from "@/shared/model/model";
 
 export function useCreateUser(
   isEditing: boolean,

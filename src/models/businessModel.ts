@@ -146,7 +146,7 @@ businessSchema.pre("validate", function (next) {
     doc.addressStructured &&
     (!doc.address || doc.isModified("addressStructured"))
   ) {
-    const line = formatSingleLine(doc.addressStructured as any);
+    const line = formatSingleLine(doc.addressStructured);
     if (line) doc.address = line;
     if (doc.addressStructured.country)
       doc.country = doc.addressStructured.country;

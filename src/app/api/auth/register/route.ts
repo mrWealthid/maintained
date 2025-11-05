@@ -3,7 +3,7 @@ import User, { UserDoc } from "@/models/userModel";
 import Business from "@/models/businessModel";
 import { NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { INVITE_STATUS, ROLES } from "@/app/shared/enums/enums";
+import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
 import { ApiErrorHandler } from "@/utils/apiError";
 
 connect();

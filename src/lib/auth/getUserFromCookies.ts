@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { verifyToken } from "./token";
 import { cookies as getCookiesHeader } from "next/headers";
 import User from "@/models/userModel";
-import { ROLES } from "@/app/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 import Business from "@/models/businessModel";
 
 export async function getUserFromCookies(

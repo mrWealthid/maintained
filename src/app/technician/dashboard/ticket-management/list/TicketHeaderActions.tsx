@@ -1,11 +1,11 @@
 "use client";
 import React, { FC, useState } from "react";
-import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import {
   TicketFilterQuery,
   TicketQueryprops,
-} from "@/app/shared/features/ticket-feat/model/ticket.model";
-import { technicianListFilter } from "@/app/shared/features/ticket-feat/data/data";
+} from "@/features/ticket-feat/model/ticket.model";
+import { technicianListFilter } from "@/features/ticket-feat/data/data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
   onFilter,

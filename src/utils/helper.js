@@ -1,43 +1,43 @@
-import { TICKET_STATUS } from '@/app/shared/enums/enums';
+import { TICKET_STATUS } from "@/shared/enums/enums";
 export const convertTime = (time) => {
-	const options = {
-		hour: 'numeric',
-		minute: 'numeric'
-	};
-	const locale = navigator.language;
+  const options = {
+    hour: "numeric",
+    minute: "numeric",
+  };
+  const locale = navigator.language;
 
-	return Intl.DateTimeFormat(locale, options).format(new Date(time));
+  return Intl.DateTimeFormat(locale, options).format(new Date(time));
 };
 
 //to get days passed
 export const calcDaysPassed = (date1, date2) =>
-	Math.floor(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  Math.floor(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
 //to get hours passed
 export const calcHoursPassed = (date1, date2) =>
-	Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60));
+  Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60));
 
 //to get mins passed
 export const calcMinsPassed = (date1, date2) =>
-	Math.round(Math.abs(date2 - date1) / (1000 * 60));
+  Math.round(Math.abs(date2 - date1) / (1000 * 60));
 
 // console.log(calcDaysPassed(new Date(2021, 11, 14), new Date(2021, 11, 12)));
 
 export const formatDate = (date) => {
-	const daysPassed = calcDaysPassed(new Date(), new Date(date));
+  const daysPassed = calcDaysPassed(new Date(), new Date(date));
 
-	const WeeksPassed = Math.round(
-		calcDaysPassed(new Date(), new Date(date)) / 7
-	);
-	const locale = navigator.language;
-	if (daysPassed === 0) return 'Today';
-	if (daysPassed === 1) return 'Yesterday';
-	if (daysPassed <= 7) return `${daysPassed} days ago`;
-	if (daysPassed <= 7) return `${daysPassed} days ago`;
-	if (WeeksPassed === 1) return `${WeeksPassed} week ago`;
-	if (WeeksPassed > 1) return `${WeeksPassed} weeks ago`;
-	const TodaysDate = new Intl.DateTimeFormat(locale).format(new Date(date));
-	return TodaysDate;
+  const WeeksPassed = Math.round(
+    calcDaysPassed(new Date(), new Date(date)) / 7
+  );
+  const locale = navigator.language;
+  if (daysPassed === 0) return "Today";
+  if (daysPassed === 1) return "Yesterday";
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  if (WeeksPassed === 1) return `${WeeksPassed} week ago`;
+  if (WeeksPassed > 1) return `${WeeksPassed} weeks ago`;
+  const TodaysDate = new Intl.DateTimeFormat(locale).format(new Date(date));
+  return TodaysDate;
 };
 
 // export function getStatusColor(val) {
@@ -57,78 +57,78 @@ export const formatDate = (date) => {
 // }
 
 export function GetColorObject() {
-	return {
-		[TICKET_STATUS.pending]: '#F7CB73', // Soft yellow (pending)
-		[TICKET_STATUS.processing]: '#F6C23E', // Stronger yellow/orange (processing)
-		[TICKET_STATUS.completed]: '#38B000', // Green (completed)
-		[TICKET_STATUS.assigned]: '#36A2EB', // Blue (assigned)
-		[TICKET_STATUS.scheduled]: '#6C63FF', // Indigo (scheduled)
-		[TICKET_STATUS.declined]: '#E74C3C'
-	};
+  return {
+    [TICKET_STATUS.pending]: "#F7CB73", // Soft yellow (pending)
+    [TICKET_STATUS.processing]: "#F6C23E", // Stronger yellow/orange (processing)
+    [TICKET_STATUS.completed]: "#38B000", // Green (completed)
+    [TICKET_STATUS.assigned]: "#36A2EB", // Blue (assigned)
+    [TICKET_STATUS.scheduled]: "#6C63FF", // Indigo (scheduled)
+    [TICKET_STATUS.declined]: "#E74C3C",
+  };
 }
 export function getStatusColor(val) {
-	const colorObj = {
-		[TICKET_STATUS.pending]: '#F7CB73', // Soft yellow (pending)
-		[TICKET_STATUS.processing]: '#F6C23E', // Stronger yellow/orange (processing)
-		[TICKET_STATUS.pending_assignment]: '#F6C23E', // Stronger yellow/orange (processing)
-		[TICKET_STATUS.completed]: '#38B000', // Green (completed)
-		[TICKET_STATUS.assigned]: '#36A2EB', // Blue (assigned)
-		[TICKET_STATUS.scheduled]: '#6C63FF', // Indigo (scheduled)
-		[TICKET_STATUS.declined]: '#E74C3C'
-	};
+  const colorObj = {
+    [TICKET_STATUS.pending]: "#F7CB73", // Soft yellow (pending)
+    [TICKET_STATUS.processing]: "#F6C23E", // Stronger yellow/orange (processing)
+    [TICKET_STATUS.pending_assignment]: "#F6C23E", // Stronger yellow/orange (processing)
+    [TICKET_STATUS.completed]: "#38B000", // Green (completed)
+    [TICKET_STATUS.assigned]: "#36A2EB", // Blue (assigned)
+    [TICKET_STATUS.scheduled]: "#6C63FF", // Indigo (scheduled)
+    [TICKET_STATUS.declined]: "#E74C3C",
+  };
 
-	return colorObj[val];
+  return colorObj[val];
 }
 
-export const formatCurrency = (value, currency = 'USD', locale = 'en') => {
-	const options = {
-		style: 'currency',
-		currency
-	};
+export const formatCurrency = (value, currency = "USD", locale = "en") => {
+  const options = {
+    style: "currency",
+    currency,
+  };
 
-	return new Intl.NumberFormat(locale, options).format(Math.abs(value));
+  return new Intl.NumberFormat(locale, options).format(Math.abs(value));
 };
 
 export function handleClientErrorMessage(err) {
-	return err.response.data.error;
+  return err.response.data.error;
 }
 
 export const validateSize = (file) => {
-	console.log(file.size);
-	if (file.size > 5000000) {
-		return true;
-	} else {
-		return false;
-	}
+  console.log(file.size);
+  if (file.size > 5000000) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const getExtension = (filename) => {
-	var parts = filename.split('.');
-	return parts[parts.length - 1];
+  var parts = filename.split(".");
+  return parts[parts.length - 1];
 };
 
 export const isVideo = (filename) => {
-	var ext = getExtension(filename);
-	switch (ext.toLowerCase()) {
-		case 'm4v':
-		case 'avi':
-		case 'mpg':
-		case 'mp4':
-		case 'webm':
-			return true;
-	}
-	return false;
+  var ext = getExtension(filename);
+  switch (ext.toLowerCase()) {
+    case "m4v":
+    case "avi":
+    case "mpg":
+    case "mp4":
+    case "webm":
+      return true;
+  }
+  return false;
 };
 
 export const isImage = (filename) => {
-	var ext = getExtension(filename);
-	switch (ext.toLowerCase()) {
-		case 'jpg':
-		case 'gif':
-		case 'bmp':
-		case 'png':
-		case 'jpeg':
-			return true;
-	}
-	return false;
+  var ext = getExtension(filename);
+  switch (ext.toLowerCase()) {
+    case "jpg":
+    case "gif":
+    case "bmp":
+    case "png":
+    case "jpeg":
+      return true;
+  }
+  return false;
 };

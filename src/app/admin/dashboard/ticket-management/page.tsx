@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react";
 import TicketList from "./list/TicketList";
-import ToggleView from "@/app/shared/components/toggle-views/ToggleView";
-import TransitionReveal from "@/app/shared/components/animation/TransitionReveal";
-import TicketComponent from "@/app/shared/features/ticket-feat/pages/TicketComponent";
+import ToggleView from "@/shared/components/toggle-views/ToggleView";
+import TransitionReveal from "@/shared/components/animation/TransitionReveal";
+import TicketComponent from "@/features/ticket-feat/pages/TicketComponent";
 
 export default function Home() {
   const [isList, setIsList] = useState(true);

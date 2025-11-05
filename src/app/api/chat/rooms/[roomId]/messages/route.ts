@@ -5,7 +5,7 @@ import ChatMessage from "@/models/chatMessage";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { CHAT_TYPE } from "@/app/shared/features/chat-feat/data/enums";
+import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import chatRoom from "@/models/chatRoom";

@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState } from "react";
-import { INVITE_STATUS } from "@/app/shared/enums/enums";
-import { UserFilterQuery, UserQueryprops } from "@/app/shared/model/model";
+import { INVITE_STATUS } from "@/shared/enums/enums";
+import { UserFilterQuery, UserQueryprops } from "@/shared/model/model";
 import { userListFilter } from "../data/user.data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

@@ -1,13 +1,13 @@
 "use client";
 import React, { FC, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import ButtonComponent from "@/app/shared/components/form-elements/Button";
+import ButtonComponent from "@/shared/components/form-elements/Button";
 import {
   useFetchAdmins,
   useHandOffTicket,
-} from "@/app/shared/features/ticket-feat/hooks/ticketHooks";
-import { handOffTicketFormProps } from "@/app/shared/features/ticket-feat/model/ticket.model";
-import { User } from "@/app/shared/model/model";
+} from "@/features/ticket-feat/hooks/ticketHooks";
+import { handOffTicketFormProps } from "@/features/ticket-feat/model/ticket.model";
+import { User } from "@/shared/model/model";
 import {
   PopoverTrigger,
   Popover,

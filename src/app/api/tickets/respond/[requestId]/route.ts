@@ -1,4 +1,4 @@
-import { TECHNICIAN_RESPONSE } from "@/app/shared/enums/enums";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import MiddlewareFeatures from "@/middlewareFeatures";

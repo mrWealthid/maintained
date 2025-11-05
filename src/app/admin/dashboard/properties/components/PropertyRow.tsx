@@ -1,8 +1,8 @@
-import { PropertyRowProps } from "@/app/shared/features/property-feat/model/property.model";
+import { PropertyRowProps } from "@/features/property-feat/model/property.model";
 import PropertyRowActions from "./PropertyRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/app/shared/components/modal/Modal";
+import Modal from "@/shared/components/modal/Modal";
 import { Building2, MapPin } from "lucide-react";
 
 function PropertyRow({ data }: PropertyRowProps) {

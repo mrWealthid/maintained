@@ -2,7 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User, { UserDoc } from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { ROLES } from "@/app/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 
 connect();
 
