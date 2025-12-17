@@ -10,6 +10,7 @@ import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import chatRoom from "@/models/chatRoom";
 import { Types } from "mongoose";
+import { ChatRoomMessage } from "@/features/chat-feat/model/chat.model";
 
 export async function GET(
   request: NextRequest,
@@ -40,21 +41,12 @@ export async function GET(
 
   const requests = await features.query;
 
-  let count;
+  const countFeatures = new APIFeatures<ChatRoomMessage>(
+    ChatMessage.find(filter),
+    transformedQuery
+  ).filter();
 
-  // console.log( await Model.find(req.query))
-
-  //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-
-  if (Object.values(transformedQuery).length > 0) {
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    excludedFields.forEach((el) => delete transformedQuery[el]);
-    count = await ChatMessage.find(filter)
-      .find(transformedQuery)
-      .countDocuments();
-  } else {
-    count = await ChatMessage.countDocuments(filter);
-  }
+  const count = await countFeatures.query.countDocuments();
 
   const response = NextResponse.json(
     {

@@ -35,7 +35,7 @@ import {
   User,
 } from "@/shared/model/model";
 import { ApiError } from "next/dist/server/api-utils";
-import { IListResponse } from "@/shared/components/table/models/table.model";
+import { IListResponse } from "@/shared/components/old-table/models/table.model";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getMembershipForBusiness } from "@/utils/helpers";
 

@@ -1,8 +1,8 @@
-import { TableColumn } from "@/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/old-table/models/table.model";
 import UnitRow from "./UnitRow";
 import { FC } from "react";
 import { fetchUnitList } from "@/features/property-feat/service/unit-service";
-import Table from "@/shared/components/table/Table";
+import Table from "@/shared/components/old-table/Table";
 import { Unit } from "@/features/property-feat/service/unit-service";
 import UnitHeaderActions from "./UnitHeaderActions";
 

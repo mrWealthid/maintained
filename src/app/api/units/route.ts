@@ -4,6 +4,7 @@ import Unit from "@/models/unitModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { mapToObject } from "@/utils/helpers";
 import APIFeatures from "@/utils/apiFeatures";
+import { Unit as IUnit } from "@/features/property-feat/service/unit-service";
 
 export async function GET(req: NextRequest) {
   try {
@@ -64,17 +65,12 @@ export async function GET(req: NextRequest) {
       ]);
     const units = await features.query;
 
-    let count;
+    const countFeatures = new APIFeatures<IUnit>(
+      Unit.find(filter),
+      transformedQuery
+    ).filter();
 
-    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-
-    if (Object.values(transformedQuery).length > 0) {
-      const excludedFields = ["page", "sort", "limit", "fields"];
-      excludedFields.forEach((el) => delete transformedQuery[el]);
-      count = await Unit.find(filter).find(transformedQuery).countDocuments();
-    } else {
-      count = await Unit.countDocuments(filter);
-    }
+    const count = await countFeatures.query.countDocuments();
 
     return NextResponse.json({
       totalRecords: count,

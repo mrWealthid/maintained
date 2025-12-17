@@ -5,6 +5,7 @@ import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import Ticket from "@/models/ticketModel";
 import { NextRequest, NextResponse } from "next/server";
+import { TechnicianRequestDetails } from "@/features/ticket-feat/model/ticket.model";
 
 connect();
 export async function GET(request: NextRequest) {
@@ -58,19 +59,12 @@ export async function GET(request: NextRequest) {
       });
     const requests = await features.query;
 
-    let count;
+    const countFeatures = new APIFeatures<TechnicianRequestDetails>(
+      TechnicianRequest.find(filter),
+      transformedQuery
+    ).filter();
 
-    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-
-    if (Object.values(transformedQuery).length > 0) {
-      const excludedFields = ["page", "sort", "limit", "fields"];
-      excludedFields.forEach((el) => delete transformedQuery[el]);
-      count = await TechnicianRequest.find(filter)
-        .find(transformedQuery)
-        .countDocuments();
-    } else {
-      count = await TechnicianRequest.countDocuments(filter);
-    }
+    const count = await countFeatures.query.countDocuments();
 
     const response = NextResponse.json(
       {

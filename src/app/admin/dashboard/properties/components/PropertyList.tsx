@@ -1,8 +1,8 @@
-import { TableColumn } from "@/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/old-table/models/table.model";
 import PropertyRow from "./PropertyRow";
 import { FC } from "react";
 import { fetchPropertyList } from "@/features/property-feat/service/property-service";
-import Table from "@/shared/components/table/Table";
+import Table from "@/shared/components/old-table/Table";
 import { Property } from "@/features/property-feat/service/property-service";
 import PropertyHeaderActions from "./PropertyHeaderActions";
 

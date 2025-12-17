@@ -6,6 +6,7 @@ import { PROPERTY_TYPES } from "@/features/onboarding-feat/data/data";
 import Unit from "@/models/unitModel";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
+import { Property as IProperty } from "@/features/property-feat/service/property-service";
 
 export async function POST(req: Request) {
   try {
@@ -139,46 +140,14 @@ export async function GET(req: NextRequest) {
       .limitFields()
       .paginate();
 
-    // Get total count
-
-    // Get properties with pagination
-    // const properties = await Property.find(filter)
-    //   .select("_id name type address isActive code createdAt updatedAt")
-    //   .sort({ createdAt: -1 })
-    //   .skip(skip)
-    //   .limit(limit)
-    //   .lean();
-
-    // Get units count for each property
-    // const propertiesWithUnits = await Promise.all(
-    //   properties.map(async (property) => {
-    //     const unitsCount = await Unit.countDocuments({
-    //       property: property._id,
-    //       isActive: true,
-    //     });
-    //     return {
-    //       ...property,
-    //       units: unitsCount,
-    //     };
-    //   })
-    // );
     const properties = await features.query;
 
-    let count;
+    const countFeatures = new APIFeatures<IProperty>(
+      Property.find(filter),
+      transformedQuery
+    ).filter();
 
-    // console.log( await Model.find(req.query))
-
-    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-
-    if (Object.values(transformedQuery).length > 0) {
-      const excludedFields = ["page", "sort", "limit", "fields"];
-      excludedFields.forEach((el) => delete transformedQuery[el]);
-      count = await Property.find(filter)
-        .find(transformedQuery)
-        .countDocuments();
-    } else {
-      count = await Property.countDocuments(filter);
-    }
+    const count = await countFeatures.query.countDocuments();
 
     return NextResponse.json(
       {

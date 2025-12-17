@@ -5,22 +5,40 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useEffect,
 } from "react";
 import { createContext } from "react";
 import {
   IListResponse,
-  ITable,
+  ITableProps,
   TableColumn,
   IsearchParams,
   IselectOptions,
+  TableContextType,
 } from "./models/table.model";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { formatCurrency } from "@/utils/helper";
 import { useTable } from "./hooks/useTable";
 import { useForm } from "react-hook-form";
-import { FcFilledFilter } from "react-icons/fc";
-import { CiFilter } from "react-icons/ci";
 import { DownloadTableExcel } from "react-export-table-to-excel";
-import { IoCloudDownloadOutline } from "react-icons/io5";
 import TextInput from "../form-elements/Text-Input";
 import Modal from "../modal/Modal";
 import ButtonComponent from "../form-elements/Button";
@@ -44,40 +62,21 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { FolderInput, Funnel, FunnelX } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
-const TableContext = createContext({});
+const TableContext = createContext<TableContextType<unknown> | undefined>(
+  undefined
+);
 
-// type TableContextValue<T> = {
-//   data: T[];
-//   columns: Array<Column<T>>;
-//   headerActions: React.ReactNode;        // or a typed array if applicable
-//   service: Service | null;
-
-//   // state
-//   limit: number;
-//   page: number;
-//   totalRecords: number;
-
-//   // actions (memoized)
-//   updateLimit: (n: number) => void;
-//   handlePaginate: (p: number) => void;
-//   onFilter: (q: Record<string, unknown>) => void;
-//   cancelFilter: () => void;
-
-//   // utilities (stable)
-//   objectToQueryParams: (o: Record<string, unknown>) => string;
-
-//   // flags / misc
-//   filterIsActive: boolean;
-//   actionable: boolean;
-//   tableRef: React.RefObject<HTMLDivElement>;
-//   queryKey: string;
-//   isDownloadable: boolean;
-//   isRefetching: boolean;
-//   search: string;
-//   searchKey: string;
-//   summary: Summary | null;
-// };
+function useTypedTableContext<T>() {
+  const ctx = useContext(TableContext);
+  if (!ctx) {
+    throw new Error("Table components must be used within TableComponent");
+  }
+  return ctx as TableContextType<T>;
+}
 
 function TableComponent<T>({
   queryKey,
@@ -90,13 +89,22 @@ function TableComponent<T>({
   isDownloadable = true,
   defaultParams,
   searchKey,
-}: ITable) {
+  enableSelection = false,
+  getRowId,
+  onSelectionChange,
+  renderSelectionActions,
+}: ITableProps<T>) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(limitVal || 5);
   const [search, setSearch] = useState<IsearchParams | null>(
     defaultParams ?? null
   );
-  const [filterIsActive, setfilterIsActive] = useState(search ?? false);
+  const [filterIsActive, setfilterIsActive] =
+    useState<boolean>(!!defaultParams);
+
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
+    new Set()
+  );
 
   const {
     isLoading,
@@ -165,69 +173,105 @@ function TableComponent<T>({
     setSearch(null);
   }, []);
 
-  // function removeEmptyKeys(obj: { [key: string]: any }): {
-  //   [key: string]: any;
-  // } {
-  //   const cleanedObj: { [key: string]: any } = {};
-  //   Object.keys(obj).forEach((key) => {
-  //     if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
-  //       cleanedObj[key] = obj[key];
-  //     }
-  //   });
-  //   return cleanedObj;
-  // }
-  // function objectToQueryParams(obj: { [key: string]: any }): string {
-  //   return Object.keys(removeEmptyKeys(obj))
-  //     .map(
-  //       (key) =>
-  //         `${encodeURIComponent(key)}=${encodeURIComponent(
-  //           obj[key].toString()
-  //         )}`
-  //     )
-  //     .join("&");
-  // }
   const tableRef = useRef(null);
 
+  const getRowIdForRow = React.useCallback(
+    (row: T, index: number) => {
+      if (getRowId) return getRowId(row, index);
+      return index;
+    },
+    [getRowId]
+  );
+
+  const toggleRowSelection = React.useCallback((id: string | number) => {
+    setSelectedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = React.useCallback(() => {
+    setSelectedRowIds(new Set());
+  }, []);
+
+  const selectAllOnPage = React.useCallback(() => {
+    if (!data || data.length === 0) {
+      setSelectedRowIds(new Set());
+      return;
+    }
+    const all = new Set<string | number>();
+    data.forEach((row, index) => {
+      all.add(getRowIdForRow(row, index));
+    });
+    setSelectedRowIds(all);
+  }, [data, getRowIdForRow]);
+
+  const isRowSelected = React.useCallback(
+    (id: string | number) => selectedRowIds.has(id),
+    [selectedRowIds]
+  );
+
+  const selectedRows: T[] = useMemo(() => {
+    if (!data || !enableSelection) return [];
+    const rows: T[] = [];
+    data.forEach((row, index) => {
+      const id = getRowIdForRow(row, index);
+      if (selectedRowIds.has(id)) rows.push(row);
+    });
+    return rows;
+  }, [data, enableSelection, getRowIdForRow, selectedRowIds]);
+
+  const hasSelection = selectedRows.length > 0;
+
+  useEffect(() => {
+    if (onSelectionChange && enableSelection) {
+      onSelectionChange(selectedRows);
+    }
+  }, [onSelectionChange, selectedRows, enableSelection]);
+
   const CardContent = (
-    <div className=" bg-card  p-2">
-      <TableHeaderAction onFilter={onFilter}>{headerActions}</TableHeaderAction>
+    <div className="bg-card/80 backdrop-blur-sm p-3 border border-border/80 rounded-xl space-y-3">
+      <TableHeaderAction>
+        {headerActions as React.ReactElement<Record<string, unknown>> | null}
+      </TableHeaderAction>
 
       {!isLoading && !data.length && (
-        <section className="flex justify-center items-center">
-          <Empty />
+        <section className="flex justify-center items-center py-8 text-xs text-muted-foreground">
+          <Empty description="Please check back later or adjust your filters." />
         </section>
       )}
 
       {!isLoading && data.length > 0 && (
         <Table
           ref={tableRef}
-          className="w-full overflow-hidden  rounded-xl  border text-xs"
+          className="w-full overflow-hidden rounded-xl border border-border/80 text-xs bg-background"
         >
           {children}
         </Table>
       )}
 
       {data.length > 0 && (
-        <div className="mt-3 border  rounded-xl text-xs">
+        <div className="mt-3 border border-border/80 rounded-xl text-xs bg-background">
           <Paginator />
         </div>
       )}
     </div>
   ); // Render it conditionally with/without animation return
 
-  const memoizedValue = useMemo(
+  const memoizedValue = useMemo<TableContextType<unknown>>(
     () => ({
-      data,
-      columns,
-      headerActions,
-      service,
+      data: data as unknown[],
+      columns: columns as TableColumn<unknown>[],
+      headerActions: headerActions ?? null,
+      service: service as ITableProps<unknown>["service"],
       limit,
       page,
       updateLimit,
       totalRecords,
       handlePaginate,
       onFilter,
-      // objectToQueryParams,
       cancelFilter,
       filterIsActive,
       actionable,
@@ -238,6 +282,25 @@ function TableComponent<T>({
       search,
       searchKey,
       summary,
+      enableSelection,
+      selectedRowIds,
+      toggleRowSelection,
+      isRowSelected,
+      selectAllOnPage,
+      clearSelection,
+      hasSelection,
+      selectedRows: selectedRows as unknown[],
+      getRowIdForRow: getRowIdForRow as (
+        row: unknown,
+        index: number
+      ) => string | number,
+      renderSelectionActions: renderSelectionActions
+        ? (((params) =>
+            renderSelectionActions({
+              selectedRows: params.selectedRows as T[],
+              clearSelection: params.clearSelection,
+            })) as TableContextType<unknown>["renderSelectionActions"])
+        : undefined,
     }),
     [
       data,
@@ -250,7 +313,6 @@ function TableComponent<T>({
       totalRecords,
       handlePaginate,
       onFilter,
-      // objectToQueryParams,
       cancelFilter,
       filterIsActive,
       actionable,
@@ -261,34 +323,20 @@ function TableComponent<T>({
       search,
       searchKey,
       summary,
+      enableSelection,
+      selectedRowIds,
+      toggleRowSelection,
+      isRowSelected,
+      selectAllOnPage,
+      clearSelection,
+      hasSelection,
+      selectedRows,
+      getRowIdForRow,
+      renderSelectionActions,
     ]
   );
   return (
-    <TableContext.Provider
-      value={{
-        data,
-        columns,
-        headerActions,
-        service,
-        limit,
-        page,
-        updateLimit,
-        totalRecords,
-        handlePaginate,
-        onFilter,
-        // objectToQueryParams,
-        cancelFilter,
-        filterIsActive,
-        actionable,
-        tableRef,
-        queryKey,
-        isDownloadable,
-        isRefetching,
-        search,
-        searchKey,
-        summary,
-      }}
-    >
+    <TableContext.Provider value={memoizedValue}>
       <AnimatedBorderWrapper loading={isLoading || isRefetching}>
         {CardContent}
       </AnimatedBorderWrapper>
@@ -296,224 +344,268 @@ function TableComponent<T>({
   );
 }
 
-function TableFilterForm({ column, onCloseModal }: any) {
-  const { onFilter, cancelFilter, search }: any = useContext(TableContext);
-  const { register, handleSubmit, formState } = useForm({
-    mode: "onChange",
-    defaultValues: { ...search },
-  });
-  // const { errors, isSubmitting } = formState;
+/* =========================================================
+   Filter Form
+   ========================================================= */
 
-  const { columns, isRefetching }: any = useContext(TableContext);
+interface TableFilterFormProps {
+  onCloseModal?: () => void;
+}
 
-  async function onSubmit(data: any, onCloseModal: () => void) {
-    onFilter({ ...search, ...data });
+function TableFilterForm({ onCloseModal }: TableFilterFormProps) {
+  // If your hook is generic: useTypedTableContext<T>(), you can retain <unknown>:
+  const {
+    onFilter,
+    cancelFilter,
+    search,
+    columns,
+    isRefetching,
+  }: TableContextType<unknown> = useTypedTableContext<unknown>();
 
-    onCloseModal();
-    // console.log(objectToQueryParams(data));
+  const { register, handleSubmit, formState, setValue, watch } =
+    useForm<IsearchParams>({
+      mode: "onChange",
+      defaultValues: { ...(search ?? {}) },
+    });
+
+  function removeEmptyObjValues(data: IsearchParams) {
+    return Object.fromEntries(
+      Object.entries(data).filter(
+        ([, v]) =>
+          v !== "" && v != null && !(typeof v === "number" && Number.isNaN(v))
+      )
+    );
   }
+
+  const handleSubmitFilter = (data: IsearchParams) => {
+    const query = removeEmptyObjValues(data);
+
+    onFilter({ ...(search ?? {}), ...query });
+    onCloseModal?.();
+  };
+
+  const handleCancel = () => {
+    cancelFilter();
+    onCloseModal?.();
+  };
+
+  const getKeyForColumn = (column: TableColumn<unknown>): string =>
+    column.filterKey ?? column.header;
 
   return (
     <form
-      onSubmit={handleSubmit((data) => onSubmit(data, onCloseModal))}
-      className=' flex flex-col gap-3  items-center"'
+      onSubmit={handleSubmit(handleSubmitFilter)}
+      className="flex flex-col gap-4"
     >
-      <section className=" grid  gap-3 grid-cols-1 ">
+      <section className="grid grid-cols-1 gap-3">
         {columns
           .slice()
-          .filter((val: TableColumn) => val.searchType)
-          .map((column: TableColumn) => {
-            if (/TEXT/.test(column.searchType!)) {
+          .filter((col) => col.searchType)
+          .map((column: TableColumn<unknown>) => {
+            const formKey = getKeyForColumn(column);
+
+            /** ========== TEXT ========== */
+            if (column.searchType === "TEXT") {
               return (
-                <TextInput
-                  key={column.accessor}
-                  name={column.header}
-                  label={column.header}
+                <div
+                  key={String(column.accessor)}
+                  className="flex flex-col gap-1"
                 >
-                  <input
-                    {...register(
-                      column.filterKey ? column.filterKey : column.header,
-                      {}
-                    )}
-                    className="input-style"
-                    placeholder={`Enter ${column.header}`}
+                  <Label htmlFor={String(column.header)}>{column.header}</Label>
+                  <Input
+                    id={String(column.header)}
                     type="text"
-                    id={column.header}
+                    placeholder={`Enter ${column.header}`}
+                    {...register(formKey)}
                   />
-                </TextInput>
+                </div>
               );
             }
-            if (/NUMBER/.test(column.searchType!)) {
+
+            /** ========== NUMBER ========== */
+            if (column.searchType === "NUMBER") {
               return (
-                <TextInput
-                  key={column.accessor}
-                  name={column.header}
-                  label={column.header}
+                <div
+                  key={String(column.accessor)}
+                  className="flex flex-col gap-1"
                 >
-                  <input
-                    {...register(
-                      column.filterKey ? column.filterKey : column.header
-                    )}
-                    className="input-style"
+                  <Label htmlFor={String(column.header)}>{column.header}</Label>
+                  <Input
+                    id={String(column.header)}
                     type="number"
-                    id={column.header}
+                    {...register(formKey, { valueAsNumber: true })}
                   />
-                </TextInput>
+                </div>
               );
             }
-            if (/DROPDOWN/.test(column.searchType!)) {
+
+            /** ========== DROPDOWN ========== */
+            if (column.searchType === "DROPDOWN") {
+              const currentValue = watch(formKey) ?? "";
+
               return (
-                <TextInput
-                  key={column.accessor}
-                  name={column.header}
-                  label={column.header}
+                <div
+                  key={String(column.accessor)}
+                  className="flex flex-col gap-1"
                 >
-                  <select
-                    className="input-style"
-                    {...register(
-                      column.filterKey ? column.filterKey : column.header
-                    )}
+                  <Label>{column.header}</Label>
+                  <Select
+                    value={
+                      currentValue === undefined ? "" : String(currentValue)
+                    }
+                    onValueChange={(val) => {
+                      setValue(formKey, val || "");
+                    }}
                   >
-                    <option value="">Select Options</option>
-                    {column.selectOptions?.map((options: IselectOptions, i) => (
-                      <React.Fragment key={i}>
-                        <option value={options.value}>{options.name}</option>
-                      </React.Fragment>
-                    ))}
-                  </select>
-                </TextInput>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={`Select ${column.header.toLowerCase()}`}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All</SelectItem>
+                      {column.selectOptions?.map(
+                        (opt: IselectOptions, idx: number) => (
+                          <SelectItem key={idx} value={String(opt.value)}>
+                            {opt.name}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               );
             }
+
+            return null;
           })}
       </section>
-      {/* <TextInput
-				name={'description'}
-				placeholder="Enter Description"
-				label="Description"
-				error={errors?.['description']?.message?.toString()}>
-				<textarea
-					className="input-style"
-					{...register('description', {
-						required: 'This field is required'
-					})}
-					disabled={isSubmitting}
-					id="description"
-					cols={40}
-					rows={3}></textarea>
-			</TextInput> */}
 
-      {/* <TextInput
-				name={column.header}
-				placeholder={`Enter ${column.header}`}
-				label={column.header}
-				error={errors?.[`${column.header}`]?.message?.toString()}>
-				<input
-					{...register(column.header, {
-						required: 'This field is required'
-					})}
-					className="input-style"
-					type="text"
-					id={column.header}
-				/>
-			</TextInput> */}
-      <hr className=" my-3" />
-      <section className="flex justify-end  gap-4">
-        <ButtonComponent
-          type="reset"
-          handleClick={() => {
-            cancelFilter();
-            onCloseModal();
-          }}
-          styles="rounded-3xl"
-          btnText={"Cancel"}
-        ></ButtonComponent>
+      <hr className="my-3" />
 
-        <ButtonComponent
+      <section className="flex justify-end gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-3xl"
+          onClick={handleCancel}
+        >
+          Cancel
+        </Button>
+
+        <Button
           type="submit"
-          loading={isRefetching}
-          styles="rounded-3xl"
-          disabled={!formState.isValid}
-          btnText={`Search
-					`}
-        ></ButtonComponent>
+          className="rounded-3xl"
+          disabled={!formState.isValid || isRefetching}
+        >
+          {isRefetching ? "Searching..." : "Search"}
+        </Button>
       </section>
     </form>
   );
 }
 
-function TableFilter() {
-  const { columns, filterIsActive }: any = useContext(TableContext);
-  return (
-    <div>
-      <Modal>
-        <Modal.Open opens="filter-form">
-          <button
-            type="button"
-            className={`  ${
-              filterIsActive
-                ? "ring-1  ring-offset-2 text-success  ring-success"
-                : ""
-            } w-full flex items-center gap-1  text-xs px-4 py-2 rounded-3xl   font-light  border btn`}
-          >
-            {filterIsActive ? (
-              <FcFilledFilter size={15} color="green" />
-            ) : (
-              <CiFilter size={15} />
-            )}
-            Filter
-          </button>
-        </Modal.Open>
+/* =========================================================
+   Filter Trigger Wrapper
+   ========================================================= */
 
-        <Modal.Window
-          title="Manage filters"
-          description="Quickly find table records using available filters"
-          name="filter-form"
+export function TableFilter() {
+  const { filterIsActive }: TableContextType<unknown> =
+    useTypedTableContext<unknown>();
+  const [open, setOpen] = React.useState(false);
+
+  const handleClose = () => setOpen(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="secondary"
+          className={`flex items-center gap-1 text-xs px-4 py-2 rounded-lg font-light ${
+            filterIsActive
+              ? "ring-1 ring-offset-2 text-green-600 ring-green-600"
+              : ""
+          }`}
         >
-          <TableFilterForm />
-        </Modal.Window>
-      </Modal>
-    </div>
+          {filterIsActive ? (
+            <FunnelX color="green" size={12} className="mr-1" />
+          ) : (
+            <Funnel color="green" size={12} className="mr-1" />
+          )}
+          Filter
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Manage filters</DialogTitle>
+          <DialogDescription>
+            Quickly find table records using the available filters.
+          </DialogDescription>
+        </DialogHeader>
+
+        <TableFilterForm onCloseModal={handleClose} />
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function TableHeaders() {
-  const { columns, actionable }: any = useContext(TableContext);
-  return (
-    <TableHeader className="bg-muted capitalize sticky  top-0">
-      <TableRow>
-        {/* <th className="px-2 py-4 uppercase">
-					<input
-						title="check"
-						id="checkbox-all-search"
-						type="checkbox"
-						className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-gray-500 "
-					/>
-					<label
-						htmlFor="checkbox-all-search text-sm"
-						className="sr-only">
-						#
-					</label>
-				</th> */}
+  const {
+    columns,
+    actionable,
+    enableSelection,
+    data,
+    selectAllOnPage,
+    clearSelection,
+    selectedRowIds,
+  } = useTypedTableContext<unknown>();
 
-        <TableHead className=" font-medium px-2  whitespace-nowrap">
+  const allOnPageSelected =
+    enableSelection && data.length > 0 && selectedRowIds.size === data.length;
+
+  return (
+    <TableHeader className="bg-muted/80 backdrop-blur capitalize sticky top-0 z-10">
+      <TableRow>
+        {enableSelection && (
+          <TableHead className="w-8 px-2 py-3">
+            <Checkbox
+              id="checkbox-all-rows"
+              aria-label="Select all rows on page"
+              checked={allOnPageSelected}
+              onCheckedChange={() =>
+                allOnPageSelected ? clearSelection() : selectAllOnPage()
+              }
+              className="m-0"
+            />
+          </TableHead>
+        )}
+
+        <TableHead className="font-medium px-2 whitespace-nowrap">
           <span>S/N</span>
         </TableHead>
 
         {columns.map((col: TableColumn) => (
           <TableHead
             colSpan={col.colspan}
-            key={col.header}
-            className=" px-2 flex-grow"
+            key={col.key ?? String(col.accessor) ?? col.header}
+            className="px-2 grow"
           >
             {col.header}
           </TableHead>
         ))}
-        {actionable && <TableHead className="px-2  ">Actions</TableHead>}
+        {actionable && (
+          <TableHead className="px-2 whitespace-nowrap">Actions</TableHead>
+        )}
       </TableRow>
     </TableHeader>
   );
 }
-export function TableHeaderAction({ children }: any) {
+export function TableHeaderAction({
+  children,
+}: {
+  children?: React.ReactElement<Record<string, unknown>> | null;
+}) {
   const {
     onFilter,
     tableRef,
@@ -522,74 +614,127 @@ export function TableHeaderAction({ children }: any) {
     searchKey,
     search,
     summary,
-  }: any = useContext(TableContext);
+    hasSelection,
+    selectedRows,
+    clearSelection,
+    renderSelectionActions,
+  } = useTypedTableContext<unknown>();
 
   // const [searchValue, setSearchValue] = useState("");
 
-  function debounce<T extends (...args: any[]) => void>(fn: T, delay = 500) {
+  function debounce(fn: (value: string) => void, delay = 500) {
     let t: ReturnType<typeof setTimeout> | null = null;
-    return (...args: Parameters<T>) => {
+    return (value: string) => {
       if (t) clearTimeout(t);
-      t = setTimeout(() => fn(...args), delay);
+      t = setTimeout(() => fn(value), delay);
     };
   }
 
   const debouncedFilter = useMemo(
     () =>
       debounce((value: string) => {
-        onFilter({ ...search, [searchKey]: value ?? undefined });
+        onFilter({
+          ...search,
+          ...(searchKey ? { [searchKey]: value ?? undefined } : {}),
+        });
       }, 500),
     [onFilter, search, searchKey]
   );
 
+  const primaryActions: React.ReactNode =
+    hasSelection && renderSelectionActions
+      ? renderSelectionActions({
+          selectedRows,
+          clearSelection,
+        })
+      : children
+        ? cloneElement(children, {
+            onFilter,
+            summary,
+          } as Record<string, unknown>)
+        : null;
+
   return (
-    <div className="flex flex-col flex-wrap  gap-1  justify-between mb-2 ">
-      <div className="flex flex-wrap">
-        <div className="w-1/2 items-start">
+    <div className="flex flex-col gap-2 justify-between mb-1">
+      <div className="flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex-1 min-w-[220px] max-w-md text-xs">
           <Search
             placeHolder={`Search by ${searchKey}`}
             onSearch={debouncedFilter}
           />
         </div>
 
-        <div className=" flex flex-1 flex-wrap justify-end  gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
+          {primaryActions}
           <TableFilter />
           {isDownloadable && (
             <DownloadTableExcel
               filename={`${queryKey} table`}
               sheet={queryKey}
-              currentTableRef={tableRef.current}
+              currentTableRef={tableRef}
             >
-              <button
-                type="button"
-                className="w-full btn-primary  text-xs px-6 py-2 gap-1 rounded-3xl flex items-center    font-light  border"
+              <Button
+                variant={"secondary"}
+                className=" text-xs px-4 py-2 gap-1 rounded-lg flex items-center font-light"
               >
-                <IoCloudDownloadOutline /> Export
-              </button>
+                <FolderInput color="orange" size={12} />
+                Export
+              </Button>
             </DownloadTableExcel>
           )}
         </div>
       </div>
 
-      <div className="flex justify-end">
-        {" "}
-        {cloneElement(children, { onFilter, summary })}
-      </div>
+      <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground">
+        {hasSelection ? (
+          /* ------------------ SELECTION STATE ------------------ */
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+              {selectedRows.length} selected
+            </Badge>
 
-      {/* <div className="flex gap-3 items-center">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 512 512"
-						fill=" #ff931f">
-						<path d="M448 192H64C28.65 192 0 220.7 0 256v96c0 17.67 14.33 32 32 32h32v96c0 17.67 14.33 32 32 32h320c17.67 0 32-14.33 32-32v-96h32c17.67 0 32-14.33 32-32V256C512 220.7 483.3 192 448 192zM384 448H128v-96h256V448zM432 296c-13.25 0-24-10.75-24-24c0-13.27 10.75-24 24-24s24 10.73 24 24C456 285.3 445.3 296 432 296zM128 64h229.5L384 90.51V160h64V77.25c0-8.484-3.375-16.62-9.375-22.62l-45.25-45.25C387.4 3.375 379.2 0 370.8 0H96C78.34 0 64 14.33 64 32v128h64V64z" />
-					</svg>
-					<p className="text-sm w-11">Print</p>
-				</div> */}
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="underline-offset-2 hover:underline text-[11px]"
+            >
+              Clear
+            </button>
+          </div>
+        ) : summary && Object.keys(summary).length ? (
+          /* ----------------------- SUMMARY ----------------------- */
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-[11px]">Summary:</span>
+            {Object.entries(summary).map(([key, value], idx) => (
+              <Badge
+                key={idx}
+                variant="outline"
+                className="text-[10px] font-normal px-2 py-0.5"
+              >
+                {key}: {value}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
-function TableRows({ children, customRow }: any) {
-  const { columns, data, actionable }: any = useContext(TableContext);
+interface TableRowsProps {
+  children: React.ReactElement<Record<string, unknown>>;
+  customRow?: boolean;
+}
+
+function TableRows({ children, customRow }: TableRowsProps) {
+  const {
+    columns,
+    data,
+    actionable,
+    enableSelection,
+    toggleRowSelection,
+    isRowSelected,
+    getRowIdForRow,
+  } = useTypedTableContext<unknown>();
 
   // if (data?.length < 1) {
   // 	return (
@@ -604,127 +749,177 @@ function TableRows({ children, customRow }: any) {
   return (
     <TableBody className="">
       {!customRow
-        ? data?.map((row: any, i: any) => {
+        ? data?.map((row, i: number) => {
+            const rowId = getRowIdForRow(row as unknown, i);
+            const checked = enableSelection && isRowSelected(rowId);
             return (
-              <TableRow key={i} className=" px-2  relative border-b  ">
-                {/* <td className=" font-medium whitespace-nowrap">
-									<input
-										title="check"
-										id="checkbox-all-search"
-										type="checkbox"
-										className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-gray-500 "
-									/>
-									<label
-										htmlFor="checkbox-all-search text-sm"
-										className="sr-only">
-										#
-									</label>
-								</td> */}
+              <TableRow
+                key={String(rowId)}
+                className="px-2 relative border-b hover:bg-muted/40 transition-colors"
+              >
+                {enableSelection && (
+                  <TableCell className="w-8 px-2">
+                    <input
+                      title="Select row"
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleRowSelection(rowId)}
+                      className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-ring"
+                    />
+                  </TableCell>
+                )}
                 <TableCell className=" font-medium">
                   <span>{i + 1}.</span>
                 </TableCell>
 
-                {columns.map((column: TableColumn, i: any) => {
+                {columns.map((column: TableColumn, i: number) => {
                   //This logic helps check for more accessors; double items in a row cell
-                  const value = column.accessor
+                  const value = String(column.accessor)
                     ?.split(".")
-                    .reduce((obj, key) => obj[key], row);
+                    .reduce((obj: unknown, key) => {
+                      if (obj && typeof obj === "object") {
+                        const record = obj as Record<string, unknown>;
+                        return record[key] as unknown;
+                      }
+                      return undefined;
+                    }, row as unknown);
 
                   if (column.custom) {
                     if (column.custom.type === "style") {
                       return (
                         <TableCell
                           className={`${
-                            column.custom.bolden && "font-semibold"
+                            column.custom.bolden ? "font-semibold" : ""
                           }`}
-                          key={column.accessor + i}
+                          key={`${String(column.accessor)}-${i}`}
                         >
                           <span
-                            title={value}
+                            title={
+                              value !== undefined && value !== null
+                                ? String(value)
+                                : undefined
+                            }
                             className="bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
                           >
-                            {value}
+                            {value !== undefined && value !== null
+                              ? String(value)
+                              : "--"}
                           </span>
                         </TableCell>
                       );
                     }
                     if (column.custom.type === "date") {
+                      const dateValue = value as
+                        | string
+                        | number
+                        | Date
+                        | undefined;
+                      const dateText = dateValue
+                        ? new Date(dateValue).toDateString()
+                        : "--";
                       return (
                         <TableCell
                           className={`${
-                            column.custom.bolden && "font-semibold"
+                            column.custom.bolden ? "font-semibold" : ""
                           } ellipisis-overflow block`}
-                          title={new Date(value).toDateString()}
-                          key={column.accessor + i}
+                          title={dateText !== "--" ? dateText : undefined}
+                          key={`${String(column.accessor)}-${i}`}
                         >
-                          {new Date(value).toDateString()}
+                          {dateText}
                         </TableCell>
                       );
                     }
                     if (column.custom.type === "currency") {
+                      const numValue = value as number | string | undefined;
                       return (
                         <TableCell
                           className={`${
-                            column.custom.bolden && "font-semibold"
-                          }  `}
-                          key={column.accessor + i}
+                            column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                          key={`${String(column.accessor)}-${i}`}
                         >
                           <span
-                            title={formatCurrency(value)}
+                            title={
+                              numValue !== undefined
+                                ? formatCurrency(numValue)
+                                : undefined
+                            }
                             className="ellipsis-overflow block"
                           >
-                            {formatCurrency(value)}
+                            {numValue !== undefined
+                              ? formatCurrency(numValue)
+                              : "--"}
                           </span>
                         </TableCell>
                       );
                     }
                     if (column.custom.type === "percent") {
+                      const numValue = value as number | string | undefined;
                       return (
                         <TableCell
                           className={`${
-                            column.custom.bolden && "font-semibold"
-                          } `}
-                          title={value}
-                          key={column.accessor + i}
+                            column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                          title={
+                            value !== undefined && value !== null
+                              ? String(value)
+                              : undefined
+                          }
+                          key={`${String(column.accessor)}-${i}`}
                         >
-                          {value} %
+                          {numValue ?? "--"} %
                         </TableCell>
                       );
                     }
                     if (column.custom.type === "sentence") {
+                      const text = String(value ?? "");
                       return (
                         <TableCell
                           className={`${
-                            column.custom.bolden && "font-semibold"
-                          } `}
-                          key={column.accessor + i}
+                            column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                          key={`${String(column.accessor)}-${i}`}
                         >
-                          {value} {""} {column.custom.suffix}
+                          {text} {""} {column.custom.suffix}
                         </TableCell>
                       );
                     }
                   }
                   return (
-                    <TableCell key={column.accessor + i}>
-                      <span title={value} className="block ellipsis-overflow">
-                        {value}
+                    <TableCell key={`${String(column.accessor)}-${i}`}>
+                      <span
+                        title={value as string | undefined}
+                        className="block ellipsis-overflow"
+                      >
+                        {value !== undefined && value !== null
+                          ? (value as React.ReactNode)
+                          : "--"}
                       </span>
                     </TableCell>
                   );
                 })}
 
-                {actionable && cloneElement(children, { rowData: row })}
+                {actionable &&
+                  cloneElement(children, {
+                    rowData: row,
+                  } as Record<string, unknown>)}
               </TableRow>
             );
           })
-        : cloneElement(children, { data })}
+        : cloneElement(children, {
+            data,
+            enableSelection,
+            getRowIdForRow,
+            isRowSelected,
+            toggleRowSelection,
+          } as Record<string, unknown>)}
     </TableBody>
   );
 }
 
 function Paginator() {
-  const { updateLimit, data, limit, page, totalRecords, handlePaginate }: any =
-    useContext(TableContext);
+  const { updateLimit, data, limit, page, totalRecords, handlePaginate } =
+    useTypedTableContext<unknown>();
 
   const maxNumPage = useMemo(() => {
     return Math.ceil(totalRecords / limit);

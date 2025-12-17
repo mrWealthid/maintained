@@ -11,6 +11,7 @@ import { TicketActivity } from "@/models/ticketActivity";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
+import { Ticket as ITicket } from "@/shared/model/model";
 
 connect();
 
@@ -118,19 +119,12 @@ export async function GET(request: NextRequest) {
       ]);
     const requests = await features.query;
 
-    let count;
+    const countFeatures = new APIFeatures<ITicket>(
+      Ticket.find(filter),
+      transformedQuery
+    ).filter();
 
-    // console.log( await Model.find(req.query))
-
-    //I did this because pagination of filtered data was impossible, The endpoint keeps returning the total count of all document
-
-    if (Object.values(transformedQuery).length > 0) {
-      const excludedFields = ["page", "sort", "limit", "fields"];
-      excludedFields.forEach((el) => delete transformedQuery[el]);
-      count = await Ticket.find(filter).find(transformedQuery).countDocuments();
-    } else {
-      count = await Ticket.countDocuments(filter);
-    }
+    const count = await countFeatures.query.countDocuments();
 
     // Group ticket counts by status
     const statusCounts = await Ticket.aggregate([

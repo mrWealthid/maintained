@@ -1,30 +1,52 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import { ArrowUpRightIcon, FolderSearch } from "lucide-react";
 
-export default function Empty({
-	message = 'No records found'
-}: {
-	message?: string;
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+
+export default function EmptyComponent({
+  message = "No records found",
+  description = `You haven&apos;t created any projects yet. Get started by creating
+	your first project.`,
+}: // onCreate,
+{
+  message?: string;
+  description?: string;
+  // onCreate?: () => void;
 }) {
-	return (
-		<div className='flex flex-col gap-1 items-center justify-center text-center py-16'>
-			{/* Illustration */}
-			<Image
-				loading='lazy'
-				src='/illustrations/no-record.svg' // ⬅️ place in /public/illustrations/
-				alt='No data illustration'
-				width={200}
-				height={200}
-			/>
-
-			{/* Message */}
-			<h2 className='text-lg capitalize font-semibold text-gray-600 dark:text-gray-300'>
-				{message}
-			</h2>
-			<p className='text-sm text-gray-500 '>
-				Please check back later or adjust your filters.
-			</p>
-		</div>
-	);
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <FolderSearch />
+        </EmptyMedia>
+        <EmptyTitle>{message}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        {/* <div className="flex gap-2">
+          <Button onClick={onCreate}>Create New</Button>
+          <Button variant="outline">Import Project</Button>
+        </div> */}
+      </EmptyContent>
+      <Button
+        variant="link"
+        asChild
+        className="text-muted-foreground"
+        size="sm"
+      >
+        {/* <a href="#">
+          Learn More <ArrowUpRightIcon />
+        </a> */}
+      </Button>
+    </Empty>
+  );
 }

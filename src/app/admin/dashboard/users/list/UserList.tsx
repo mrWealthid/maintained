@@ -5,9 +5,9 @@ import { fetchUsers } from "../service/user.service";
 import UserHeaderActions from "./UserHeaderActions";
 import UserRow from "./UserRow";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
-import { TableColumn } from "@/shared/components/table/models/table.model";
+import { TableColumn } from "@/shared/components/old-table/models/table.model";
 import { User } from "@/shared/model/model";
-import TableComponent from "@/shared/components/table/Table";
+import TableComponent from "@/shared/components/old-table/Table";
 
 const UserList = () => {
   const columns: TableColumn[] = [

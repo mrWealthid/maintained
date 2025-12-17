@@ -1,5 +1,5 @@
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
+import User, { IUser } from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
@@ -78,12 +78,12 @@ export async function GET(request: NextRequest) {
 
     const users = await features.query;
 
-    // Count for pagination with same filters
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    excludedFields.forEach((f) => delete transformedQuery[f]);
-    const count = await User.find(filter)
-      .find(transformedQuery)
-      .countDocuments();
+    const countFeatures = new APIFeatures<IUser>(
+      User.find(filter),
+      transformedQuery
+    ).filter();
+
+    const count = await countFeatures.query.countDocuments();
 
     return NextResponse.json({
       status: "success",
