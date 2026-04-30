@@ -12,6 +12,12 @@ import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 import { Ticket as ITicket } from "@/shared/model/model";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
 
 connect();
 
@@ -158,35 +164,39 @@ export async function GET(request: NextRequest) {
     );
 
     return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
 
-export async function POST(request: NextRequest, { params }: any) {
+const ticketCreateBodySchema = ticketFormSchema.partial({
+  // The route resolves property/unit from the verified user when omitted,
+  // so they are optional in the wire schema even though the form requires them.
+  property: true,
+  unit: true,
+  images: true,
+  videos: true,
+  documents: true,
+});
+
+export async function POST(request: NextRequest) {
   try {
-    //2) Check if user exists & password is correct after it's hashed
     const verify = await getUserFromCookies();
-    if (!verify) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!verify) throw ApiError.unauthorized();
+
     const user = await User.findById(verify.id);
+    if (!user) throw ApiError.notFound("User not found");
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-    const body = await request.json();
+    const body = parseOrThrow(ticketCreateBodySchema, await request.json());
 
-    //create Ticket
     const data = await Ticket.create({
       ...body,
-      property: verify.property,
-      unit: verify.unit,
+      property: body.property ?? verify.property,
+      unit: body.unit ?? verify.unit,
       user: verify.id,
       business: user.currentBusiness,
     });
 
-    //Log Ticket Activity
     await TicketActivity.create({
       ticket: data.id,
       action: "created",
@@ -199,15 +209,8 @@ export async function POST(request: NextRequest, { params }: any) {
       },
     });
 
-    const response = NextResponse.json(
-      {
-        status: "success",
-        data,
-      },
-      { status: 201 }
-    );
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ status: "success", data }, { status: 201 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
