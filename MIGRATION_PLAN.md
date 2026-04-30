@@ -88,35 +88,44 @@ this file as phases land.
 
 ## Phase 5 — Feature folder migration
 
-Tickets first, then properties/units, then team, then settings. Each
-feature gets the canonical
-`components/ data/ forms/ helpers/ hooks/ list/ models/ services/`
-structure. The existing `src/app/admin/dashboard/.../helper.ts` files
-become feature `helpers/` and `data/`. The existing custom Table
-component is preserved during the move; only callers are updated to the
-typed query-key + filter-schema pattern.
+Each feature gets the canonical structure:
+`components/ data/ forms/ helpers/ hooks/ list/ models/ services/`.
+The existing custom Table component is preserved during the move; only
+callers are updated to the typed query-key + filter-schema pattern.
 
 For each feature:
 
 - [ ] Extract status/priority constants into `*-status.model.ts` etc.
 - [ ] Extract Zod schemas into `*-form.model.ts`
-- [ ] Move axios calls into `services/`
-- [ ] Add typed query-key map in `hooks/`
+- [ ] Move axios calls into `services/` using `ApiErrorHandler.toUIError`
+- [ ] Add typed `*_KEYS` query-key map in `hooks/`
 - [ ] Replace inline permission/role checks with `assertPermission` and
       `hasPermission`
 
-Order of attack:
+Status:
 
-1. tickets
-2. technician-requests
-3. properties
-4. units
-5. tenants
-6. technicians
-7. team (staff management)
-8. settings
-9. dashboard
-10. chat
+| Feature              | Constants | Schemas | Service | Hooks | Components | List | Forms |
+| -------------------- | --------- | ------- | ------- | ----- | ---------- | ---- | ----- |
+| tickets              | done      | done    | done    | done  |            |      |       |
+| properties           | done      | done    | done    | done  |            |      |       |
+| units                |           | done    | done    | done  |            |      |       |
+| tenants              | done      | done    | done    | done  |            |      |       |
+| technicians          | done      | done    | done    | done  |            |      |       |
+| team                 |           | done    | done    | done  |            |      |       |
+| chat                 | done      |         | done    | done  |            |      |       |
+| settings             |           |         |         |       |            |      |       |
+| dashboard            |           |         |         |       |            |      |       |
+| technician-requests  | done\*    |         |         |       |            |      |       |
+
+\* technician-response constants are in `src/features/tickets/models/`
+because the request entity is currently part of the ticket model graph.
+A dedicated `src/features/technician-requests/` folder is needed before
+that layer can take services + hooks.
+
+Remaining for each feature: components/list/forms (the UI layer). These
+are migrated only when the underlying page or dialog is touched —
+existing legacy code under `src/features/*-feat/` keeps working
+unchanged during the rollout.
 
 ## Phase 6 — API route hardening
 
@@ -130,6 +139,17 @@ For every route under `src/app/api/**`:
 - [ ] List routes adopt the
       `parseOrThrow → buildApiFeaturesQuery → applyFilters` pipeline
       with a feature `*ListQuerySchema`
+
+Status:
+
+- [x] `POST /api/tickets` (canonical example)
+- [x] `GET /api/tickets` (catch block converted)
+- [ ] all other ticket routes
+- [ ] all property/unit routes
+- [ ] all auth routes
+- [ ] all user/users routes
+- [ ] all chat routes
+- [ ] all onboarding routes
 
 ## Phase 7 — Email feature boundary
 
@@ -151,8 +171,8 @@ For every route under `src/app/api/**`:
 
 ## Phase 9 — Lint enforcement
 
-- [ ] Add `no-nested-ternary: error` to ESLint
-- [ ] Add `npm run lint:no-nested-ternary` script
+- [x] Add `no-nested-ternary: error` to ESLint
+- [x] Add `npm run lint:no-nested-ternary` script
 - [ ] Add a custom rule (or grep CI check) banning `currentBusiness:
       string` literals in API routes — must come from `getVerifiedUser`
 
