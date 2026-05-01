@@ -1,4 +1,5 @@
 import { ROLES } from "@/shared/enums/enums";
+import type { PLATFORM_ROLE, WORKSPACE_ROLE } from "@/shared/auth/roles";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export type UserRole = "ADMIN" | "SUPER_ADMIN" | "TECHNICIAN" | "USER";
@@ -7,6 +8,10 @@ export interface TokenPayload extends JwtPayload {
   id: string;
   role: ROLES;
   currentBusiness: string;
+  businessId?: string;
+  platformRole?: PLATFORM_ROLE | null;
+  workspaceRole?: WORKSPACE_ROLE | null;
+  sessionId?: string;
 }
 
 export function decodeToken(token: string): TokenPayload | null {

@@ -1,14 +1,13 @@
 import { redirect } from "next/navigation";
 
 import { ROLES } from "@/shared/enums/enums";
-import { getUserFromCookies } from "./getUserFromCookies";
 import {
-  hasPermission,
-  type PermissionContext,
-} from "./permission-guards";
+  getVerifiedUserState,
+  VERIFIED_USER_STATE_STATUS,
+} from "./getVerifiedUser";
+import { hasPermission, type PermissionContext } from "./permission-guards";
 import {
   isPlatformSuperAdminRole,
-  resolveWorkspaceRole,
 } from "@/shared/auth/roles";
 import type { PermissionKey } from "@/shared/auth/permission-registry";
 
@@ -46,12 +45,17 @@ function dashboardPathForRole(role: ROLES | string): string {
 export async function requireDashboardAccess(
   options: DashboardAccessOptions = {},
 ) {
-  const user = await getUserFromCookies();
+  const verifyState = await getVerifiedUserState();
 
-  if (!user) {
+  if (verifyState.status === VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED) {
     redirect(options.loginPath ?? "/auth/login");
   }
 
+  if (verifyState.status === VERIFIED_USER_STATE_STATUS.INACTIVE_BUSINESS) {
+    redirect(options.forbiddenPath ?? "/auth/login");
+  }
+
+  const user = verifyState.user;
   const roles = options.roles;
   if (roles?.length) {
     const allowed = roles.some((role) => {
@@ -68,13 +72,13 @@ export async function requireDashboardAccess(
 
   if (options.requiredPermission) {
     const ctx: PermissionContext = {
-      platformRole: isPlatformSuperAdminRole(user.role)
-        ? user.role
-        : null,
-      workspaceRole: resolveWorkspaceRole({ storedRole: user.role }),
+      userId: user.id,
+      businessId: user.businessId,
+      platformRole: user.platformRole,
+      workspaceRole: user.workspaceRole,
     };
 
-    if (!hasPermission(ctx, options.requiredPermission)) {
+    if (!(await hasPermission(ctx, options.requiredPermission))) {
       redirect(options.forbiddenPath ?? dashboardPathForRole(user.role));
     }
   }
