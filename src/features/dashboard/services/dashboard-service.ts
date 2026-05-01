@@ -1,9 +1,9 @@
-import axios from "axios";
+import { http } from "@/services/http";
 import { ApiErrorHandler } from "@/utils/apiError";
 
 export async function fetchDashboardChecklist() {
   try {
-    const response = await axios.get("/api/onboarding/checklist");
+    const response = await http.get("/api/onboarding/checklist");
     return response.data;
   } catch (err) {
     throw ApiErrorHandler.toUIError(err);

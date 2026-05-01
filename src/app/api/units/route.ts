@@ -13,11 +13,10 @@ import {
   unitListQuerySchema,
 } from "@/features/units/models/unit-form.model";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { mapToObject } from "@/utils/helpers";
 import APIFeatures from "@/utils/apiFeatures";
 import Unit from "@/models/unitModel";
 import Property from "@/models/propertyModel";
-import { Unit as IUnit } from "@/features/property-feat/service/unit-service";
+import { Unit as IUnit } from "@/features/units/services/unit-service";
 
 const unitCreateBodySchema = unitFormSchema
   .omit({ isActive: true })
@@ -50,7 +49,7 @@ export async function GET(request: NextRequest) {
       business: verify.businessId,
       isActive: parsedQuery.isActive ?? true,
     };
-    const transformedQuery = mapToObject(request.nextUrl.searchParams as any);
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
     if (parsedQuery.propertyId ?? parsedQuery.property) {
       filter.property = parsedQuery.propertyId ?? parsedQuery.property;

@@ -4,7 +4,6 @@ import Breadcrumbs from "@/shared/components/breadcrumbs/BreadCrumbs";
 import AppSidebar from "@/shared/components/sidebar/AppSidebar";
 import { HeaderBar } from "@/shared/components/header/Headerbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { layoutConfig } from "@/shared/data/data";
 import { ROLES } from "@/shared/enums/enums";
 import { AppShell } from "@/shared/shells/AppShell";
 
@@ -26,16 +25,14 @@ type DashboardChromeProps = {
 };
 
 export function DashboardChrome({ role, children }: DashboardChromeProps) {
-  const { routes, crumbLabelMap } = layoutConfig[role];
-
   return (
     <section className="h-dvh flex">
       <SidebarProvider>
-        <AppSidebar routes={routes} />
+        <AppSidebar role={role} />
         <section className="flex flex-col overflow-x-hidden w-full">
           <HeaderBar />
           <section className="dashboard-body px-4 py-4">
-            <Breadcrumbs crumbLabelMap={crumbLabelMap} />
+            <Breadcrumbs />
             <AppShell>{children}</AppShell>
           </section>
         </section>

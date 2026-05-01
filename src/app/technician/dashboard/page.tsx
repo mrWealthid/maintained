@@ -1,4 +1,4 @@
-import TicketComponent from "@/features/ticket-feat/pages/TicketComponent";
+import TicketComponent from "@/features/tickets/components/TicketComponent";
 
 export default function Home() {
   return (

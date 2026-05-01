@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
 import type {
@@ -22,7 +22,7 @@ export async function fetchTechnicianRequests(
 ) {
   try {
     const qs = queryString(query);
-    const response = await axios.get(
+    const response = await http.get(
       qs
         ? `${API_ROUTES.ticketManagement.get_technician_requests}?${qs}`
         : API_ROUTES.ticketManagement.get_technician_requests,
@@ -38,7 +38,7 @@ export async function createTechnicianRequests(
   payload: TechnicianRequestCreateValues,
 ) {
   try {
-    const response = await axios.post(
+    const response = await http.post(
       API_ROUTES.ticketManagement.send_technician_request(ticketId),
       payload,
     );
@@ -53,7 +53,7 @@ export async function respondToTechnicianRequest(
   payload: TechnicianResponseValues,
 ) {
   try {
-    const response = await axios.patch(
+    const response = await http.patch(
       API_ROUTES.ticketManagement.process_technician_response(requestId),
       payload,
     );

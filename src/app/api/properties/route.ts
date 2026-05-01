@@ -12,13 +12,12 @@ import {
   propertyFormSchema,
   propertyListQuerySchema,
 } from "@/features/properties/models/property-form.model";
-import { PROPERTY_TYPES } from "@/features/onboarding-feat/data/data";
+import { PROPERTY_TYPES } from "@/features/onboarding/data/data";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { mapToObject } from "@/utils/helpers";
 import APIFeatures from "@/utils/apiFeatures";
 import Property from "@/models/propertyModel";
 import Unit from "@/models/unitModel";
-import { Property as IProperty } from "@/features/property-feat/service/property-service";
+import { Property as IProperty } from "@/features/properties/services/property-service";
 
 const propertyCreateBodySchema = propertyFormSchema
   .omit({ isActive: true })
@@ -100,7 +99,7 @@ export async function GET(request: NextRequest) {
       isActive: parsedQuery.isActive ?? true,
     };
 
-    const transformedQuery = mapToObject(request.nextUrl.searchParams as any);
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
     if (parsedQuery.name) {
       filter.name = { $regex: parsedQuery.name, $options: "i" };

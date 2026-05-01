@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { ROLES } from "@/shared/enums/enums";
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
@@ -19,7 +19,7 @@ import type {
 export async function fetchTenantList(query: TenantListQuery) {
   try {
     const qs = buildQueryString({ ...query, role: ROLES.user });
-    const { data } = await axios.get(
+    const { data } = await http.get(
       `${API_ROUTES.userManagement.get_users}?${qs}`,
     );
     return data;
@@ -30,7 +30,7 @@ export async function fetchTenantList(query: TenantListQuery) {
 
 export async function fetchTenantById(id: string) {
   try {
-    const { data } = await axios.get(
+    const { data } = await http.get(
       API_ROUTES.userManagement.userById(id),
     );
     return data;
@@ -41,7 +41,7 @@ export async function fetchTenantById(id: string) {
 
 export async function inviteTenant(payload: TenantInviteFormValues) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.userManagement.invite_user,
       { ...payload, role: ROLES.user },
     );
@@ -56,7 +56,7 @@ export async function updateTenant(
   payload: Partial<TenantInviteFormValues>,
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.userManagement.userById(id),
       payload,
     );
@@ -68,7 +68,7 @@ export async function updateTenant(
 
 export async function removeTenant(id: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.userManagement.userById(id),
     );
     return data;

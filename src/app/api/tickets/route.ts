@@ -3,12 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Ticket from "@/models/ticketModel";
 import Category from "@/models/ticketCategoryModel";
 import { connect } from "@/dbConfig/dbConfig";
-import { mapToObject } from "@/utils/helpers";
 import MiddlewareFeatures from "@/middlewareFeatures";
 import { Types } from "mongoose";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
-import { TICKET_STATUS } from "@/shared/enums/enums";
+import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 import { Ticket as ITicket } from "@/shared/model/model";
@@ -17,7 +16,10 @@ import {
   errorToNextResponse,
   parseOrThrow,
 } from "@/lib/errors/apiError";
-import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
+import {
+  ticketFormSchema,
+  ticketListQuerySchema,
+} from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 
@@ -37,7 +39,7 @@ export async function GET(request: NextRequest) {
     if (!user) {
       throw ApiError.notFound("User not found");
     }
-    if (verify.isAdminRole) {
+    if (verify.role === ROLES.admin) {
       filter = { business: user.currentBusiness };
     }
 
@@ -63,18 +65,26 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    const query: any = request.nextUrl.searchParams;
-
-    const transformedQuery = mapToObject(query);
+    const parsedQuery = parseOrThrow(
+      ticketListQuerySchema
+        .extend({
+          title: ticketListQuerySchema.shape.search.optional(),
+          category: ticketListQuerySchema.shape.search.optional(),
+          user: ticketListQuerySchema.shape.search.optional(),
+        })
+        .passthrough(),
+      Object.fromEntries(request.nextUrl.searchParams.entries())
+    );
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
     //handling nested filters / partial match
-    if (transformedQuery.title) {
-      const regex = new RegExp(transformedQuery.title, "i"); // 'i' for case-insensitive
+    if (parsedQuery.title) {
+      const regex = new RegExp(parsedQuery.title, "i"); // 'i' for case-insensitive
       filter = { ...filter, title: { $regex: regex } };
       delete transformedQuery.title; // Remove name from transformedQuery so it doesn't get double-filtered
     }
 
-    if ("category" in transformedQuery) {
-      const categoryName = String(transformedQuery["category"]).trim();
+    if (parsedQuery.category) {
+      const categoryName = parsedQuery.category.trim();
       const categoryFound = await Category.findOne({
         name: new RegExp(categoryName, "i"),
       }).select("_id");
@@ -84,8 +94,8 @@ export async function GET(request: NextRequest) {
       // if (!categoryFound) delete transformedQuery["category"];
     }
 
-    if ("user" in transformedQuery) {
-      const userName = String(transformedQuery["user"]).trim();
+    if (parsedQuery.user) {
+      const userName = parsedQuery.user.trim();
       const userFound = await User.findOne({
         name: new RegExp(userName, "i"),
       }).select("_id");

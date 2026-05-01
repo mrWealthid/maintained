@@ -1,9 +1,9 @@
 "use client";
 import { useCallback, useState } from "react";
-import TicketList from "./list/TicketList";
+import TicketList from "@/features/tickets/list/technician/TicketList";
 import ToggleView from "@/shared/components/toggle-views/ToggleView";
 import TransitionReveal from "@/shared/components/animation/TransitionReveal";
-import TicketComponent from "@/features/ticket-feat/pages/TicketComponent";
+import TicketComponent from "@/features/tickets/components/TicketComponent";
 
 export default function Home() {
   const [isList, setIsList] = useState(true);

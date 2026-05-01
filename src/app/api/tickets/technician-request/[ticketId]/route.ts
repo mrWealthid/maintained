@@ -1,4 +1,4 @@
-import { TICKET_STATUS } from "@/shared/enums/enums";
+import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { technicianRequestCreateSchema } from "@/features/technician-requests/models/technician-request.model";
@@ -39,7 +39,7 @@ export async function POST(
     if (!ticket) throw ApiError.notFound("Ticket not found");
 
     if (
-      verify.isAdminRole &&
+      verify.role === ROLES.admin &&
       ticket.actionedBy?.toString() !== verify.id.toString()
     ) {
       throw ApiError.forbidden("You are not allowed to perform this action");

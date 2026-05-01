@@ -1,4 +1,4 @@
-import ChatComponent from "@/features/chat-feat/ChatComponent";
+import ChatComponent from "@/features/chat/ChatComponent";
 import React from "react";
 
 const page = () => {

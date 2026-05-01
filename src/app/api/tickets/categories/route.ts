@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 
 import Category from "@/models/ticketCategoryModel";
 import { connect } from "@/dbConfig/dbConfig";
-import { mapToObject } from "@/utils/helpers";
 import User from "@/models/userModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
@@ -18,6 +17,10 @@ const categoryBodySchema = z.object({
   description: z.string().trim().optional().default(""),
 });
 
+const categoryListQuerySchema = z.object({
+  name: z.string().trim().optional(),
+});
+
 export async function GET(request: NextRequest) {
   try {
     const verify = await getUserFromCookies();
@@ -27,8 +30,9 @@ export async function GET(request: NextRequest) {
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
 
-    const transformedQuery = mapToObject(
-      request.nextUrl.searchParams as unknown as Map<string, string>,
+    const parsedQuery = parseOrThrow(
+      categoryListQuerySchema,
+      Object.fromEntries(request.nextUrl.searchParams.entries())
     );
 
     const businessIds = user.memberships.map((m) =>
@@ -39,10 +43,9 @@ export async function GET(request: NextRequest) {
       $or: [{ business: { $in: businessIds } }, { isDefault: true }],
     };
 
-    if (transformedQuery.name) {
-      const regex = new RegExp(String(transformedQuery.name), "i");
+    if (parsedQuery.name) {
+      const regex = new RegExp(parsedQuery.name, "i");
       filter = { ...filter, name: { $regex: regex } };
-      delete transformedQuery.name;
     }
 
     const categories = await Category.find(filter);

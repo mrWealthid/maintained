@@ -15,28 +15,47 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Routes } from "@/shared/model/model";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Profile from "@/shared/components/profile/Profile";
-import Logout from "@/shared/components/header/Logout";
 import { Separator } from "@/components/ui/separator";
-import SwitchBusiness from "./SwitchBusiness";
+import { EventBuddyLogo } from "../EventBuddyLogo";
+import { ROLES } from "@/shared/enums/enums";
+import SidebarProfileShell from "./SidebarProfileShell";
+import type { WorkspaceType } from "@/shared/model/workspace.model";
+import { getDashboardRoutes } from "@/shared/routes/appRoutes";
+import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
 
-function AppSidebar({ routes }: { routes: Routes[] }) {
+function AppSidebar({
+  role,
+  workspaceRole,
+  workspaceType,
+  canViewPayments,
+}: {
+  role: ROLES;
+  workspaceRole?: WORKSPACE_ROLE | null;
+  workspaceType?: WorkspaceType | null;
+  canViewPayments?: boolean;
+}) {
   const pathname = usePathname();
   const { open, setOpenMobile, isMobile } = useSidebar();
+  const routes = getDashboardRoutes({
+    role,
+    workspaceRole,
+    workspaceType,
+    canViewPayments,
+  });
 
   return (
     <Sidebar className="flex flex-col h-screen" collapsible="icon">
       <SidebarHeader>
         <div className="flex flex-col   justify-between">
-          {open && <SwitchBusiness />}
+          {/* {open  (
+            <div>
+              <p>Voluntary</p>{" "}
+              <span className="italic text-xs">Volunteer Today Somewhere</span>
+            </div>
+          )} */}
+
+          <EventBuddyLogo size={'sm'} variant={open ? 'full' : 'icon'} />
+
         </div>
       </SidebarHeader>
       <Separator />
@@ -50,18 +69,16 @@ function AppSidebar({ routes }: { routes: Routes[] }) {
                 return (
                   <SidebarMenuItem key={link.name}>
                     <SidebarMenuButton
+                      isActive={isActive}
                       onClick={() => {
                         if (isMobile) setOpenMobile(false);
                       }}
+                      className="bg-transparent transition-[background-color,color] duration-300 ease-out hover:bg-transparent active:bg-transparent data-[state=open]:hover:bg-transparent data-[active=true]:bg-muted data-[active=true]:font-medium"
                       asChild
                     >
                       <Link
                         href={link.path}
-                        className={`hover:translate-x-1  rounded-lg text-sm transition-all duration-500 flex items-center gap-2 ${
-                          isActive
-                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                            : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                        }`}
+                        className="flex items-center gap-2 rounded-lg text-sm transition-transform duration-200 ease-out hover:translate-x-1"
                       >
                         {link.icon &&
                           React.createElement(link.icon, {
@@ -80,32 +97,11 @@ function AppSidebar({ routes }: { routes: Routes[] }) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="focus-visible:ring-0 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Profile />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-(--radix-dropdown-menu-trigger-width)  min-w-56 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <Logout />
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarProfileShell
+              fallbackRole={role}
+              fallbackWorkspaceRole={workspaceRole}
+              fallbackWorkspaceType={workspaceType}
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

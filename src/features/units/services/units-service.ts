@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
@@ -12,7 +12,7 @@ import type {
 export async function fetchUnitList(query: UnitListQuery) {
   try {
     const qs = buildQueryString(query);
-    const { data } = await axios.get(
+    const { data } = await http.get(
       `${API_ROUTES.propertyManagement.get_units}?${qs}`,
     );
     return data;
@@ -23,7 +23,7 @@ export async function fetchUnitList(query: UnitListQuery) {
 
 export async function fetchUnitById(id: string) {
   try {
-    const { data } = await axios.get(
+    const { data } = await http.get(
       API_ROUTES.propertyManagement.unitById(id),
     );
     return data;
@@ -34,7 +34,7 @@ export async function fetchUnitById(id: string) {
 
 export async function createUnit(payload: UnitFormValues) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.propertyManagement.get_units,
       payload,
     );
@@ -49,7 +49,7 @@ export async function updateUnit(
   payload: Partial<UnitFormValues>,
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.propertyManagement.unitById(id),
       payload,
     );
@@ -61,7 +61,7 @@ export async function updateUnit(
 
 export async function deleteUnit(id: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.propertyManagement.unitById(id),
     );
     return data;

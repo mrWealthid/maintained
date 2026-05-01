@@ -22,7 +22,7 @@ export async function PATCH(
     const { ticketId } = await params;
 
     const user = await getUserFromCookies(request);
-    if (!user || (!user.isAdminRole && !user.isSuperAdminRole)) {
+    if (!user) {
       throw ApiError.unauthorized();
     }
     await assertLegacyWorkspacePermission(user, PERMISSION.TICKETS_ASSIGN);

@@ -7,7 +7,8 @@ import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import ChatMessage from "@/models/chatMessage";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
-import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
+import { CHAT_TYPE } from "@/features/chat/data/enums";
+import { ROLES } from "@/shared/enums/enums";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
@@ -24,13 +25,17 @@ function assertValidIds(roomId: string, messageId: string) {
   }
 }
 
-function canModifyMessage(
-  verify: { id: string; isAdminRole?: boolean; isSuperAdminRole?: boolean },
-  message: { sender?: unknown },
-) {
-  const isSender = String(message.sender) === String(verify.id);
-  const isAdmin = !!verify.isAdminRole || !!verify.isSuperAdminRole;
-  return isSender || isAdmin;
+function canModifyMessage({
+  userId,
+  canModerate,
+  message,
+}: {
+  userId: string;
+  canModerate: boolean;
+  message: { sender?: unknown };
+}) {
+  const isSender = String(message.sender) === String(userId);
+  return isSender || canModerate;
 }
 
 export async function PATCH(
@@ -57,7 +62,17 @@ export async function PATCH(
       room: roomId,
     });
     if (!existing) throw ApiError.notFound("Message not found");
-    if (!canModifyMessage(verify, existing)) throw ApiError.forbidden();
+    if (
+      !canModifyMessage({
+        userId: verify.id,
+        canModerate: Boolean(
+          verify.isSuperAdminRole || verify.role === ROLES.admin
+        ),
+        message: existing,
+      })
+    ) {
+      throw ApiError.forbidden();
+    }
 
     existing.text = newText;
     existing.type = existing.type ?? CHAT_TYPE.USER;
@@ -111,7 +126,17 @@ export async function DELETE(
       room: roomId,
     });
     if (!existing) throw ApiError.notFound("Message not found");
-    if (!canModifyMessage(verify, existing)) throw ApiError.forbidden();
+    if (
+      !canModifyMessage({
+        userId: verify.id,
+        canModerate: Boolean(
+          verify.isSuperAdminRole || verify.role === ROLES.admin
+        ),
+        message: existing,
+      })
+    ) {
+      throw ApiError.forbidden();
+    }
 
     await ChatMessage.deleteOne({ _id: messageId });
 

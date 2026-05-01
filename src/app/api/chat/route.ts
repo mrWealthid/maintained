@@ -1,4 +1,6 @@
-// app/api/completion/route.ts
+// app/api/chat/route.ts
+// This endpoint returns an AI stream response. It intentionally uses the AI SDK
+// stream response shape instead of the app-wide JSON success envelope.
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from "zod";

@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
 import { TechnicianRequest } from "@/models/technicanRequest";
 import APIFeatures from "@/utils/apiFeatures";
-import { mapToObject } from "@/utils/helpers";
 import Ticket from "@/models/ticketModel";
-import { TechnicianRequestDetails } from "@/features/ticket-feat/model/ticket.model";
+import { TechnicianRequestDetails } from "@/features/tickets/models/ticket.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { technicianRequestListQuerySchema } from "@/features/technician-requests/models/technician-request.model";
 
 connect();
 
@@ -29,19 +33,20 @@ export async function GET(request: NextRequest) {
       filter = { ...filter, isActive: true };
     }
 
-    const transformedQuery = mapToObject(
-      request.nextUrl.searchParams as unknown as Map<string, string>,
+    const parsedQuery = parseOrThrow(
+      technicianRequestListQuerySchema,
+      Object.fromEntries(request.nextUrl.searchParams.entries())
     );
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
-    if ("title" in transformedQuery) {
-      const titleQuery = String(transformedQuery["title"]);
+    if (parsedQuery.title) {
       const matchingTickets = await Ticket.find({
-        title: { $regex: new RegExp(titleQuery, "i") },
+        title: { $regex: new RegExp(parsedQuery.title, "i") },
       }).select("_id");
 
       const ticketIds = matchingTickets.map((t) => t._id);
       filter.ticket = { $in: ticketIds };
-      delete transformedQuery["title"];
+      delete transformedQuery.title;
     }
 
     const requestQuery = TechnicianRequest.find(filter);

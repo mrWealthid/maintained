@@ -103,7 +103,8 @@ For each feature:
 
 - [x] Extract status/priority constants into `*-status.model.ts` etc.
 - [x] Extract Zod schemas into `*-form.model.ts`
-- [x] Move axios calls into `services/` using `ApiErrorHandler.toUIError`
+- [x] Move client HTTP calls into `services/` using the shared `http`
+      client and `ApiErrorHandler.toUIError`
 - [x] Add typed `*_KEYS` query-key map in `hooks/`
 - [x] Replace inline permission/role checks with `assertPermission` and
       `hasPermission`
@@ -112,11 +113,11 @@ Status:
 
 | Feature              | Constants | Schemas | Service | Hooks | Components | List | Forms |
 | -------------------- | --------- | ------- | ------- | ----- | ---------- | ---- | ----- |
-| tickets              | done      | done    | done    | done  |            |      |       |
-| properties           | done      | done    | done    | done  |            |      |       |
+| tickets              | done      | done    | done    | done  | done       | done | done  |
+| properties           | done      | done    | done    | done  | done       | done | done  |
 | units                | done      | done    | done    | done  | done       | done | done  |
-| tenants              | done      | done    | done    | done  |            |      |       |
-| technicians          | done      | done    | done    | done  |            |      |       |
+| tenants              | done      | done    | done    | done  | done       | done | done  |
+| technicians          | done      | done    | done    | done  | done       | done | done  |
 | team                 | done      | done    | done    | done  | done       | done | done  |
 | chat                 | done      | done    | done    | done  | done       | done | done  |
 | settings             | done      | done    | done    | done  | done       | done | done  |
@@ -128,10 +129,12 @@ because the request entity is currently part of the ticket model graph.
 A dedicated `src/features/technician-requests/` folder is needed before
 that layer can take services + hooks.
 
-Remaining for each feature: components/list/forms (the UI layer). These
-are migrated only when the underlying page or dialog is touched —
+Remaining for each open feature: components/list/forms (the UI layer).
+These are migrated only when the underlying page or dialog is touched —
 existing legacy code under `src/features/*-feat/` keeps working
-unchanged during the rollout.
+unchanged during the rollout. Phase 5 UI migration is complete for the
+tracked feature rows; `ticket-feat`, `property-feat`, `chat-feat`, and
+`settings-feat` have been removed.
 
 ## Phase 6 — API route hardening
 
@@ -183,31 +186,34 @@ Status:
 - [x] Consolidate the three role-specific layouts (admin, technician,
       users) behind a shared `DashboardChrome` shell. Layouts now
       declare only role gating + which `layoutConfig` entry to render.
+- [x] Align reusable shared components with eventSphere: sidebar
+      workspace/profile shell, table header actions/reload/export/
+      visualize/row-actions styles, address field/autocomplete,
+      calendar/date-filter, and native date/time inputs.
 - [x] Feature `components/*Skeleton.tsx` files
       (DashboardSkeleton, TicketListSkeleton, TeamListSkeleton,
       ChatSkeleton) wired through Next.js segment `loading.tsx` so
       every dashboard route has a proper Suspense fallback. Replaces
       the `loading....` placeholders and a broken admin loader that
       was rendering nothing.
-- [ ] Replace `crumbLabelMap` with the eventSphere breadcrumb pattern
-      once the breadcrumb component itself is touched. The current
-      Breadcrumbs component works correctly; touching it has no
-      leverage today.
+- [x] Replace `crumbLabelMap` with a segment-driven breadcrumb pattern.
+      `BreadCrumbs.tsx` now derives labels from the current pathname
+      and hides role root segments without per-role crumb maps.
 
 ## Phase 9 — Lint enforcement
 
 - [x] Add `no-nested-ternary: error` to ESLint
 - [x] Add `npm run lint:no-nested-ternary` script and clear existing
       violations
-- [ ] Add a custom rule (or grep CI check) banning `currentBusiness:
+- [x] Add a custom rule (or grep CI check) banning `currentBusiness:
       string` literals in API routes — must come from `getVerifiedUser`
 
 ## Phase 10 — Cleanup
 
-- [ ] Delete legacy helper paths after callers move
-- [ ] Remove dead role-string branches once permission-key checks are
+- [x] Delete legacy helper paths after callers move
+- [x] Remove dead role-string branches once permission-key checks are
       everywhere
-- [ ] Final pass: typecheck, lint, build
+- [x] Final pass: typecheck, lint, build, built-app smoke
 
 ## Notes
 

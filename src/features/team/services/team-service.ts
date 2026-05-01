@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
@@ -19,7 +19,7 @@ import type {
 export async function fetchTeamList(query: TeamListQuery) {
   try {
     const qs = buildQueryString(query);
-    const { data } = await axios.get(
+    const { data } = await http.get(
       `${API_ROUTES.userManagement.get_users}?${qs}`,
     );
     return data;
@@ -30,7 +30,7 @@ export async function fetchTeamList(query: TeamListQuery) {
 
 export async function fetchTeamMember(id: string) {
   try {
-    const { data } = await axios.get(API_ROUTES.userManagement.userById(id));
+    const { data } = await http.get(API_ROUTES.userManagement.userById(id));
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
@@ -39,7 +39,7 @@ export async function fetchTeamMember(id: string) {
 
 export async function inviteTeamMember(payload: TeamInviteFormValues) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.userManagement.invite_user,
       payload,
     );
@@ -54,7 +54,7 @@ export async function updateTeamMemberRole(
   payload: TeamRoleUpdateValues,
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.userManagement.userById(id),
       payload,
     );
@@ -66,7 +66,7 @@ export async function updateTeamMemberRole(
 
 export async function removeTeamMember(id: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.userManagement.userById(id),
     );
     return data;

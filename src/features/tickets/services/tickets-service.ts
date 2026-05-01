@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
@@ -18,7 +18,7 @@ import type { TicketStatus } from "../models/ticket-status.model";
 export async function fetchTicketList(query: TicketListQuery) {
   try {
     const qs = buildQueryString(query);
-    const { data } = await axios.get(
+    const { data } = await http.get(
       `${API_ROUTES.ticketManagement.get_tickets}?${qs}`,
     );
     return data;
@@ -29,7 +29,7 @@ export async function fetchTicketList(query: TicketListQuery) {
 
 export async function fetchTicketById(id: string) {
   try {
-    const { data } = await axios.get(
+    const { data } = await http.get(
       API_ROUTES.ticketManagement.ticketById(id),
     );
     return data;
@@ -40,7 +40,7 @@ export async function fetchTicketById(id: string) {
 
 export async function createTicket(payload: TicketFormValues) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.ticketManagement.create_ticket,
       payload,
     );
@@ -52,7 +52,7 @@ export async function createTicket(payload: TicketFormValues) {
 
 export async function updateTicket(id: string, payload: Partial<TicketFormValues>) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.ticketManagement.ticketById(id),
       payload,
     );
@@ -64,7 +64,7 @@ export async function updateTicket(id: string, payload: Partial<TicketFormValues
 
 export async function deleteTicket(id: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.ticketManagement.ticketById(id),
     );
     return data;
@@ -78,7 +78,7 @@ export async function updateTicketStatus(
   payload: { status: TicketStatus; reason?: string },
 ) {
   try {
-    const { data } = await axios.put(
+    const { data } = await http.put(
       API_ROUTES.ticketManagement.update_status(id),
       payload,
     );
@@ -93,7 +93,7 @@ export async function assignTechnicianToTicket(
   payload: { assignedTo: string },
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.ticketManagement.assign_technician(id),
       payload,
     );

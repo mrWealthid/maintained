@@ -6,7 +6,6 @@ import User, { IUser } from "@/models/userModel";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { teamListQuerySchema } from "@/features/team/models/team-form.model";
 import APIFeatures from "@/utils/apiFeatures";
-import { mapToObject } from "@/utils/helpers";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -36,7 +35,7 @@ export async function GET(request: NextRequest) {
       "memberships.business": currentBusinessId,
     };
 
-    const transformedQuery = mapToObject(request.nextUrl.searchParams as any);
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
     if (request.nextUrl.searchParams.get("excludeSelf") === "true") {
       filter._id = { $ne: verify.id };

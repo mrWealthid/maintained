@@ -24,7 +24,7 @@ export function useTable<T>(
   queryKey: string,
   search?: IsearchParams | null
 ): IListResponse<T> {
-  const { isLoading, data, error, isRefetching } = useQuery({
+  const { isLoading, data, error, isRefetching, refetch } = useQuery({
     queryKey: [queryKey, limit, page, search],
     queryFn: () => service({ page, limit, search }),
     // placeholderData: undefined
@@ -39,6 +39,7 @@ export function useTable<T>(
     summary: data?.summary ?? {},
     totalRecords: data?.totalRecords ?? 0,
     results: data?.results ?? 0,
+    reload: () => refetch(),
   };
 }
 

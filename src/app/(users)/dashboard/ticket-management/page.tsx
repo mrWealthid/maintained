@@ -1,15 +1,15 @@
 "use client";
 import { useCallback, useState } from "react";
-import TicketList from "@/app/admin/dashboard/ticket-management/list/TicketList";
+import TicketList from "@/features/tickets/list/admin/TicketList";
 import ToggleView from "@/shared/components/toggle-views/ToggleView";
-import TicketComponent from "@/features/ticket-feat/pages/TicketComponent";
+import TicketComponent from "@/features/tickets/components/TicketComponent";
 import { CiCirclePlus } from "react-icons/ci";
 import TransitionReveal from "@/shared/components/animation/TransitionReveal";
-import { InteractiveTicketChat } from "@/features/ticket-feat/pages/InteractiveTicketChat";
+import { InteractiveTicketChat } from "@/features/tickets/components/InteractiveTicketChat";
 import { Bot, FilePlus } from "lucide-react";
-import { ManageTicketForm } from "@/features/ticket-feat/model/ticket.model";
+import { ManageTicketForm } from "@/features/tickets/models/ticket.model";
 import { FormProvider, useForm } from "react-hook-form";
-import TicketForm from "@/features/ticket-feat/form/TicketForm";
+import TicketForm from "@/features/tickets/forms/TicketForm";
 import { CreateTicketPayload } from "@/shared/model/model";
 import {
   Sheet,
@@ -18,7 +18,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useCreateTicket } from "@/features/ticket-feat/hooks/ticketHooks";
+import { useCreateTicket } from "@/features/tickets/hooks/ticketHooks";
 import { useRouter } from "next/navigation";
 import { ROUTES_DEFINITION } from "@/shared/routes/routes";
 

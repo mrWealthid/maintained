@@ -1,4 +1,6 @@
 // app/api/completion/route.ts
+// This endpoint returns an AI stream response. It intentionally remains exempt
+// from the app-wide JSON error/success envelope used by normal API routes.
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 

@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
@@ -10,7 +10,7 @@ export type SendMessagePayload = {
 
 export async function fetchChatRooms() {
   try {
-    const { data } = await axios.get(API_ROUTES.chat.get_rooms);
+    const { data } = await http.get(API_ROUTES.chat.get_rooms);
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
@@ -19,7 +19,7 @@ export async function fetchChatRooms() {
 
 export async function fetchRoomMessages(roomId: string) {
   try {
-    const { data } = await axios.get(
+    const { data } = await http.get(
       API_ROUTES.chat.get_room_messages(roomId),
     );
     return data;
@@ -33,7 +33,7 @@ export async function sendChatMessage(
   payload: SendMessagePayload,
 ) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.chat.send_message(roomId),
       payload,
     );
@@ -49,7 +49,7 @@ export async function editChatMessage(
   payload: SendMessagePayload,
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.chat.edit_message(roomId, messageId),
       payload,
     );
@@ -61,7 +61,7 @@ export async function editChatMessage(
 
 export async function deleteChatMessage(roomId: string, messageId: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.chat.delete_message(roomId, messageId),
     );
     return data;
@@ -72,7 +72,7 @@ export async function deleteChatMessage(roomId: string, messageId: string) {
 
 export async function markRoomRead(roomId: string) {
   try {
-    const { data } = await axios.post(API_ROUTES.chat.message_read(roomId));
+    const { data } = await http.post(API_ROUTES.chat.message_read(roomId));
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
@@ -84,7 +84,7 @@ export async function markMessageDelivered(
   messageId: string,
 ) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.chat.message_delivered(roomId, messageId),
     );
     return data;

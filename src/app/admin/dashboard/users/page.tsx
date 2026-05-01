@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import UserList from './list/UserList';
-import AddUser from './AddUser';
+import UserList from '@/features/team/list/UserList';
+import AddUser from '@/features/team/components/AddUser';
 
 const page: FC = () => {
 	return (

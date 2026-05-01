@@ -1,4 +1,4 @@
-import axios from "axios";
+import { http } from "@/services/http";
 
 import { ROLES } from "@/shared/enums/enums";
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
@@ -13,7 +13,7 @@ import type {
 export async function fetchTechnicianList(query: TechnicianListQuery) {
   try {
     const qs = buildQueryString({ ...query, role: ROLES.technician });
-    const { data } = await axios.get(
+    const { data } = await http.get(
       `${API_ROUTES.userManagement.get_users}?${qs}`,
     );
     return data;
@@ -24,7 +24,7 @@ export async function fetchTechnicianList(query: TechnicianListQuery) {
 
 export async function fetchTechnicianById(id: string) {
   try {
-    const { data } = await axios.get(API_ROUTES.userManagement.userById(id));
+    const { data } = await http.get(API_ROUTES.userManagement.userById(id));
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
@@ -33,7 +33,7 @@ export async function fetchTechnicianById(id: string) {
 
 export async function inviteTechnician(payload: TechnicianInviteFormValues) {
   try {
-    const { data } = await axios.post(
+    const { data } = await http.post(
       API_ROUTES.userManagement.invite_user,
       { ...payload, role: ROLES.technician },
     );
@@ -48,7 +48,7 @@ export async function updateTechnician(
   payload: Partial<TechnicianInviteFormValues>,
 ) {
   try {
-    const { data } = await axios.patch(
+    const { data } = await http.patch(
       API_ROUTES.userManagement.userById(id),
       payload,
     );
@@ -60,7 +60,7 @@ export async function updateTechnician(
 
 export async function removeTechnician(id: string) {
   try {
-    const { data } = await axios.delete(
+    const { data } = await http.delete(
       API_ROUTES.userManagement.userById(id),
     );
     return data;

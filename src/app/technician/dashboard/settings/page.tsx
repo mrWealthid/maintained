@@ -1,4 +1,4 @@
-import SettingsPage from "@/features/settings-feat/SettingsPage";
+import SettingsPage from "@/features/settings/components/SettingsPage";
 
 export default function TechnicianSettingsPage() {
   return <SettingsPage />;

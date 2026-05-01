@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Home } from "lucide-react";
-import PropertyList from "./components/PropertyList";
-import UnitList from "./components/UnitList";
+import PropertyList from "@/features/properties/list/PropertyList";
+import UnitList from "@/features/units/list/UnitList";
 
 const PropertyManagementPage = () => {
   const [activeTab, setActiveTab] = useState("properties");

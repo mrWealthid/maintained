@@ -1,15 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { Input } from "@/components/ui/input";
-import { ParsedAddress, parseGooglePlace } from "@/utils/helpers";
+import { cn } from "@/lib/utils";
+import { parseGooglePlace } from "@/shared/helper/address.helper";
+import type { ParsedAddress } from "@/shared/model/address.model";
 
 type Props = {
-  onSelect: (addr: ParsedAddress) => void;
+  onSelect: (
+    addr: ParsedAddress & { countryCode?: string; country?: string }
+  ) => void;
   proximity?: { lng: number; lat: number };
   placeholder?: string;
   className?: string;
   initialQuery?: string;
+  countryCode?: "US" | "CA" | "GB" | "NG" | "DE";
 };
 
 export default function AddressAutocomplete({
@@ -18,6 +23,7 @@ export default function AddressAutocomplete({
   placeholder = "Enter address…",
   className,
   initialQuery,
+  countryCode,
 }: Props) {
   const [query, setQuery] = useState("");
   const [preds, setPreds] = useState<
@@ -47,18 +53,17 @@ export default function AddressAutocomplete({
   // load Google Places
   useEffect(() => {
     let alive = true;
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-      version: "weekly",
-      libraries: ["places"],
+    setOptions({
+      key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     });
-    loader.load().then(() => {
+    importLibrary("places").then(() => {
       if (!alive) return;
       acServiceRef.current = new google.maps.places.AutocompleteService();
-      const dummy = document.createElement("div");
-      placesServiceRef.current = new google.maps.places.PlacesService(dummy);
-      sessionTokenRef.current =
-        new google.maps.places.AutocompleteSessionToken();
+      // Initialize PlacesService using a detached element to avoid any DOM side-effects
+      const detachedHostEl = document.createElement("div");
+      placesServiceRef.current = new google.maps.places.PlacesService(
+        detachedHostEl
+      );
     });
     return () => {
       alive = false;
@@ -83,13 +88,16 @@ export default function AddressAutocomplete({
       const req: google.maps.places.AutocompletionRequest = {
         input: query,
         types: ["address"],
-        componentRestrictions: { country: ["us"] },
+        componentRestrictions: {
+          country: [countryCode?.toLowerCase() ?? "us"],
+        },
         sessionToken: sessionTokenRef.current ?? undefined,
       };
+
       if (proximity) {
         req.locationBias = {
           center: new google.maps.LatLng(proximity.lat, proximity.lng),
-          radius: 150_000,
+          radius: 50_000, // ✅ fix
         };
       }
       acServiceRef.current!.getPlacePredictions(req, (results) => {
@@ -103,7 +111,7 @@ export default function AddressAutocomplete({
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
-  }, [query, proximity, focused]);
+  }, [query, proximity, focused, countryCode]);
 
   // click-away closes list
   useEffect(() => {
@@ -171,51 +179,62 @@ export default function AddressAutocomplete({
   };
 
   return (
-    <div ref={containerRef} className={`relative ${className ?? ""}`}>
-      <Input
-        placeholder={placeholder}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={onKeyDown}
-        onFocus={() => setFocused(true)} // 👈 focus on
-        onBlur={() =>
-          setTimeout(() => {
-            // 👈 clear after click can register
-            setFocused(false);
-            setPreds([]);
-          }, 100)
-        }
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={focused && preds.length > 0}
-        aria-controls="addr-listbox"
-      />
+    <div ref={containerRef} className={cn("relative w-full", className)}>
+      <div className="relative">
+        <Input
+          id="address-search"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={onKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() =>
+            setTimeout(() => {
+              setFocused(false);
+              setPreds([]);
+            }, 100)
+          }
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={focused && preds.length > 0}
+          aria-controls="addr-listbox"
+          aria-autocomplete="list"
+          className="w-full"
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+        )}
+      </div>
       {focused && preds.length > 0 && (
         <ul
           id="addr-listbox"
           role="listbox"
-          className="absolute z-50 mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg max-h-72 overflow-auto"
+          className="absolute z-50 mt-2 w-full rounded-lg border border-border bg-popover shadow-lg max-h-72 overflow-auto"
         >
           {preds.map((p, i) => (
             <li
               key={p.place_id}
               role="option"
               aria-selected={i === activeIdx}
-              onMouseDown={(e) => e.preventDefault()} // 👈 keep focus for click
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelect(p)}
-              className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${i === activeIdx ? "bg-gray-100 dark:bg-gray-800" : ""}`}
+              className={cn(
+                "cursor-pointer px-4 py-3 text-sm transition-colors",
+                "hover:bg-muted hover:text-accent-foreground",
+                i === activeIdx && "bg-muted text-accent-foreground",
+                "border-b border-border last:border-b-0"
+              )}
             >
-              <div className="font-medium">
+              <div className="font-medium text-foreground">
                 {p.structured_formatting.main_text}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {p.structured_formatting.secondary_text}
               </div>
             </li>
           ))}
-          {loading && (
-            <li className="px-3 py-2 text-sm text-gray-500">Searching…</li>
-          )}
         </ul>
       )}
     </div>

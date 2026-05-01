@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:no-nested-ternary": "eslint . --ext .js,.jsx,.ts,.tsx --rule \"no-nested-ternary: error\""
+    "lint:no-nested-ternary": "eslint . --ext .js,.jsx,.ts,.tsx --rule \"no-nested-ternary: error\"",
+    "lint:no-hardcoded-current-business": "rg \"currentBusiness:\\\\s*string\" src/app/api && exit 1 || exit 0"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.36",
-    "@googlemaps/js-api-loader": "^1.16.10",
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "v1",
     "@hookform/resolvers": "^5.2.1",

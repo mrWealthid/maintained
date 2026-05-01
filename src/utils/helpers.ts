@@ -3,7 +3,9 @@ import crypto from "crypto";
 import { INVITE_STATUS, ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { Membership, User } from "@/shared/model/model";
 
-export function mapToObject(map: Map<string, any>): { [key: string]: any } {
+export function mapToObject(
+  map: Map<string, any> | URLSearchParams
+): { [key: string]: any } {
   const obj: { [key: string]: any } = {};
   for (let [key, value] of Array.from(map)) {
     // Checking if the value is a string representation of a number

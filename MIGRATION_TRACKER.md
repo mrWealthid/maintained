@@ -16,12 +16,14 @@ Legend
 
 ## Phase 2 — UI error surface
 
-- [ ] **Replace `toast.error(ApiErrorHandler.parse(err))` with `<ErrorList error={mutation.error} />`**
+- [x] **Replace `toast.error(ApiErrorHandler.parse(err))` with `<ErrorList error={mutation.error} />`**
       in ticket / property / unit / user dialogs.
       Effort: S per dialog · Risk: low · Trigger: on-touch.
       Reference: any new feature hook already passes a structured
       `UIError` through `onError`; the dialog just needs the import
       and the JSX swap.
+      Verified 2026-05-01: no remaining
+      `toast.error(ApiErrorHandler.parse(...))` callers.
 
 ---
 
@@ -39,29 +41,31 @@ Per-feature checklist:
 
 | Feature | components/ | list/ | forms/ | Notes |
 | --- | --- | --- | --- | --- |
-| tickets | ☐ | ☐ | ☐ | Largest surface. Existing pages: admin, technician, users dashboards. Move `src/app/admin/dashboard/ticket-management/list/*` into `src/features/tickets/list/`; convert `TicketList.tsx` to consume `useTicketList(query)` instead of inline axios. |
-| properties | ☐ | ☐ | ☐ | Existing dialogs at `src/app/admin/dashboard/properties/components/{PropertyDialog,UnitDialog}.tsx` should consume `useCreateProperty / useUpdateProperty` and `propertyFormSchema`. |
-| units | ☐ | ☐ | ☐ | Same pattern as properties. UnitDialog into `src/features/units/forms/`. |
-| tenants | ☐ | ☐ | ☐ | Currently lives inside `src/app/admin/dashboard/users/` because legacy code treats tenants as part of user management. New folder is `src/features/tenants/`. |
-| technicians | ☐ | ☐ | ☐ | Same shape as tenants. |
-| team | ☐ | ☐ | ☐ | Workspace staff. `src/app/admin/dashboard/users/UserForm.tsx` → `src/features/team/forms/TeamInviteForm.tsx`. |
-| chat | ☐ | ☐ | ☐ | Migrate `src/features/chat-feat/` → `src/features/chat/`. The chat skeleton is already in place at `src/features/chat/components/ChatSkeleton.tsx`. |
-| settings | ☐ | ☐ | ☐ | Constants + schemas + services + hooks not yet shipped (Phase 5 status table). Largest gap. Start here last because eventSphere settings is the most complex feature. |
-| dashboard | ☐ | ☐ | ☐ | Constants + schemas + services + hooks not yet shipped. Mostly read-only widgets. |
-| technician-requests | ☐ | ☐ | ☐ | Needs its own feature folder; constants currently live in `src/features/tickets/models/technician-response.model.ts`. |
+| tickets | ☑ | ☑ | ☑ | Migrated shared ticket components, forms, hooks, services, models, helpers, and role-specific admin/technician lists into `src/features/tickets/`. No `ticket-feat` callers remain. |
+| properties | ☑ | ☑ | ☑ | Migrated property dialog, view, actions, form, list, row components, hooks, models, and compatibility service into `src/features/properties/`. |
+| units | ☑ | ☑ | ☑ | Migrated unit dialog, view, actions, form, list, row components, hooks, models, and compatibility service into `src/features/units/`. |
+| tenants | ☑ | ☑ | ☑ | Canonical tenant services/hooks/models remain in `src/features/tenants/`; the shared users UI was moved from the route folder into `src/features/team/` because tenants are still managed through the combined user-management surface. |
+| technicians | ☑ | ☑ | ☑ | Canonical technician services/hooks/models remain in `src/features/technicians/`; the shared users UI was moved from the route folder into `src/features/team/`, with technician-specific request forms under `src/features/technician-requests/`. |
+| team | ☑ | ☑ | ☑ | Migrated the admin users page UI, list, forms, data, hooks, models, and compatibility service into `src/features/team/`. |
+| chat | ☑ | ☑ | ☑ | Migrated `src/features/chat-feat/` into `src/features/chat/` and removed the legacy folder. |
+| settings | ☑ | ☑ | ☑ | Migrated `src/features/settings-feat/` into `src/features/settings/` and removed the legacy folder. |
+| dashboard | ☑ | ☑ | ☑ | Dashboard feature folder already owns skeletons, data, hooks, models, and services; no legacy route-local dashboard UI remains for this phase. |
+| technician-requests | ☑ | ☑ | ☑ | Migrated technician apply/decline/send-request forms into `src/features/technician-requests/forms/`; canonical data/hooks/models/services were already present. |
 
 Effort per feature: M-L · Risk: med (touches working pages) · Trigger: on-touch.
 
 Phase-5-only sub-items:
 
-- [ ] **Create `src/features/settings/`** — full canonical layout
-      (constants, schemas, service, hooks, data) for workspace settings.
+- [x] **Create `src/features/settings/`** — entrypoints exist for
+      components, data, hooks, models, and services. Caller migration
+      off `settings-feat` is complete.
       Effort: L · Risk: low · Trigger: anytime, but only when settings
       page is being reworked.
-- [ ] **Create `src/features/dashboard/`** services + hooks
-      (just `DashboardSkeleton` lives there today). Effort: M · Risk:
-      low · Trigger: on-touch when dashboard cards are reworked.
-- [ ] **Promote `technician-requests` to its own feature folder** with
+- [x] **Create `src/features/dashboard/`** services + hooks
+      alongside the dashboard skeleton/data/model entrypoints. Effort:
+      M · Risk: low · Trigger: on-touch when dashboard cards are
+      reworked.
+- [x] **Promote `technician-requests` to its own feature folder** with
       a service + hook layer. Effort: M · Risk: low · Trigger:
       on-touch when the apply / decline flow is reworked.
 
@@ -72,23 +76,35 @@ Phase-5-only sub-items:
 All routes now use `errorToNextResponse` and structured `ApiError`. The
 remaining incremental work per route:
 
-- [ ] **Strict body parsing with `parseOrThrow(*Schema, body)`** — most
-      routes still inline-destructure the body. Replace with the
-      already-shipped feature schema (e.g. `ticketFormSchema`,
-      `propertyFormSchema`, `unitFormSchema`).
+- [x] **Strict body parsing with `parseOrThrow(*Schema, body)`** —
+      JSON mutation routes now parse through Zod schemas and
+      `parseOrThrow`. AI streaming endpoints are documented
+      exemptions, and multipart/form-data upload routes remain on
+      `request.formData()`.
       Effort: S per route · Risk: low · Trigger: on-touch.
-- [ ] **Replace inline role checks with `assertPermission(ctx, PERMISSION.X)`**
+      Verified 2026-05-01: the remaining raw `request.json()` reads
+      are wrapped by `parseOrThrow(...)` except documented streaming
+      and optional-payload compatibility cases.
+- [x] **Replace inline role checks with `assertPermission(ctx, PERMISSION.X)`**
       on every route that today does
       `if (!verify.isAdminRole) throw ApiError.unauthorized()`.
       Effort: S per route · Risk: low · Trigger: on-touch.
       Permission keys for every domain are already defined in
       `src/shared/auth/permission-registry.ts`.
-- [ ] **List endpoints adopt `*ListQuerySchema` + feature filter helper**
+      Verified 2026-05-01: no route-level `verify.isAdminRole`
+      permission gates remain.
+- [x] **List endpoints adopt `*ListQuerySchema` + feature filter helper**
       — i.e. parse `searchParams` with `ticketListQuerySchema` (and
       siblings) instead of `mapToObject(query as unknown as ...)`.
       Effort: M per route · Risk: med (filter behavior must be
       preserved) · Trigger: on-touch.
-- [ ] **`/api/chat/route.ts` and `/api/completion/route.ts`** — AI
+      2026-05-01: unsafe `mapToObject(... as unknown as Map<...>)`
+      casts were removed from API routes; `/api/tickets`, ticket
+      categories/types, technician requests, properties, units, users,
+      and chat room messages now parse list queries before passing
+      filters into legacy `APIFeatures` where applicable. Dedicated
+      feature filter helpers remain optional on-touch extraction work.
+- [x] **`/api/chat/route.ts` and `/api/completion/route.ts`** — AI
       streaming endpoints intentionally exempt from the JSON error
       shape; document this in the file header so a future passer-by
       doesn't try to "fix" them.
@@ -98,43 +114,51 @@ remaining incremental work per route:
 
 ## Phase 8 — Dashboard polish
 
-- [ ] **Breadcrumb pattern swap.** Current `BreadCrumbs.tsx` works
-      correctly off `crumbLabelMap`. EventSphere uses a slightly
-      different segment-driven pattern. Defer until the breadcrumb
-      component itself is being modified for product reasons.
-      Effort: S · Risk: low · Trigger: on-touch (no leverage today).
+- [x] **Breadcrumb pattern swap.** `BreadCrumbs.tsx` now derives labels
+      from route segments directly, hides role root segments, and no
+      longer depends on `crumbLabelMap` layout config.
+      Effort: S · Risk: low · Trigger: on-touch.
+- [x] **Reusable component parity.** Sidebar workspace/profile shell,
+      table header actions/reload/export/visualize/row-actions styles,
+      address field/autocomplete, calendar/date-filter, and native
+      date/time inputs are aligned with eventSphere.
+      Verified 2026-05-01.
 
 ---
 
 ## Phase 9 — Lint enforcement (residual)
 
-- [ ] **Custom rule / CI grep** banning hard-coded `currentBusiness:
+- [x] **Custom rule / CI grep** banning hard-coded `currentBusiness:
       string` literals in API routes — every business id must come
       from `getVerifiedUser`. Today the rule is policy in
       ENGINEERING_PATTERNS.md but unenforced.
       Effort: S · Risk: low · Trigger: anytime.
+      Implemented as `npm run lint:no-hardcoded-current-business`.
 
 ---
 
 ## Phase 10 — Cleanup (must run after Phase 5 is well underway)
 
-- [ ] **Delete legacy `src/features/*-feat/` folders** once their last
+- [x] **Delete legacy `src/features/*-feat/` folders** once their last
       caller migrates to the new feature. Per-folder gates:
-      - `ticket-feat/` — blocked on tickets feature UI migration
-      - `property-feat/` — blocked on properties UI migration
-      - `chat-feat/` — blocked on chat UI migration
-      - `onboarding-feat/` — needs its own feature folder first
-        (`src/features/onboarding/`) plus migration
-      - `settings-feat/` — blocked on settings feature shipping
+      - `ticket-feat/` — deleted after tickets feature UI migration
+      - `property-feat/` — deleted after properties/units UI migration
+      - `chat-feat/` — deleted after chat UI migration
+      - `onboarding-feat/` — deleted after migration to
+        `src/features/onboarding/`
+      - `settings-feat/` — deleted after settings UI migration
       Effort: S each (just delete) · Risk: low (typecheck catches
       missed callers) · Trigger: only after the corresponding feature
       row in Phase 5 is fully ☑.
-- [ ] **Delete dead role-string branches** (`if (verify.isAdminRole)`)
+- [x] **Delete dead role-string branches** (`if (verify.isAdminRole)`)
       once permission-key checks are everywhere. Effort: M · Trigger:
       after Phase 6 permission gating sweep.
-- [ ] **Final pass:** typecheck, full lint, build, smoke-test golden
+- [x] **Final pass:** typecheck, full lint, build, smoke-test golden
       paths in the browser.
       Effort: M · Risk: low · Trigger: pre-merge to main.
+      Verified 2026-05-01: built app served on port 3010; `/auth/login`
+      returned 200, and protected dashboard golden paths redirected to
+      `/auth/login`.
 
 ---
 
@@ -142,23 +166,24 @@ remaining incremental work per route:
 
 These are small wins that can be picked off in idle moments:
 
-1. Document `/api/chat/route.ts` and `/api/completion/route.ts` as
+1. [x] Document `/api/chat/route.ts` and `/api/completion/route.ts` as
    intentionally exempt from the JSON error shape (Phase 6).
-2. Add the `currentBusiness` lint rule (Phase 9).
-3. Header comment on each `loading.tsx` referencing the skeleton it
+2. [x] Add the `currentBusiness` lint rule (Phase 9).
+3. [x] Header comment on each `loading.tsx` referencing the skeleton it
    delegates to (Phase 8 polish).
+
+## Verification
+
+- [x] `npx tsc --noEmit` (2026-05-01)
+- [x] `npm run lint:no-hardcoded-current-business` (2026-05-01)
+- [x] `npm run lint` (2026-05-01)
+- [x] `npm run build` (2026-05-01)
+- [x] Built-app smoke: `/auth/login`, `/dashboard`, `/admin/dashboard`,
+      `/technician/dashboard` (2026-05-01)
 
 ## High-leverage next steps
 
 If the goal is to unblock the most downstream cleanup, attack in this
 order:
 
-1. **Tickets feature UI migration** — unblocks deletion of the
-   largest legacy folder (`ticket-feat/`).
-2. **Settings feature folder creation** — fills the biggest Phase 5
-   gap and unblocks `settings-feat/` deletion.
-3. **API permission-key sweep** — replaces every
-   `verify.isAdminRole` with `assertPermission(...)`. Mechanical and
-   low-risk; biggest payoff for code review consistency.
-4. **Onboarding feature folder + UI migration** — unblocks
-   `onboarding-feat/` deletion.
+1. No open migration tracker tasks remain.

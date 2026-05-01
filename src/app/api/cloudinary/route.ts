@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "cloudinary";
+import { z } from "zod";
 
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -9,11 +14,19 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const deleteCloudinaryAssetSchema = z.object({
+  publicId: z.string().min(1, "publicId is required"),
+  resourceType: z.enum(["image", "raw", "video"]).optional().default("image"),
+});
+
 export async function DELETE(request: NextRequest) {
   try {
-    const { publicId, resourceType } = await request.json();
+    const { publicId, resourceType } = parseOrThrow(
+      deleteCloudinaryAssetSchema,
+      await request.json()
+    );
     await cloudinary.v2.uploader.destroy(publicId, {
-      resource_type: resourceType || "image",
+      resource_type: resourceType,
     });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

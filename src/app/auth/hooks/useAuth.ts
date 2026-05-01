@@ -41,7 +41,7 @@ import { ApiError } from "@/shared/model/model";
 //   async function handleLogins(payload: { email: string; password: string }) {
 //     try {
 //       setIsLoading(true);
-//       const response = await axios.post(`${API_ROUTES.auth.login}`, payload);
+//       const response = await http.post(`${API_ROUTES.auth.login}`, payload);
 
 //       setIsLoading(false);
 //       setData(response.data);

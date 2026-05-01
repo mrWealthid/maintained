@@ -3,11 +3,20 @@ const resourceById = (resource: string) => (id: string) =>
   `${base}/${resource}/${id}`;
 
 export const API_ROUTES = {
+  dashboard: {
+    exports: {
+      table: `${base}/dashboard/exports/table`,
+    },
+  },
   auth: {
     login: `${base}/auth/login`,
     register: `${base}/auth/register`,
     logout: `${base}/auth/logout`,
     onboard: `${base}/auth/onboard`,
+    sidebarProfile: `${base}/auth/sidebar-profile`,
+    workspaceCreate: `${base}/auth/workspaces`,
+    workspaceSwitch: `${base}/auth/workspaces/switch`,
+    workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
     forgot_password: `${base}/auth/forgotPassword`,
     reset_password: `${base}/auth/resetPassword`,
     update_password: `${base}/auth/updatePassword`,

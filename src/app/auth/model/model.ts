@@ -1,5 +1,4 @@
 import { ROLES } from "@/shared/enums/enums";
-import { USState } from "@/lib/model/model";
 import { CountryCode } from "libphonenumber-js";
 
 export interface IUpdatePassword {
@@ -29,8 +28,9 @@ export interface AddressStructured {
   line1: string;
   line2?: string;
   city: string;
-  state: USState; // US-only scope
-  postalCode: string; // 12345 or 12345-6789
+  state: string;
+  postalCode: string;
+  countryCode?: CountryCode;
   country: string;
   placeId?: string; // Google Place ID
   lat?: number | null;

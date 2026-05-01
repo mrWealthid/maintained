@@ -8,10 +8,12 @@ import { assertRoomAccess } from "@/lib/chat/chatAuth";
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
-import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
+import { CHAT_TYPE } from "@/features/chat/data/enums";
 import APIFeatures from "@/utils/apiFeatures";
-import { mapToObject } from "@/utils/helpers";
-import { ChatRoomMessage } from "@/features/chat-feat/model/chat.model";
+import {
+  chatMessageListQuerySchema,
+  ChatRoomMessage,
+} from "@/features/chat/model/chat.model";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
@@ -34,9 +36,11 @@ export async function GET(
     const { roomId } = await params;
     await assertRoomAccess(roomId, verify.id);
 
-    const transformedQuery = mapToObject(
-      request.nextUrl.searchParams as unknown as Map<string, string>,
+    const parsedQuery = parseOrThrow(
+      chatMessageListQuerySchema,
+      Object.fromEntries(request.nextUrl.searchParams.entries())
     );
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
     const filter = { room: roomId };
     const chatRequestQuery = ChatMessage.find(filter);

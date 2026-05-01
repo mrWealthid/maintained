@@ -2,28 +2,44 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment } from 'react';
-import { CrumbLabelMap } from '../../model/model';
 import { RiHomeLine } from 'react-icons/ri';
 import { PiCaretDoubleRightThin } from 'react-icons/pi';
 
-interface BreadcrumbsProps {
-	crumbLabelMap: CrumbLabelMap;
+const hiddenSegments = new Set(['admin', 'technician']);
+
+const segmentLabels: Record<string, string> = {
+	chat: 'Chat',
+	dashboard: 'Dashboard',
+	properties: 'Properties',
+	settings: 'Settings',
+	users: 'Users',
+	'ticket-management': 'Ticket Management',
+};
+
+function labelForSegment(segment: string) {
+	const decoded = decodeURIComponent(segment);
+	return (
+		segmentLabels[decoded] ||
+		decoded
+			.split('-')
+			.filter(Boolean)
+			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+			.join(' ')
+	);
 }
 
-export default function Breadcrumbs({ crumbLabelMap }: BreadcrumbsProps) {
+export default function Breadcrumbs() {
 	const pathname = usePathname();
 	const segments = pathname.split('/').filter(Boolean);
 
 	const pathLinks = segments
 		.map((seg, index) => {
 			const href = '/' + segments.slice(0, index + 1).join('/');
-			const entry = crumbLabelMap[seg];
-			const label = entry?.label || decodeURIComponent(seg);
-			const hide = entry?.hide;
+			const label = labelForSegment(seg);
+			const hide = hiddenSegments.has(seg);
 			return { href, label, hide };
 		})
-		.filter((crumb) => !crumb.hide); // 👈 exclude hidden segments
+		.filter((crumb) => !crumb.hide);
 
 	return (
 		<nav aria-label='breadcrumb' className='text-sm sm:text-xs    mb-4'>
@@ -40,13 +56,13 @@ export default function Breadcrumbs({ crumbLabelMap }: BreadcrumbsProps) {
 							<PiCaretDoubleRightThin />
 						</span>
 						{idx === pathLinks.length - 1 ? (
-							<span className='font-medium capitalize '>
+							<span className='font-medium'>
 								{crumb.label}
 							</span>
 						) : (
 							<Link
 								href={crumb.href}
-								className='hover:underline capitalize text-blue-600'>
+								className='hover:underline text-blue-600'>
 								{crumb.label}
 							</Link>
 						)}
