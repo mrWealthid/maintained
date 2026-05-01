@@ -15,11 +15,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import ApplyForm from "@/features/technician-requests/forms/ApplyForm";
-import { TECHNICIAN_ROUTES_DEFINITION } from "@/shared/routes/routes";
+import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const TicketRowActions: FC<TechnicianRowActionsProps> = ({
   technicianRequest,
 }) => {
+  const canRespondToRequest = useHasPermission(
+    PERMISSION.TECHNICIAN_REQUESTS_RESPOND
+  );
+
   return (
     <TableCell className="md:px-2 py-2 space-x-3">
       <DropdownMenu>
@@ -36,20 +42,21 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
         <DropdownMenuContent align="end" className="w-32">
           <DropdownMenuItem>
             <Link
-              href={`${TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${technicianRequest.ticket.id}`}
+              href={`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${technicianRequest.ticket.id}`}
             >
               View Details
             </Link>
           </DropdownMenuItem>
           {technicianRequest.ticket.status ===
             TICKET_STATUS.pending_assignment &&
-            technicianRequest.status === TECHNICIAN_RESPONSE.pending && (
+            technicianRequest.status === TECHNICIAN_RESPONSE.pending &&
+            canRespondToRequest && (
               <>
                 <DropdownMenuItem>
                   {/* <Modal.Open opens='accept-request'> */}
 
                   <Link
-                    href={`ticket-management/apply/${technicianRequest.id}`}
+                    href={`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/apply/${technicianRequest.id}`}
                     type="button"
                     className="w-full text-left"
                   >
@@ -69,7 +76,8 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
               </>
             )}
 
-          {technicianRequest.status === TECHNICIAN_RESPONSE.applied && (
+          {technicianRequest.status === TECHNICIAN_RESPONSE.applied &&
+            canRespondToRequest && (
             <>
               <DropdownMenuItem>
                 {/* <Modal.Open opens='accept-request'>
@@ -81,7 +89,7 @@ const TicketRowActions: FC<TechnicianRowActionsProps> = ({
 								</Modal.Open> */}
 
                 <Link
-                  href={`ticket-management/apply/${technicianRequest.id}`}
+                  href={`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/apply/${technicianRequest.id}`}
                   type="button"
                   className="w-full text-left"
                 >

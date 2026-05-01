@@ -26,6 +26,8 @@ import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import CategoryModal from "./CategoryModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Category } from "@/shared/model/model";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const CategoryManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +40,9 @@ const CategoryManagement: React.FC = () => {
   const { data: categories, isLoading } = useCategories();
   const { handleDeleteCategory, isDeleting } = useDeleteCategory();
   const updateCategory = useUpdateCategory();
+  const canManageCategories = useHasPermission(
+    PERMISSION.TICKET_CATEGORIES_MANAGE
+  );
 
   const isOpen = !!selectedCategory?.id;
   const handleEdit = (category: Category) => {
@@ -84,10 +89,12 @@ const CategoryManagement: React.FC = () => {
           <h2 className="text-2xl font-bold">Category Management</h2>
           <p className="text-gray-600">Create and manage ticket categories</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Category
-        </Button>
+        {canManageCategories && (
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Category
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -130,32 +137,38 @@ const CategoryManagement: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={category.isActive}
-                      onCheckedChange={() => handleToggleStatus(category)}
-                    />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleEdit(category)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        {!category.isDefault && (
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(category)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {canManageCategories && (
+                      <>
+                        <Switch
+                          checked={category.isActive}
+                          onCheckedChange={() => handleToggleStatus(category)}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(category)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            {!category.isDefault && (
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(category)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

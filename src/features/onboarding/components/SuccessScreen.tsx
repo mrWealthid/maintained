@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function SuccessScreen({
   seconds = 6,
-  to = "/admin/dashboard",
+  to = "/dashboard",
   onCloseModal,
 }: {
   seconds?: number;

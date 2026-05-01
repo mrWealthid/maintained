@@ -32,7 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
-import { TECHNICIAN_ROUTES_DEFINITION } from "@/shared/routes/routes";
+import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
 
 const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
   const { isProcessing, processResponse } = useProcessTechnicianResponse(
@@ -165,7 +165,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
     //✅ You can now send the payload
     processResponse(payload, {
       onSuccess: () =>
-        router.push(TECHNICIAN_ROUTES_DEFINITION.DASHBOARD.TICKETS),
+        router.push(APP_ROUTE_PATHS.DASHBOARD.TICKETS),
     });
   };
 

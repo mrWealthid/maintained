@@ -1,8 +1,12 @@
+"use client";
+
 import React, { FC } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UnitDialog from "../components/UnitDialog";
 import { useState } from "react";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const UnitHeaderActions: FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -10,11 +14,14 @@ const UnitHeaderActions: FC = () => {
     "create"
   );
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
+  const canCreateUnit = useHasPermission(PERMISSION.UNITS_CREATE);
   const handleCreate = () => {
     setSelectedUnit(null);
     setDialogMode("create");
     setIsDialogOpen(true);
   };
+
+  if (!canCreateUnit) return null;
 
   return (
     <div className="flex items-center gap-2">

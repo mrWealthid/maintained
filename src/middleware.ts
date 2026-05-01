@@ -1,10 +1,10 @@
 // middleware.ts
 import { NextResponse, NextRequest } from "next/server";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { ROLES } from "./shared/enums/enums";
 
 type Role = "ADMIN" | "TECHNICIAN" | "USER" | string | null;
-type DecodedToken = JwtPayload & {
+type DecodedToken = {
+  exp?: number;
   role?: ROLES | string;
   businessId?: string;
   currentBusiness?: string;
@@ -69,10 +69,8 @@ export function middleware(request: NextRequest) {
 
 function getDashboardPath(
   role: Role
-): "/admin/dashboard" | "/technician/dashboard" | "/dashboard" {
-  const r = (role || "").toUpperCase();
-  if (r.includes("ADMIN") || r.includes("OWNER")) return "/admin/dashboard";
-  if (r.includes("TECHNICIAN")) return "/technician/dashboard";
+): "/dashboard" {
+  void role;
   return "/dashboard";
 }
 
@@ -103,7 +101,7 @@ function decodeToken(token: string | null): {
     return { valid: false, decoded: null };
   }
   try {
-    const decoded = jwt.decode(token) as DecodedToken | null;
+    const decoded = decodeJwtPayload(token);
     if (!decoded?.exp || !decoded.sessionId || !decoded.role) {
       return { valid: false, decoded: null };
     }
@@ -114,13 +112,26 @@ function decodeToken(token: string | null): {
   }
 }
 
+function decodeJwtPayload(token: string): DecodedToken | null {
+  const [, payload] = token.split(".");
+  if (!payload) return null;
+
+  const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+  const paddedPayload = normalizedPayload.padEnd(
+    Math.ceil(normalizedPayload.length / 4) * 4,
+    "="
+  );
+
+  return JSON.parse(atob(paddedPayload)) as DecodedToken;
+}
+
 // Only run where needed
 export const config = {
   matcher: [
     "/", // homepage (unprotected)
     "/auth/:path*", // login/register + onboard-user
     "/dashboard/:path*", // user dashboard (protected)
-    "/admin/dashboard/:path*", // admin dashboard (protected)
-    "/technician/dashboard/:path*", // technician dashboard (protected)
+    "/admin/dashboard/:path*", // legacy dashboard prefix, normalized
+    "/technician/dashboard/:path*", // legacy dashboard prefix, normalized
   ],
 };

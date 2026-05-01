@@ -72,10 +72,17 @@ export default function SidebarProfileShell({
   const upgradeWorkspaceMutation = useUpgradeWorkspace();
 
   const fallbackProfile: SidebarProfileData = {
+    id: "",
     name: "Workspace User",
     email: "",
     role: fallbackRole,
     workspaceRole: fallbackWorkspaceRole,
+    permissions: [],
+    isWorkspaceOwner: false,
+    currentBusiness: {
+      id: "",
+      name: isSuperAdminRole(fallbackRole) ? "Platform" : "Business",
+    },
     businessName: isSuperAdminRole(fallbackRole) ? "Platform" : "Business",
     workspaceType: isSuperAdminRole(fallbackRole)
       ? null

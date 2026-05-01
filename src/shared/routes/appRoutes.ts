@@ -14,6 +14,7 @@ import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
 import type { Routes } from "@/shared/model/model";
 import { APP_ROUTE_PATHS } from "./appRoutePaths";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export const APP_ROUTES = APP_ROUTE_PATHS;
 
@@ -27,73 +28,40 @@ export const routes: Routes[] = [
     name: "Tickets",
     path: APP_ROUTES.DASHBOARD.TICKETS,
     icon: Wrench,
+    permission: PERMISSION.TICKETS_VIEW,
+  },
+  {
+    name: "Property Management",
+    path: APP_ROUTES.DASHBOARD.PROPERTIES,
+    icon: Building2,
+    permission: PERMISSION.PROPERTIES_VIEW,
+  },
+  {
+    name: "User Management",
+    path: APP_ROUTES.DASHBOARD.USERS,
+    icon: Users,
+    permission: PERMISSION.TEAM_VIEW,
   },
   {
     name: "Chat",
     path: APP_ROUTES.DASHBOARD.CHAT,
     icon: MessageSquare,
+    permission: PERMISSION.CHAT_VIEW,
   },
   {
     name: "Settings",
     path: APP_ROUTES.DASHBOARD.SETTINGS,
     icon: Settings,
+    permission: PERMISSION.SETTINGS_VIEW,
   },
 ];
 
 export const technicianRoutes: Routes[] = [
-  {
-    name: "Overview",
-    path: APP_ROUTES.TECHNICIAN_DASHBOARD.OVERVIEW,
-    icon: Home,
-  },
-  {
-    name: "Tickets",
-    path: APP_ROUTES.TECHNICIAN_DASHBOARD.TICKETS,
-    icon: Wrench,
-  },
-  {
-    name: "Chat",
-    path: APP_ROUTES.TECHNICIAN_DASHBOARD.CHAT,
-    icon: MessageSquare,
-  },
-  {
-    name: "Settings",
-    path: APP_ROUTES.TECHNICIAN_DASHBOARD.SETTINGS,
-    icon: Settings,
-  },
+  ...routes,
 ];
 
 export const adminRoutes: Routes[] = [
-  {
-    name: "Overview",
-    path: APP_ROUTES.ADMIN_DASHBOARD.OVERVIEW,
-    icon: Home,
-  },
-  {
-    name: "Tickets",
-    path: APP_ROUTES.ADMIN_DASHBOARD.TICKETS,
-    icon: Wrench,
-  },
-  {
-    name: "User Management",
-    path: APP_ROUTES.ADMIN_DASHBOARD.USERS,
-    icon: Users,
-  },
-  {
-    name: "Property Management",
-    path: APP_ROUTES.ADMIN_DASHBOARD.PROPERTIES,
-    icon: Building2,
-  },
-  {
-    name: "Chat",
-    path: APP_ROUTES.ADMIN_DASHBOARD.CHAT,
-    icon: MessageSquare,
-  },
-  {
-    name: "Settings",
-    path: APP_ROUTES.ADMIN_DASHBOARD.SETTINGS,
-    icon: Settings,
-  },
+  ...routes,
 ];
 
 export function getDashboardRoutes(args: {

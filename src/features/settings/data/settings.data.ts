@@ -1,36 +1,37 @@
 import { SettingsTab } from "../models/settings.model";
 import { Bell, FolderOpen, Lock, Mail, Ticket } from "lucide-react";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export const settingsTabs: SettingsTab[] = [
   {
     id: "notifications",
     label: "Notifications",
     icon: Bell,
-    adminOnly: false,
+    permission: PERMISSION.SETTINGS_VIEW,
   },
   {
     id: "email",
     label: "Email",
     icon: Mail,
-    adminOnly: true,
+    permission: PERMISSION.SETTINGS_EMAIL_MANAGE,
   },
   {
     id: "security",
     label: "Security",
     icon: Lock,
-    adminOnly: false,
+    permission: PERMISSION.SETTINGS_VIEW,
   },
   {
     id: "categories",
     label: "Categories",
     icon: FolderOpen,
-    adminOnly: true,
+    permission: PERMISSION.TICKET_CATEGORIES_MANAGE,
   },
   {
     id: "ticket-types",
     label: "Ticket Types",
     icon: Ticket,
-    adminOnly: true,
+    permission: PERMISSION.TICKET_TYPES_MANAGE,
   },
 ];
 

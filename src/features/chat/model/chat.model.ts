@@ -3,6 +3,10 @@ import { z } from "zod";
 import { Ticket, User } from "@/shared/model/model";
 import { CHAT_ROLES, CHAT_TYPE } from "../data/enums";
 
+export type ChatUser = Pick<User, "id" | "name" | "email"> & {
+  photo?: string;
+};
+
 export interface ChatRoomListFilter {
   title?: string;
 }
@@ -32,7 +36,7 @@ export interface ChatRoomMessage {
   id: string;
   _id: string;
   room: string;
-  sender: User | null; // null for system
+  sender: ChatUser | null; // null for system
   type: CHAT_TYPE;
   text?: string;
   meta?: Record<string, any>;
@@ -68,7 +72,7 @@ export interface SendChatMessagePayload {
 
 export interface SendChatMessageResponse {
   id: string;
-  sender: User;
+  sender: ChatUser;
   text: string;
   createdAt: Date;
 }

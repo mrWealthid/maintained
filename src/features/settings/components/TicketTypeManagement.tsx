@@ -26,6 +26,8 @@ import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import TicketTypeModal from "./TicketTypeModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { TicketType } from "@/shared/model/model";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const TicketTypeManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,6 +38,7 @@ const TicketTypeManagement: React.FC = () => {
   const { data: ticketTypes, isLoading } = useTicketTypes();
   const { handleDeleteTicketType, isDeleting } = useDeleteTicketType();
   const updateTicketType = useUpdateTicketType();
+  const canManageTicketTypes = useHasPermission(PERMISSION.TICKET_TYPES_MANAGE);
 
   const handleEdit = (ticketType: TicketType) => {
     setEditingType(ticketType);
@@ -83,10 +86,12 @@ const TicketTypeManagement: React.FC = () => {
           <h2 className="text-2xl font-bold">Ticket Type Management</h2>
           <p className="text-gray-600">Create and manage ticket types</p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Ticket Type
-        </Button>
+        {canManageTicketTypes && (
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Ticket Type
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -129,34 +134,40 @@ const TicketTypeManagement: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={ticketType.isActive}
-                      onCheckedChange={() => handleToggleStatus(ticketType)}
-                    />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => handleEdit(ticketType)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        {!ticketType.isDefault && (
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(ticketType)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {canManageTicketTypes && (
+                      <>
+                        <Switch
+                          checked={ticketType.isActive}
+                          onCheckedChange={() =>
+                            handleToggleStatus(ticketType)
+                          }
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(ticketType)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            {!ticketType.isDefault && (
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(ticketType)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

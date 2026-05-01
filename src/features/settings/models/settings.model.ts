@@ -1,3 +1,5 @@
+import type { PermissionKey } from "@/shared/auth/permission-registry";
+
 export interface NotificationPreferences {
   mode: "SMS" | "EMAIL" | "PHONE";
   smsEnabled: boolean;
@@ -63,5 +65,5 @@ export interface SettingsTab {
   id: string;
   label: string;
   icon: React.ElementType;
-  adminOnly?: boolean;
+  permission?: PermissionKey;
 }

@@ -39,6 +39,8 @@ import {
 import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
 import Modal from "@/shared/components/modal/Modal";
 import { useAssignTechnician } from "../hooks/ticketHooks";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const getPriorityColor = (priority: TICKET_PRIORITY | undefined) => {
   switch (priority?.toLowerCase()) {
@@ -72,6 +74,16 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
   const { isAssigning, handleAssignTechnician } = useAssignTechnician(
     ticket?.id!
   );
+  const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
+  const canCreateTechnicianRequest = useHasPermission(
+    PERMISSION.TECHNICIAN_REQUESTS_CREATE
+  );
+  const canManageTicketStatus = useHasPermission(
+    PERMISSION.TICKETS_STATUS_MANAGE
+  );
+  const hasHeaderActions = canAssignTicket || canCreateTechnicianRequest;
+  const hasTechnicianResponseActions =
+    canAssignTicket || canManageTicketStatus;
 
   function handleTechnicianAssign(
     onCloseModal: () => void,
@@ -104,36 +116,42 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                 : "N/A"}
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 bg-transparent">
-                <MoreHorizontal className="h-4 w-4" />
-                Actions
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {/* <DropdownMenuItem>
+          {hasHeaderActions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2 bg-transparent">
+                  <MoreHorizontal className="h-4 w-4" />
+                  Actions
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {/* <DropdownMenuItem>
                 <Link href={`${ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${}`}>
                   View Details
                 </Link>
               </DropdownMenuItem> */}
-              <DropdownMenuItem>
-                <Modal.Open opens="self-assign">
-                  <button type="button" className="w-full text-left">
-                    Assign to me
-                  </button>
-                </Modal.Open>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Modal.Open opens="send-request-technicians">
-                  <button type="button" className="w-full text-left">
-                    Assign Technician
-                  </button>
-                </Modal.Open>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {canAssignTicket && (
+                  <DropdownMenuItem>
+                    <Modal.Open opens="self-assign">
+                      <button type="button" className="w-full text-left">
+                        Assign to me
+                      </button>
+                    </Modal.Open>
+                  </DropdownMenuItem>
+                )}
+                {canCreateTechnicianRequest && (
+                  <DropdownMenuItem>
+                    <Modal.Open opens="send-request-technicians">
+                      <button type="button" className="w-full text-left">
+                        Assign Technician
+                      </button>
+                    </Modal.Open>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
@@ -305,47 +323,67 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                     <Badge variant={"outline"} className="mt-1 text-xs">
                       {ticket.status}
                     </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="">
-                        <DropdownMenuItem>
-                          <Modal.Open
-                            opens="assign-technician"
-                            payload={request.technician.id}
-                          >
-                            <button type="button" className="w-full text-left">
-                              Assign
-                            </button>
-                          </Modal.Open>
-                        </DropdownMenuItem>
+                    {hasTechnicianResponseActions && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="">
+                          {canAssignTicket && (
+                            <DropdownMenuItem>
+                              <Modal.Open
+                                opens="assign-technician"
+                                payload={request.technician.id}
+                              >
+                                <button
+                                  type="button"
+                                  className="w-full text-left"
+                                >
+                                  Assign
+                                </button>
+                              </Modal.Open>
+                            </DropdownMenuItem>
+                          )}
 
-                        <DropdownMenuItem>
-                          <Modal.Open opens="self-assign">
-                            <button type="button" className="w-full text-left">
-                              Withdraw
-                            </button>
-                          </Modal.Open>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Modal.Open opens="self-assign">
-                            <button type="button" className="w-full text-left">
-                              Update Schedule
-                            </button>
-                          </Modal.Open>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Modal.Open opens="send-request-technicians">
-                            <button type="button" className="w-full text-left">
-                              Decline
-                            </button>
-                          </Modal.Open>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          {canManageTicketStatus && (
+                            <>
+                              <DropdownMenuItem>
+                                <Modal.Open opens="self-assign">
+                                  <button
+                                    type="button"
+                                    className="w-full text-left"
+                                  >
+                                    Withdraw
+                                  </button>
+                                </Modal.Open>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Modal.Open opens="self-assign">
+                                  <button
+                                    type="button"
+                                    className="w-full text-left"
+                                  >
+                                    Update Schedule
+                                  </button>
+                                </Modal.Open>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Modal.Open opens="send-request-technicians">
+                                  <button
+                                    type="button"
+                                    className="w-full text-left"
+                                  >
+                                    Decline
+                                  </button>
+                                </Modal.Open>
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
 

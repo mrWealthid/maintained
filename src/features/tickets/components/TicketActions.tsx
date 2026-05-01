@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import Modal from "@/shared/components/modal/Modal";
 import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
-import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import { TfiMore } from "react-icons/tfi";
 import {
   DropdownMenu,
@@ -13,10 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  ADMIN_ROUTES_DEFINITION,
-  ROUTES_DEFINITION,
-} from "@/shared/routes/routes";
+import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
 import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
 import { useAppContext } from "@/shared/contexts/AppContext";
 import HandOffTicketForm from "@/features/tickets/forms/HandOffTicketForm";
@@ -37,6 +34,8 @@ import {
   useDeleteTicket,
 } from "../hooks/ticketHooks";
 import ErrorList from "@/components/ui/ErrorList";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
   const { isDeleting, handleDeleteTicket, deleteTicketError } =
@@ -51,7 +50,17 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
       onSuccess: () => onCloseModal(),
     });
   }
-  const { user, role } = useAppContext();
+  const { user } = useAppContext();
+  const canEditTicket = useHasPermission(PERMISSION.TICKETS_EDIT);
+  const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
+  const canManageTicketStatus = useHasPermission(
+    PERMISSION.TICKETS_STATUS_MANAGE
+  );
+  const canDeleteTicket = useHasPermission(PERMISSION.TICKETS_DELETE);
+  const canCreateTechnicianRequest = useHasPermission(
+    PERMISSION.TECHNICIAN_REQUESTS_CREATE
+  );
+  const isActionedByCurrentUser = user?.id === ticket.actionedBy?.id;
 
   function handleAssign(onCloseModal: () => void) {
     const payload = {
@@ -113,13 +122,13 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
         <DropdownMenuContent align="end" className="">
           <DropdownMenuItem>
             <Link
-              href={`${role === ROLES.user ? ROUTES_DEFINITION.DASHBOARD.TICKETS : ADMIN_ROUTES_DEFINITION.DASHBOARD.TICKETS}/${ticket.id}`}
+              href={`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${ticket.id}`}
             >
               View Details
             </Link>
           </DropdownMenuItem>
 
-          {ticket.status === TICKET_STATUS.pending && role === ROLES.user && (
+          {ticket.status === TICKET_STATUS.pending && canEditTicket && (
             <DropdownMenuItem
               className="cursor-pointer"
               onSelect={(e) => {
@@ -130,8 +139,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
               Edit
             </DropdownMenuItem>
           )}
-          {/*  This feat should be executed only by an admin */}
-          {ticket.status === TICKET_STATUS.pending && role === ROLES.admin && (
+          {ticket.status === TICKET_STATUS.pending && canAssignTicket && (
             <DropdownMenuItem>
               <Modal.Open opens="self-assign">
                 <button type="button" className="w-full text-left">
@@ -140,19 +148,9 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
               </Modal.Open>
             </DropdownMenuItem>
           )}
-          {role === ROLES.admin &&
-            user?.id === ticket.actionedBy?.id &&
-            ticket.status !== TICKET_STATUS.pending && (
-              <DropdownMenuItem>
-                <Modal.Open opens="handoff-ticket">
-                  <button type="button" className="w-full text-left">
-                    Handoff
-                  </button>
-                </Modal.Open>
-              </DropdownMenuItem>
-            )}
-          {role === ROLES.super_admin &&
-            ticket.status !== TICKET_STATUS.pending && (
+          {ticket.status !== TICKET_STATUS.pending &&
+            (canManageTicketStatus ||
+              (canAssignTicket && isActionedByCurrentUser)) && (
               <DropdownMenuItem>
                 <Modal.Open opens="handoff-ticket">
                   <button type="button" className="w-full text-left">
@@ -162,11 +160,9 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
               </DropdownMenuItem>
             )}
 
-          {/*  This feat should be executed by an admin who
-					created the ticket only */}
           {ticket.status === TICKET_STATUS.processing &&
-            role === ROLES.admin &&
-            user?.id === ticket.actionedBy?.id && (
+            canCreateTechnicianRequest &&
+            (isActionedByCurrentUser || canAssignTicket) && (
               <DropdownMenuItem>
                 <Modal.Open opens="send-request-technicians">
                   <button type="button" className="w-full text-left">
@@ -177,7 +173,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
             )}
 
           {ticket.status === TICKET_STATUS.pending_assignment &&
-            role === ROLES.admin && (
+            canCreateTechnicianRequest && (
               <DropdownMenuItem>
                 <Modal.Open opens="send-request-technicians">
                   <button type="button" className="w-full text-left">
@@ -187,9 +183,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
               </DropdownMenuItem>
             )}
           {/* <DropdownMenuSeparator /> */}
-          {/* TODO:: This feat should be executed by the user who
-					created the ticket only */}
-          {role === ROLES.user && (
+          {canDeleteTicket && (
             <DropdownMenuItem>
               <Modal.Open opens="delete-ticket">
                 <button type="button" className="w-full text-left">

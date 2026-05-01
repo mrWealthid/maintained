@@ -90,6 +90,8 @@ import { EmptyRoomsState } from "./components/EmptyRoomsState";
 import { useFetchTechnicians } from "../tickets/hooks/ticketHooks";
 import { getMembershipForBusiness } from "@/utils/helpers";
 import { useAppContext } from "../../shared/contexts/AppContext";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 // const mockTechnicians = [
 //   {
@@ -120,6 +122,7 @@ const chatRoleMap = {
 
 export default function ChatComponent() {
   const { user } = useAppContext();
+  const canSendChat = useHasPermission(PERMISSION.CHAT_SEND);
   const { isFetchingRooms, rooms = [], roomsError } = useFetchChatRooms();
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -636,7 +639,8 @@ export default function ChatComponent() {
                               {formatTime(message.createdAt.toString())}
                             </span>
 
-                            {message.sender &&
+                            {canSendChat &&
+                              message.sender &&
                               message.sender.id === user?.id && (
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                                   <Button
@@ -755,48 +759,49 @@ export default function ChatComponent() {
                   </div>
                 )}
 
-                {/* Message Input */}
-                <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
-                  {" "}
-                  <div className="flex space-x-2">
-                    <input
-                      title="Upload files"
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      multiple
-                      accept="image/*,.pdf,.doc,.docx"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex-shrink-0"
-                    >
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Textarea
-                      value={newMessage}
-                      onChange={onChange}
-                      placeholder="Type your message..."
-                      className="flex-1 min-h-[40px] max-h-32 resize-none"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={!newMessage.trim()}
-                      className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                {canSendChat && (
+                  <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
+                    {" "}
+                    <div className="flex space-x-2">
+                      <input
+                        title="Upload files"
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        multiple
+                        accept="image/*,.pdf,.doc,.docx"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex-shrink-0"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      <Textarea
+                        value={newMessage}
+                        onChange={onChange}
+                        placeholder="Type your message..."
+                        className="flex-1 min-h-[40px] max-h-32 resize-none"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!newMessage.trim()}
+                        className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {currentRoom.id && (

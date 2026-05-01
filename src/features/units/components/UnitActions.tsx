@@ -1,6 +1,5 @@
 "use client";
 import React, { FC, useState } from "react";
-import { Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,6 +23,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 interface UnitActionsProps {
   unit: Unit;
@@ -37,6 +38,8 @@ const UnitActions: FC<UnitActionsProps> = ({ unit }) => {
   );
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"view" | "edit">("view");
+  const canEditUnit = useHasPermission(PERMISSION.UNITS_EDIT);
+  const canDeleteUnit = useHasPermission(PERMISSION.UNITS_DELETE);
 
   function handleDelete(onCloseModal: () => void) {
     handleDeleteUnit(unit._id, {
@@ -82,23 +85,27 @@ const UnitActions: FC<UnitActionsProps> = ({ unit }) => {
         <DropdownMenuContent align="end" className="">
           <DropdownMenuItem onClick={handleView}>View Details</DropdownMenuItem>
 
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onSelect={(e) => {
-              e.stopPropagation();
-              handleEdit();
-            }}
-          >
-            Edit
-          </DropdownMenuItem>
+          {canEditUnit && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onSelect={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              Edit
+            </DropdownMenuItem>
+          )}
 
-          <DropdownMenuItem>
-            <Modal.Open opens="delete-unit">
-              <button type="button" className="w-full text-left">
-                Delete
-              </button>
-            </Modal.Open>
-          </DropdownMenuItem>
+          {canDeleteUnit && (
+            <DropdownMenuItem>
+              <Modal.Open opens="delete-unit">
+                <button type="button" className="w-full text-left">
+                  Delete
+                </button>
+              </Modal.Open>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

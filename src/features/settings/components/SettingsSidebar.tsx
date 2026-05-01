@@ -4,7 +4,6 @@ import React, { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { settingsTabs } from "../data/settings.data";
 import { useAppContext } from "@/shared/contexts/AppContext";
-import { ROLES } from "@/shared/enums/enums";
 
 interface SettingsSidebarProps {
   activeTab: string;
@@ -15,12 +14,13 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  const { role } = useAppContext();
+  const { user } = useAppContext();
 
   const filteredTabs = useMemo(() => {
-    const isAdmin = role === ROLES.admin || role === ROLES.super_admin;
-    return settingsTabs.filter((tab) => !tab.adminOnly || isAdmin);
-  }, [role]);
+    return settingsTabs.filter(
+      (tab) => !tab.permission || user.permissions.includes(tab.permission)
+    );
+  }, [user.permissions]);
 
   return (
     <div className="w-64 bg-background  border-gray-200 dark:border-gray-700 h-full">

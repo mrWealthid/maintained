@@ -1,6 +1,5 @@
 "use client";
 import React, { FC, useState } from "react";
-import { Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,6 +23,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 interface PropertyActionsProps {
   property: Property;
@@ -39,6 +40,8 @@ const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
   );
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"view" | "edit">("view");
+  const canEditProperty = useHasPermission(PERMISSION.PROPERTIES_EDIT);
+  const canDeleteProperty = useHasPermission(PERMISSION.PROPERTIES_DELETE);
 
   function handleDelete(onCloseModal: () => void) {
     handleDeleteProperty(property._id, {
@@ -84,23 +87,27 @@ const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
         <DropdownMenuContent align="end" className="">
           <DropdownMenuItem onClick={handleView}>View Details</DropdownMenuItem>
 
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onSelect={(e) => {
-              e.stopPropagation();
-              handleEdit();
-            }}
-          >
-            Edit
-          </DropdownMenuItem>
+          {canEditProperty && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onSelect={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              Edit
+            </DropdownMenuItem>
+          )}
 
-          <DropdownMenuItem>
-            <Modal.Open opens="delete-property">
-              <button type="button" className="w-full text-left">
-                Delete
-              </button>
-            </Modal.Open>
-          </DropdownMenuItem>
+          {canDeleteProperty && (
+            <DropdownMenuItem>
+              <Modal.Open opens="delete-property">
+                <button type="button" className="w-full text-left">
+                  Delete
+                </button>
+              </Modal.Open>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

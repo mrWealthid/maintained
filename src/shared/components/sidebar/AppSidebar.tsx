@@ -16,12 +16,13 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { EventBuddyLogo } from "../EventBuddyLogo";
+import { MaintainLogo } from "../MaintainLogo";
 import { ROLES } from "@/shared/enums/enums";
 import SidebarProfileShell from "./SidebarProfileShell";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
 import { getDashboardRoutes } from "@/shared/routes/appRoutes";
 import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { useSidebarProfile } from "./hooks/useSidebarProfile";
 
 function AppSidebar({
   role,
@@ -36,11 +37,16 @@ function AppSidebar({
 }) {
   const pathname = usePathname();
   const { open, setOpenMobile, isMobile } = useSidebar();
+  const { data: profile } = useSidebarProfile();
   const routes = getDashboardRoutes({
     role,
     workspaceRole,
     workspaceType,
     canViewPayments,
+  }).filter((route) => {
+    if (!route.permission) return true;
+    if (!profile) return true;
+    return profile.permissions.includes(route.permission);
   });
 
   return (
@@ -54,7 +60,7 @@ function AppSidebar({
             </div>
           )} */}
 
-          <EventBuddyLogo size={'sm'} variant={open ? 'full' : 'icon'} />
+          <MaintainLogo size={"sm"} variant={open ? "full" : "icon"} />
 
         </div>
       </SidebarHeader>

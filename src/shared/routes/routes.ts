@@ -25,21 +25,21 @@ export const ROUTES_DEFINITION = {
 
 export const TECHNICIAN_ROUTES_DEFINITION = {
   DASHBOARD: {
-    OVERVIEW: "/technician/dashboard",
-    TICKETS: "/technician/dashboard/ticket-management",
+    OVERVIEW: "/dashboard",
+    TICKETS: "/dashboard/ticket-management",
     CHAT: "/dashboard/chat",
-    SETTINGS: "/technician/dashboard/settings",
+    SETTINGS: "/dashboard/settings",
   },
 };
 
 export const ADMIN_ROUTES_DEFINITION = {
   DASHBOARD: {
-    OVERVIEW: "/admin/dashboard",
-    TICKETS: "/admin/dashboard/ticket-management",
-    CHAT: "/admin/dashboard/chat",
-    USERS: "/admin/dashboard/users",
-    PROPERTIES: "/admin/dashboard/properties",
-    SETTINGS: "/admin/dashboard/settings",
+    OVERVIEW: "/dashboard",
+    TICKETS: "/dashboard/ticket-management",
+    CHAT: "/dashboard/chat",
+    USERS: "/dashboard/users",
+    PROPERTIES: "/dashboard/properties",
+    SETTINGS: "/dashboard/settings",
   },
 };
 

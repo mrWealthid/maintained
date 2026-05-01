@@ -33,12 +33,7 @@ type DashboardAccessOptions = {
 };
 
 function dashboardPathForRole(role: ROLES | string): string {
-  if (role === ROLES.admin || role === ROLES.owner) {
-    return "/admin/dashboard";
-  }
-  if (role === ROLES.technician) {
-    return "/technician/dashboard";
-  }
+  void role;
   return "/dashboard";
 }
 

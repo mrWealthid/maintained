@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-interface EventBuddyLogoProps {
+interface MaintainLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl" | "2xl";
   variant?: "full" | "icon" | "wordmark";
@@ -34,7 +34,7 @@ function LogoContent({
   className,
   size = "md",
   variant = "full",
-}: Pick<EventBuddyLogoProps, "className" | "size" | "variant">) {
+}: Pick<MaintainLogoProps, "className" | "size" | "variant">) {
   const currentSize = sizeMap[size ?? "md"];
 
   return (
@@ -57,11 +57,11 @@ function LogoContent({
   );
 }
 
-function EventBuddyLogo({
+function MaintainLogo({
   linkHref = "/dashboard",
   disableLink = false,
   ...props
-}: EventBuddyLogoProps) {
+}: MaintainLogoProps) {
   const content = <LogoContent {...props} />;
 
   if (disableLink) {
@@ -75,4 +75,4 @@ function EventBuddyLogo({
   );
 }
 
-export { EventBuddyLogo };
+export { MaintainLogo };

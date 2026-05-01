@@ -7,6 +7,7 @@ import {
 import type { ComponentType } from "react";
 import { TechnicianRequest } from "../../features/tickets/models/ticket.model";
 import { IUser } from "@/models/userModel";
+import type { PermissionKey } from "@/shared/auth/permission-registry";
 
 export interface Category {
   id: string;
@@ -118,6 +119,7 @@ export type Routes = {
   name: string;
   path: string;
   icon: React.ElementType;
+  permission?: PermissionKey;
 };
 
 //USER

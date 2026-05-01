@@ -1,8 +1,12 @@
+"use client";
+
 import React, { FC } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyDialog from "../components/PropertyDialog";
 import { useState } from "react";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const PropertyHeaderActions: FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -10,11 +14,14 @@ const PropertyHeaderActions: FC = () => {
     "create"
   );
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const canCreateProperty = useHasPermission(PERMISSION.PROPERTIES_CREATE);
   const handleCreate = () => {
     setSelectedProperty(null);
     setDialogMode("create");
     setIsDialogOpen(true);
   };
+
+  if (!canCreateProperty) return null;
 
   return (
     <div className="flex items-center gap-2">

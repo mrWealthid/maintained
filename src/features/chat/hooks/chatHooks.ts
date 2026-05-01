@@ -11,13 +11,13 @@ import {
   ChatMessageFilter,
   ChatRoom,
   ChatRoomMessage,
+  ChatUser,
 } from "../model/chat.model";
 import toast from "react-hot-toast";
 import {
   ApiError,
   ApiPaginatedResponse,
   ApiResponse,
-  User,
 } from "@/shared/model/model";
 import { CHAT_TYPE } from "../data/enums";
 import { nanoid } from "nanoid";
@@ -77,7 +77,7 @@ export function useFetchChatRoomMessages(
   };
 }
 
-export function useSendMessage(roomId: string, me: User) {
+export function useSendMessage(roomId: string, me: ChatUser) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (text: string) => sendChatMessage(roomId, text),

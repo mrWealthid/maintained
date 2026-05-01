@@ -16,10 +16,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { getMembershipForBusiness } from "@/utils/helpers";
 import { INVITE_STATUS } from "@/shared/enums/enums";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
   const { isDeleting, deleteUser } = useDeleteUser();
   const { isInviting, reInviteUser } = useReInviteUser();
+  const canEditUser = useHasPermission(PERMISSION.TEAM_ROLE_MANAGE);
+  const canInviteTeam = useHasPermission(PERMISSION.TEAM_INVITE);
+  const canRemoveTeamMember = useHasPermission(PERMISSION.TEAM_REMOVE);
 
   function handleDelete(onCloseModal: () => void) {
     if (!user.id) return;
@@ -38,6 +43,14 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
   }
 
   const member = getMembershipForBusiness(user, user.currentBusiness.id);
+  const canReInviteUser =
+    canInviteTeam &&
+    member?.inviteExpired &&
+    member.status !== INVITE_STATUS.activated;
+  const hasRowActions = canEditUser || canReInviteUser || canRemoveTeamMember;
+
+  if (!hasRowActions) return <TableCell className="md:px-2 py-2" />;
+
   return (
     <TableCell className="md:px-2 py-2 space-x-3">
       <DropdownMenu>
@@ -52,33 +65,35 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem>
-            <Modal.Open opens="edit-user-form">
-              <button type="button" className="w-full text-left">
-                Edit
-              </button>
-            </Modal.Open>
-          </DropdownMenuItem>
+          {canEditUser && (
+            <DropdownMenuItem>
+              <Modal.Open opens="edit-user-form">
+                <button type="button" className="w-full text-left">
+                  Edit
+                </button>
+              </Modal.Open>
+            </DropdownMenuItem>
+          )}
 
-          {member?.inviteExpired &&
-            member.status !== INVITE_STATUS.activated && (
-              <DropdownMenuItem>
-                <Modal.Open opens="re-invite">
-                  <button type="button" className="w-full text-left">
-                    Re-Invite
-                  </button>
-                </Modal.Open>
-              </DropdownMenuItem>
-            )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <Modal.Open opens="delete-user">
-              <button type="button" className="w-full text-left">
-                Delete
-              </button>
-            </Modal.Open>
-            {/* Delete */}
-          </DropdownMenuItem>
+          {canReInviteUser && (
+            <DropdownMenuItem>
+              <Modal.Open opens="re-invite">
+                <button type="button" className="w-full text-left">
+                  Re-Invite
+                </button>
+              </Modal.Open>
+            </DropdownMenuItem>
+          )}
+          {canRemoveTeamMember && <DropdownMenuSeparator />}
+          {canRemoveTeamMember && (
+            <DropdownMenuItem>
+              <Modal.Open opens="delete-user">
+                <button type="button" className="w-full text-left">
+                  Delete
+                </button>
+              </Modal.Open>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

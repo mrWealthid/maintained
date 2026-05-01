@@ -20,10 +20,15 @@ import UserForm from "../forms/UserForm";
 import MultipleUserForm from "../forms/MultipleUserForm";
 import { Plus, Users, UserPlus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const AddUser: FC = () => {
   const [singleUserOpen, setSingleUserOpen] = useState(false);
   const [multipleUsersOpen, setMultipleUsersOpen] = useState(false);
+  const canInviteTeam = useHasPermission(PERMISSION.TEAM_INVITE);
+
+  if (!canInviteTeam) return null;
 
   return (
     <>
