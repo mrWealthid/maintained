@@ -7,6 +7,7 @@ import {
   type BusinessEmailTemplateKey,
 } from "@/lib/email/defaults/default-business-email-template";
 import type { EmailSettings } from "@/lib/email/models/email.model";
+import { defaultBusinessSecuritySettings } from "@/lib/security/business-security";
 import { CountryCode } from "libphonenumber-js";
 import mongoose, { Document, Schema, Model } from "mongoose";
 import validator from "validator";
@@ -32,6 +33,15 @@ export interface IBusiness extends Document {
   active?: boolean;
   settings?: {
     email?: EmailSettings<BusinessEmailTemplateKey>;
+    security?: {
+      require2fa?: boolean;
+      sessionTimeoutMinutes?: number;
+      maxActiveSessions?: 1 | 3 | 5 | "unlimited";
+      ipWhitelist?: {
+        enabled?: boolean;
+        ips?: string[];
+      };
+    };
   };
 }
 
@@ -137,6 +147,36 @@ const EmailSettingsSchema = new Schema(
   { _id: false }
 );
 
+const SecuritySettingsSchema = new Schema(
+  {
+    require2fa: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.require2fa,
+    },
+    sessionTimeoutMinutes: {
+      type: Number,
+      default: defaultBusinessSecuritySettings.sessionTimeoutMinutes,
+      min: 5,
+      max: 1440,
+    },
+    maxActiveSessions: {
+      type: Schema.Types.Mixed,
+      default: defaultBusinessSecuritySettings.maxActiveSessions,
+    },
+    ipWhitelist: {
+      enabled: {
+        type: Boolean,
+        default: defaultBusinessSecuritySettings.ipWhitelist.enabled,
+      },
+      ips: {
+        type: [String],
+        default: () => [],
+      },
+    },
+  },
+  { _id: false }
+);
+
 const businessSchema = new Schema<IBusiness>(
   {
     name: { type: String, required: true, trim: true },
@@ -167,6 +207,7 @@ const businessSchema = new Schema<IBusiness>(
     active: { type: Boolean, default: true },
     settings: {
       email: { type: EmailSettingsSchema, default: () => ({}) },
+      security: { type: SecuritySettingsSchema, default: () => ({}) },
     },
   },
   {

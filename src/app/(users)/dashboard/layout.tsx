@@ -5,6 +5,7 @@ import { HeaderBar } from "@/shared/components/header/Headerbar";
 import AppSidebar from "@/shared/components/sidebar/AppSidebar";
 import { AppShell } from "@/shared/shells/AppShell";
 import { requireDashboardAccess } from "@/lib/auth/requireDashboardAccess";
+import { getSessionTimeoutMinutesForVerifiedUser } from "@/lib/auth/session-timeout";
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +13,8 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const verify = await requireDashboardAccess();
+  const sessionTimeoutMinutes =
+    await getSessionTimeoutMinutesForVerifiedUser(verify);
 
   return (
     <section className="h-dvh flex overflow-hidden dashboard-shell">
@@ -32,6 +35,7 @@ export default async function DashboardLayout({
               <AppShell
                 fallbackRole={verify.role}
                 fallbackWorkspaceRole={verify.workspaceRole}
+                sessionTimeoutMinutes={sessionTimeoutMinutes}
               >
                 {children}
               </AppShell>

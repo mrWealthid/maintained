@@ -9,6 +9,8 @@ import {
   SecuritySettings,
   BusinessEmailSettings,
   EmailSettingsUpdateData,
+  SecuritySessionSummary,
+  WorkspaceSecuritySettings,
 } from "../models/settings.model";
 import { Category, TicketType } from "@/shared/model/model";
 
@@ -103,6 +105,58 @@ export async function changePassword(
       data
     );
     return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function fetchSecuritySettings(): Promise<
+  ApiResponse<WorkspaceSecuritySettings>
+> {
+  try {
+    const response = await http.get(API_ROUTES.settings.security);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updateSecuritySettings(
+  settings: WorkspaceSecuritySettings
+): Promise<ApiResponse<WorkspaceSecuritySettings>> {
+  try {
+    const response = await http.put(API_ROUTES.settings.security, settings);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function fetchSecuritySessions(): Promise<
+  SecuritySessionSummary[]
+> {
+  try {
+    const response = await http.get<{
+      status: string;
+      data: { sessions: SecuritySessionSummary[] };
+    }>(API_ROUTES.dashboard.settings.securitySessions);
+    return response.data.data.sessions;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function revokeSecuritySession(sessionId: string): Promise<void> {
+  try {
+    await http.delete(API_ROUTES.dashboard.settings.securitySessionById(sessionId));
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function revokeOtherSecuritySessions(): Promise<void> {
+  try {
+    await http.post(API_ROUTES.dashboard.settings.securitySessionsRevokeOthers);
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
   }

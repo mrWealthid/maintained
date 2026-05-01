@@ -7,6 +7,13 @@ export const API_ROUTES = {
     exports: {
       table: `${base}/dashboard/exports/table`,
     },
+    settings: {
+      securitySessions: `${base}/dashboard/settings/security/sessions`,
+      securitySessionById: (sessionId: string) =>
+        `${base}/dashboard/settings/security/sessions/${sessionId}`,
+      securitySessionsRevokeOthers:
+        `${base}/dashboard/settings/security/sessions/revoke-others`,
+    },
   },
   auth: {
     login: `${base}/auth/login`,
@@ -18,6 +25,7 @@ export const API_ROUTES = {
     workspaceSwitch: `${base}/auth/workspaces/switch`,
     workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
     passwordPolicyConfig: `${base}/auth/password-policy/config`,
+    sessionKeepAlive: `${base}/auth/session/keep-alive`,
     forgot_password: `${base}/auth/forgotPassword`,
     reset_password: `${base}/auth/resetPassword`,
     update_password: `${base}/auth/updatePassword`,
@@ -33,6 +41,7 @@ export const API_ROUTES = {
   },
   settings: {
     email: `${base}/dashboard/settings/email`,
+    security: `${base}/dashboard/settings/security`,
   },
 
   ticketManagement: {

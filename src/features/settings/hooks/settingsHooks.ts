@@ -14,6 +14,11 @@ import {
   changePassword,
   initiatePasswordChange,
   verifyPasscodeAndChangePassword,
+  fetchSecuritySettings,
+  fetchSecuritySessions,
+  revokeOtherSecuritySessions,
+  revokeSecuritySession,
+  updateSecuritySettings,
   fetchCategories,
   createCategory,
   updateCategory,
@@ -104,6 +109,67 @@ export function useVerifyPasscodeAndChangePassword() {
     mutationFn: verifyPasscodeAndChangePassword,
     onSuccess: () => {
       toast.success("Password changed successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useSecuritySettings() {
+  return useQuery({
+    queryKey: ["security-settings"],
+    queryFn: fetchSecuritySettings,
+    select: (data) => data.data,
+  });
+}
+
+export function useUpdateSecuritySettings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateSecuritySettings,
+    onSuccess: () => {
+      toast.success("Security settings updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["security-settings"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useSecuritySessions() {
+  return useQuery({
+    queryKey: ["security-sessions"],
+    queryFn: fetchSecuritySessions,
+    staleTime: 30_000,
+  });
+}
+
+export function useRevokeSecuritySession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: revokeSecuritySession,
+    onSuccess: () => {
+      toast.success("Session revoked");
+      queryClient.invalidateQueries({ queryKey: ["security-sessions"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useRevokeOtherSecuritySessions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: revokeOtherSecuritySessions,
+    onSuccess: () => {
+      toast.success("Other sessions revoked");
+      queryClient.invalidateQueries({ queryKey: ["security-sessions"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);

@@ -13,6 +13,8 @@ import {
 import { verifyToken } from "./token";
 import Business from "@/models/businessModel";
 import User from "@/models/userModel";
+import { getBusinessSecuritySettings, isIpAllowed } from "@/lib/security/business-security";
+import { getRequestSecurityContext } from "@/lib/security/request-context";
 import {
   isPlatformSuperAdminRole,
   PLATFORM_ROLE,
@@ -75,7 +77,7 @@ export async function getVerifiedUserState(
 
   await connect();
 
-  const [session, user, business] = await Promise.all([
+  const [session, user, business, requestContext] = await Promise.all([
     getActiveAuthSession({
       sessionId: payload.sessionId,
       userId: payload.id,
@@ -98,6 +100,7 @@ export async function getVerifiedUserState(
     Business.findById(payload.currentBusiness)
       .select("active")
       .lean<{ active?: boolean } | null>(),
+    getRequestSecurityContext(request),
   ]);
 
   if (!session || !user) {
@@ -106,6 +109,28 @@ export async function getVerifiedUserState(
 
   if (!business || business.active === false) {
     return { status: VERIFIED_USER_STATE_STATUS.INACTIVE_BUSINESS };
+  }
+
+  const securitySettings = await getBusinessSecuritySettings(payload.currentBusiness);
+
+  if (
+    session.lastSeenAt &&
+    Date.now() - new Date(session.lastSeenAt).getTime() >
+      securitySettings.sessionTimeoutMinutes * 60 * 1000
+  ) {
+    await revokeAuthSession(payload.sessionId);
+    return { status: VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED };
+  }
+
+  if (
+    securitySettings.ipWhitelist.enabled &&
+    !isIpAllowed({
+      ipAddress: requestContext.ipAddress,
+      ips: securitySettings.ipWhitelist.ips,
+    })
+  ) {
+    await revokeAuthSession(payload.sessionId);
+    return { status: VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED };
   }
 
   if (

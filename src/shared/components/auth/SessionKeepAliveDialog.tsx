@@ -25,6 +25,7 @@ import {
   subscribeToClientSessionActivity,
 } from "@/lib/auth/client-session-activity";
 import { http } from "@/services/http";
+import { API_ROUTES } from "@/shared/routes/apiRoutes";
 
 const MIN_WARNING_LEAD_MS = 30 * 1000;
 const DEFAULT_WARNING_LEAD_MS = 60 * 1000;
@@ -163,7 +164,7 @@ export function SessionKeepAliveDialog({
     setRefreshError(null);
 
     try {
-      const response = await http.post("/auth/session/keep-alive");
+      const response = await http.post(API_ROUTES.auth.sessionKeepAlive);
       const nextTimeoutMinutes = Number(
         response.data?.data?.sessionTimeoutMinutes ?? effectiveSessionTimeoutMinutes,
       );

@@ -8,6 +8,8 @@ import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
 import { NextRequest } from "next/server";
 import User, { UserDoc } from "@/models/userModel";
 import { ROLES } from "@/shared/enums/enums";
+import { getBusinessSecuritySettings, isIpAllowed } from "@/lib/security/business-security";
+import { getRequestSecurityContext } from "@/lib/security/request-context";
 import { z } from "zod";
 
 connect();
@@ -46,9 +48,26 @@ export async function POST(request: NextRequest) {
       throw ApiError.badRequest("Incorrect email or password");
     }
 
+    const businessId = user.currentBusiness?.toString();
+    const [securitySettings, requestContext] = await Promise.all([
+      getBusinessSecuritySettings(businessId),
+      getRequestSecurityContext(request),
+    ]);
+
+    if (
+      securitySettings.ipWhitelist.enabled &&
+      !isIpAllowed({
+        ipAddress: requestContext.ipAddress,
+        ips: securitySettings.ipWhitelist.ips,
+      })
+    ) {
+      throw ApiError.forbidden("This IP address is not allowed for this workspace.");
+    }
+
     return buildAuthSuccessResponse({
       request,
       user,
+      maxActiveSessions: securitySettings.maxActiveSessions,
       body: {
         status: "success",
         ...getLegacyTokenPreview(user),

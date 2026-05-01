@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
 
 import { createAuthSession } from "@/lib/auth/session";
+import { getRequestSecurityContext } from "@/lib/security/request-context";
 import {
   isPlatformSuperAdminRole,
   PLATFORM_ROLE,
@@ -20,14 +21,6 @@ type AuthSessionIssueArgs = {
   body?: Record<string, unknown>;
   maxActiveSessions?: number | "unlimited";
 };
-
-function getRequestIp(request: NextRequest) {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    ""
-  );
-}
 
 function getCookieExpiresAt() {
   const minutes = Number(process.env.JWT_COOKIE_EXPIRES_IN);
@@ -72,14 +65,15 @@ async function issueAuthSession(args: AuthSessionIssueArgs) {
     throw new Error("User does not have an active workspace membership");
   }
 
+  const requestContext = await getRequestSecurityContext(args.request);
   const session = await createAuthSession({
     userId: args.user.id,
     businessId: sessionContext.businessId,
     role: sessionContext.role,
     workspaceRole: sessionContext.workspaceRole,
     maxActiveSessions: args.maxActiveSessions,
-    ipAddress: getRequestIp(args.request),
-    userAgent: args.request.headers.get("user-agent") ?? "",
+    ipAddress: requestContext.ipAddress,
+    userAgent: requestContext.userAgent,
   });
 
   const token = jwt.sign(

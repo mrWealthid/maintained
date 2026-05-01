@@ -14,6 +14,26 @@ export interface SecuritySettings {
   passcode: string;
 }
 
+export interface WorkspaceSecuritySettings {
+  require2fa: boolean;
+  sessionTimeoutMinutes: number;
+  maxActiveSessions: 1 | 3 | 5 | "unlimited";
+  ipWhitelist: {
+    enabled: boolean;
+    ips: string[];
+  };
+  currentRequestIp?: string | null;
+}
+
+export type SecuritySessionSummary = {
+  sessionId: string;
+  current: boolean;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+};
+
 export interface CategoryFormData {
   name: string;
   description?: string;
