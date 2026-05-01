@@ -180,13 +180,13 @@ Status:
 
 ## Phase 8 — Dashboard / sidebar parity
 
-- [ ] Adopt the eventSphere `(dashboard)` route group layout
-- [ ] Replace `crumbLabelMap` with the eventSphere breadcrumb pattern
+- [x] Consolidate the three role-specific layouts (admin, technician,
+      users) behind a shared `DashboardChrome` shell. Layouts now
+      declare only role gating + which `layoutConfig` entry to render.
 - [ ] Move dashboard skeletons into feature `components/*Skeleton.tsx`
       and wrap pages in `<Suspense>`
-- [ ] Consolidate the three role-specific layouts (admin, technician,
-      users) behind one layout that branches on workspace role +
-      USER_TYPE
+- [ ] Replace `crumbLabelMap` with the eventSphere breadcrumb pattern
+      once the breadcrumb component itself is touched
 
 ## Phase 9 — Lint enforcement
 
