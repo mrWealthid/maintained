@@ -1,71 +1,60 @@
 import { connect } from "@/dbConfig/dbConfig";
-import { NextRequest, NextResponse } from "next/server";
-import jwt, { SignOptions } from "jsonwebtoken";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
+import { NextRequest } from "next/server";
 import User, { UserDoc } from "@/models/userModel";
-import { ApiErrorHandler } from "@/utils/apiError";
 import { ROLES } from "@/shared/enums/enums";
+import { z } from "zod";
 
 connect();
 
-const signToken = (user: UserDoc) => {
+const getLegacyTokenPreview = (user: UserDoc) => {
   const tenants = user.tenantsClaim();
 
   const tenant = tenants.find(
     (tenant) => user.currentBusiness.toString() === tenant.business
   );
 
-  return jwt.sign(
-    {
-      id: user.id,
-      role: tenant?.role || ROLES.user,
-      tenants,
-    },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
-  );
+  return {
+    id: user.id,
+    role: tenant?.role || ROLES.user,
+    tenants,
+  };
 };
+
+const loginBodySchema = z.object({
+  email: z.string().email("Please provide a valid email"),
+  password: z.string().min(1, "Please provide a password"),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
-    //1) Check if emails and password exists
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Please provide email and password" },
-        { status: 400 }
-      );
-    }
-    //2) Check if user exists & password is correct after it's hashed
+    const { email, password } = parseOrThrow(
+      loginBodySchema,
+      await request.json()
+    );
+
     const user = await User.findOne({
       email,
     }).select("+password");
 
     if (!user || !(await user.correctPassword(password, user.password))) {
-      return NextResponse.json(
-        { error: "Incorrect email or password" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Incorrect email or password");
     }
 
-    const token = signToken(user);
-
-    const response = NextResponse.json({
-      status: "success",
-      token,
+    return buildAuthSuccessResponse({
+      request,
+      user,
+      body: {
+        status: "success",
+        ...getLegacyTokenPreview(user),
+      },
     });
-
-    const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-    const expires = new Date(Date.now() + timeInMs);
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      expires,
-    });
-
-    return response;
   } catch (error) {
-    return NextResponse.json(
-      { error: ApiErrorHandler.parse(error) },
-      { status: 500 }
-    );
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

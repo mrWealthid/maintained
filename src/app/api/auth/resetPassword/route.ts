@@ -1,21 +1,34 @@
 import { connect } from "@/dbConfig/dbConfig";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
 import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
-import jwt, { SignOptions } from "jsonwebtoken";
+import { NextRequest } from "next/server";
 import crypto from "crypto";
+import { z } from "zod";
 
 connect();
 
-const signToken = (id: any) =>
-  jwt.sign({ id }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  } as SignOptions);
+const resetPasswordBodySchema = z
+  .object({
+    resetToken: z.string().min(1, "Reset token is required"),
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmNewPassword: z.string().min(8, "Please confirm your new password"),
+  })
+  .refine((body) => body.newPassword === body.confirmNewPassword, {
+    path: ["confirmNewPassword"],
+    message: "Passwords do not match",
+  });
 
 export async function POST(request: NextRequest) {
-  const { newPassword, currentPassword, confirmNewPassword, resetToken } =
-    await request.json();
-
   try {
+    const { newPassword, currentPassword, confirmNewPassword, resetToken } =
+      parseOrThrow(resetPasswordBodySchema, await request.json());
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
@@ -26,55 +39,33 @@ export async function POST(request: NextRequest) {
       passwordResetExpires: { $gt: Date.now() },
     }).select("+password");
 
-    console.log("User", user);
-
-    // 2) If token has not expired and there is a user, set the new password
     if (!user) {
-      return NextResponse.json(
-        { error: "Token is invalid or has expired" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Token is invalid or has expired");
     }
 
-    // 3 Check if current the password is correct
     if (!(await user.correctPassword(currentPassword, user.password))) {
-      return NextResponse.json(
-        { error: "Your current password is wrong" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Your current password is wrong");
     }
 
-    //4 Check if the current password and the new password is the same
     if (currentPassword === newPassword) {
-      return NextResponse.json(
-        { error: "You can't use your old password" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("You can't use your old password");
     }
+
     user.password = newPassword;
     user.passwordConfirm = confirmNewPassword;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
-    //3 Update changedpasswordAt property for the user
-    //4 Log the user in, send JWT
-
-    const token = signToken(user.id);
-    const response = NextResponse.json({
-      status: "success",
-      message: "Password reset successfully! Kindly Login with Credentials",
+    return buildAuthSuccessResponse({
+      request,
+      user,
+      body: {
+        status: "success",
+        message: "Password reset successfully! Kindly Login with Credentials",
+      },
     });
-
-    const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-    const expires = new Date(Date.now() + timeInMs);
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      expires,
-    });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

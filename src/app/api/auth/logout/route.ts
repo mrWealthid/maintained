@@ -1,9 +1,17 @@
-import { ApiErrorHandler } from "@/utils/apiError";
+import { errorToNextResponse } from "@/lib/errors/apiError";
+import { revokeAuthSession } from "@/lib/auth/session";
+import { verifyToken } from "@/lib/auth/token";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("token")?.value;
+    const payload = token ? verifyToken(token) : null;
+    if (payload?.sessionId) {
+      await revokeAuthSession(payload.sessionId);
+    }
+
     const cookie = await cookies();
     cookie.delete("token");
     const response = NextResponse.json({
@@ -13,9 +21,6 @@ export async function GET() {
 
     return response;
   } catch (error) {
-    return NextResponse.json(
-      { error: ApiErrorHandler.parse(error) },
-      { status: 500 }
-    );
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

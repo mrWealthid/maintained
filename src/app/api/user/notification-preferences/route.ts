@@ -1,54 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
 import { connect } from "@/dbConfig/dbConfig";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import User from "@/models/userModel";
 
 connect();
 
+const notificationPreferencesSchema = z.object({
+  mode: z.enum(["SMS", "EMAIL", "PHONE"]).default("SMS"),
+  smsEnabled: z.boolean().default(true),
+  emailEnabled: z.boolean().default(false),
+  phoneEnabled: z.boolean().default(false),
+});
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
     const user = await User.findById(verify.id).select(
       "notificationPreferences"
     );
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) throw ApiError.notFound("User not found");
 
     return NextResponse.json({
       status: "success",
-      data: user.notificationPreferences || {
-        mode: "SMS",
-        smsEnabled: true,
-        emailEnabled: false,
-        phoneEnabled: false,
-      },
+      data:
+        user.notificationPreferences ||
+        notificationPreferencesSchema.parse({}),
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    const preferences = await request.json();
+    const preferences = parseOrThrow(
+      notificationPreferencesSchema,
+      await request.json()
+    );
 
     const user = await User.findByIdAndUpdate(
       verify.id,
@@ -56,16 +56,14 @@ export async function PUT(request: NextRequest) {
       { new: true }
     );
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) throw ApiError.notFound("User not found");
 
     return NextResponse.json({
       status: "success",
       message: "Notification preferences updated successfully",
       data: user.notificationPreferences,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

@@ -1,60 +1,78 @@
 // app/api/units/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import Unit from "@/models/unitModel";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import {
+  unitFormSchema,
+  unitListQuerySchema,
+} from "@/features/units/models/unit-form.model";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 import { mapToObject } from "@/utils/helpers";
 import APIFeatures from "@/utils/apiFeatures";
+import Unit from "@/models/unitModel";
+import Property from "@/models/propertyModel";
 import { Unit as IUnit } from "@/features/property-feat/service/unit-service";
 
-export async function GET(req: NextRequest) {
+const unitCreateBodySchema = unitFormSchema
+  .omit({ isActive: true })
+  .partial({ property: true })
+  .refine((body) => Boolean(body.propertyId ?? body.property), {
+    path: ["property"],
+    message: "Property is required",
+  })
+  .transform((body) => ({
+    ...body,
+    property: body.propertyId ?? body.property,
+  }));
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const me = await getUserFromCookies();
-    if (!me?.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const businessId = me.currentBusiness;
+    await assertWorkspacePermissionKey(verify, PERMISSION.UNITS_VIEW);
+    const parsedQuery = parseOrThrow(
+      unitListQuerySchema,
+      Object.fromEntries(request.nextUrl.searchParams.entries())
+    );
 
-    if (!businessId)
-      return NextResponse.json(
-        { error: "businessId required" },
-        { status: 400 }
-      );
+    const filter: Record<string, unknown> = {
+      business: verify.businessId,
+      isActive: parsedQuery.isActive ?? true,
+    };
+    const transformedQuery = mapToObject(request.nextUrl.searchParams as any);
 
-    // Build filter object
-    const filter: any = { business: businessId, isActive: true };
-    const query: any = req.nextUrl.searchParams;
-
-    const transformedQuery = mapToObject(query);
-    console.log(transformedQuery);
-
-    if (transformedQuery.propertyId) {
-      filter.property = transformedQuery.propertyId;
+    if (parsedQuery.propertyId ?? parsedQuery.property) {
+      filter.property = parsedQuery.propertyId ?? parsedQuery.property;
       delete transformedQuery.propertyId;
+      delete transformedQuery.property;
     }
-    // if (transformedQuery.property) filter.property = transformedQuery.property;
-    if (transformedQuery.label) {
-      filter.label = { $regex: transformedQuery.label, $options: "i" };
 
+    if (parsedQuery.label) {
+      filter.label = { $regex: parsedQuery.label, $options: "i" };
       delete transformedQuery.label;
     }
-    // if (
-    //   transformedQuery.status !== null &&
-    //   transformedQuery.status !== undefined
-    // ) {
-    //   filter.tenantActive = transformedQuery.status === "true";
-    // }
 
-    if (transformedQuery.tenant) {
+    if (parsedQuery.tenant) {
       filter["tenantUser.name"] = {
-        $regex: transformedQuery.tenant,
+        $regex: parsedQuery.tenant,
         $options: "i",
       };
       delete transformedQuery.tenant;
     }
+    delete transformedQuery.search;
 
-    const requestQuery = Unit.find(filter);
-
-    const features = new APIFeatures(requestQuery, transformedQuery)
+    const features = new APIFeatures(Unit.find(filter), transformedQuery)
       .filter()
       .sort()
       .limitFields()
@@ -69,7 +87,6 @@ export async function GET(req: NextRequest) {
       Unit.find(filter),
       transformedQuery
     ).filter();
-
     const count = await countFeatures.query.countDocuments();
 
     return NextResponse.json({
@@ -78,30 +95,35 @@ export async function GET(req: NextRequest) {
       status: "success",
       data: units,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const me = await getUserFromCookies();
-    if (!me?.isAdminRole)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const { businessId, propertyId, label, floor, tags } = await req.json();
-    if (!businessId || !propertyId || !label)
-      return NextResponse.json(
-        { error: "businessId, propertyId, label required" },
-        { status: 400 }
-      );
+    await assertWorkspacePermissionKey(verify, PERMISSION.UNITS_CREATE);
+    const body = parseOrThrow(unitCreateBodySchema, await request.json());
+
+    const property = await Property.findOne({
+      _id: body.property,
+      business: verify.businessId,
+      isActive: true,
+    }).select("_id");
+
+    if (!property) {
+      throw ApiError.notFound("Property not found");
+    }
 
     const unit = await Unit.create({
-      business: businessId,
-      property: propertyId,
-      label,
-      floor,
-      tags,
+      business: verify.businessId,
+      property: body.property,
+      label: body.label,
+      floor: body.floor,
+      tags: body.tags,
       isActive: true,
     });
 
@@ -109,7 +131,7 @@ export async function POST(req: Request) {
       { status: "success", data: unit },
       { status: 201 }
     );
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

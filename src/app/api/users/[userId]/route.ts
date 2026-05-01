@@ -1,44 +1,51 @@
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import User from "@/models/userModel";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 import { NextRequest, NextResponse } from "next/server";
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const verify = await getUserFromCookies();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
+
+    await assertWorkspacePermissionKey(verify, PERMISSION.TEAM_REMOVE);
     const { userId } = await params;
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-    if (!verify.isAdminRole) {
-      return NextResponse.json(
-        { error: "You are not Unauthorized to perform action" },
-        { status: 401 }
-      );
+    if (userId === verify.id) {
+      throw ApiError.badRequest("You cannot remove yourself from the workspace");
     }
 
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "memberships.business": verify.businessId,
+      },
+      {
+        $pull: {
+          memberships: { business: verify.businessId },
+        },
+      },
+      { new: true }
+    );
 
     if (!user) {
-      return NextResponse.json(
-        { error: "No user found with id" },
-        { status: 404 }
-      );
+      throw ApiError.notFound("No user found with id");
     }
-    const response = NextResponse.json({
-      message: "User deleted Successfully",
+
+    return NextResponse.json({
+      message: "User removed from workspace successfully",
       success: true,
     });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

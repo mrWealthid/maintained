@@ -1,36 +1,33 @@
 import { connect } from "@/dbConfig/dbConfig";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
-import jwt, { SignOptions } from "jsonwebtoken";
 import { Emails } from "@/utils/email-resend";
+import { z } from "zod";
 
 connect();
 
-const signToken = (id: string) =>
-  jwt.sign({ id }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN!,
-  } as SignOptions);
+const forgotPasswordBodySchema = z.object({
+  email: z.string().email("Please provide a valid email"),
+});
 
 export async function POST(request: NextRequest) {
-  const { email } = await request.json();
   try {
-    //1) Check if emails and password exists
-    if (!email) {
-      return NextResponse.json(
-        { error: "Please provide an email" },
-        { status: 400 }
-      );
-    }
-    //2) Check if user exists & password is correct after it's hashed
+    const { email } = parseOrThrow(
+      forgotPasswordBodySchema,
+      await request.json()
+    );
+
     const user = await User.findOne({
       email,
     }).select("+password");
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User does not exist" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("User does not exist");
     }
 
     const resetToken = user.createPasswordResetToken();
@@ -57,7 +54,7 @@ export async function POST(request: NextRequest) {
     // });
 
     return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

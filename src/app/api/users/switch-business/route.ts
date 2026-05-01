@@ -1,56 +1,67 @@
 import { connect } from "@/dbConfig/dbConfig";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
+import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import User, { UserDoc } from "@/models/userModel";
+import { INVITE_STATUS } from "@/shared/enums/enums";
+import { NextRequest } from "next/server";
+import { z } from "zod";
 
 connect();
 
+const switchBusinessBodySchema = z.object({
+  currentBusiness: z.string().min(1, "Workspace is required"),
+});
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
 export async function PATCH(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
+    const { currentBusiness } = parseOrThrow(
+      switchBusinessBodySchema,
+      await request.json()
+    );
+
+    const user = await User.findById(verify.id);
+    if (!user) throw ApiError.notFound("User not found");
+
+    const membership = user.memberships.find(
+      (item) =>
+        String(item.business) === currentBusiness &&
+        item.status === INVITE_STATUS.activated
+    );
+
+    if (!membership) {
+      throw ApiError.forbidden("You do not have access to this workspace");
     }
 
-    const { currentBusiness } = await request.json();
+    user.currentBusiness = membership.business;
+    await user.save({ validateBeforeSave: false });
 
-    console.log({ currentBusiness });
-
-    const updatedCurrentBusiness = await User.findByIdAndUpdate(
-      verify.id,
-      { currentBusiness },
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
-    );
-
-    if (!updatedCurrentBusiness)
-      NextResponse.json({ error: "User not found" }, { status: 404 });
-
-    const response = NextResponse.json(
-      {
+    const response = await buildAuthSuccessResponse({
+      request,
+      user: user as UserDoc,
+      body: {
         status: "success",
-        data: updatedCurrentBusiness,
+        data: user,
       },
-      { status: 200 }
-    );
+    });
 
-    // httpOnly so client JS can’t tamper; shortish max-age; secure + samesite for safety
     response.cookies.set("activeBusiness", String(currentBusiness), {
       httpOnly: true,
       sameSite: "lax",
       secure: true,
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days; adjust as needed
+      maxAge: 60 * 60 * 24 * 7,
     });
+
     return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

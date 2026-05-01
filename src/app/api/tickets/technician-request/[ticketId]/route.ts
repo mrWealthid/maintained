@@ -1,71 +1,51 @@
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import { TechnicianRequest } from "@/models/technicanRequest";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket from "@/models/ticketModel";
 import User from "@/models/userModel";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
 
     if (!verify || verify.isUserRole || verify.isTechnicianRole) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
+      throw ApiError.unauthorized();
     }
 
     const adminUser = await User.findById(verify.id);
-    if (!adminUser) {
-      return NextResponse.json(
-        { error: "Admin user not found" },
-        { status: 404 }
-      );
-    }
+    if (!adminUser) throw ApiError.notFound("Admin user not found");
 
     const body = await request.json();
     const { technicianIds } = body;
 
     if (!Array.isArray(technicianIds) || technicianIds.length === 0) {
-      return NextResponse.json(
-        { error: "At least one technician ID must be provided" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("At least one technician ID must be provided");
     }
 
     const ticket = await Ticket.findById(ticketId);
-    if (!ticket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 400 });
-    }
+    if (!ticket) throw ApiError.notFound("Ticket not found");
 
     if (
       verify.isAdminRole &&
       ticket.actionedBy?.toString() !== verify.id.toString()
     ) {
-      return NextResponse.json(
-        { error: "You are not allowed to perform this action" },
-        { status: 403 }
-      );
+      throw ApiError.forbidden("You are not allowed to perform this action");
     }
 
-    const existingRequests = await TechnicianRequest.find({
-      ticket: ticketId,
-    });
+    const existingRequests = await TechnicianRequest.find({ ticket: ticketId });
     const alreadyRequestedTechIds = existingRequests.map((r) =>
-      r.technician.toString()
+      r.technician.toString(),
     );
 
-    // Filter out duplicates
     const newTechIds = technicianIds.filter(
-      (id) => !alreadyRequestedTechIds.includes(id)
+      (id) => !alreadyRequestedTechIds.includes(id),
     );
 
     const newRequests = await Promise.all(
@@ -75,30 +55,14 @@ export async function POST(
           technician: techId,
           sentBy: adminUser.id,
           expiresAt: body.expiresAt,
-        })
-      )
+        }),
+      ),
     );
 
-    //update ticket status to pending assignment
     if (newRequests.length > 0) {
       ticket.status = TICKET_STATUS.pending_assignment;
       await ticket.save();
     }
-
-    // // Optionally log each new activity
-    // await Promise.all(
-    // 	newRequests.map((req) =>
-    // 		TicketActivity.create({
-    // 			ticket: ticketId,
-    // 			action: 'assignment-request-sent',
-    // 			changedBy: adminUser.id,
-    // 			description: `Assignment request sent to technician with ID ${req.technician}`,
-    // 			metadata: {
-    // 				technicianId: req.technician
-    // 			}
-    // 		})
-    // 	)
-    // );
 
     await TicketActivity.create({
       ticket: ticketId,
@@ -118,7 +82,7 @@ export async function POST(
       count: newRequests.length,
       requests: newRequests,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

@@ -1,45 +1,56 @@
 // app/api/units/my/route.ts
-import { NextResponse } from "next/server";
-import User from "@/models/userModel";
-import Unit from "@/models/unitModel";
-import Property from "@/models/propertyModel";
+import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 
-export async function GET(req: Request) {
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { INVITE_STATUS } from "@/shared/enums/enums";
+import Unit from "@/models/unitModel";
+import User from "@/models/userModel";
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const me = await getUserFromCookies();
-    if (!me?.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const url = new URL(req.url);
-    const businessId = url.searchParams.get("businessId");
-    if (!businessId)
-      return NextResponse.json(
-        { error: "businessId required" },
-        { status: 400 }
-      );
-
-    const user = await User.findById(me.id).lean();
+    const user = await User.findById(verify.id)
+      .select("memberships")
+      .lean<{
+        memberships?: Array<{
+          business?: { toString(): string } | string;
+          status?: string;
+          unit?: string | Types.ObjectId;
+          accessibleUnits?: Array<string | Types.ObjectId>;
+        }>;
+      } | null>();
     const membership = user?.memberships?.find(
-      (m: any) =>
-        String(m.business) === String(businessId) && m.status === "ACTIVATED"
+      (item) =>
+        String(item.business) === String(verify.businessId) &&
+        item.status === INVITE_STATUS.activated
     );
-    if (!membership) return NextResponse.json({ data: [] }, { status: 200 });
+
+    if (!membership) {
+      return NextResponse.json({ data: [] }, { status: 200 });
+    }
 
     const unitIds = [
       ...(membership.unit ? [membership.unit] : []),
       ...(membership.accessibleUnits || []),
-    ].map((id: any) => new Types.ObjectId(id));
+    ].map((id) => new Types.ObjectId(id));
 
-    if (!unitIds.length)
+    if (!unitIds.length) {
       return NextResponse.json({ data: [] }, { status: 200 });
+    }
 
     const units = await Unit.aggregate([
       {
         $match: {
           _id: { $in: unitIds },
-          business: new Types.ObjectId(businessId),
+          business: new Types.ObjectId(verify.businessId),
           isActive: true,
         },
       },
@@ -58,7 +69,7 @@ export async function GET(req: Request) {
     ]);
 
     return NextResponse.json({ data: units }, { status: 200 });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

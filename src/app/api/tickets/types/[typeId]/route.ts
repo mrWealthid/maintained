@@ -1,32 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import TicketType from "@/models/ticketTypeModel";
 import { ROLES } from "@/shared/enums/enums";
 
 connect();
 
+function assertTypeAdmin(role: string | undefined) {
+  if (role !== ROLES.admin && role !== ROLES.super_admin) {
+    throw ApiError.forbidden("Admin access required");
+  }
+}
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ typeId: string }> }
+  { params }: { params: Promise<{ typeId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (verify.role !== ROLES.admin && verify.role !== ROLES.super_admin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
+    if (!verify) throw ApiError.unauthorized();
+    assertTypeAdmin(verify.role);
 
     const { name, description, isActive } = await request.json();
     const { typeId } = await params;
@@ -34,64 +29,36 @@ export async function PUT(
     const ticketType = await TicketType.findByIdAndUpdate(
       typeId,
       { name, description, isActive },
-      { new: true }
+      { new: true },
     );
 
-    if (!ticketType) {
-      return NextResponse.json(
-        { error: "Ticket type not found" },
-        { status: 404 }
-      );
-    }
+    if (!ticketType) throw ApiError.notFound("Ticket type not found");
 
     return NextResponse.json({
       status: "success",
       message: "Ticket type updated successfully",
       data: ticketType,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ typeId: string }> }
+  { params }: { params: Promise<{ typeId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (verify.role !== ROLES.admin && verify.role !== ROLES.super_admin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
+    if (!verify) throw ApiError.unauthorized();
+    assertTypeAdmin(verify.role);
 
     const { typeId } = await params;
 
     const ticketType = await TicketType.findById(typeId);
-    if (!ticketType) {
-      return NextResponse.json(
-        { error: "Ticket type not found" },
-        { status: 404 }
-      );
-    }
-
-    // Prevent deletion of default ticket types
+    if (!ticketType) throw ApiError.notFound("Ticket type not found");
     if (ticketType.isDefault) {
-      return NextResponse.json(
-        { error: "Cannot delete default ticket types" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Cannot delete default ticket types");
     }
 
     await TicketType.findByIdAndDelete(typeId);
@@ -100,7 +67,7 @@ export async function DELETE(
       status: "success",
       message: "Ticket type deleted successfully",
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
