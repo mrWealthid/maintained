@@ -1,33 +1,21 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
-import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
+    if (!verify) throw ApiError.unauthorized();
+
     const { ticketId } = await params;
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
     const data = await TicketActivity.find({ ticket: ticketId });
 
-    const response = NextResponse.json({
-      status: "success",
-      data,
-    });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ status: "success", data });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

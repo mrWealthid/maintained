@@ -1,94 +1,33 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket from "@/models/ticketModel";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
-// export async function GET(
-//     request: NextRequest,
-//     { params }: { params: { ticketId: string } }
-// ) {
-//     try {
-//         // const verify =await getUserFromCookies();
-
-//         // if (!verify) {
-//         // 	return NextResponse.json(
-//         // 		{ error: 'Unauthorized access' },
-//         // 		{ status: 401 }
-//         // 	);
-//         // }
-
-//         const ticketId = params.ticketId;
-
-//         const maintenanceRequest = await Ticket.findOne({
-//             id: ticketId
-//         }).populate({
-//             path: 'category',
-//             select: 'name '
-//         });
-
-//         const response = NextResponse.json({
-//             status: 'success',
-//             data: maintenanceRequest
-//         });
-
-//         return response;
-//     } catch (error: any) {
-//         return NextResponse.json({ error: error.message }, { status: 500 });
-//     }
-// }
-
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
-
-    if (!verify || verify.isUserRole) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    if (!verify || verify.isUserRole) throw ApiError.unauthorized();
 
     const { status } = await request.json();
 
     const user = await User.findById(verify.id);
+    if (!user) throw ApiError.notFound("User not found");
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const payload = {
-      actionedBy: verify.id,
-      status,
-    };
-
-    // 1. Get current (pre-update) ticket — for comparison/logging
     const previous = await Ticket.findById(ticketId);
-
-    if (!previous) {
-      return NextResponse.json(
-        { error: "No ticket found with id" },
-        { status: 404 }
-      );
-    }
+    if (!previous) throw ApiError.notFound("No ticket found with id");
 
     const updatedRequest = await Ticket.findByIdAndUpdate(
       ticketId,
-      payload,
-
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
+      { actionedBy: verify.id, status },
+      { new: true, runValidators: true, context: "query" },
     );
 
-    //Log Ticket Activity --if it's an admin
     await TicketActivity.create({
       ticket: ticketId,
       action: "status-changed",
@@ -101,14 +40,12 @@ export async function PATCH(
       },
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       message: "Ticket Updated Successfully",
       success: true,
       data: updatedRequest,
     });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

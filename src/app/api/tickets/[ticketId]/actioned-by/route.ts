@@ -1,61 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import Ticket from "@/models/ticketModel";
 import mongoose from "mongoose";
+
+import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { TICKET_STATUS } from "@/shared/enums/enums";
+import Ticket from "@/models/ticketModel";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const { ticketId } = await params;
 
     const user = await getUserFromCookies(request);
-
-    console.log(user);
     if (!user || (!user.isAdminRole && !user.isSuperAdminRole)) {
-      {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+      throw ApiError.unauthorized();
     }
 
-    const body = await request.json();
-    const { actionedBy, status } = body;
+    const { actionedBy, status } = await request.json();
 
     if (!mongoose.Types.ObjectId.isValid(actionedBy)) {
-      return NextResponse.json(
-        { error: "Invalid actionedBy ID" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Invalid actionedBy ID");
     }
 
     const ticket = await Ticket.findById(ticketId);
+    if (!ticket) throw ApiError.notFound("Ticket not found");
 
-    if (!ticket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
-    }
-
-    const isPending = ticket.status === "PENDING";
+    const isPending = ticket.status === TICKET_STATUS.pending;
     const isSameActionedBy = ticket.actionedBy?.toString() === user.id;
 
-    // If not pending, only the current actionedBy or a SuperAdmin can change
     if (!isPending && !(isSameActionedBy || user.isSuperAdminRole)) {
-      return NextResponse.json(
-        { error: "You are not allowed to update this ticket" },
-        { status: 403 }
-      );
+      throw ApiError.forbidden("You are not allowed to update this ticket");
     }
 
-    await Ticket.findByIdAndUpdate(ticketId, {
-      actionedBy: actionedBy,
-      status: status,
-    });
+    await Ticket.findByIdAndUpdate(ticketId, { actionedBy, status });
 
     return NextResponse.json(
       { message: "Ticket actionedBy updated successfully", ticket },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
