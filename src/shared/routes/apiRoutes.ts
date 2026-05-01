@@ -17,6 +17,7 @@ export const API_ROUTES = {
     workspaceCreate: `${base}/auth/workspaces`,
     workspaceSwitch: `${base}/auth/workspaces/switch`,
     workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
+    passwordPolicyConfig: `${base}/auth/password-policy/config`,
     forgot_password: `${base}/auth/forgotPassword`,
     reset_password: `${base}/auth/resetPassword`,
     update_password: `${base}/auth/updatePassword`,

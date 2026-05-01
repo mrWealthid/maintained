@@ -1,6 +1,6 @@
 import { ROLES } from "../enums/enums";
 import { Routes } from "../model/model";
-import { adminRoutes, routes, technicianRoutes } from "../routes/routes";
+import { adminRoutes, routes, technicianRoutes } from "../routes/appRoutes";
 
 export const layoutConfig: Record<
   ROLES.user | ROLES.admin | ROLES.technician,
