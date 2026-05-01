@@ -1,7 +1,5 @@
-import React from 'react';
+import { TeamListSkeleton } from "@/features/team/components/TeamListSkeleton";
 
-const loading = () => {
-	return <div>loading....</div>;
-};
-
-export default loading;
+export default function Loading() {
+  return <TeamListSkeleton />;
+}

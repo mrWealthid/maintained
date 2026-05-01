@@ -1,7 +1,5 @@
-import React from "react";
+import { DashboardSkeleton } from "@/features/dashboard/components/DashboardSkeleton";
 
-const loading = () => {
-  return <div>loading.....</div>;
-};
-
-export default loading;
+export default function Loading() {
+  return <DashboardSkeleton />;
+}

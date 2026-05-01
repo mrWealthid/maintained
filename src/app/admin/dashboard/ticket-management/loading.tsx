@@ -1,7 +1,5 @@
-import React from 'react';
+import { TicketListSkeleton } from "@/features/tickets/components/TicketListSkeleton";
 
-const loading = () => {
-	return <div>loading....</div>;
-};
-
-export default loading;
+export default function Loading() {
+  return <TicketListSkeleton />;
+}

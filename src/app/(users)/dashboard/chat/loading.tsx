@@ -1,7 +1,5 @@
-import React from "react";
+import { ChatSkeleton } from "@/features/chat/components/ChatSkeleton";
 
-const loading = () => {
-  return <div>loading...</div>;
-};
-
-export default loading;
+export default function Loading() {
+  return <ChatSkeleton />;
+}
