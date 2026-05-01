@@ -183,10 +183,16 @@ Status:
 - [x] Consolidate the three role-specific layouts (admin, technician,
       users) behind a shared `DashboardChrome` shell. Layouts now
       declare only role gating + which `layoutConfig` entry to render.
-- [ ] Move dashboard skeletons into feature `components/*Skeleton.tsx`
-      and wrap pages in `<Suspense>`
+- [x] Feature `components/*Skeleton.tsx` files
+      (DashboardSkeleton, TicketListSkeleton, TeamListSkeleton,
+      ChatSkeleton) wired through Next.js segment `loading.tsx` so
+      every dashboard route has a proper Suspense fallback. Replaces
+      the `loading....` placeholders and a broken admin loader that
+      was rendering nothing.
 - [ ] Replace `crumbLabelMap` with the eventSphere breadcrumb pattern
-      once the breadcrumb component itself is touched
+      once the breadcrumb component itself is touched. The current
+      Breadcrumbs component works correctly; touching it has no
+      leverage today.
 
 ## Phase 9 — Lint enforcement
 
