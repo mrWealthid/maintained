@@ -52,7 +52,7 @@ export function useCreateUnit() {
       toast.success("Unit created");
       queryClient.invalidateQueries({ queryKey: UNIT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -66,7 +66,7 @@ export function useUpdateUnit(id: string) {
       queryClient.invalidateQueries({ queryKey: UNIT_KEYS.byId(id) });
       queryClient.invalidateQueries({ queryKey: UNIT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -79,6 +79,6 @@ export function useDeleteUnit() {
       toast.success("Unit deleted");
       queryClient.invalidateQueries({ queryKey: UNIT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

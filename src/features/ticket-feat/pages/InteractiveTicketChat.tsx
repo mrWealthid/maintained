@@ -902,12 +902,13 @@ Would you like to submit this request?`;
     const oversized = all.filter((f) => !withinLimit(f, target));
 
     if (oversized.length) {
-      const limitText =
-        target === "images"
-          ? formatMB(MAX_IMAGE_SIZE)
-          : target === "videos"
-            ? formatMB(MAX_VIDEO_SIZE)
-            : formatMB(MAX_DOC_SIZE);
+      let limitText = formatMB(MAX_DOC_SIZE);
+      if (target === "images") {
+        limitText = formatMB(MAX_IMAGE_SIZE);
+      } else if (target === "videos") {
+        limitText = formatMB(MAX_VIDEO_SIZE);
+      }
+
       handleUserResponse(
         `Rejected ${oversized.length} ${target} due to size limit (${limitText} each): ${oversized.map((f) => f.name).join(", ")}`,
         target

@@ -7,10 +7,13 @@ import "@/models/chatMessage";
 import ChatRoom from "@/models/chatRoom";
 import ChatRoomMessage from "@/models/chatMessage";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { pusherServer } from "@/lib/pusher/pusher";
+import { z } from "zod";
 
-type Body = { lastReadMessageId?: string };
+const readMessageBodySchema = z.object({
+  lastReadMessageId: z.string().min(1),
+});
 
 export async function POST(
   req: NextRequest,
@@ -25,7 +28,10 @@ export async function POST(
       throw ApiError.badRequest("Invalid room id");
     }
 
-    const { lastReadMessageId }: Body = await req.json();
+    const { lastReadMessageId } = parseOrThrow(
+      readMessageBodySchema,
+      await req.json()
+    );
     if (!lastReadMessageId || !Types.ObjectId.isValid(lastReadMessageId)) {
       throw ApiError.badRequest("Invalid lastReadMessageId");
     }

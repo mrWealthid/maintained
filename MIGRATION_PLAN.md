@@ -51,7 +51,7 @@ this file as phases land.
       `collapsible` primitive at `src/components/ui/collapsible.tsx`
 - [x] Add `src/lib/helpers/scroll-to-element.ts` (port from eventSphere)
 - [x] Add `src/components/ui/ErrorList.tsx` (port from eventSphere)
-- [ ] Replace the loose `toast.error(ApiErrorHandler.parse(err))` pattern
+- [x] Replace the loose `toast.error(ApiErrorHandler.parse(err))` pattern
       with `ErrorList error={mutation.error}` in the existing ticket,
       property, and user dialogs
 - [x] Add a shared `AppDialogShell` and `AppSheetShell` under
@@ -101,11 +101,11 @@ callers are updated to the typed query-key + filter-schema pattern.
 
 For each feature:
 
-- [ ] Extract status/priority constants into `*-status.model.ts` etc.
-- [ ] Extract Zod schemas into `*-form.model.ts`
-- [ ] Move axios calls into `services/` using `ApiErrorHandler.toUIError`
-- [ ] Add typed `*_KEYS` query-key map in `hooks/`
-- [ ] Replace inline permission/role checks with `assertPermission` and
+- [x] Extract status/priority constants into `*-status.model.ts` etc.
+- [x] Extract Zod schemas into `*-form.model.ts`
+- [x] Move axios calls into `services/` using `ApiErrorHandler.toUIError`
+- [x] Add typed `*_KEYS` query-key map in `hooks/`
+- [x] Replace inline permission/role checks with `assertPermission` and
       `hasPermission`
 
 Status:
@@ -114,14 +114,14 @@ Status:
 | -------------------- | --------- | ------- | ------- | ----- | ---------- | ---- | ----- |
 | tickets              | done      | done    | done    | done  |            |      |       |
 | properties           | done      | done    | done    | done  |            |      |       |
-| units                |           | done    | done    | done  |            |      |       |
+| units                | done      | done    | done    | done  | done       | done | done  |
 | tenants              | done      | done    | done    | done  |            |      |       |
 | technicians          | done      | done    | done    | done  |            |      |       |
-| team                 |           | done    | done    | done  |            |      |       |
-| chat                 | done      |         | done    | done  |            |      |       |
-| settings             |           |         |         |       |            |      |       |
-| dashboard            |           |         |         |       |            |      |       |
-| technician-requests  | done\*    |         |         |       |            |      |       |
+| team                 | done      | done    | done    | done  | done       | done | done  |
+| chat                 | done      | done    | done    | done  | done       | done | done  |
+| settings             | done      | done    | done    | done  | done       | done | done  |
+| dashboard            | done      | done    | done    | done  | done       | done | done  |
+| technician-requests  | done      | done    | done    | done  | done       | done | done  |
 
 \* technician-response constants are in `src/features/tickets/models/`
 because the request entity is currently part of the ticket model graph.
@@ -137,12 +137,12 @@ unchanged during the rollout.
 
 For every route under `src/app/api/**`:
 
-- [ ] Body parsing through `parseOrThrow(Schema, body)`
-- [ ] Permission enforced with `assertPermission`
-- [ ] Workspace ownership verified via `currentBusiness`
-- [ ] All thrown errors returned via `errorToNextResponse`
-- [ ] Remove any hand-built `{ error: ... }` payloads
-- [ ] List routes adopt the
+- [x] Body parsing through `parseOrThrow(Schema, body)`
+- [x] Permission enforced with `assertPermission`
+- [x] Workspace ownership verified via `currentBusiness`
+- [x] All thrown errors returned via `errorToNextResponse`
+- [x] Remove any hand-built `{ error: ... }` payloads
+- [x] List routes adopt the
       `parseOrThrow → buildApiFeaturesQuery → applyFilters` pipeline
       with a feature `*ListQuerySchema`
 
@@ -163,19 +163,19 @@ Status:
       `/api/user/notification-preferences`) now use verified session
       context, permission keys where applicable, Zod parsing, workspace
       ownership checks, and `errorToNextResponse`
-- [ ] all other ticket routes
+- [x] all other ticket routes
 - [x] all property/unit routes
-- [ ] all auth routes
+- [x] all auth routes
 - [x] all user/users routes
-- [ ] all chat routes
-- [ ] all onboarding routes
+- [x] all chat routes
+- [x] all onboarding routes
 
 ## Phase 7 — Email feature boundary
 
-- [ ] Move HTML composition out of routes into `src/lib/email/senders/`
-- [ ] Split `src/lib/email/` into the canonical
+- [x] Move HTML composition out of routes into `src/lib/email/senders/`
+- [x] Split `src/lib/email/` into the canonical
       `clients/ defaults/ helpers/ models/ senders/` shape
-- [ ] One template key per customer-facing action (ticket created,
+- [x] One template key per customer-facing action (ticket created,
       ticket assigned, technician request, status changed, etc.)
 
 ## Phase 8 — Dashboard / sidebar parity

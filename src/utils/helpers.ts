@@ -179,16 +179,12 @@ export function parseGooglePlace(
   const postalCode = get("postal_code");
   const country = get("country") || "United States";
   const loc = details.geometry?.location;
-  const lat = loc
-    ? typeof loc.lat === "function"
-      ? loc.lat()
-      : (loc as any).lat
-    : null;
-  const lng = loc
-    ? typeof loc.lng === "function"
-      ? loc.lng()
-      : (loc as any).lng
-    : null;
+  let lat = null;
+  let lng = null;
+  if (loc) {
+    lat = typeof loc.lat === "function" ? loc.lat() : (loc as any).lat;
+    lng = typeof loc.lng === "function" ? loc.lng() : (loc as any).lng;
+  }
 
   return {
     line1,

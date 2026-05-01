@@ -50,6 +50,7 @@ export interface IUser extends Document {
     property?: Types.ObjectId;
     unit?: Types.ObjectId;
     accessibleUnits?: Types.ObjectId[];
+    roleDefinition?: Types.ObjectId;
     isCreator: boolean;
   }[];
   currentBusiness: Types.ObjectId;
@@ -133,6 +134,7 @@ const MembershipSchema = new Schema(
 
     // 🔵 NEW — optional: allow multi-unit tenants (admin-assigned)
     accessibleUnits: [{ type: Schema.Types.ObjectId, ref: "Unit" }],
+    roleDefinition: { type: Schema.Types.ObjectId, ref: "RoleDefinition" },
 
     // keep your technician specialties exactly as you had
     specialties: {
@@ -327,6 +329,8 @@ export type UserDoc = mongoose.Document &
       property?: Types.ObjectId;
       unit?: Types.ObjectId;
       accessibleUnits?: Types.ObjectId[];
+      roleDefinition?: Types.ObjectId;
+      isCreator?: boolean;
       locationSnapshot?: {
         propertyName?: string;
         unitLabel?: string;

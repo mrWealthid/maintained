@@ -61,7 +61,7 @@ export function useCreateTicket() {
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
-      toast.error(ApiErrorHandler.parse(err));
+      toast.error(ApiErrorHandler.extract(err).message);
     },
   });
 }
@@ -78,7 +78,7 @@ export function useUpdateTicket(id: string) {
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
-      toast.error(ApiErrorHandler.parse(err));
+      toast.error(ApiErrorHandler.extract(err).message);
     },
   });
 }
@@ -93,7 +93,7 @@ export function useDeleteTicket() {
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
-      toast.error(ApiErrorHandler.parse(err));
+      toast.error(ApiErrorHandler.extract(err).message);
     },
   });
 }
@@ -110,7 +110,7 @@ export function useUpdateTicketStatus(id: string) {
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
-      toast.error(ApiErrorHandler.parse(err));
+      toast.error(ApiErrorHandler.extract(err).message);
     },
   });
 }
@@ -127,7 +127,7 @@ export function useAssignTechnician(id: string) {
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
-      toast.error(ApiErrorHandler.parse(err));
+      toast.error(ApiErrorHandler.extract(err).message);
     },
   });
 }

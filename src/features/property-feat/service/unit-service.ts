@@ -56,7 +56,7 @@ export async function fetchUnits<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -72,7 +72,7 @@ export async function fetchUnitList<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -82,7 +82,7 @@ export async function fetchUnitDetails(id: string): Promise<ApiResponse<Unit>> {
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -94,7 +94,7 @@ export async function createUnit(data: Partial<Unit>) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -106,7 +106,7 @@ export async function updateUnit(id: string, data: Partial<Unit>) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -117,6 +117,6 @@ export async function deleteUnit(id: string) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

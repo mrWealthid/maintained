@@ -18,7 +18,11 @@ export function useCreateUser(
   userId?: string
 ) {
   const queryClient = useQueryClient();
-  const { isPending: isCreating, mutate: createUser } = useMutation({
+  const {
+    isPending: isCreating,
+    mutate: createUser,
+    error: createUserError,
+  } = useMutation({
     mutationFn: (payload: CreateUserPayload) =>
       handleCreateUser(payload, isEditing, userId),
 
@@ -33,7 +37,7 @@ export function useCreateUser(
     onError: (err: any) => toast.error(err.message),
   });
 
-  return { isCreating, createUser };
+  return { isCreating, createUser, createUserError };
 }
 
 export function useCreateMultipleUsers(isEditing: boolean, close?: () => void) {

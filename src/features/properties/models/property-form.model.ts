@@ -29,7 +29,10 @@ export type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 export const propertyListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(10),
+  name: z.string().optional(),
   type: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
   isActive: z.coerce.boolean().optional(),
   search: z.string().optional(),
 });

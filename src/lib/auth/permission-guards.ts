@@ -130,3 +130,30 @@ export async function assertWorkspacePermissionKey(
 
   throw ApiError.forbidden(message ?? getPermissionDeniedMessage(permission));
 }
+
+export async function assertLegacyWorkspacePermission(
+  user: {
+    id?: string | null;
+    currentBusiness?: { toString(): string } | string | null;
+    role?: string | null;
+    isSuperAdminRole?: boolean;
+  },
+  permission: PermissionKey,
+  message?: string
+) {
+  const workspaceRole =
+    user.role === "USER" || user.role === "TECHNICIAN"
+      ? WORKSPACE_ROLE.member
+      : user.role;
+
+  await assertPermission(
+    {
+      userId: user.id,
+      businessId: user.currentBusiness?.toString(),
+      platformRole: user.isSuperAdminRole ? PLATFORM_ROLE.super_admin : null,
+      workspaceRole,
+    },
+    permission,
+    message
+  );
+}

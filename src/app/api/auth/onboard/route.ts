@@ -3,14 +3,23 @@ import crypto from "crypto";
 
 import { connect } from "@/dbConfig/dbConfig";
 import User, { UserDoc } from "@/models/userModel";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { INVITE_STATUS } from "@/shared/enums/enums";
+import { z } from "zod";
 
 connect();
 
+const onboardBodySchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  inviteToken: z.string().min(1, "Invite token is required"),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const { password, inviteToken } = await request.json();
+    const { password, inviteToken } = parseOrThrow(
+      onboardBodySchema,
+      await request.json()
+    );
 
     const hashedToken = crypto
       .createHash("sha256")

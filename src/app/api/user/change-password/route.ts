@@ -6,7 +6,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import User from "@/models/userModel";
-import { Emails } from "@/utils/email-resend";
+import { sendPasswordChangePasscodeEmail } from "@/lib/email/senders/security/sendPasswordChangePasscodeEmail";
 
 connect();
 
@@ -46,12 +46,18 @@ export async function POST(request: NextRequest) {
     const passcode = user.createPasswordChangePasscode();
     await user.save({ validateBeforeSave: false });
 
-    try {
-      await new Emails(user, verify.businessId).sendPasswordChangePasscode(
-        passcode
+    const emailResult = await sendPasswordChangePasscodeEmail({
+      to: user.email,
+      attendeeName: user.name,
+      passcode,
+    });
+
+    if (!emailResult.sent) {
+      throw ApiError.unavailable(
+        emailResult.error ||
+          emailResult.skippedReason ||
+          "Unable to send password change passcode email"
       );
-    } catch (emailError) {
-      console.error("Error sending passcode email:", emailError);
     }
 
     return NextResponse.json({

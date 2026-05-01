@@ -1,12 +1,15 @@
 import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import { technicianResponseSchema } from "@/features/technician-requests/models/technician-request.model";
 import { TechnicianRequest } from "@/models/technicanRequest";
 import Ticket from "@/models/ticketModel";
 import User from "@/models/userModel";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
 
@@ -37,8 +40,17 @@ export async function PATCH(
     const { requestId } = await params;
     const verify = await getUserFromCookies();
     if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    if (!verify.isTechnicianRole) {
+      await assertLegacyWorkspacePermission(
+        verify,
+        PERMISSION.TECHNICIAN_REQUESTS_RESPOND
+      );
+    }
 
-    const { status, reason, quote, message, schedule } = await request.json();
+    const { status, reason, quote, message, schedule } = parseOrThrow(
+      technicianResponseSchema,
+      await request.json()
+    );
 
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
@@ -63,6 +75,9 @@ export async function PATCH(
 
     switch (status) {
       case TECHNICIAN_RESPONSE.applied:
+        if (!quote) {
+          throw ApiError.badRequest("Quote is required when applying");
+        }
         payload = {
           ...payload,
           quote: {

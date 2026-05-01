@@ -1,7 +1,12 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Ticket from "@/models/ticketModel";
 import { NextRequest, NextResponse } from "next/server";
+import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const ticketUpdateBodySchema = ticketFormSchema.partial();
 
 export async function GET(
   request: NextRequest,
@@ -9,6 +14,9 @@ export async function GET(
 ) {
   try {
     const { ticketId } = await params;
+    const verify = await getUserFromCookies(request);
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
 
     const ticket = await Ticket.findById(ticketId).populate([
       { path: "category", select: "name" },
@@ -38,8 +46,9 @@ export async function PATCH(
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
 
-    const { status: _ignoredStatus, ...rest } = await request.json();
+    const rest = parseOrThrow(ticketUpdateBodySchema, await request.json());
 
     const updatedRequest = await Ticket.findOneAndUpdate(
       { _id: ticketId, user: verify.id },

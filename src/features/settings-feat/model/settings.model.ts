@@ -24,6 +24,41 @@ export interface TicketTypeFormData {
   isActive: boolean;
 }
 
+export type BusinessEmailTemplateKey =
+  | "team_invite"
+  | "ticket_created"
+  | "ticket_status_updated"
+  | "ticket_assigned"
+  | "technician_request";
+
+export type EmailTemplateDelay = "immediate" | "1h" | "24h" | "48h" | "custom";
+
+export interface EmailTemplateSetting {
+  enabled: boolean;
+  subject: string;
+  preheader: string;
+  body: string;
+  delay: EmailTemplateDelay;
+  customDelayMinutes?: number;
+  triggerDescription: string;
+  includeUnsubscribe?: boolean;
+  replyToOverride?: string;
+}
+
+export interface BusinessEmailSettings {
+  senderName: string;
+  senderEmail: string;
+  replyTo: string;
+  bcc: string;
+  footer: string;
+  templates: Record<BusinessEmailTemplateKey, EmailTemplateSetting>;
+}
+
+export type EmailSettingsUpdateData = Pick<
+  BusinessEmailSettings,
+  "replyTo" | "bcc" | "templates"
+>;
+
 export interface SettingsTab {
   id: string;
   label: string;

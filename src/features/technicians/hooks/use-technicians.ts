@@ -54,7 +54,7 @@ export function useInviteTechnician() {
       toast.success("Technician invitation sent");
       queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -69,7 +69,7 @@ export function useUpdateTechnician(id: string) {
       queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.byId(id) });
       queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -82,6 +82,6 @@ export function useRemoveTechnician() {
       toast.success("Technician removed");
       queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

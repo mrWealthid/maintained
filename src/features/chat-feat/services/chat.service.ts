@@ -21,7 +21,7 @@ export async function fetchChatRooms<T>({
     const response = await axios(url);
     return response.data;
   } catch (err) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -40,7 +40,7 @@ export async function fetchChatMessagesByRoomId<T>({
     console.log(response.data);
     return response.data;
   } catch (err) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -65,7 +65,7 @@ export async function sendChatMessage(
     );
     return response.data;
   } catch (error) {
-    throw new Error(ApiErrorHandler.parse(error));
+    throw ApiErrorHandler.toUIError(error);
   }
 }
 
@@ -103,7 +103,7 @@ export async function sendChatMessage(
 //       message: json.message,
 //     };
 //   } catch (error) {
-//     throw new Error(ApiErrorHandler.parse(error));
+//     throw ApiErrorHandler.toUIError(error);
 //   }
 // }
 
@@ -128,7 +128,7 @@ export async function editChatMessage(
     );
     return res.data;
   } catch (error) {
-    throw new Error(ApiErrorHandler.parse(error));
+    throw ApiErrorHandler.toUIError(error);
   }
 }
 
@@ -149,7 +149,7 @@ export async function deleteChatMessage(
     });
     return res.data;
   } catch (error) {
-    throw new Error(ApiErrorHandler.parse(error));
+    throw ApiErrorHandler.toUIError(error);
   }
 }
 

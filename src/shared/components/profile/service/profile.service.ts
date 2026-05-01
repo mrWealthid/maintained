@@ -7,7 +7,7 @@ export async function fetchProfile<T>(): Promise<T | undefined> {
     const response = await axios(`${API_ROUTES.userManagement.get_user}`);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -22,6 +22,6 @@ export async function switchBusiness<T>(payload: {
 
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

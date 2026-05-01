@@ -50,7 +50,7 @@ export function useSendChatMessage(roomId: string) {
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.messages(roomId) });
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.rooms });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -68,7 +68,7 @@ export function useEditChatMessage(roomId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.messages(roomId) });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -80,7 +80,7 @@ export function useDeleteChatMessage(roomId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.messages(roomId) });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -92,13 +92,13 @@ export function useMarkRoomRead(roomId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.rooms });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
 export function useMarkMessageDelivered(roomId: string) {
   return useMutation({
     mutationFn: (messageId: string) => markMessageDelivered(roomId, messageId),
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

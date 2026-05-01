@@ -16,6 +16,7 @@ import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
 import UnitForm from "../form/UnitForm";
 import UnitView from "../components/UnitView";
 import { useCreateUnit } from "../hooks/unitHooks";
+import ErrorList from "@/components/ui/ErrorList";
 import {
   Sheet,
   SheetContent,
@@ -29,8 +30,11 @@ interface UnitActionsProps {
 }
 
 const UnitActions: FC<UnitActionsProps> = ({ unit }) => {
-  const { isDeleting, handleDeleteUnit } = useDeleteUnit();
-  const { isCreating, handleCreateUnit } = useCreateUnit(true, unit._id);
+  const { isDeleting, handleDeleteUnit, deleteUnitError } = useDeleteUnit();
+  const { isCreating, handleCreateUnit, createUnitError } = useCreateUnit(
+    true,
+    unit._id
+  );
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"view" | "edit">("view");
 
@@ -103,13 +107,16 @@ const UnitActions: FC<UnitActionsProps> = ({ unit }) => {
         title="Delete Unit"
         description="Unit will be deleted permanently"
       >
-        <ConfirmationPage
-          handler={(onCloseModal) => {
-            handleDelete(onCloseModal ?? (() => {}));
-          }}
-          isLoading={isDeleting}
-          modalText={"Are you sure you want to delete this unit?"}
-        />
+        <div className="space-y-3">
+          <ConfirmationPage
+            handler={(onCloseModal) => {
+              handleDelete(onCloseModal ?? (() => {}));
+            }}
+            isLoading={isDeleting}
+            modalText={"Are you sure you want to delete this unit?"}
+          />
+          {deleteUnitError ? <ErrorList error={deleteUnitError} /> : null}
+        </div>
       </Modal.Window>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -130,11 +137,14 @@ const UnitActions: FC<UnitActionsProps> = ({ unit }) => {
             </SheetHeader>
 
             {viewMode === "edit" ? (
-              <UnitForm
-                unit={unit}
-                onSubmit={onSubmit}
-                isLoading={isCreating}
-              />
+              <>
+                {createUnitError ? <ErrorList error={createUnitError} /> : null}
+                <UnitForm
+                  unit={unit}
+                  onSubmit={onSubmit}
+                  isLoading={isCreating}
+                />
+              </>
             ) : (
               <UnitView unit={unit} />
             )}

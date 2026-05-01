@@ -16,7 +16,7 @@ export async function handleCreateProperty(payload: CreatePropertyPayload) {
     const res = await axios.post(`/api/properties`, payload);
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -27,7 +27,7 @@ export async function handleCreateMultipleProperties(
     const res = await axios.post(`/api/properties`, payload.properties);
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function handleCreateUnits(payload: CreateUnitPayload) {
@@ -35,7 +35,7 @@ export async function handleCreateUnits(payload: CreateUnitPayload) {
     const res = await axios.post(`/api/units/bulk`, payload);
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchProperties(): Promise<ApiResponse<Property[]>> {
@@ -43,7 +43,7 @@ export async function fetchProperties(): Promise<ApiResponse<Property[]>> {
     const res = await axios(`/api/properties`);
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -52,7 +52,7 @@ export async function fetchUnits(propertyId: string): Promise<UnitOption[]> {
     const res = await axios(`/api/units?propertyId=${propertyId}`);
     return res.data.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -61,6 +61,6 @@ export async function fetchOnboardingChecklist(): Promise<ChecklistState> {
     const res = await axios(`/api/onboarding/checklist`);
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

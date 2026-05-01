@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Category from "@/models/ticketCategoryModel";
 import { ROLES } from "@/shared/enums/enums";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
+
+const categoryUpdateBodySchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  description: z.string().trim().optional(),
+  isActive: z.boolean().optional(),
+});
 
 function assertCategoryAdmin(role: string | undefined) {
   if (role !== ROLES.admin && role !== ROLES.super_admin) {
@@ -21,9 +30,13 @@ export async function PUT(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
     assertCategoryAdmin(verify.role);
 
-    const { name, description, isActive } = await request.json();
+    const { name, description, isActive } = parseOrThrow(
+      categoryUpdateBodySchema,
+      await request.json()
+    );
     const { categoryId } = await params;
 
     const category = await Category.findByIdAndUpdate(
@@ -51,6 +64,7 @@ export async function DELETE(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
     assertCategoryAdmin(verify.role);
 
     const { categoryId } = await params;

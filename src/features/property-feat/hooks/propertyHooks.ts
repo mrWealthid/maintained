@@ -12,7 +12,11 @@ import { ApiError } from "next/dist/server/api-utils";
 
 export function useCreateProperty(isEditing: boolean, propertyId?: string) {
   const queryClient = useQueryClient();
-  const { isPending: isCreating, mutate: handleCreateProperty } = useMutation({
+  const {
+    isPending: isCreating,
+    mutate: handleCreateProperty,
+    error: createPropertyError,
+  } = useMutation({
     mutationFn: (payload: Partial<Property>) =>
       isEditing && propertyId
         ? updateProperty(propertyId, payload)
@@ -28,12 +32,16 @@ export function useCreateProperty(isEditing: boolean, propertyId?: string) {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isCreating, handleCreateProperty };
+  return { isCreating, handleCreateProperty, createPropertyError };
 }
 
 export function useDeleteProperty() {
   const queryClient = useQueryClient();
-  const { isPending: isDeleting, mutate: handleDeleteProperty } = useMutation({
+  const {
+    isPending: isDeleting,
+    mutate: handleDeleteProperty,
+    error: deletePropertyError,
+  } = useMutation({
     mutationFn: (id: string) => deleteProperty(id),
     onSuccess: () => {
       toast.success("🎉 Property successfully deleted");
@@ -44,7 +52,7 @@ export function useDeleteProperty() {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isDeleting, handleDeleteProperty };
+  return { isDeleting, handleDeleteProperty, deletePropertyError };
 }
 
 export function useUpdateProperty() {

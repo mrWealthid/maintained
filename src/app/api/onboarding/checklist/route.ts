@@ -7,11 +7,14 @@ import User from "@/models/userModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export async function GET(req: NextRequest) {
   try {
     const me = await getUserFromCookies();
     if (!me?.id) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(me, PERMISSION.WORKSPACE_DASHBOARD_VIEW);
 
     const businessId = me.currentBusiness;
     if (!businessId) throw ApiError.badRequest("businessId required");

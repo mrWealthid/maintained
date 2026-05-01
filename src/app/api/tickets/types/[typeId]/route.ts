@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import TicketType from "@/models/ticketTypeModel";
 import { ROLES } from "@/shared/enums/enums";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
+
+const ticketTypeUpdateBodySchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  description: z.string().trim().optional(),
+  isActive: z.boolean().optional(),
+});
 
 function assertTypeAdmin(role: string | undefined) {
   if (role !== ROLES.admin && role !== ROLES.super_admin) {
@@ -21,9 +30,13 @@ export async function PUT(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
     assertTypeAdmin(verify.role);
 
-    const { name, description, isActive } = await request.json();
+    const { name, description, isActive } = parseOrThrow(
+      ticketTypeUpdateBodySchema,
+      await request.json()
+    );
     const { typeId } = await params;
 
     const ticketType = await TicketType.findByIdAndUpdate(
@@ -51,6 +64,7 @@ export async function DELETE(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
     assertTypeAdmin(verify.role);
 
     const { typeId } = await params;

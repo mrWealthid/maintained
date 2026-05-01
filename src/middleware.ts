@@ -1,17 +1,14 @@
 // middleware.ts
 import { NextResponse, NextRequest } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { INVITE_STATUS, ROLES } from "./shared/enums/enums";
+import { ROLES } from "./shared/enums/enums";
 
 type Role = "ADMIN" | "TECHNICIAN" | "USER" | string | null;
-type TenantsClaim = Array<{
-  business: string;
-  role: ROLES;
-  status: INVITE_STATUS;
-}>;
 type DecodedToken = JwtPayload & {
-  role?: string; // optional legacy single-tenant role
-  tenants?: TenantsClaim; // multi-tenant roles
+  role?: ROLES | string;
+  businessId?: string;
+  currentBusiness?: string;
+  sessionId?: string;
 };
 
 export function middleware(request: NextRequest) {
@@ -21,7 +18,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value || null;
   const { valid, decoded } = decodeToken(token);
 
-  const role: Role = getEffectiveRole(request, decoded);
+  const role: Role = decoded?.role?.toUpperCase() ?? null;
 
   // --- Route groups ---
   const isHome = path === "/";
@@ -39,7 +36,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If token exists and user tries to visit auth pages (except onboard-user), reroute to their dashboard
+  // Middleware only performs fast session-token routing. Server layouts call
+  // requireDashboardAccess for the authoritative DB-backed guard.
   if (token && valid && isAuthRoute) {
     return NextResponse.redirect(getDashboardURL(request, role));
   }
@@ -51,20 +49,16 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    // Token present: normalize dashboard by role
-    // --- inside your middleware, inside the "isAnyDashboard" guard ---
     const targetPrefix = getDashboardPath(role);
     const currentPrefix = matchDashPrefix(path);
 
-    // No/invalid token handled earlier. If prefixes differ, preserve the trailing subpath.
     if (currentPrefix && currentPrefix !== targetPrefix) {
-      const suffix = path.slice(currentPrefix.length); // "" or like "/tickets/123?tab=quote"
-      const redirectUrl = new URL(request.url); // preserves search/hash
-      redirectUrl.pathname = targetPrefix + suffix; // e.g. "/admin/dashboard" + "/tickets/123"
+      const suffix = path.slice(currentPrefix.length);
+      const redirectUrl = new URL(request.url);
+      redirectUrl.pathname = targetPrefix + suffix;
       return NextResponse.redirect(redirectUrl);
     }
 
-    // Otherwise allow
     return NextResponse.next();
   }
 
@@ -73,50 +67,11 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-/**
- * Determine the user's effective role for the active business.
- * Priority:
- *  1) If a biz cookie is present, match tenants[].businessId and use that role.
- *  2) Fallback to decoded.role (legacy single-tenant).
- *  3) Fallback to 'USER'.
- */
-function getEffectiveRole(
-  req: NextRequest,
-  decoded: DecodedToken | null
-): Role {
-  if (!decoded) return null;
-
-  // read active business from cookie set by your "switch business" action
-  const activeBizId = req.cookies.get("activeBusiness")?.value || null;
-
-  if (activeBizId && Array.isArray(decoded.tenants)) {
-    const match = decoded.tenants.find(
-      (t) => String(t.business) === String(activeBizId)
-    );
-    if (match?.role) return match.role.toUpperCase();
-  }
-
-  if (decoded.role) return decoded.role.toUpperCase();
-  return "USER";
-}
-
-// /** Map role → dashboard path */
-// function getDashboardPath(
-// 	role: Role
-// ): '/admin/dashboard' | '/technician/dashboard' | '/dashboard' {
-// 	const r = (role || '').toUpperCase();
-// 	if (r.includes('SUPERADMIN') || r.includes('ADMIN'))
-// 		return '/admin/dashboard';
-// 	if (r.includes('TECHNICIAN')) return '/technician/dashboard';
-// 	return '/dashboard';
-// }
-
-// Map role → dashboard prefix (unchanged)
 function getDashboardPath(
   role: Role
 ): "/admin/dashboard" | "/technician/dashboard" | "/dashboard" {
   const r = (role || "").toUpperCase();
-  if (r.includes("ADMIN")) return "/admin/dashboard";
+  if (r.includes("ADMIN") || r.includes("OWNER")) return "/admin/dashboard";
   if (r.includes("TECHNICIAN")) return "/technician/dashboard";
   return "/dashboard";
 }
@@ -149,7 +104,9 @@ function decodeToken(token: string | null): {
   }
   try {
     const decoded = jwt.decode(token) as DecodedToken | null;
-    if (!decoded?.exp) return { valid: false, decoded: null };
+    if (!decoded?.exp || !decoded.sessionId || !decoded.role) {
+      return { valid: false, decoded: null };
+    }
     const notExpired = Date.now() < decoded.exp * 1000;
     return { valid: notExpired, decoded: notExpired ? decoded : null };
   } catch {

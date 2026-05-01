@@ -53,7 +53,7 @@ export function useInviteTeamMember() {
       toast.success("Invitation sent");
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -68,7 +68,7 @@ export function useUpdateTeamMemberRole(id: string) {
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.byId(id) });
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -81,6 +81,6 @@ export function useRemoveTeamMember() {
       toast.success("Team member removed");
       queryClient.invalidateQueries({ queryKey: TEAM_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SettingsSidebar from "./components/SettingsSidebar";
 import NotificationSettings from "./components/NotificationSettings";
+import EmailSettings from "./components/EmailSettings";
 import SecuritySettings from "./components/SecuritySettings";
 import CategoryManagement from "./components/CategoryManagement";
 import TicketTypeManagement from "./components/TicketTypeManagement";
@@ -14,6 +15,8 @@ const SettingsPage: React.FC = () => {
     switch (activeTab) {
       case "notifications":
         return <NotificationSettings />;
+      case "email":
+        return <EmailSettings />;
       case "security":
         return <SecuritySettings />;
       case "categories":

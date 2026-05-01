@@ -641,18 +641,18 @@ export function TableHeaderAction({
     [onFilter, search, searchKey]
   );
 
-  const primaryActions: React.ReactNode =
-    hasSelection && renderSelectionActions
-      ? renderSelectionActions({
-          selectedRows,
-          clearSelection,
-        })
-      : children
-        ? cloneElement(children, {
-            onFilter,
-            summary,
-          } as Record<string, unknown>)
-        : null;
+  let primaryActions: React.ReactNode = null;
+  if (hasSelection && renderSelectionActions) {
+    primaryActions = renderSelectionActions({
+      selectedRows,
+      clearSelection,
+    });
+  } else if (children) {
+    primaryActions = cloneElement(children, {
+      onFilter,
+      summary,
+    } as Record<string, unknown>);
+  }
 
   return (
     <div className="flex flex-col gap-2 justify-between mb-1">
@@ -686,7 +686,7 @@ export function TableHeaderAction({
       </div>
 
       <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground">
-        {hasSelection ? (
+        {hasSelection && (
           /* ------------------ SELECTION STATE ------------------ */
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
@@ -701,7 +701,8 @@ export function TableHeaderAction({
               Clear
             </button>
           </div>
-        ) : summary && Object.keys(summary).length ? (
+        )}
+        {!hasSelection && summary && Boolean(Object.keys(summary).length) && (
           /* ----------------------- SUMMARY ----------------------- */
           <div className="flex items-center gap-1 flex-wrap">
             <span className="text-[11px]">Summary:</span>
@@ -715,7 +716,7 @@ export function TableHeaderAction({
               </Badge>
             ))}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

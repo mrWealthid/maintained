@@ -224,6 +224,31 @@ function ExistingUnitComponent({
   units: UnitOption[];
   isFetchingUnits: boolean;
 }) {
+  let unitsContent = units.map((unit) => (
+    <EditableUnitChip
+      key={unit._id}
+      unit={unit}
+      selected={selectedUnits.includes(unit._id)}
+      onToggle={toggleUnit}
+      businessId={businessId}
+      propertyId={propertyId}
+    />
+  ));
+
+  if (isFetchingUnits) {
+    unitsContent = [
+      <span key="loading" className="text-sm text-muted-foreground">
+        Loading…
+      </span>,
+    ];
+  } else if (units.length === 0) {
+    unitsContent = [
+      <span key="empty" className="text-sm text-muted-foreground">
+        No units found
+      </span>,
+    ];
+  }
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -234,26 +259,7 @@ function ExistingUnitComponent({
         </Badge>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {isFetchingUnits ? (
-          <span className="text-sm text-muted-foreground">Loading…</span>
-        ) : units.length === 0 ? (
-          <span className="text-sm text-muted-foreground">No units found</span>
-        ) : (
-          units.map((unit) => {
-            return (
-              <EditableUnitChip
-                key={unit._id}
-                unit={unit}
-                selected={selectedUnits.includes(unit._id)}
-                onToggle={toggleUnit}
-                businessId={businessId}
-                propertyId={propertyId}
-              />
-            );
-          })
-        )}
-      </div>
+      <div className="flex flex-wrap gap-2">{unitsContent}</div>
     </div>
   );
 }

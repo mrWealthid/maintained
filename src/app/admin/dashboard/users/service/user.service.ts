@@ -21,7 +21,7 @@ export async function fetchUsers<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -40,7 +40,7 @@ export async function handleCreateUser(
 
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -54,7 +54,7 @@ export async function handleCreateMultipleUsers(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -64,7 +64,7 @@ export async function handleDeleteUser(id: string) {
 
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function handleReInviteUser(payload: {
@@ -78,6 +78,6 @@ export async function handleReInviteUser(payload: {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

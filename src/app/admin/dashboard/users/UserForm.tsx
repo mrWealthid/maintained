@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import ButtonComponent from "@/shared/components/form-elements/Button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import ErrorList from "@/components/ui/ErrorList";
 import {
   fetchProperties,
   fetchUnits,
@@ -201,8 +202,22 @@ const UserForm: FC<ManageUserFormProps> = ({
   // React Query: list units for the chosen property
   const { units, isFetchingUnits } = useFetchUnits(selectedPropertyId);
 
+  let propertyPlaceholder = "No properties found";
+  if (isFetchingProperties) {
+    propertyPlaceholder = "Loading properties...";
+  } else if (properties?.data.length) {
+    propertyPlaceholder = "Select property";
+  }
+
+  let unitPlaceholder = "Select property first";
+  if (isFetchingUnits) {
+    unitPlaceholder = "Loading units...";
+  } else if (selectedPropertyId) {
+    unitPlaceholder = units?.length ? "Select unit" : "No units found";
+  }
+
   const { errors, isSubmitting, isValid, isDirty } = formState;
-  const { isCreating, createUser } = useCreateUser(
+  const { isCreating, createUser, createUserError } = useCreateUser(
     isEditing,
     onCloseModal,
     user?.id
@@ -238,6 +253,7 @@ const UserForm: FC<ManageUserFormProps> = ({
         className="flex flex-1 items-center"
       >
         <section className="flex-col flex gap-4 w-full">
+          {createUserError ? <ErrorList error={createUserError} /> : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Name */}
             <div className="space-y-2">
@@ -370,15 +386,7 @@ const UserForm: FC<ManageUserFormProps> = ({
                       disabled={!businessId || isFetchingProperties}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={
-                            isFetchingProperties
-                              ? "Loading properties..."
-                              : properties?.data.length
-                                ? "Select property"
-                                : "No properties found"
-                          }
-                        />
+                        <SelectValue placeholder={propertyPlaceholder} />
                       </SelectTrigger>
                       <SelectContent>
                         {properties?.data.map((p) => (
@@ -415,17 +423,7 @@ const UserForm: FC<ManageUserFormProps> = ({
                       disabled={!selectedPropertyId || isFetchingUnits}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={
-                            isFetchingUnits
-                              ? "Loading units..."
-                              : selectedPropertyId
-                                ? units?.length
-                                  ? "Select unit"
-                                  : "No units found"
-                                : "Select property first"
-                          }
-                        />
+                        <SelectValue placeholder={unitPlaceholder} />
                       </SelectTrigger>
                       <SelectContent>
                         {units?.map((u) => (

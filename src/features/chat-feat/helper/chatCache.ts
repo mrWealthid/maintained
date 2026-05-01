@@ -23,14 +23,12 @@ export const removeById = (list: ChatRoomMessage[], id: string) =>
   list.filter((x) => getMsgId(x) !== id);
 
 // ---------- NEW: small ID utils ----------
-const toStrId = (v: any): string =>
-  v == null
-    ? ""
-    : typeof v === "string"
-      ? v
-      : typeof v === "object" && "toString" in v
-        ? String(v.toString())
-        : String(v);
+const toStrId = (v: any): string => {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "object" && "toString" in v) return String(v.toString());
+  return String(v);
+};
 
 const sameId = (a: any, b: any) => toStrId(a) === toStrId(b);
 

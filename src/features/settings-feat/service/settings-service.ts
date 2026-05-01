@@ -7,6 +7,8 @@ import {
   TicketTypeFormData,
   NotificationPreferences,
   SecuritySettings,
+  BusinessEmailSettings,
+  EmailSettingsUpdateData,
 } from "../model/settings.model";
 import { Category, TicketType } from "@/shared/model/model";
 
@@ -20,7 +22,7 @@ export async function fetchNotificationPreferences(): Promise<
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -34,7 +36,29 @@ export async function updateNotificationPreferences(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function fetchEmailSettings(): Promise<
+  ApiResponse<BusinessEmailSettings>
+> {
+  try {
+    const response = await axios.get(API_ROUTES.settings.email);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updateEmailSettings(
+  settings: EmailSettingsUpdateData
+): Promise<ApiResponse<BusinessEmailSettings>> {
+  try {
+    const response = await axios.put(API_ROUTES.settings.email, settings);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -49,7 +73,7 @@ export async function initiatePasswordChange(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -65,7 +89,7 @@ export async function verifyPasscodeAndChangePassword(data: {
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -80,7 +104,7 @@ export async function changePassword(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -92,7 +116,7 @@ export async function fetchCategories(): Promise<ApiResponse<Category[]>> {
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -106,7 +130,7 @@ export async function createCategory(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -121,7 +145,7 @@ export async function updateCategory(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -132,7 +156,7 @@ export async function deleteCategory(id: string): Promise<ApiResponse<void>> {
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -144,7 +168,7 @@ export async function fetchTicketTypes(): Promise<ApiResponse<TicketType[]>> {
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -158,7 +182,7 @@ export async function createTicketType(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -173,7 +197,7 @@ export async function updateTicketType(
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -184,6 +208,6 @@ export async function deleteTicketType(id: string): Promise<ApiResponse<void>> {
     );
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

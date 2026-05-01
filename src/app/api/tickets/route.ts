@@ -18,6 +18,8 @@ import {
   parseOrThrow,
 } from "@/lib/errors/apiError";
 import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
 
@@ -26,13 +28,14 @@ export async function GET(request: NextRequest) {
     //2) Check if user exists & password is correct after it's hashed
     const verify = await getUserFromCookies();
     if (!verify) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw ApiError.unauthorized();
     }
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
 
     let filter = {};
     const user = await User.findById(verify.id);
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw ApiError.notFound("User not found");
     }
     if (verify.isAdminRole) {
       filter = { business: user.currentBusiness };
@@ -183,6 +186,7 @@ export async function POST(request: NextRequest) {
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_CREATE);
 
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");

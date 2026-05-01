@@ -179,6 +179,32 @@ const FileUpload: React.FC<FileUploadProps> = ({
 	// 	setPreviews(newPreviews);
 	// };
 
+	const renderFilePreview = (url: string, type: string) => {
+		if (type.startsWith('image/')) {
+			return (
+				<Image
+					src={url}
+					alt='preview'
+					width={100}
+					height={100}
+					className='w-full h-32 object-cover rounded-md'
+				/>
+			);
+		}
+
+		if (type.startsWith('video/')) {
+			return (
+				<video
+					src={url}
+					controls
+					className='w-full h-32 object-cover rounded-md'
+				/>
+			);
+		}
+
+		return <p>Unsupported file type</p>;
+	};
+
 	return (
 		<div>
 			<label htmlFor={id} className='text-xs cursor-pointer'>
@@ -229,23 +255,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 								title='Remove'>
 								<LiaTimesSolid color='red' size={12} />
 							</button>
-							{file.type.startsWith('image/') ? (
-								<Image
-									src={file.url}
-									alt='preview'
-									width={100}
-									height={100}
-									className='w-full h-32 object-cover rounded-md'
-								/>
-							) : file.type.startsWith('video/') ? (
-								<video
-									src={file.url}
-									controls
-									className='w-full h-32 object-cover rounded-md'
-								/>
-							) : (
-								<p>Unsupported file type</p>
-							)}
+							{renderFilePreview(file.url, file.type)}
 						</div>
 					))}
 					{/* New previews */}
@@ -262,23 +272,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 									title='Remove'>
 									<LiaTimesSolid color='red' size={12} />
 								</button>
-								{file.type.startsWith('image/') ? (
-									<Image
-										src={file.url}
-										alt='preview'
-										width={100}
-										height={100}
-										className='w-full h-32 object-cover rounded-md'
-									/>
-								) : file.type.startsWith('video/') ? (
-									<video
-										src={file.url}
-										controls
-										className='w-full h-32 object-cover rounded-md'
-									/>
-								) : (
-									<p>Unsupported file type</p>
-								)}
+								{renderFilePreview(file.url, file.type)}
 								{progress > 0 && progress <= 100 && (
 									<div className='absolute inset-0 flex items-center justify-center z-20'>
 										<div className='relative w-10 h-10'>

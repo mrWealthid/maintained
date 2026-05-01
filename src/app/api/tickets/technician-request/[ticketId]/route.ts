@@ -1,11 +1,14 @@
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import { technicianRequestCreateSchema } from "@/features/technician-requests/models/technician-request.model";
 import { TechnicianRequest } from "@/models/technicanRequest";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket from "@/models/ticketModel";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export async function POST(
   request: NextRequest,
@@ -18,16 +21,19 @@ export async function POST(
     if (!verify || verify.isUserRole || verify.isTechnicianRole) {
       throw ApiError.unauthorized();
     }
+    await assertLegacyWorkspacePermission(
+      verify,
+      PERMISSION.TECHNICIAN_REQUESTS_CREATE
+    );
 
     const adminUser = await User.findById(verify.id);
     if (!adminUser) throw ApiError.notFound("Admin user not found");
 
-    const body = await request.json();
+    const body = parseOrThrow(
+      technicianRequestCreateSchema,
+      await request.json()
+    );
     const { technicianIds } = body;
-
-    if (!Array.isArray(technicianIds) || technicianIds.length === 0) {
-      throw ApiError.badRequest("At least one technician ID must be provided");
-    }
 
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) throw ApiError.notFound("Ticket not found");

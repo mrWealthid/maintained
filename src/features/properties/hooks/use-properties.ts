@@ -52,7 +52,7 @@ export function useCreateProperty() {
       toast.success("Property created");
       queryClient.invalidateQueries({ queryKey: PROPERTY_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -67,7 +67,7 @@ export function useUpdateProperty(id: string) {
       queryClient.invalidateQueries({ queryKey: PROPERTY_KEYS.byId(id) });
       queryClient.invalidateQueries({ queryKey: PROPERTY_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -80,6 +80,6 @@ export function useDeleteProperty() {
       toast.success("Property deleted");
       queryClient.invalidateQueries({ queryKey: PROPERTY_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

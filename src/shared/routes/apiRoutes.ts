@@ -21,6 +21,9 @@ export const API_ROUTES = {
     notification_preferences: `${base}/user/notification-preferences`,
     change_password: `${base}/user/change-password`,
   },
+  settings: {
+    email: `${base}/dashboard/settings/email`,
+  },
 
   ticketManagement: {
     get_tickets: `${base}/tickets`,

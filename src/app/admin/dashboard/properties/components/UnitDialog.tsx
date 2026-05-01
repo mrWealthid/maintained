@@ -50,24 +50,22 @@ const UnitDialog: React.FC<UnitDialogProps> = ({
     });
   };
 
+  let dialogTitle = "Unit Details";
+  let dialogDescription = "View unit details and information";
+  if (mode === "create") {
+    dialogTitle = "Add Units";
+    dialogDescription = "Configure units for your properties";
+  } else if (mode === "edit") {
+    dialogTitle = "Edit Unit";
+    dialogDescription = "Update unit information";
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle>
-            {mode === "create"
-              ? "Add Units"
-              : mode === "edit"
-                ? "Edit Unit"
-                : "Unit Details"}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === "create"
-              ? "Configure units for your properties"
-              : mode === "edit"
-                ? "Update unit information"
-                : "View unit details and information"}
-          </DialogDescription>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6 pt-4">

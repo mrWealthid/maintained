@@ -4,12 +4,19 @@ import { Types } from "mongoose";
 
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import ChatMessage from "@/models/chatMessage";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
 import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export const runtime = "nodejs";
+
+const editMessageBodySchema = z.object({
+  message: z.string().trim().min(1, "Message is required"),
+});
 
 function assertValidIds(roomId: string, messageId: string) {
   if (!Types.ObjectId.isValid(roomId) || !Types.ObjectId.isValid(messageId)) {
@@ -33,15 +40,17 @@ export async function PATCH(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_SEND);
 
     const { roomId, messageId } = await params;
     assertValidIds(roomId, messageId);
     await assertRoomAccess(roomId, verify.id);
 
     const socketId = req.headers.get("x-socket-id") ?? undefined;
-    const body = await req.json().catch(() => ({}));
-    const newText: string | undefined = body?.message;
-    if (!newText || !newText.trim()) throw ApiError.badRequest("Empty message");
+    const { message: newText } = parseOrThrow(
+      editMessageBodySchema,
+      await req.json().catch(() => ({}))
+    );
 
     const existing = await ChatMessage.findOne({
       _id: messageId,
@@ -50,7 +59,7 @@ export async function PATCH(
     if (!existing) throw ApiError.notFound("Message not found");
     if (!canModifyMessage(verify, existing)) throw ApiError.forbidden();
 
-    existing.text = newText.trim();
+    existing.text = newText;
     existing.type = existing.type ?? CHAT_TYPE.USER;
     await existing.save();
 
@@ -89,6 +98,7 @@ export async function DELETE(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_SEND);
 
     const { roomId, messageId } = await params;
     assertValidIds(roomId, messageId);

@@ -8,6 +8,8 @@ import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import Ticket from "@/models/ticketModel";
 import { TechnicianRequestDetails } from "@/features/ticket-feat/model/ticket.model";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
 
@@ -15,6 +17,12 @@ export async function GET(request: NextRequest) {
   try {
     const verify = await getUserFromCookies();
     if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    if (!verify.isTechnicianRole) {
+      await assertLegacyWorkspacePermission(
+        verify,
+        PERMISSION.TECHNICIAN_REQUESTS_VIEW
+      );
+    }
 
     let filter: Record<string, unknown> = { technician: verify.id };
     if (verify.isTechnicianRole) {

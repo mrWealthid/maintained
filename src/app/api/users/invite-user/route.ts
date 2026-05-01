@@ -10,7 +10,7 @@ import Business from "@/models/businessModel";
 import User from "@/models/userModel";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { toLegacySessionRole } from "@/shared/auth/roles";
-import { Emails } from "@/utils/email-resend";
+import { sendTeamInviteEmail } from "@/lib/email/senders/team/sendTeamInviteEmail";
 import { generateInviteToken } from "@/utils/helpers";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -44,6 +44,25 @@ function objectIdOrUndefined(value?: string) {
   return value && mongoose.Types.ObjectId.isValid(value)
     ? new mongoose.Types.ObjectId(value)
     : undefined;
+}
+
+async function sendInviteOrThrow(args: {
+  request: NextRequest;
+  businessId: string;
+  to: string;
+  attendeeName: string;
+  workspaceName: string;
+  rawToken: string;
+}) {
+  const emailResult = await sendTeamInviteEmail(args);
+
+  if (!emailResult.sent) {
+    throw ApiError.unavailable(
+      emailResult.error ||
+        emailResult.skippedReason ||
+        "Unable to send team invite email"
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -113,23 +132,18 @@ export async function POST(request: NextRequest) {
 
           await existingUser.save({ validateBeforeSave: false });
 
-          // Construct invite URL
-          const inviteURL =
-            process.env.NODE_ENV === "development"
-              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-          // Send invite email
-          await new Emails(
-            existingUser,
-            inviteURL,
-            business.name
-          ).sendInviteUser();
+          await sendInviteOrThrow({
+            request,
+            businessId: String(currentBusinessId),
+            to: existingUser.email,
+            attendeeName: existingUser.name,
+            workspaceName: business.name,
+            rawToken: token,
+          });
 
           results.push({
             email: userData.email,
             status: "success",
-            url: inviteURL,
           });
         } else {
           // New user
@@ -156,23 +170,18 @@ export async function POST(request: NextRequest) {
 
           await newUser.save({ validateBeforeSave: false });
 
-          // Construct invite URL
-          const inviteURL =
-            process.env.NODE_ENV === "development"
-              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-          // Send invite email
-          await new Emails(
-            newUser,
-            business.name,
-            inviteURL
-          ).sendInviteUser();
+          await sendInviteOrThrow({
+            request,
+            businessId: String(currentBusinessId),
+            to: newUser.email,
+            attendeeName: newUser.name,
+            workspaceName: business.name,
+            rawToken: token,
+          });
 
           results.push({
             email: userData.email,
             status: "success",
-            url: inviteURL,
           });
         }
       } catch (error: any) {
@@ -260,23 +269,18 @@ export async function PATCH(request: NextRequest) {
 
     await user.save({ validateBeforeSave: false });
 
-    // 8) Build invite URL using the *plain* token (not hashed)
-    const inviteURL =
-      process.env.NODE_ENV === "development"
-        ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-        : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-    // 9) Send the invite email
-    await new Emails(
-      user,
-      business.name,
-      inviteURL
-    ).sendInviteUser();
+    await sendInviteOrThrow({
+      request,
+      businessId: String(currentBusinessId),
+      to: user.email,
+      attendeeName: user.name,
+      workspaceName: business.name,
+      rawToken: token,
+    });
 
     return NextResponse.json({
       status: "success",
       message: "Invite re-sent successfully",
-      url: inviteURL,
       expiresAt: expires,
     });
   } catch (error: any) {

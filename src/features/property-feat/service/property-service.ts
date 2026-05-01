@@ -109,7 +109,7 @@ export async function fetchProperties<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -125,7 +125,7 @@ export async function fetchPropertyList<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -137,7 +137,7 @@ export async function fetchPropertyDetails(
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -149,7 +149,7 @@ export async function createProperty(data: Partial<Property>) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -161,7 +161,7 @@ export async function updateProperty(id: string, data: Partial<Property>) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -172,6 +172,6 @@ export async function deleteProperty(id: string) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

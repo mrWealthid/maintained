@@ -2,12 +2,19 @@ import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ensureTicketRoom } from "@/lib/chat/chat";
 import { pusherServer } from "@/lib/pusher/pusher";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket, { ITicket } from "@/models/ticketModel";
 import User from "@/models/userModel";
 import mongoose, { Types, HydratedDocument } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const assignTechnicianBodySchema = z.object({
+  assignedTo: z.string().min(1),
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -18,8 +25,12 @@ export async function PATCH(
     const verify = await getUserFromCookies();
 
     if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_ASSIGN);
 
-    const { assignedTo } = await request.json();
+    const { assignedTo } = parseOrThrow(
+      assignTechnicianBodySchema,
+      await request.json()
+    );
 
     const adminUser = await User.findById(verify.id);
     if (!adminUser) throw ApiError.notFound("Admin user not found");

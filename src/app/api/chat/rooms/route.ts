@@ -6,6 +6,8 @@ import { Types } from "mongoose";
 import ChatRoom from "@/models/chatRoom";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 import Ticket from "@/models/ticketModel";
 import ChatMessage from "@/models/chatMessage";
 
@@ -13,6 +15,7 @@ export async function GET(req: NextRequest) {
   try {
     const verify = await getUserFromCookies();
     if (!verify?.id) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_VIEW);
     if (!Types.ObjectId.isValid(verify.id)) {
       throw ApiError.badRequest("Invalid user id");
     }

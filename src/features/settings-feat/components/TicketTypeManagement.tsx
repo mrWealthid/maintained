@@ -74,6 +74,8 @@ const TicketTypeManagement: React.FC = () => {
     setSelectedTicket(null);
   }, []);
 
+  const hasTicketTypes = Boolean(ticketTypes?.length);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -93,15 +95,17 @@ const TicketTypeManagement: React.FC = () => {
           <CardDescription>Manage existing ticket types</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && (
             <div className="text-center py-4">Loading ticket types...</div>
-          ) : !ticketTypes || ticketTypes.length === 0 ? (
+          )}
+          {!isLoading && !hasTicketTypes && (
             <div className="text-center py-4 text-gray-500">
               No ticket types found
             </div>
-          ) : (
+          )}
+          {!isLoading && hasTicketTypes && (
             <div className="space-y-3">
-              {ticketTypes.map((ticketType: TicketType) => (
+              {ticketTypes!.map((ticketType: TicketType) => (
                 <div
                   key={ticketType.id}
                   className="flex items-center justify-between p-4 border rounded-lg"

@@ -50,6 +50,12 @@ export type UnitsFormValues = z.infer<typeof formSchema>;
 // ---- Component -------------------------------------------------------------
 type Step = "select" | "manage" | "review";
 
+const STEP_LABELS: Record<Step, string> = {
+  select: "Select Properties",
+  manage: "Manage Units",
+  review: "Review & Submit",
+};
+
 const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
   businessId,
   successCallback,
@@ -146,11 +152,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
                   }`}
                 >
                   <div className="w-2 h-2 rounded-full bg-current" />
-                  {s === "select"
-                    ? "Select Properties"
-                    : s === "manage"
-                      ? "Manage Units"
-                      : "Review & Submit"}
+                  {STEP_LABELS[s]}
                 </div>
                 {i < 2 && <div className="w-8 h-px bg-border" />}
               </React.Fragment>

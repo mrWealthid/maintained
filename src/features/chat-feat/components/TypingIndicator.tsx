@@ -29,12 +29,12 @@ export function TypingIndicator({
 
   // label like: "Alex is typing…" / "Alex and Beatrice…" / "Several people…"
   const names = people.map(uname).filter(Boolean);
-  const label =
-    names.length === 1
-      ? `${names[0]} is typing…`
-      : names.length === 2
-        ? `${names[0]} and ${names[1]} are typing…`
-        : "Several people are typing…";
+  let label = "Several people are typing…";
+  if (names.length === 1) {
+    label = `${names[0]} is typing…`;
+  } else if (names.length === 2) {
+    label = `${names[0]} and ${names[1]} are typing…`;
+  }
 
   return (
     <div className="flex items-center space-x-3 py-2">

@@ -52,7 +52,7 @@ export function useInviteTenant() {
       toast.success("Tenant invitation sent");
       queryClient.invalidateQueries({ queryKey: TENANT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -67,7 +67,7 @@ export function useUpdateTenant(id: string) {
       queryClient.invalidateQueries({ queryKey: TENANT_KEYS.byId(id) });
       queryClient.invalidateQueries({ queryKey: TENANT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }
 
@@ -80,6 +80,6 @@ export function useRemoveTenant() {
       toast.success("Tenant removed");
       queryClient.invalidateQueries({ queryKey: TENANT_KEYS.all });
     },
-    onError: (err) => toast.error(ApiErrorHandler.parse(err)),
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
   });
 }

@@ -42,6 +42,20 @@ const SingleForm = ({
 
   const { units, isFetchingUnits } = useFetchUnits(currentUser.propertyId);
 
+  let propertyPlaceholder = "No properties found";
+  if (isFetchingProperties) {
+    propertyPlaceholder = "Loading properties...";
+  } else if (properties?.length) {
+    propertyPlaceholder = "Select property";
+  }
+
+  let unitPlaceholder = "Select property first";
+  if (isFetchingUnits) {
+    unitPlaceholder = "Loading units...";
+  } else if (currentUser?.propertyId) {
+    unitPlaceholder = units?.length ? "Select unit" : "No units found";
+  }
+
   return (
     <div key={field.id} className="border rounded-lg p-6 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -182,15 +196,7 @@ const SingleForm = ({
                   disabled={isFetchingProperties}
                 >
                   <SelectTrigger className="h-11">
-                    <SelectValue
-                      placeholder={
-                        isFetchingProperties
-                          ? "Loading properties..."
-                          : properties?.length
-                            ? "Select property"
-                            : "No properties found"
-                      }
-                    />
+                    <SelectValue placeholder={propertyPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {properties?.map((p) => (
@@ -227,17 +233,7 @@ const SingleForm = ({
                   disabled={!currentUser?.propertyId || isFetchingUnits}
                 >
                   <SelectTrigger className="h-11">
-                    <SelectValue
-                      placeholder={
-                        isFetchingUnits
-                          ? "Loading units..."
-                          : currentUser?.propertyId
-                            ? units?.length
-                              ? "Select unit"
-                              : "No units found"
-                            : "Select property first"
-                      }
-                    />
+                    <SelectValue placeholder={unitPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {units?.map((u) => (

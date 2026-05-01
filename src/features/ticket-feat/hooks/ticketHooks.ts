@@ -41,7 +41,11 @@ import { getMembershipForBusiness } from "@/utils/helpers";
 
 export function useCreateTicket(isEditing: boolean, ticketId?: string) {
   const queryClient = useQueryClient();
-  const { isPending: isCreating, mutate: handleCreateTicket } = useMutation({
+  const {
+    isPending: isCreating,
+    mutate: handleCreateTicket,
+    error: createTicketError,
+  } = useMutation({
     mutationFn: (payload: CreateTicketPayload) =>
       createTicket(payload, isEditing, ticketId),
     onSuccess: () => {
@@ -57,7 +61,7 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isCreating, handleCreateTicket };
+  return { isCreating, handleCreateTicket, createTicketError };
 }
 
 export function useFetchTickets<T>(
@@ -95,7 +99,11 @@ export function useFetchTicketType<T>(page: number = 1, limit: number = 50) {
 
 export function useDeleteTicket() {
   const queryClient = useQueryClient();
-  const { isPending: isDeleting, mutate: handleDeleteTicket } = useMutation({
+  const {
+    isPending: isDeleting,
+    mutate: handleDeleteTicket,
+    error: deleteTicketError,
+  } = useMutation({
     mutationFn: (id: string) => deleteTicket(id),
     onSuccess: () => {
       toast.success("🎉 Maintenance request successfully deleted");
@@ -106,11 +114,15 @@ export function useDeleteTicket() {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isDeleting, handleDeleteTicket };
+  return { isDeleting, handleDeleteTicket, deleteTicketError };
 }
 export function useAssignTicket(id: string) {
   const queryClient = useQueryClient();
-  const { isPending: isUpdating, mutate: handleAssignTicket } = useMutation({
+  const {
+    isPending: isUpdating,
+    mutate: handleAssignTicket,
+    error: assignTicketError,
+  } = useMutation({
     mutationFn: (payload: { actionedBy?: string; status: TICKET_STATUS }) =>
       assignTicket(id, payload),
     onSuccess: () => {
@@ -122,7 +134,7 @@ export function useAssignTicket(id: string) {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isUpdating, handleAssignTicket };
+  return { isUpdating, handleAssignTicket, assignTicketError };
 }
 export function useProcessTechnicianResponse(id: string, close?: () => void) {
   const queryClient = useQueryClient();

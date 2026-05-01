@@ -36,10 +36,13 @@ import {
   useCreateTicket,
   useDeleteTicket,
 } from "../hooks/ticketHooks";
+import ErrorList from "@/components/ui/ErrorList";
 
 export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
-  const { isDeleting, handleDeleteTicket } = useDeleteTicket();
-  const { isUpdating, handleAssignTicket } = useAssignTicket(ticket.id);
+  const { isDeleting, handleDeleteTicket, deleteTicketError } =
+    useDeleteTicket();
+  const { isUpdating, handleAssignTicket, assignTicketError } =
+    useAssignTicket(ticket.id);
 
   const [open, setOpen] = useState(false);
 
@@ -60,7 +63,10 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
     });
   }
 
-  const { handleCreateTicket } = useCreateTicket(true, ticket.id);
+  const { handleCreateTicket, createTicketError } = useCreateTicket(
+    true,
+    ticket.id
+  );
 
   const methods = useForm<ManageTicketForm>({
     mode: "all",
@@ -200,27 +206,33 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
         title="Delete Maintenance Ticket"
         description="Request ticket will be deleted permanently"
       >
-        <ConfirmationPage
-          handler={(onCloseModal) => {
-            handleDelete(onCloseModal ?? (() => {}));
-          }}
-          isLoading={isDeleting}
-          modalText={"Are you sure you want to delete this ticket"}
-        />
+        <div className="space-y-3">
+          <ConfirmationPage
+            handler={(onCloseModal) => {
+              handleDelete(onCloseModal ?? (() => {}));
+            }}
+            isLoading={isDeleting}
+            modalText={"Are you sure you want to delete this ticket"}
+          />
+          {deleteTicketError ? <ErrorList error={deleteTicketError} /> : null}
+        </div>
       </Modal.Window>
       <Modal.Window
         name="self-assign"
         title="Admin Assignment"
         description="Request ticket will be actioned by you"
       >
-        <ConfirmationPage
-          handler={(onCloseModal) => {
-            handleAssign(onCloseModal ?? (() => {}));
-          }}
-          isLoading={isUpdating}
-          modalText={"Are you sure you want to assign this ticket"}
-          reason="confirm"
-        />
+        <div className="space-y-3">
+          <ConfirmationPage
+            handler={(onCloseModal) => {
+              handleAssign(onCloseModal ?? (() => {}));
+            }}
+            isLoading={isUpdating}
+            modalText={"Are you sure you want to assign this ticket"}
+            reason="confirm"
+          />
+          {assignTicketError ? <ErrorList error={assignTicketError} /> : null}
+        </div>
       </Modal.Window>
 
       <Modal.Window
@@ -249,6 +261,7 @@ export const TicketActions: FC<TicketRowActionsProps> = ({ ticket }) => {
               <SheetTitle>Manage Ticket</SheetTitle>
               <SheetDescription>Seamlessly manage requests</SheetDescription>
             </SheetHeader>
+            {createTicketError ? <ErrorList error={createTicketError} /> : null}
             <FormProvider {...methods}>
               <TicketForm ticket={ticket} onSubmit={onSubmit} />
             </FormProvider>

@@ -6,14 +6,23 @@ import { mapToObject } from "@/utils/helpers";
 import User from "@/models/userModel";
 import TicketType from "@/models/ticketTypeModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
+
+const ticketTypeBodySchema = z.object({
+  name: z.string().trim().min(1),
+  description: z.string().trim().optional().default(""),
+});
 
 export async function GET(request: NextRequest) {
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_VIEW);
 
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
@@ -47,11 +56,15 @@ export async function POST(request: NextRequest) {
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
 
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
 
-    const { name, description } = await request.json();
+    const { name, description } = parseOrThrow(
+      ticketTypeBodySchema,
+      await request.json()
+    );
 
     const data = await TicketType.create({
       name,

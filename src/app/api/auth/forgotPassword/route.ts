@@ -6,7 +6,7 @@ import {
 } from "@/lib/errors/apiError";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
-import { Emails } from "@/utils/email-resend";
+import { sendPasswordResetEmail } from "@/lib/email/senders/auth/sendPasswordResetEmail";
 import { z } from "zod";
 
 connect();
@@ -34,12 +34,20 @@ export async function POST(request: NextRequest) {
 
     await user.save({ validateBeforeSave: false });
 
-    const resetURL =
-      process.env.NODE_ENV === "development"
-        ? `${process.env.DEVELOPMENT_URL}/auth/updatePassword/${resetToken}`
-        : `${process.env.PRODUCTION_URL}/auth/updatePassword/${resetToken}`;
+    const emailResult = await sendPasswordResetEmail({
+      request,
+      to: user.email,
+      attendeeName: user.name,
+      resetToken,
+    });
 
-    await new Emails(user, null, resetURL).sendPasswordReset();
+    if (!emailResult.sent) {
+      throw ApiError.unavailable(
+        emailResult.error ||
+          emailResult.skippedReason ||
+          "Unable to send password reset email"
+      );
+    }
 
     const response = NextResponse.json({
       status: "success",

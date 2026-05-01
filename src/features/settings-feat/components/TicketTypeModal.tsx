@@ -82,6 +82,12 @@ const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
   };
 
   const isLoading = createTicketType.isPending || updateTicketType.isPending;
+  let submitLabel = "Create";
+  if (isLoading) {
+    submitLabel = "Saving...";
+  } else if (editingType) {
+    submitLabel = "Update";
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -151,9 +157,7 @@ const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : editingType ? "Update" : "Create"}
-              </Button>
+              <Button type="submit" disabled={isLoading}>{submitLabel}</Button>
             </div>
           </form>
         </Form>

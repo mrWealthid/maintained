@@ -7,13 +7,20 @@ import chatRoom from "@/models/chatRoom";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import { ChatRoomMessage } from "@/features/chat-feat/model/chat.model";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export const runtime = "nodejs";
+
+const chatMessageBodySchema = z.object({
+  message: z.string().trim().min(1, "Message is required"),
+});
 
 export async function GET(
   request: NextRequest,
@@ -22,6 +29,7 @@ export async function GET(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_VIEW);
 
     const { roomId } = await params;
     await assertRoomAccess(roomId, verify.id);
@@ -70,16 +78,14 @@ export async function POST(
   try {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_SEND);
 
     const { roomId } = await params;
     const socketId = req.headers.get("x-socket-id") ?? undefined;
 
     await assertRoomAccess(roomId, verify.id);
 
-    const { message } = await req.json();
-    if (!message || !message.trim()) {
-      throw ApiError.badRequest("Empty message");
-    }
+    const { message } = parseOrThrow(chatMessageBodySchema, await req.json());
 
     const room = await chatRoom.findById(roomId);
     if (!room) throw ApiError.notFound("Room not found");
@@ -95,7 +101,7 @@ export async function POST(
       room: roomId,
       sender: verify.id,
       type: CHAT_TYPE.USER,
-      text: message.trim(),
+      text: message,
       receipts,
     });
 

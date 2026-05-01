@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:no-nested-ternary": "next lint --rule \"no-nested-ternary: error\""
+    "lint:no-nested-ternary": "eslint . --ext .js,.jsx,.ts,.tsx --rule \"no-nested-ternary: error\""
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.36",

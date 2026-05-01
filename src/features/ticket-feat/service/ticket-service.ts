@@ -34,7 +34,7 @@ export async function createTicket(
 
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -49,7 +49,7 @@ export async function fetchTicketCategory<T>(
 
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
@@ -59,7 +59,7 @@ export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
 
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchTechnicians(
@@ -72,7 +72,7 @@ export async function fetchTechnicians(
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchTicketDetails(
@@ -83,7 +83,7 @@ export async function fetchTicketDetails(
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchAdmins<T>(
@@ -96,7 +96,7 @@ export async function fetchAdmins<T>(
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -118,7 +118,7 @@ export async function fetchTickets<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -134,7 +134,7 @@ export async function fetchTicketList<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function fetchRequestTicketList<T>({
@@ -149,7 +149,7 @@ export async function fetchRequestTicketList<T>({
     const response = await axios(url);
     return response.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -160,7 +160,7 @@ export async function deleteTicket(id: string) {
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function assignTicket(
@@ -174,7 +174,7 @@ export async function assignTicket(
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function handOffTicket(
@@ -188,7 +188,7 @@ export async function handOffTicket(
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -203,7 +203,7 @@ export async function ProcessTechnicianResponse(
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 export async function assignTechnician(
@@ -217,7 +217,7 @@ export async function assignTechnician(
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }
 
@@ -232,6 +232,6 @@ export async function sendTechnicianRequest(
     );
     return res.data;
   } catch (err: unknown) {
-    throw new Error(ApiErrorHandler.parse(err));
+    throw ApiErrorHandler.toUIError(err);
   }
 }

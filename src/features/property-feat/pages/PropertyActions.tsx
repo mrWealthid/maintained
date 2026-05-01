@@ -16,6 +16,7 @@ import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
 import PropertyForm from "../form/PropertyForm";
 import PropertyView from "../components/PropertyView";
 import { useCreateProperty } from "../hooks/propertyHooks";
+import ErrorList from "@/components/ui/ErrorList";
 import {
   Sheet,
   SheetContent,
@@ -29,8 +30,10 @@ interface PropertyActionsProps {
 }
 
 const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
-  const { isDeleting, handleDeleteProperty } = useDeleteProperty();
-  const { isCreating, handleCreateProperty } = useCreateProperty(
+  const { isDeleting, handleDeleteProperty, deletePropertyError } =
+    useDeleteProperty();
+  const { isCreating, handleCreateProperty, createPropertyError } =
+    useCreateProperty(
     true,
     property._id
   );
@@ -106,13 +109,18 @@ const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
         title="Delete Property"
         description="Property will be deleted permanently"
       >
-        <ConfirmationPage
-          handler={(onCloseModal) => {
-            handleDelete(onCloseModal ?? (() => {}));
-          }}
-          isLoading={isDeleting}
-          modalText={"Are you sure you want to delete this property?"}
-        />
+        <div className="space-y-3">
+          <ConfirmationPage
+            handler={(onCloseModal) => {
+              handleDelete(onCloseModal ?? (() => {}));
+            }}
+            isLoading={isDeleting}
+            modalText={"Are you sure you want to delete this property?"}
+          />
+          {deletePropertyError ? (
+            <ErrorList error={deletePropertyError} />
+          ) : null}
+        </div>
       </Modal.Window>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -133,11 +141,16 @@ const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
             </SheetHeader>
 
             {viewMode === "edit" ? (
-              <PropertyForm
-                property={property}
-                onSubmit={onSubmit}
-                isLoading={isCreating}
-              />
+              <>
+                {createPropertyError ? (
+                  <ErrorList error={createPropertyError} />
+                ) : null}
+                <PropertyForm
+                  property={property}
+                  onSubmit={onSubmit}
+                  isLoading={isCreating}
+                />
+              </>
             ) : (
               <PropertyView property={property} />
             )}

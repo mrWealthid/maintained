@@ -79,6 +79,12 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   };
 
   const isLoading = createCategory.isPending || updateCategory.isPending;
+  let submitLabel = "Create";
+  if (isLoading) {
+    submitLabel = "Saving...";
+  } else if (editingCategory) {
+    submitLabel = "Update";
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -148,13 +154,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? "Saving..."
-                  : editingCategory
-                    ? "Update"
-                    : "Create"}
-              </Button>
+              <Button type="submit" disabled={isLoading}>{submitLabel}</Button>
             </div>
           </form>
         </Form>

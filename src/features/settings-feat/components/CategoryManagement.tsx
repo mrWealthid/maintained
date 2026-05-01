@@ -75,6 +75,8 @@ const CategoryManagement: React.FC = () => {
     setSelectedCategory(null);
   }, []);
 
+  const hasCategories = Boolean(categories?.length);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -94,15 +96,17 @@ const CategoryManagement: React.FC = () => {
           <CardDescription>Manage existing ticket categories</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && (
             <div className="text-center py-4">Loading categories...</div>
-          ) : !categories || categories.length === 0 ? (
+          )}
+          {!isLoading && !hasCategories && (
             <div className="text-center py-4 text-gray-500">
               No categories found
             </div>
-          ) : (
+          )}
+          {!isLoading && hasCategories && (
             <div className="space-y-3">
-              {categories.map((category: Category) => (
+              {categories!.map((category: Category) => (
                 <div
                   key={category.id}
                   className="flex items-center justify-between p-4 border rounded-lg"

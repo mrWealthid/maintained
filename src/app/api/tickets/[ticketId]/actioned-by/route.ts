@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import Ticket from "@/models/ticketModel";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const actionedByBodySchema = z.object({
+  actionedBy: z.string().min(1),
+  status: z.string().min(1),
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -17,8 +25,12 @@ export async function PATCH(
     if (!user || (!user.isAdminRole && !user.isSuperAdminRole)) {
       throw ApiError.unauthorized();
     }
+    await assertLegacyWorkspacePermission(user, PERMISSION.TICKETS_ASSIGN);
 
-    const { actionedBy, status } = await request.json();
+    const { actionedBy, status } = parseOrThrow(
+      actionedByBodySchema,
+      await request.json()
+    );
 
     if (!mongoose.Types.ObjectId.isValid(actionedBy)) {
       throw ApiError.badRequest("Invalid actionedBy ID");

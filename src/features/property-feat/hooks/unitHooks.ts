@@ -12,7 +12,11 @@ import { ApiError } from "next/dist/server/api-utils";
 
 export function useCreateUnit(isEditing: boolean, unitId?: string) {
   const queryClient = useQueryClient();
-  const { isPending: isCreating, mutate: handleCreateUnit } = useMutation({
+  const {
+    isPending: isCreating,
+    mutate: handleCreateUnit,
+    error: createUnitError,
+  } = useMutation({
     mutationFn: (payload: Partial<Unit>) =>
       isEditing && unitId ? updateUnit(unitId, payload) : createUnit(payload),
     onSuccess: () => {
@@ -26,12 +30,16 @@ export function useCreateUnit(isEditing: boolean, unitId?: string) {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isCreating, handleCreateUnit };
+  return { isCreating, handleCreateUnit, createUnitError };
 }
 
 export function useDeleteUnit() {
   const queryClient = useQueryClient();
-  const { isPending: isDeleting, mutate: handleDeleteUnit } = useMutation({
+  const {
+    isPending: isDeleting,
+    mutate: handleDeleteUnit,
+    error: deleteUnitError,
+  } = useMutation({
     mutationFn: (id: string) => deleteUnit(id),
     onSuccess: () => {
       toast.success("🎉 Unit successfully deleted");
@@ -42,7 +50,7 @@ export function useDeleteUnit() {
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return { isDeleting, handleDeleteUnit };
+  return { isDeleting, handleDeleteUnit, deleteUnitError };
 }
 
 export function useUpdateUnit() {

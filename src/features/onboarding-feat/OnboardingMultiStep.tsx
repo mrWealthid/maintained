@@ -264,11 +264,13 @@ export function OnboardingMultiStep({
       {!allDone && (
         <div className="mt-6 grid grid-cols-4 gap-2">
           {steps.map((s, i) => {
-            const state = s.completed
-              ? "done"
-              : i === currentIndex
-                ? "active"
-                : "todo";
+            let state = "todo";
+            if (s.completed) {
+              state = "done";
+            } else if (i === currentIndex) {
+              state = "active";
+            }
+
             return (
               <div
                 key={s.id}
@@ -312,7 +314,15 @@ export function OnboardingMultiStep({
             </CardContent>
           </Card>
         ) : (
-          current && (
+          current && (() => {
+            let iconClassName = "bg-muted/50";
+            if (current.completed) {
+              iconClassName = "bg-emerald-600 text-white";
+            } else if (current.enabled) {
+              iconClassName = "bg-muted";
+            }
+
+            return (
             <Card
               className={[
                 "transition-all",
@@ -326,11 +336,7 @@ export function OnboardingMultiStep({
                   <div
                     className={[
                       "flex h-12 w-12 items-center justify-center rounded-lg",
-                      current.completed
-                        ? "bg-emerald-600 text-white"
-                        : current.enabled
-                          ? "bg-muted"
-                          : "bg-muted/50",
+                      iconClassName,
                     ].join(" ")}
                   >
                     {current.icon}
@@ -340,15 +346,16 @@ export function OnboardingMultiStep({
                       <h3 className="font-semibold text-base">
                         {current.title}
                       </h3>
-                      {current.completed ? (
+                      {current.completed && (
                         <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-900/40 text-xs">
                           Completed
                         </Badge>
-                      ) : !current.enabled ? (
+                      )}
+                      {!current.completed && !current.enabled && (
                         <Badge variant="secondary" className="text-xs">
                           Locked
                         </Badge>
-                      ) : null}
+                      )}
                     </div>
 
                     <p className="text-sm text-muted-foreground mt-1">
@@ -388,7 +395,8 @@ export function OnboardingMultiStep({
                 </div>
               </CardContent>
             </Card>
-          )
+            );
+          })()
         )}
       </div>
     </div>

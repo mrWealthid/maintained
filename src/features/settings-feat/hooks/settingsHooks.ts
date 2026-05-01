@@ -4,10 +4,13 @@ import {
   CategoryFormData,
   TicketTypeFormData,
   NotificationPreferences,
+  EmailSettingsUpdateData,
 } from "../model/settings.model";
 import {
   fetchNotificationPreferences,
   updateNotificationPreferences,
+  fetchEmailSettings,
+  updateEmailSettings,
   changePassword,
   initiatePasswordChange,
   verifyPasscodeAndChangePassword,
@@ -39,6 +42,29 @@ export function useUpdateNotificationPreferences() {
     onSuccess: () => {
       toast.success("Notification preferences updated successfully");
       queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useEmailSettings() {
+  return useQuery({
+    queryKey: ["email-settings"],
+    queryFn: fetchEmailSettings,
+    select: (data) => data.data,
+  });
+}
+
+export function useUpdateEmailSettings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: EmailSettingsUpdateData) => updateEmailSettings(data),
+    onSuccess: () => {
+      toast.success("Email settings updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["email-settings"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
