@@ -1,37 +1,13 @@
-import { redirect } from "next/navigation";
-import Breadcrumbs from "@/shared/components/breadcrumbs/BreadCrumbs";
-import { layoutConfig } from "@/shared/data/data";
-import AppSidebar from "../../shared/components/sidebar/AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
-import { ROLES } from "../../shared/enums/enums";
-import { AppShell } from "../../shared/shells/AppShell";
-import { HeaderBar } from "../../shared/components/header/Headerbar";
+import { requireDashboardAccess } from "@/lib/auth/requireDashboardAccess";
+import { ROLES } from "@/shared/enums/enums";
+import { DashboardChrome } from "@/shared/shells/DashboardChrome";
 
-const { routes, crumbLabelMap } = layoutConfig[ROLES.admin];
-export default async function DashboardLayout({
+export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const verify = await getVerifiedUser();
+  await requireDashboardAccess({ roles: [ROLES.admin, ROLES.owner] });
 
-  if (!verify) {
-    redirect("/auth/login");
-  }
-
-  return (
-    <section className=" h-dvh flex">
-      <SidebarProvider>
-        <AppSidebar routes={routes} />
-        <section className="flex flex-col overflow-x-hidden w-full">
-          <HeaderBar />
-          <section className="dashboard-body px-4 py-4  ">
-            <Breadcrumbs crumbLabelMap={crumbLabelMap} />
-            <AppShell>{children}</AppShell>
-          </section>
-        </section>
-      </SidebarProvider>
-    </section>
-  );
+  return <DashboardChrome role={ROLES.admin}>{children}</DashboardChrome>;
 }
