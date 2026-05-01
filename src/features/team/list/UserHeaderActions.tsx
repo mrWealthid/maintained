@@ -44,7 +44,7 @@ const UserHeaderActions: FC<UserQueryprops> = ({ onFilter }) => {
 				id="sort"
 				name="sort"
 				title="sortdropdown"
-				className="text-xs font-light text-gray-900 focus-within:ring-0 focus-within:border-none border border-gray-300 bg-gray-50 rounded">
+				className="text-xs font-light text-foreground focus-within:ring-0 focus-within:border-none border border-border bg-muted/40 rounded">
 				<option value="">Sort By Amount(Highest)</option>
 				<option value="">Sort By Amount(Lowest)</option>
 				<option value="">Sort By Date(Recent)</option>

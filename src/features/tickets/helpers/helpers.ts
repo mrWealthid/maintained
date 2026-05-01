@@ -168,19 +168,19 @@ export function formatDate(d: string | number | Date) {
 export function statusPillClasses(status?: string) {
   switch ((status || "").toUpperCase()) {
     case "PENDING":
-      return "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100";
+    case "PENDING_ASSIGNMENT":
+      return "bg-status-open text-status-open-foreground";
     case "PROCESSING":
-      return "bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100";
     case "ASSIGNED":
-      return "bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100";
+      return "bg-status-progress text-status-progress-foreground";
     case "SCHEDULED":
-      return "bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-100";
+      return "bg-primary text-primary-foreground";
     case "COMPLETED":
-      return "bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100";
+      return "bg-status-resolved text-status-resolved-foreground";
     case "DECLINED":
-      return "bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100";
+      return "bg-status-overdue text-status-overdue-foreground";
     default:
-      return "bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100";
+      return "bg-muted text-muted-foreground";
   }
 }
 
@@ -188,15 +188,14 @@ export function statusPillClasses(status?: string) {
 export function priorityPillClasses(priority?: string) {
   switch ((priority || "").toUpperCase()) {
     case "LOW":
-      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100";
+      return "bg-muted text-muted-foreground";
     case "MEDIUM":
-      return "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100";
+      return "bg-status-open text-status-open-foreground";
     case "HIGH":
-      return "bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100";
     case "URGENT":
-      return "bg-rose-100 text-rose-900 dark:bg-rose-900 dark:text-rose-100";
+      return "bg-status-overdue text-status-overdue-foreground";
     default:
-      return "bg-muted text-foreground";
+      return "bg-muted text-muted-foreground";
   }
 }
 

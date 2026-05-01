@@ -214,17 +214,17 @@ export function SessionKeepAliveDialog({
 
         <AppDialogBody>
           {isExpired ? (
-            <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-4 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+            <div className="space-y-3 rounded-2xl border border-destructive/40 bg-destructive/80 px-4 py-4 text-sm text-destructive dark:border-destructive/40/40 dark:bg-destructive/30 dark:text-destructive">
               <p className="font-medium">
                 Your protected dashboard access timed out due to inactivity.
               </p>
-              <p className="text-red-600/90 dark:text-red-200/80">
+              <p className="text-destructive/90 dark:text-destructive/80">
                 Redirecting to sign in so you can start a fresh session.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50/80 px-4 py-3 dark:border-blue-900/40 dark:bg-blue-950/30">
+              <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5/80 px-4 py-3 dark:border-primary/40/40 dark:bg-primary/10/30">
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     Time remaining before sign-out
@@ -235,7 +235,7 @@ export function SessionKeepAliveDialog({
                 </div>
                 <Badge
                   variant="outline"
-                  className="shrink-0 rounded-full border-blue-300 bg-white px-3 py-1 text-sm font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-200"
+                  className="shrink-0 rounded-full border-primary/40 bg-white px-3 py-1 text-sm font-semibold text-primary dark:border-primary dark:bg-primary/10/50 dark:text-primary"
                 >
                   <Clock3 className="mr-1.5 size-3.5" />
                   {countdownLabel}
@@ -248,7 +248,7 @@ export function SessionKeepAliveDialog({
               </p>
 
               {refreshError ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+                <div className="rounded-2xl border border-destructive/40 bg-destructive/80 px-4 py-3 text-sm text-destructive dark:border-destructive/40/40 dark:bg-destructive/30 dark:text-destructive">
                   {refreshError}
                 </div>
               ) : null}

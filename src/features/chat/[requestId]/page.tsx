@@ -241,28 +241,28 @@ export default function ChatPage({
 	const getRoleColor = (role: string) => {
 		switch (role) {
 			case 'admin':
-				return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+				return 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary';
 			case 'tenant':
-				return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+				return 'bg-status-resolved text-status-resolved dark:bg-status-resolved dark:text-status-resolved';
 			case 'technician':
-				return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+				return 'bg-accent text-accent-foreground dark:bg-accent dark:text-accent-foreground';
 			default:
-				return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+				return 'bg-muted text-foreground dark:bg-card dark:text-muted-foreground';
 		}
 	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'open':
-				return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+				return 'bg-status-open text-status-open dark:bg-status-open dark:text-status-open';
 			case 'in_progress':
-				return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+				return 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary';
 			case 'completed':
-				return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+				return 'bg-status-resolved text-status-resolved dark:bg-status-resolved dark:text-status-resolved';
 			case 'cancelled':
-				return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+				return 'bg-destructive text-destructive dark:bg-destructive dark:text-destructive';
 			default:
-				return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+				return 'bg-muted text-foreground dark:bg-card dark:text-muted-foreground';
 		}
 	};
 
@@ -282,9 +282,9 @@ export default function ChatPage({
 	};
 
 	return (
-		<div className='flex flex-col h-screen bg-gray-50 dark:bg-gray-950'>
+		<div className='flex flex-col h-screen bg-muted/40 dark:bg-background'>
 			{/* Header */}
-			<header className='border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3'>
+			<header className='border-b border-border bg-background px-4 py-3'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center space-x-4'>
 						<Link href='/dashboard'>
@@ -294,14 +294,14 @@ export default function ChatPage({
 							</Button>
 						</Link>
 						<div className='flex items-center space-x-3'>
-							<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900'>
-								<Wrench className='h-5 w-5 text-blue-600 dark:text-blue-400' />
+							<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10'>
+								<Wrench className='h-5 w-5 text-primary' />
 							</div>
 							<div>
-								<h1 className='text-lg font-semibold text-gray-900 dark:text-white'>
+								<h1 className='text-lg font-semibold text-foreground'>
 									{mockRequest.title}
 								</h1>
-								<p className='text-sm text-gray-500 dark:text-gray-400'>
+								<p className='text-sm text-muted-foreground'>
 									{mockRequest.id} •{' '}
 									{mockRequest.tenant.apartment}
 								</p>
@@ -342,19 +342,19 @@ export default function ChatPage({
 				{/* Chat Area */}
 				<div className='flex-1 flex flex-col'>
 					{/* Request Info Bar */}
-					<div className='border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4'>
+					<div className='border-b border-border bg-card p-4'>
 						<div className='flex items-center justify-between'>
 							<div className='flex items-center space-x-4'>
 								<div className='flex items-center space-x-2'>
-									<Clock className='h-4 w-4 text-gray-500' />
-									<span className='text-sm text-gray-600 dark:text-gray-400'>
+									<Clock className='h-4 w-4 text-muted-foreground' />
+									<span className='text-sm text-muted-foreground'>
 										Created{' '}
 										{formatDate(mockRequest.createdAt)}
 									</span>
 								</div>
 								<div className='flex items-center space-x-2'>
-									<AlertCircle className='h-4 w-4 text-orange-500' />
-									<span className='text-sm font-medium text-orange-600 dark:text-orange-400'>
+									<AlertCircle className='h-4 w-4 text-status-open' />
+									<span className='text-sm font-medium text-status-open dark:text-status-open'>
 										{mockRequest.priority} priority
 									</span>
 								</div>
@@ -423,7 +423,7 @@ export default function ChatPage({
 																<span className='font-medium'>
 																	{tech.name}
 																</span>
-																<span className='text-sm text-gray-500 ml-2'>
+																<span className='text-sm text-muted-foreground ml-2'>
 																	(
 																	{
 																		tech.specialty
@@ -476,19 +476,19 @@ export default function ChatPage({
 								</Avatar>
 								<div className='flex-1 min-w-0'>
 									<div className='flex items-center space-x-2 mb-1'>
-										<span className='text-sm font-medium text-gray-900 dark:text-white'>
+										<span className='text-sm font-medium text-foreground'>
 											{message.senderName}
 										</span>
 										<Badge
 											className={`text-xs ${getRoleColor(message.senderRole)}`}>
 											{message.senderRole}
 										</Badge>
-										<span className='text-xs text-gray-500 dark:text-gray-400'>
+										<span className='text-xs text-muted-foreground'>
 											{formatTime(message.timestamp)}
 										</span>
 									</div>
-									<div className='bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700'>
-										<p className='text-sm text-gray-900 dark:text-white leading-relaxed'>
+									<div className='bg-card rounded-lg p-3 shadow-sm border border-border'>
+										<p className='text-sm text-foreground leading-relaxed'>
 											{message.content}
 										</p>
 										{message.attachments.length > 0 && (
@@ -497,19 +497,19 @@ export default function ChatPage({
 													(attachment) => (
 														<div
 															key={attachment.id}
-															className='flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border'>
+															className='flex items-center space-x-2 p-2 bg-muted/40 dark:bg-muted rounded border'>
 															{attachment.type ===
 															'image' ? (
-																<ImageIcon className='h-4 w-4 text-blue-600' />
+																<ImageIcon className='h-4 w-4 text-primary' />
 															) : (
-																<File className='h-4 w-4 text-gray-600' />
+																<File className='h-4 w-4 text-muted-foreground' />
 															)}
-															<span className='text-sm text-gray-700 dark:text-gray-300 flex-1'>
+															<span className='text-sm text-foreground flex-1'>
 																{
 																	attachment.name
 																}
 															</span>
-															<span className='text-xs text-gray-500'>
+															<span className='text-xs text-muted-foreground'>
 																{
 																	attachment.size
 																}
@@ -533,16 +533,16 @@ export default function ChatPage({
 								<Avatar className='h-8 w-8'>
 									<AvatarFallback>...</AvatarFallback>
 								</Avatar>
-								<div className='bg-gray-100 dark:bg-gray-800 rounded-lg p-3'>
+								<div className='bg-muted rounded-lg p-3'>
 									<div className='flex space-x-1'>
-										<div className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'></div>
+										<div className='w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce'></div>
 										<div
-											className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+											className='w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce'
 											style={{
 												animationDelay: '0.1s'
 											}}></div>
 										<div
-											className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+											className='w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce'
 											style={{
 												animationDelay: '0.2s'
 											}}></div>
@@ -554,7 +554,7 @@ export default function ChatPage({
 					</div>
 
 					{/* Message Input */}
-					<div className='border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4'>
+					<div className='border-t border-border bg-card p-4'>
 						<div className='flex space-x-2'>
 							<input
 							title='Upload files'
@@ -587,7 +587,7 @@ export default function ChatPage({
 							<Button
 								onClick={handleSendMessage}
 								disabled={!newMessage.trim()}
-								className='flex-shrink-0 bg-blue-600 hover:bg-blue-700'>
+								className='flex-shrink-0 bg-primary hover:bg-primary/90'>
 								<Send className='h-4 w-4' />
 							</Button>
 						</div>
@@ -595,11 +595,11 @@ export default function ChatPage({
 				</div>
 
 				{/* Sidebar */}
-				<div className='w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto'>
+				<div className='w-80 border-l border-border bg-card overflow-y-auto'>
 					<div className='p-4 space-y-6'>
 						{/* Participants */}
 						<div>
-							<h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3'>
+							<h3 className='text-sm font-semibold text-foreground mb-3'>
 								Participants ({3})
 							</h3>
 							<div className='space-y-3'>
@@ -615,10 +615,10 @@ export default function ChatPage({
 										<AvatarFallback>SJ</AvatarFallback>
 									</Avatar>
 									<div className='flex-1 min-w-0'>
-										<p className='text-sm font-medium text-gray-900 dark:text-white'>
+										<p className='text-sm font-medium text-foreground'>
 											{mockRequest.tenant.name}
 										</p>
-										<p className='text-xs text-gray-500 dark:text-gray-400'>
+										<p className='text-xs text-muted-foreground'>
 											Tenant •{' '}
 											{mockRequest.tenant.apartment}
 										</p>
@@ -635,10 +635,10 @@ export default function ChatPage({
 										<AvatarFallback>AS</AvatarFallback>
 									</Avatar>
 									<div className='flex-1 min-w-0'>
-										<p className='text-sm font-medium text-gray-900 dark:text-white'>
+										<p className='text-sm font-medium text-foreground'>
 											Admin Support
 										</p>
-										<p className='text-xs text-gray-500 dark:text-gray-400'>
+										<p className='text-xs text-muted-foreground'>
 											Property Manager
 										</p>
 									</div>
@@ -660,13 +660,13 @@ export default function ChatPage({
 										<AvatarFallback>MR</AvatarFallback>
 									</Avatar>
 									<div className='flex-1 min-w-0'>
-										<p className='text-sm font-medium text-gray-900 dark:text-white'>
+										<p className='text-sm font-medium text-foreground'>
 											{
 												mockRequest.assignedTechnician
 													.name
 											}
 										</p>
-										<p className='text-xs text-gray-500 dark:text-gray-400'>
+										<p className='text-xs text-muted-foreground'>
 											{
 												mockRequest.assignedTechnician
 													.specialty
@@ -683,39 +683,39 @@ export default function ChatPage({
 
 						{/* Request Details */}
 						<div>
-							<h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3'>
+							<h3 className='text-sm font-semibold text-foreground mb-3'>
 								Request Details
 							</h3>
 							<Card>
 								<CardContent className='p-4 space-y-3'>
 									<div>
-										<label className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+										<label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
 											Description
 										</label>
-										<p className='text-sm text-gray-900 dark:text-white mt-1'>
+										<p className='text-sm text-foreground mt-1'>
 											{mockRequest.description}
 										</p>
 									</div>
 									<div className='grid grid-cols-2 gap-3'>
 										<div>
-											<label className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+											<label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
 												Priority
 											</label>
-											<p className='text-sm font-medium text-orange-600 dark:text-orange-400 mt-1'>
+											<p className='text-sm font-medium text-status-open dark:text-status-open mt-1'>
 												{mockRequest.priority}
 											</p>
 										</div>
 										<div>
-											<label className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+											<label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
 												Category
 											</label>
-											<p className='text-sm text-gray-900 dark:text-white mt-1'>
+											<p className='text-sm text-foreground mt-1'>
 												{mockRequest.category}
 											</p>
 										</div>
 									</div>
 									<div>
-										<label className='text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide'>
+										<label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
 											Status
 										</label>
 										<Badge
@@ -732,7 +732,7 @@ export default function ChatPage({
 
 						{/* Quick Actions */}
 						<div>
-							<h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-3'>
+							<h3 className='text-sm font-semibold text-foreground mb-3'>
 								Quick Actions
 							</h3>
 							<div className='space-y-2'>

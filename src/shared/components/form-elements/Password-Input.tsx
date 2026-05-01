@@ -33,12 +33,12 @@ const PasswordInput: FC<PasswordProps> = ({
 				)}
 				{!showPassword ? (
 					<FaEyeSlash
-						className='text-green-600 cursor-pointer'
+						className='text-status-resolved cursor-pointer'
 						onClick={togglePassword}
 					/>
 				) : (
 					<FaEye
-						className='text-green-600 cursor-pointer'
+						className='text-status-resolved cursor-pointer'
 						onClick={togglePassword}
 					/>
 				)}

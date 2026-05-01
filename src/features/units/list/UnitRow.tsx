@@ -32,7 +32,7 @@ function UnitRow({ data }: UnitRowProps) {
             </TableCell>
             <TableCell>
               {row.tenantActive ? (
-                <Badge className="bg-green-100 text-green-800">Occupied</Badge>
+                <Badge className="bg-status-resolved text-status-resolved">Occupied</Badge>
               ) : (
                 <Badge variant="outline">Vacant</Badge>
               )}

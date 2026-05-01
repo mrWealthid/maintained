@@ -36,7 +36,7 @@ type AppSheetBodyProps = React.ComponentProps<"div"> & {
 
 function getToneClasses(tone: SheetTone) {
   return tone === "destructive"
-    ? "border-red-200 bg-red-50 text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+    ? "border-destructive/40 bg-destructive text-destructive dark:border-destructive/40/40 dark:bg-destructive/30 dark:text-destructive"
     : "border-primary/15 bg-primary/5 text-primary";
 }
 

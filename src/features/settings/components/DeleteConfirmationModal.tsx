@@ -49,7 +49,7 @@ function DeleteConfirmationModal({
               e.preventDefault();
               onConfirm();
             }}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive hover:bg-destructive/90"
           >
             {isLoading ? "Deleting" : "Delete"}
           </AlertDialogAction>

@@ -216,10 +216,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
 				className=' p-4 flex flex-col gap-2 cursor-pointer border    rounded-lg justify-center items-center h-32'>
-				<span className='p-4  shadow border bg-secondary text-green-600 rounded-full'>
+				<span className='p-4  shadow border bg-secondary text-status-resolved rounded-full'>
 					{icon}
 				</span>
-				<span className='text-xs text-gray-500'>
+				<span className='text-xs text-muted-foreground'>
 					Select a file or drag and drop here
 				</span>
 				{required && <RiAsterisk color='red' />}

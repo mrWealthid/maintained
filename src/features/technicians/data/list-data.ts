@@ -10,14 +10,14 @@ export type TechnicianSpecialtyMeta = {
 };
 
 const TONE = {
-  electric: "border-amber-500/40 bg-amber-50 text-amber-700",
-  water: "border-sky-500/40 bg-sky-50 text-sky-700",
-  air: "border-indigo-500/40 bg-indigo-50 text-indigo-700",
-  wood: "border-orange-500/40 bg-orange-50 text-orange-700",
-  paint: "border-rose-500/40 bg-rose-50 text-rose-700",
+  electric: "border-status-open/40/40 bg-status-open text-status-open",
+  water: "border-status-progress/40/40 bg-status-progress text-status-progress",
+  air: "border-status-progress/40/40 bg-status-progress text-status-progress",
+  wood: "border-status-open/40/40 bg-status-open text-status-open",
+  paint: "border-destructive/40/40 bg-destructive text-destructive",
   lock: "border-slate-500/40 bg-slate-50 text-slate-700",
-  appliance: "border-violet-500/40 bg-violet-50 text-violet-700",
-  general: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+  appliance: "border-accent/40/40 bg-accent text-accent-foreground",
+  general: "border-status-resolved/40/40 bg-status-resolved text-status-resolved",
 } as const;
 
 export const TECHNICIAN_SPECIALTY_META: Record<

@@ -1526,7 +1526,7 @@ function TableRows({ children }: TableRowsProps) {
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleRowSelection(rowId)}
-                    className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-ring"
+                    className="w-4 h-4 m-0 border-border rounded focus:ring-ring"
                   />
                 </TableCell>
               )}
@@ -1560,7 +1560,7 @@ function TableRows({ children }: TableRowsProps) {
                               ? String(value)
                               : undefined
                           }
-                          className="bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
+                          className="bg-status-resolved text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
                         >
                           {value !== undefined && value !== null
                             ? String(value)

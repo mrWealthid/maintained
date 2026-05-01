@@ -302,7 +302,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
               {/* <button
 								type='button'
 								onClick={handleAddCost}
-								className=' px-2 py-2 bg-blue-600 flex items-center gap-2 text-white text-sm rounded'>
+								className=' px-2 py-2 bg-primary flex items-center gap-2 text-white text-sm rounded'>
 								<CirclePlus size={14} strokeWidth={1} /> Add
 								Cost Item
 							</button> */}
@@ -506,7 +506,7 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
         <h3 className="text-lg font-semibold mb-4">Estimated Cost</h3>
 
         {watchCosts.length === 0 ? (
-          <p className="text-gray-500">No cost items added yet.</p>
+          <p className="text-muted-foreground">No cost items added yet.</p>
         ) : (
           <Table>
             <TableHeader>

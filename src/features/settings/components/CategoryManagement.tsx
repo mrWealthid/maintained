@@ -87,7 +87,7 @@ const CategoryManagement: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Category Management</h2>
-          <p className="text-gray-600">Create and manage ticket categories</p>
+          <p className="text-muted-foreground">Create and manage ticket categories</p>
         </div>
         {canManageCategories && (
           <Button onClick={handleCreate}>
@@ -107,7 +107,7 @@ const CategoryManagement: React.FC = () => {
             <div className="text-center py-4">Loading categories...</div>
           )}
           {!isLoading && !hasCategories && (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-muted-foreground">
               No categories found
             </div>
           )}
@@ -131,7 +131,7 @@ const CategoryManagement: React.FC = () => {
                       )}
                     </div>
                     {category.description && (
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {category.description}
                       </p>
                     )}
@@ -159,7 +159,7 @@ const CategoryManagement: React.FC = () => {
                             {!category.isDefault && (
                               <DropdownMenuItem
                                 onClick={() => handleDelete(category)}
-                                className="text-red-600"
+                                className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete

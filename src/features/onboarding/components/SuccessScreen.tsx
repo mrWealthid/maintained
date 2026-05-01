@@ -48,7 +48,7 @@ export function SuccessScreen({
   return (
     <div className="max-w-lg mx-auto p-6 text-center">
       <div className="flex justify-center mb-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-status-resolved text-white">
           <Sparkles className="h-7 w-7" />
         </div>
       </div>

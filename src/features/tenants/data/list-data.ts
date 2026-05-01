@@ -11,11 +11,11 @@ export type InviteStatusMeta = {
 export const INVITE_STATUS_META: Record<InviteStatus, InviteStatusMeta> = {
   [INVITE_STATUS.INVITED]: {
     label: "Invited",
-    className: "border-amber-500/40 bg-amber-50 text-amber-700",
+    className: "border-status-open/40/40 bg-status-open text-status-open",
   },
   [INVITE_STATUS.ACTIVATED]: {
     label: "Active",
-    className: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+    className: "border-status-resolved/40/40 bg-status-resolved text-status-resolved",
   },
   [INVITE_STATUS.DEACTIVATED]: {
     label: "Deactivated",
@@ -23,7 +23,7 @@ export const INVITE_STATUS_META: Record<InviteStatus, InviteStatusMeta> = {
   },
   [INVITE_STATUS.DECLINED]: {
     label: "Declined",
-    className: "border-rose-500/40 bg-rose-50 text-rose-700",
+    className: "border-destructive/40/40 bg-destructive text-destructive",
   },
 };
 

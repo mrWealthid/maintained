@@ -12,15 +12,15 @@ export type PropertyTypeMeta = {
 export const PROPERTY_TYPE_META: Record<PropertyType, PropertyTypeMeta> = {
   [PROPERTY_TYPE.HOUSE]: {
     label: PROPERTY_TYPE_LABELS[PROPERTY_TYPE.HOUSE],
-    className: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+    className: "border-status-resolved/40/40 bg-status-resolved text-status-resolved",
   },
   [PROPERTY_TYPE.BUILDING]: {
     label: PROPERTY_TYPE_LABELS[PROPERTY_TYPE.BUILDING],
-    className: "border-sky-500/40 bg-sky-50 text-sky-700",
+    className: "border-status-progress/40/40 bg-status-progress text-status-progress",
   },
   [PROPERTY_TYPE.STATION]: {
     label: PROPERTY_TYPE_LABELS[PROPERTY_TYPE.STATION],
-    className: "border-violet-500/40 bg-violet-50 text-violet-700",
+    className: "border-accent/40/40 bg-accent text-accent-foreground",
   },
 };
 

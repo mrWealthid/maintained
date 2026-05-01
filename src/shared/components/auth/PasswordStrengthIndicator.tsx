@@ -23,8 +23,8 @@ function getStrengthTone(label: ReturnType<typeof assessPasswordStrength>["label
     case "Strong":
       return {
         badge:
-          "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-        segment: "bg-emerald-500",
+          "border-status-resolved/40/25 bg-status-resolved/10 text-status-resolved dark:text-status-resolved",
+        segment: "bg-status-resolved",
       };
     case "Good":
       return {
@@ -33,8 +33,8 @@ function getStrengthTone(label: ReturnType<typeof assessPasswordStrength>["label
       };
     case "Fair":
       return {
-        badge: "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-        segment: "bg-amber-500",
+        badge: "border-status-open/40/25 bg-status-open/10 text-status-open dark:text-status-open",
+        segment: "bg-status-open",
       };
     default:
       return {
@@ -89,7 +89,7 @@ export function PasswordStrengthIndicator({
             key={index}
             className={cn(
               "h-2 rounded-full bg-border/70 transition-colors",
-              index < activeSegments ? "bg-emerald-500" : "bg-border/70",
+              index < activeSegments ? "bg-status-resolved" : "bg-border/70",
             )}
           />
         ))}
@@ -102,7 +102,7 @@ export function PasswordStrengthIndicator({
             className="flex items-center gap-2 text-sm text-muted-foreground"
           >
             {requirement.met ? (
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="size-4 shrink-0 text-status-resolved dark:text-status-resolved" />
             ) : (
               <Circle className="size-4 shrink-0 text-muted-foreground/70" />
             )}

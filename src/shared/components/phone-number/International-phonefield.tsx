@@ -326,7 +326,7 @@ function PhoneInputControl({
           aria-describedby={fieldState.error ? `${name}-error` : undefined}
           className={cn(
             "rounded-l-none border-l-0",
-            fieldState.error && "border-red-500 focus-visible:ring-red-500"
+            fieldState.error && "border-destructive/40 focus-visible:ring-red-500"
           )}
           maxLength={enforceDigitHints && limits?.max ? limits.max : undefined}
         />
@@ -339,7 +339,7 @@ function PhoneInputControl({
       {fieldState.error && (
         <p
           id={`${name}-error`}
-          className="mt-1 text-xs text-red-600"
+          className="mt-1 text-xs text-destructive"
           aria-live="polite"
         >
           {fieldState.error.message}

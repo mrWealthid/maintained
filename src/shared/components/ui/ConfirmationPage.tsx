@@ -22,7 +22,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
     <div className="p-6 text-center">
       {reason === "delete" && (
         <svg
-          className="mx-auto mb-4 text-red-600 w-12 h-12 dark:text-red-600"
+          className="mx-auto mb-4 text-destructive w-12 h-12 dark:text-destructive"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -86,7 +86,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
         {isLoading && (
           <svg
             aria-hidden="true"
-            className="inline w-4 h-4 ml-3 text-white animate-spin dark:text-gray-200"
+            className="inline w-4 h-4 ml-3 text-white animate-spin dark:text-muted-foreground"
             fill="gainsboro"
             role="status"
             viewBox="0 0 100 101"
@@ -108,7 +108,7 @@ const ConfirmationPage: FC<ConfirmationPageProps> = ({
         onClick={onCloseModal}
         data-modal-hide="popup-modal"
         type="button"
-        className=" text-red-500    focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-2xl border border-gray-200 text-sm font-medium px-5 py-2.5  focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+        className=" text-destructive    focus:ring-4 focus:outline-none focus:ring-ring rounded-2xl border border-border text-sm font-medium px-5 py-2.5  focus:z-10 dark:bg-muted dark:text-muted-foreground dark:border-border dark:hover:text-foreground dark:hover:bg-muted dark:focus:ring-ring"
       >
         No, cancel
       </button>

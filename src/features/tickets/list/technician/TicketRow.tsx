@@ -16,7 +16,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
 								title="check"
 								id="checkbox-all-search"
 								type="checkbox"
-								className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-gray-500 "
+								className="w-4 h-4 m-0 border-border rounded focus:ring-ring "
 							/>
 							<label
 								htmlFor="checkbox-all-search text-sm"

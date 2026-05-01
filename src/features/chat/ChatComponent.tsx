@@ -262,18 +262,18 @@ export default function ChatComponent() {
       [CHAT_MSG_DELIVERY_STATUS.SENDING]: (
         <div className="flex items-center space-x-1">
           <RefreshCw
-            className="h-3 w-3 animate-spin text-gray-300"
+            className="h-3 w-3 animate-spin text-muted-foreground"
             strokeWidth={1.5}
           />
-          {/* <span className="text-xs capitalize text-gray-300">
+          {/* <span className="text-xs capitalize text-muted-foreground">
             {CHAT_MSG_DELIVERY_STATUS.SENDING}…
           </span> */}
         </div>
       ),
       [CHAT_MSG_DELIVERY_STATUS.SENT]: (
         <div className="flex items-center space-x-1">
-          <Check className="h-3 w-3 text-gray-300" />
-          {/* <span className="text-xs capitalize text-gray-300">
+          <Check className="h-3 w-3 text-muted-foreground" />
+          {/* <span className="text-xs capitalize text-muted-foreground">
             {CHAT_MSG_DELIVERY_STATUS.SENT}
           </span> */}
         </div>
@@ -281,15 +281,15 @@ export default function ChatComponent() {
       [CHAT_MSG_DELIVERY_STATUS.READ]: (
         <div className="flex items-center space-x-1">
           <CheckCheck className="h-3 w-3 " color="#4965ee" strokeWidth={1.5} />
-          {/* <span className="text-xs capitalize text-blue-500">
+          {/* <span className="text-xs capitalize text-primary">
             {CHAT_MSG_DELIVERY_STATUS.READ}
           </span> */}
         </div>
       ),
       [CHAT_MSG_DELIVERY_STATUS.DELIVERED]: (
         <div className="flex items-center space-x-1">
-          <CheckCheck className="h-3 w-3 text-gray-400" strokeWidth={1.5} />
-          {/* <span className="text-xs capitalize text-gray-400">
+          <CheckCheck className="h-3 w-3 text-muted-foreground" strokeWidth={1.5} />
+          {/* <span className="text-xs capitalize text-muted-foreground">
             {CHAT_MSG_DELIVERY_STATUS.DELIVERED}
           </span> */}
         </div>
@@ -305,9 +305,9 @@ export default function ChatComponent() {
 
   if (rooms.length === 0) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen bg-muted/40 dark:bg-background">
         <div className="flex-1 flex flex-col">
-          <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3 flex-shrink-0">
+          <header className="border-b border-border bg-background px-4 py-3 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Link href="/dashboard">
@@ -316,7 +316,7 @@ export default function ChatComponent() {
                     Back
                   </Button>
                 </Link>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-semibold text-foreground">
                   Maintenance Chat
                 </h1>
               </div>
@@ -329,13 +329,13 @@ export default function ChatComponent() {
   }
 
   return (
-    <div className="flex h-full bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-full bg-muted/40 dark:bg-background">
       <div
-        className={`${isSidebarOpen ? "w-80" : "w-0"} transition-all duration-300 overflow-hidden border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex flex-col`}
+        className={`${isSidebarOpen ? "w-80" : "w-0"} transition-all duration-300 overflow-hidden border-r border-border bg-card flex flex-col`}
       >
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="p-4 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-foreground">
               Tickets
             </h2>
             <Button
@@ -355,30 +355,30 @@ export default function ChatComponent() {
               <div
                 key={room.id}
                 onClick={() => setCurrentRoom(room)}
-                className={`p-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                className={`p-4 border-b border-border cursor-pointer hover:bg-muted transition-colors ${
                   currentRoom?.id === room.id
-                    ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500"
+                    ? "bg-primary/5 dark:bg-primary/20/20 border-l-4 border-l-primary"
                     : ""
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <h3 className="text-sm font-medium text-foreground truncate">
                       {title}
                     </h3>
 
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       {/* {room.id} */}
                       {room.ticket.propertyName} • {room.ticket.unitLabel}
                     </p>
                   </div>
                   {/* {
-                    <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    <Badge className="bg-destructive text-white text-xs px-2 py-1 rounded-full">
                       {3}
                     </Badge>
                   } */}
                   {/* {room.unreadCount > 0 && (
-                    <Badge className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    <Badge className="bg-destructive text-white text-xs px-2 py-1 rounded-full">
                       {room.unreadCount}
                     </Badge>
                   )} */}
@@ -393,10 +393,10 @@ export default function ChatComponent() {
                     {priority}
                   </span>
                 </div>
-                {/* <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
+                {/* <p className="text-xs text-muted-foreground truncate">
                   {room.lastMessage}
                 // </p> */}
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatDate(room.updatedAt.toString())}
                 </p>
               </div>
@@ -408,7 +408,7 @@ export default function ChatComponent() {
       <div className="flex-1 flex flex-col">
         {!currentRoom?.id ? (
           <>
-            <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3 flex-shrink-0">
+            <header className="border-b border-border bg-background px-4 py-3 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Button
@@ -424,7 +424,7 @@ export default function ChatComponent() {
                       Back
                     </Button>
                   </Link>
-                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h1 className="text-lg font-semibold text-foreground">
                     Maintenance Chat
                   </h1>
                 </div>
@@ -435,7 +435,7 @@ export default function ChatComponent() {
         ) : (
           <>
             {/* Header */}
-            <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-4 py-3">
+            <header className="border-b border-border bg-background px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Button
@@ -452,14 +452,14 @@ export default function ChatComponent() {
                     </Button>
                   </Link>
                   <div className="flex items-center space-x-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                      <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Wrench className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h1 className="text-lg font-semibold text-foreground">
                         {currentRoom?.ticket.title}
                       </h1>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-muted-foreground">
                         {currentRoom.ticket.propertyName} •
                         {currentRoom.ticket.unitLabel}
                       </p>
@@ -502,19 +502,19 @@ export default function ChatComponent() {
               {/* Chat Area */}
               <div className="flex-1 flex flex-col">
                 {/* Request Info Bar */}
-                <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0">
+                <div className="border-b border-border bg-card p-4 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
                           {/* Created {formatDate(currentRoom?.createdAt.toString()!)} */}
                           Created{" "}
                           {formatDate(currentRoom?.updatedAt.toString()!)}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <AlertCircle className="h-4 w-4 text-orange-500" />
+                        <AlertCircle className="h-4 w-4 text-status-open" />
                         <Badge
                           variant={"outline"}
                           className={`text-sm font-medium ${getPriorityColor(currentRoom?.ticket.priority!)}`}
@@ -576,7 +576,7 @@ export default function ChatComponent() {
                                         <span className="font-medium">
                                           {tech.name}
                                         </span>
-                                        <span className="text-sm text-gray-500 ml-2">
+                                        <span className="text-sm text-muted-foreground ml-2">
                                           {membership?.specialties?.[0]}
                                         </span>
                                       </div>
@@ -627,7 +627,7 @@ export default function ChatComponent() {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="text-sm font-medium text-foreground">
                               {message.sender?.name || "SYSTEM"}
                             </span>
                             {/* <Badge
@@ -635,7 +635,7 @@ export default function ChatComponent() {
                       >
                         {message.senderRole}
                       </Badge> */}
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               {formatTime(message.createdAt.toString())}
                             </span>
 
@@ -662,14 +662,14 @@ export default function ChatComponent() {
                                     onClick={() =>
                                       setDeleteMessageId(message._id)
                                     }
-                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                                   >
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </div>
                               )}
                           </div>
-                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700">
+                          <div className="bg-card rounded-lg p-3 shadow-sm border border-border">
                             {editingMessageId === message._id ? (
                               <div className="space-y-2">
                                 <Textarea
@@ -708,7 +708,7 @@ export default function ChatComponent() {
                               </div>
                             ) : (
                               <>
-                                <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
+                                <p className="text-sm text-foreground leading-relaxed">
                                   {message.text}
                                 </p>
                                 {renderMessageStatus(
@@ -723,17 +723,17 @@ export default function ChatComponent() {
                           {message.attachments.map((attachment) => (
                             <div
                               key={attachment.id}
-                              className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border"
+                              className="flex items-center space-x-2 p-2 bg-muted/40 dark:bg-muted rounded border"
                             >
                               {attachment.type === "image" ? (
-                                <ImageIcon className="h-4 w-4 text-blue-600" />
+                                <ImageIcon className="h-4 w-4 text-primary" />
                               ) : (
-                                <File className="h-4 w-4 text-gray-600" />
+                                <File className="h-4 w-4 text-muted-foreground" />
                               )}
-                              <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                              <span className="text-sm text-foreground flex-1">
                                 {attachment.name}
                               </span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 {attachment.size}
                               </span>
                               <Button variant="ghost" size="sm">
@@ -760,7 +760,7 @@ export default function ChatComponent() {
                 )}
 
                 {canSendChat && (
-                  <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0 sticky bottom-0">
+                  <div className="border-t border-border bg-card p-4 flex-shrink-0 sticky bottom-0">
                     {" "}
                     <div className="flex space-x-2">
                       <input
@@ -795,7 +795,7 @@ export default function ChatComponent() {
                       <Button
                         onClick={handleSendMessage}
                         disabled={!newMessage.trim()}
-                        className="flex-shrink-0 bg-blue-600 hover:bg-blue-700"
+                        className="flex-shrink-0 bg-primary hover:bg-primary/90"
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -805,12 +805,12 @@ export default function ChatComponent() {
               </div>
 
               {currentRoom.id && (
-                <div className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col h-full">
+                <div className="w-80 border-l border-border bg-card overflow-hidden flex flex-col h-full">
                   {" "}
                   <div className="flex-1 overflow-y-auto p-4 space-y-6">
                     {/* Participants */}
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-sm font-semibold text-foreground mb-3">
                         Participants ({currentRoom?.participants.length})
                       </h3>
                       <div className="space-y-3">
@@ -831,17 +831,17 @@ export default function ChatComponent() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              <p className="text-sm font-medium text-foreground">
                                 {participant.user.name}
                               </p>
                               {participant.role === CHAT_ROLES.REQUESTER ? (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-muted-foreground">
                                   {chatRoleMap[participant.role]} •{" "}
                                   {currentRoom.ticket.propertyName} •{" "}
                                   {currentRoom.ticket.unitLabel}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-muted-foreground">
                                   {" "}
                                   {chatRoleMap[participant.role]}
                                 </p>
@@ -857,22 +857,22 @@ export default function ChatComponent() {
 
                     {/* Request Details */}
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-sm font-semibold text-foreground mb-3">
                         Request Details
                       </h3>
                       <Card>
                         <CardContent className="p-4 space-y-3">
                           <div>
-                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                               Description
                             </label>
-                            <p className="text-sm text-gray-900 dark:text-white mt-1">
+                            <p className="text-sm text-foreground mt-1">
                               {currentRoom?.ticket.description}
                             </p>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs block font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              <label className="text-xs block font-medium text-muted-foreground uppercase tracking-wide">
                                 Priority
                               </label>
                               <Badge
@@ -883,16 +883,16 @@ export default function ChatComponent() {
                               </Badge>
                             </div>
                             <div>
-                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                                 Category
                               </label>
-                              <p className="text-sm text-gray-900 dark:text-white mt-1">
+                              <p className="text-sm text-foreground mt-1">
                                 {currentRoom?.ticket.category.name}
                               </p>
                             </div>
                           </div>
                           <div>
-                            <label className="text-xs block font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            <label className="text-xs block font-medium text-muted-foreground uppercase tracking-wide">
                               Status
                             </label>
                             <Badge
@@ -907,7 +907,7 @@ export default function ChatComponent() {
 
                     {/* Quick Actions */}
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-sm font-semibold text-foreground mb-3">
                         Quick Actions
                       </h3>
                       <div className="space-y-2">
@@ -1050,7 +1050,7 @@ export default function ChatComponent() {
               onClick={() =>
                 deleteMessageId && handleDeleteMessage(deleteMessageId)
               }
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Delete
             </AlertDialogAction>

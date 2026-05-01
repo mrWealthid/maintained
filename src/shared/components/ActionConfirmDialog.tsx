@@ -58,8 +58,8 @@ export default function ActionConfirmDialog({
           <div className="rounded-md p-5 text-center">
             <div
               className={`mx-auto mb-4 flex size-12 items-center justify-center rounded-full ${variant === "destructive"
-                ? "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-300"
-                : "bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300"
+                ? "bg-destructive text-destructive dark:bg-destructive/40 dark:text-destructive"
+                : "bg-primary/10 text-primary dark:bg-primary/10/40 dark:text-primary"
                 }`}
             >
               <Icon className="size-6" />

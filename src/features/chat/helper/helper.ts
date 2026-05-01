@@ -6,64 +6,60 @@ import { User } from "@/shared/model/model";
 export const getRoleColor = (role: CHAT_ROLES) => {
   switch (role) {
     case CHAT_ROLES.ADMIN:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      return "bg-primary text-primary-foreground";
     case CHAT_ROLES.REQUESTER:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-status-resolved text-status-resolved-foreground";
     case CHAT_ROLES.TECHNICIAN:
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      return "bg-accent text-accent-foreground";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-muted text-muted-foreground";
   }
 };
 
 // const getStatusColor = (status: TICKET_STATUS) => {
 //   switch (status) {
 //     case TICKET_STATUS.pending:
-//       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+//       return "bg-status-open text-status-open dark:bg-status-open dark:text-status-open";
 //     case TICKET_STATUS.processing:
-//       return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+//       return "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary";
 //     case TICKET_STATUS.assigned:
-//       return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+//       return "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary";
 //     case TICKET_STATUS.completed:
-//       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+//       return "bg-status-resolved text-status-resolved dark:bg-status-resolved dark:text-status-resolved";
 //     case TICKET_STATUS.declined:
-//       return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+//       return "bg-destructive text-destructive dark:bg-destructive dark:text-destructive";
 //     default:
-//       return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+//       return "bg-muted text-foreground dark:bg-card dark:text-muted-foreground";
 //   }
 // };
 export const getStatusColor = (status: TICKET_STATUS) => {
   switch (status) {
     case TICKET_STATUS.pending:
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
     case TICKET_STATUS.pending_assignment:
-      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      return "bg-status-open text-status-open-foreground";
     case TICKET_STATUS.assigned:
-      return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200";
     case TICKET_STATUS.processing:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
     case TICKET_STATUS.scheduled:
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      return "bg-status-progress text-status-progress-foreground";
     case TICKET_STATUS.completed:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-status-resolved text-status-resolved-foreground";
     case TICKET_STATUS.declined:
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-
+      return "bg-status-overdue text-status-overdue-foreground";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-muted text-muted-foreground";
   }
 };
 
 export const getPriorityColor = (priority: TICKET_PRIORITY) => {
   switch (priority) {
     case TICKET_PRIORITY.high:
-      return "text-red-600 dark:text-red-400";
+      return "text-status-overdue";
     case TICKET_PRIORITY.medium:
-      return "text-orange-600 dark:text-orange-400";
+      return "text-status-open";
     case TICKET_PRIORITY.low:
-      return "text-green-600 dark:text-green-400";
+      return "text-status-resolved";
     default:
-      return "text-gray-600 dark:text-gray-400";
+      return "text-muted-foreground";
   }
 };
 

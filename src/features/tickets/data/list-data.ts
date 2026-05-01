@@ -17,37 +17,37 @@ export type TicketStatusMeta = {
 export const TICKET_STATUS_META: Record<TicketStatus, TicketStatusMeta> = {
   [TICKET_STATUS.PENDING]: {
     label: "Pending",
-    className: "border-amber-500/40 bg-amber-50 text-amber-700",
+    className: "bg-status-open text-status-open-foreground",
     description: "Submitted and awaiting triage.",
   },
   [TICKET_STATUS.PROCESSING]: {
     label: "Processing",
-    className: "border-sky-500/40 bg-sky-50 text-sky-700",
+    className: "bg-status-progress text-status-progress-foreground",
     description: "Being worked on by a manager.",
   },
   [TICKET_STATUS.PENDING_ASSIGNMENT]: {
     label: "Pending Assignment",
-    className: "border-indigo-500/40 bg-indigo-50 text-indigo-700",
+    className: "bg-status-open text-status-open-foreground",
     description: "Sent to technicians; waiting for one to accept.",
   },
   [TICKET_STATUS.ASSIGNED]: {
     label: "Assigned",
-    className: "border-violet-500/40 bg-violet-50 text-violet-700",
+    className: "bg-status-progress text-status-progress-foreground",
     description: "Technician selected.",
   },
   [TICKET_STATUS.SCHEDULED]: {
     label: "Scheduled",
-    className: "border-blue-500/40 bg-blue-50 text-blue-700",
+    className: "bg-primary text-primary-foreground",
     description: "Visit booked with the resident.",
   },
   [TICKET_STATUS.COMPLETED]: {
     label: "Completed",
-    className: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+    className: "bg-status-resolved text-status-resolved-foreground",
     description: "Work finished and signed off.",
   },
   [TICKET_STATUS.DECLINED]: {
     label: "Declined",
-    className: "border-rose-500/40 bg-rose-50 text-rose-700",
+    className: "bg-status-overdue text-status-overdue-foreground",
     description: "Closed without action.",
   },
 };
@@ -61,15 +61,15 @@ export const TICKET_PRIORITY_META: Record<TicketPriority, TicketPriorityMeta> =
   {
     [TICKET_PRIORITY.LOW]: {
       label: "Low",
-      className: "border-slate-400/40 bg-slate-50 text-slate-700",
+      className: "bg-muted text-muted-foreground",
     },
     [TICKET_PRIORITY.MEDIUM]: {
       label: "Medium",
-      className: "border-amber-400/40 bg-amber-50 text-amber-700",
+      className: "bg-status-open text-status-open-foreground",
     },
     [TICKET_PRIORITY.HIGH]: {
       label: "High",
-      className: "border-rose-500/40 bg-rose-50 text-rose-700",
+      className: "bg-status-overdue text-status-overdue-foreground",
     },
   };
 

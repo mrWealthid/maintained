@@ -245,7 +245,7 @@ export function OnboardingMultiStep({
                 </div>
                 <Progress
                   value={progressPct}
-                  className="h-3 block bg-green-700"
+                  className="h-3 block bg-status-resolved"
                 />
               </div>
             </div>
@@ -277,8 +277,8 @@ export function OnboardingMultiStep({
                 className={[
                   "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs",
                   state === "done" &&
-                    "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200/50",
-                  state === "active" && "bg-primary/5 border-yellow-600",
+                    "bg-status-resolved/50 dark:bg-status-resolved/10 border-status-resolved/40/50",
+                  state === "active" && "bg-primary/5 border-status-open/40",
                   state === "todo" && "bg-muted/30 border-muted",
                 ].join(" ")}
               >
@@ -286,7 +286,7 @@ export function OnboardingMultiStep({
                   className={[
                     "h-5 w-5 grid place-items-center rounded-full border",
                     state === "done" &&
-                      "bg-emerald-600 text-white border-emerald-600",
+                      "bg-status-resolved text-white border-status-resolved/40",
                     state === "active" && "bg-muted border-primary ",
                     state === "todo" &&
                       "text-muted-foreground border-muted-foreground/30",
@@ -308,7 +308,7 @@ export function OnboardingMultiStep({
       {/* Current step or Success */}
       <div className="mt-6">
         {allDone ? (
-          <Card className="border-emerald-200/50 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-900/10">
+          <Card className="border-status-resolved/40/50 dark:border-status-resolved/40/40 bg-status-resolved/40 dark:bg-status-resolved/10">
             <CardContent className="p-6">
               <SuccessScreen onCloseModal={onCloseModal} />
             </CardContent>
@@ -317,7 +317,7 @@ export function OnboardingMultiStep({
           current && (() => {
             let iconClassName = "bg-muted/50";
             if (current.completed) {
-              iconClassName = "bg-emerald-600 text-white";
+              iconClassName = "bg-status-resolved text-white";
             } else if (current.enabled) {
               iconClassName = "bg-muted";
             }
@@ -347,7 +347,7 @@ export function OnboardingMultiStep({
                         {current.title}
                       </h3>
                       {current.completed && (
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-900/40 text-xs">
+                        <Badge className="bg-status-resolved text-status-resolved border-status-resolved/40 dark:bg-status-resolved/40 dark:text-status-resolved dark:border-status-resolved/40/40 text-xs">
                           Completed
                         </Badge>
                       )}

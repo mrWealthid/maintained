@@ -26,7 +26,7 @@ function UserRow({ data }: UserRowProps) {
 								title="check"
 								id="checkbox-all-search"
 								type="checkbox"
-								className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-gray-500 "
+								className="w-4 h-4 m-0 border-border rounded focus:ring-ring "
 							/>
 							<label
 								htmlFor="checkbox-all-search text-sm"
@@ -75,7 +75,7 @@ function UserRow({ data }: UserRowProps) {
               {membership?.status === INVITE_STATUS.activated && (
                 <Badge
                   variant="outline"
-                  className="gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300"
+                  className="gap-1 border-status-resolved/40 text-status-resolved dark:border-status-resolved/40 dark:text-status-resolved"
                 >
                   <CircleCheck
                     className=" "
@@ -90,7 +90,7 @@ function UserRow({ data }: UserRowProps) {
               {membership?.status === INVITE_STATUS.invited && (
                 <Badge
                   variant="outline"
-                  className="gap-1 border-orange-200 text-orange-500 dark:border-orange-400 dark:text-orange-300"
+                  className="gap-1 border-status-open/40 text-status-open dark:border-status-open/40 dark:text-status-open"
                 >
                   <CircleCheck
                     className=" "
@@ -105,7 +105,7 @@ function UserRow({ data }: UserRowProps) {
               {membership?.status === INVITE_STATUS.declined && (
                 <Badge
                   variant="outline"
-                  className="gap-1 text-or border-red-200 text-red-700 dark:border-red-800 dark:text-red-300"
+                  className="gap-1 text-or border-destructive/40 text-destructive dark:border-destructive/40 dark:text-destructive"
                 >
                   <CircleCheck
                     className=" "
@@ -119,7 +119,7 @@ function UserRow({ data }: UserRowProps) {
               )}
               {/* <Badge
 								variant='outline'
-								className='gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300'>
+								className='gap-1 border-status-resolved/40 text-status-resolved dark:border-status-resolved/40 dark:text-status-resolved'>
 								{membership?.status ===
 									INVITE_STATUS.activated && (
 									/>
@@ -129,7 +129,7 @@ function UserRow({ data }: UserRowProps) {
 							)}
 							{/* <Badge
 								variant='outline'
-								className='gap-1 border-green-200 text-green-700 dark:border-green-800 dark:text-green-300'>
+								className='gap-1 border-status-resolved/40 text-status-resolved dark:border-status-resolved/40 dark:text-status-resolved'>
 								{membership?.status ===
 									INVITE_STATUS.activated && (
 									<CircleCheck

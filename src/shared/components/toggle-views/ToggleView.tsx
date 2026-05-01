@@ -7,7 +7,7 @@ const ToggleView: FC<{
   isList: boolean;
 }> = ({ onChangeView, isList }) => {
   return (
-    <div className="flex items-center gap-2 border border-gray-300  rounded-3xl">
+    <div className="flex items-center gap-2 border border-border  rounded-3xl">
       <button
         onClick={() => onChangeView(false)}
         aria-label="Toggle Grid View"

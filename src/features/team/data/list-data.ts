@@ -14,22 +14,22 @@ export type WorkspaceRoleMeta = {
 export const WORKSPACE_ROLE_META: Record<WORKSPACE_ROLE, WorkspaceRoleMeta> = {
   [WORKSPACE_ROLE.owner]: {
     label: formatWorkspaceRoleLabel(WORKSPACE_ROLE.owner),
-    className: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+    className: "border-status-resolved/40/40 bg-status-resolved text-status-resolved",
     description: "Full control over the workspace, including billing.",
   },
   [WORKSPACE_ROLE.property_manager]: {
     label: formatWorkspaceRoleLabel(WORKSPACE_ROLE.property_manager),
-    className: "border-indigo-500/40 bg-indigo-50 text-indigo-700",
+    className: "border-status-progress/40/40 bg-status-progress text-status-progress",
     description: "Day-to-day administrator for the workspace.",
   },
   [WORKSPACE_ROLE.maintenance_coordinator]: {
     label: formatWorkspaceRoleLabel(WORKSPACE_ROLE.maintenance_coordinator),
-    className: "border-sky-500/40 bg-sky-50 text-sky-700",
+    className: "border-status-progress/40/40 bg-status-progress text-status-progress",
     description: "Triages tickets and manages technician assignments.",
   },
   [WORKSPACE_ROLE.accountant]: {
     label: formatWorkspaceRoleLabel(WORKSPACE_ROLE.accountant),
-    className: "border-amber-500/40 bg-amber-50 text-amber-700",
+    className: "border-status-open/40/40 bg-status-open text-status-open",
     description: "Financial reporting, invoicing, and payouts.",
   },
   [WORKSPACE_ROLE.member]: {

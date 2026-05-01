@@ -155,7 +155,7 @@ export default function AutoComplete<T>({
 
 												{selected ? (
 													<span
-														className={`absolute inset-y-0 left-0  text-green-700 flex items-center pl-3 ${
+														className={`absolute inset-y-0 left-0  text-status-resolved flex items-center pl-3 ${
 															active
 																? 'bg-secondary '
 																: ''

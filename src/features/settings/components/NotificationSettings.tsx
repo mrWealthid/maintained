@@ -83,7 +83,7 @@ const NotificationSettings: React.FC = () => {
                   <RadioGroupItem value={mode.value} id={mode.value} />
                   <Label htmlFor={mode.value} className="flex-1">
                     <div className="font-medium">{mode.label}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-muted-foreground">
                       {mode.description}
                     </div>
                   </Label>
@@ -100,7 +100,7 @@ const NotificationSettings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="sms-toggle">SMS Notifications</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Receive text message notifications
                   </p>
                 </div>
@@ -114,7 +114,7 @@ const NotificationSettings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="email-toggle">Email Notifications</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Receive email notifications
                   </p>
                 </div>
@@ -128,7 +128,7 @@ const NotificationSettings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="phone-toggle">Phone Call Notifications</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Receive phone call notifications
                   </p>
                 </div>

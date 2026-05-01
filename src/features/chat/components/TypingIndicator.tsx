@@ -53,15 +53,15 @@ export function TypingIndicator({
       </div>
 
       {/* your bouncing dots bubble */}
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
+      <div className="bg-muted rounded-lg px-3 py-2">
         <div className="flex space-x-1 items-center">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
           <div
-            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
             style={{ animationDelay: "0.1s" }}
           />
           <div
-            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+            className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
             style={{ animationDelay: "0.2s" }}
           />
           <span className="ml-2 text-xs text-muted-foreground">{label}</span>

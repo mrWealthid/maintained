@@ -494,7 +494,7 @@ export default function BulkAudienceMessageDialog({
       >
         <SheetHeader className="border-b px-6 pb-4 pt-6 pr-14 text-left">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/5 text-primary dark:border-primary/40/40 dark:bg-primary/10/30 dark:text-primary">
               <Mail className="size-5" />
             </div>
 

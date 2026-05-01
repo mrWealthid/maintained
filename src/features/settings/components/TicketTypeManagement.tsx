@@ -84,7 +84,7 @@ const TicketTypeManagement: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Ticket Type Management</h2>
-          <p className="text-gray-600">Create and manage ticket types</p>
+          <p className="text-muted-foreground">Create and manage ticket types</p>
         </div>
         {canManageTicketTypes && (
           <Button onClick={handleCreate}>
@@ -104,7 +104,7 @@ const TicketTypeManagement: React.FC = () => {
             <div className="text-center py-4">Loading ticket types...</div>
           )}
           {!isLoading && !hasTicketTypes && (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-muted-foreground">
               No ticket types found
             </div>
           )}
@@ -128,7 +128,7 @@ const TicketTypeManagement: React.FC = () => {
                       )}
                     </div>
                     {ticketType.description && (
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {ticketType.description}
                       </p>
                     )}
@@ -158,7 +158,7 @@ const TicketTypeManagement: React.FC = () => {
                             {!ticketType.isDefault && (
                               <DropdownMenuItem
                                 onClick={() => handleDelete(ticketType)}
-                                className="text-red-600"
+                                className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete
