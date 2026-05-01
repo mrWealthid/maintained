@@ -47,42 +47,48 @@ this file as phases land.
 
 ## Phase 2 — UI error surface + missing primitives
 
-- [ ] Install `@radix-ui/react-collapsible` and add the shadcn
+- [x] Install `@radix-ui/react-collapsible` and add the shadcn
       `collapsible` primitive at `src/components/ui/collapsible.tsx`
-- [ ] Add `src/lib/helpers/scroll-to-element.ts` (port from eventSphere)
-- [ ] Add `src/components/ui/ErrorList.tsx` (port from eventSphere)
+- [x] Add `src/lib/helpers/scroll-to-element.ts` (port from eventSphere)
+- [x] Add `src/components/ui/ErrorList.tsx` (port from eventSphere)
 - [ ] Replace the loose `toast.error(ApiErrorHandler.parse(err))` pattern
       with `ErrorList error={mutation.error}` in the existing ticket,
       property, and user dialogs
-- [ ] Add a shared `AppDialogShell` and `AppSheetShell` under
+- [x] Add a shared `AppDialogShell` and `AppSheetShell` under
       `src/shared/components/` to standardise dialog/sheet structure
 
 ## Phase 3 — Auth session + dashboard guard
 
-- [ ] Add `src/models/authSessionModel.ts` (DB-tracked sessions)
-- [ ] Refactor `src/lib/auth/getVerifiedUser.ts` to return a
+- [x] Add `src/models/authSessionModel.ts` (DB-tracked sessions)
+- [x] Add session helpers in `src/lib/auth/session.ts` and issue
+      session-backed JWTs for login/register/password flows. No backfill
+      script is needed because the database will be dropped before this
+      branch is promoted.
+- [x] Refactor `src/lib/auth/getVerifiedUser.ts` to return a
       discriminated union (`{ status: "authorized" | "unauthenticated"
       | "inactive_business", user? }`) and to populate
       `workspaceRole` and `platformRole` alongside the legacy `role`
       field
-- [ ] Add `src/lib/auth/requireDashboardAccess.ts` and replace the
+- [x] Add `src/lib/auth/requireDashboardAccess.ts` and replace the
       duplicated `getVerifiedUser` + `redirect` logic in every
       `app/admin/dashboard/**`, `app/technician/dashboard/**`, and
       `app/(users)/dashboard/**` page
-- [ ] Update `src/middleware.ts` to defer to `requireDashboardAccess` for
-      role-based redirects rather than decoding role from the JWT inline
+- [x] Update `src/middleware.ts` to align with the session-backed JWT
+      contract. Middleware remains an Edge-safe coarse redirect layer;
+      `requireDashboardAccess` is the authoritative DB-backed guard in
+      server layouts.
 
 ## Phase 4 — Configurable roles & permissions persistence
 
-- [ ] Add `src/models/roleDefinitionModel.ts` — workspace-owned role
-      definitions with a `permissionKeys: string[]` field
-- [ ] Add `src/models/userPermissionOverrideModel.ts` — per-member direct
+- [x] Add `src/models/roleDefinitionModel.ts` — workspace-owned role
+      definitions with eventSphere-style `permissions: string[]`
+- [x] Add `src/models/userPermissionOverrideModel.ts` — per-member direct
       `allow` / `deny` overrides
-- [ ] Wire `resolveEffectivePermissions` (in `permission-guards.ts`) to
+- [x] Wire `resolveEffectivePermissions` (in `permission-guards.ts`) to
       read from the new models when available, falling back to the
       static defaults in the registry
-- [ ] Seed default role definitions on workspace creation
-- [ ] Add `GET /api/team/roles`, `POST /api/team/roles`,
+- [x] Seed default role definitions on workspace creation
+- [x] Add `GET /api/team/roles`, `POST /api/team/roles`,
       `PATCH /api/team/roles/[id]`, `DELETE /api/team/roles/[id]` and the
       matching team permission endpoints
 
@@ -144,10 +150,23 @@ Status:
 
 - [x] `POST /api/tickets` (canonical example)
 - [x] `GET /api/tickets` (catch block converted)
+- [x] core auth routes (`login`, `logout`, `register`, `forgotPassword`,
+      `resetPassword`, `updatePassword`) now use Zod request schemas,
+      `parseOrThrow`, `ApiError`, and `errorToNextResponse`
+- [x] property/unit routes (`/api/properties`, `/api/units`,
+      `/api/units/bulk`, `/api/units/my`) now use verified session context,
+      permission keys, Zod parsing, workspace ownership checks, and
+      `errorToNextResponse`
+- [x] user/users routes (`/api/users`, `/api/users/[userId]`,
+      `/api/users/me`, `/api/users/switch-business`,
+      `/api/users/invite-user`, `/api/user/change-password`,
+      `/api/user/notification-preferences`) now use verified session
+      context, permission keys where applicable, Zod parsing, workspace
+      ownership checks, and `errorToNextResponse`
 - [ ] all other ticket routes
-- [ ] all property/unit routes
+- [x] all property/unit routes
 - [ ] all auth routes
-- [ ] all user/users routes
+- [x] all user/users routes
 - [ ] all chat routes
 - [ ] all onboarding routes
 
@@ -172,7 +191,8 @@ Status:
 ## Phase 9 — Lint enforcement
 
 - [x] Add `no-nested-ternary: error` to ESLint
-- [x] Add `npm run lint:no-nested-ternary` script
+- [x] Add `npm run lint:no-nested-ternary` script and clear existing
+      violations
 - [ ] Add a custom rule (or grep CI check) banning `currentBusiness:
       string` literals in API routes — must come from `getVerifiedUser`
 
