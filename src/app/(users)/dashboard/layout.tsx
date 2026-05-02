@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { HeaderBar } from "@/shared/components/header/Headerbar";
 import AppSidebar from "@/shared/components/sidebar/AppSidebar";
 import { AppShell } from "@/shared/shells/AppShell";
@@ -17,32 +17,35 @@ export default async function DashboardLayout({
     await getSessionTimeoutMinutesForVerifiedUser(verify);
 
   return (
-    <section className="h-dvh flex overflow-hidden dashboard-shell">
+    <div className="dashboard-shell">
       <SidebarProvider
         style={
           {
-            "--sidebar-width": "20.5rem",
+            "--sidebar-width": "17rem",
+            "--header-height": "3rem",
+            "--sidebar": "transparent",
           } as CSSProperties
         }
       >
         <AppSidebar role={verify.role} workspaceRole={verify.workspaceRole} />
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <SidebarInset className="bg-card">
           <HeaderBar />
-
-          <section className="flex-1 overflow-y-auto overflow-x-hidden px-2 md:px-4 py-10">
-            <div className="font-display">
-              <AppShell
-                fallbackRole={verify.role}
-                fallbackWorkspaceRole={verify.workspaceRole}
-                sessionTimeoutMinutes={sessionTimeoutMinutes}
-              >
-                {children}
-              </AppShell>
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="@container/main flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+              <div className="font-display flex flex-col gap-4 px-2 py-4 md:gap-6 md:px-4 md:py-6">
+                <AppShell
+                  fallbackRole={verify.role}
+                  fallbackWorkspaceRole={verify.workspaceRole}
+                  sessionTimeoutMinutes={sessionTimeoutMinutes}
+                >
+                  {children}
+                </AppShell>
+              </div>
             </div>
-          </section>
-        </section>
+          </div>
+        </SidebarInset>
       </SidebarProvider>
-    </section>
+    </div>
   );
 }

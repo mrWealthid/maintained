@@ -50,7 +50,7 @@ function AppSidebar({
   });
 
   return (
-    <Sidebar className="flex flex-col h-screen" collapsible="icon">
+    <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
         <div className="flex flex-col   justify-between">
           {/* {open  (
@@ -64,7 +64,6 @@ function AppSidebar({
 
         </div>
       </SidebarHeader>
-      <Separator />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -79,12 +78,12 @@ function AppSidebar({
                       onClick={() => {
                         if (isMobile) setOpenMobile(false);
                       }}
-                      className="bg-transparent transition-[background-color,color] duration-300 ease-out hover:bg-transparent active:bg-transparent data-[state=open]:hover:bg-transparent data-[active=true]:bg-muted data-[active=true]:font-medium"
+                      className="bg-transparent transition-[background-color,color] duration-300 ease-out hover:bg-transparent active:bg-transparent data-[state=open]:hover:bg-transparent data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-medium data-[active=true]:hover:bg-primary data-[active=true]:hover:text-primary-foreground"
                       asChild
                     >
                       <Link
                         href={link.path}
-                        className="flex items-center gap-2 rounded-lg text-sm"
+                        className="flex items-center gap-2 rounded-lg text-sm transition-transform duration-200 ease-out hover:translate-x-1"
                       >
                         {link.icon &&
                           React.createElement(link.icon, {
