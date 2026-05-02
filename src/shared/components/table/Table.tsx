@@ -1486,7 +1486,7 @@ function TableRows({ children }: TableRowsProps) {
   // }
 
   return (
-    <TableBody className="">
+    <TableBody className="bg-card [&_tr:nth-child(even)]:bg-muted/30">
       {/* {!customRow
         ? data?.map((row, i: number) => {
           const rowId = getRowIdForRow(row as unknown, i);

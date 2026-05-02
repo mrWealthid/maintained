@@ -116,6 +116,10 @@ export type TechnicianRowActionsProps = {
 
 export type TicketRowProps = {
   data?: Ticket[];
+  enableSelection?: boolean;
+  getRowIdForRow?: (row: Ticket, index: number) => string | number;
+  isRowSelected?: (id: string | number) => boolean;
+  toggleRowSelection?: (id: string | number) => void;
 };
 
 export type TechnicianTicketRowProps = {

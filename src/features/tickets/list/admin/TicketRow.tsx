@@ -2,25 +2,31 @@ import { TicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-function RequestRow({ data }: TicketRowProps) {
+import { Checkbox } from "@/components/ui/checkbox";
+function RequestRow({
+  data,
+  enableSelection,
+  getRowIdForRow,
+  isRowSelected,
+  toggleRowSelection,
+}: TicketRowProps) {
   return (
     <>
       {data?.map((row, i) => {
+        const rowId = getRowIdForRow ? getRowIdForRow(row, i) : row.id;
+        const checked = !!enableSelection && !!isRowSelected?.(rowId);
         return (
           <TableRow key={i} className="relative  ">
-            {/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
-							<input
-								title="check"
-								id="checkbox-all-search"
-								type="checkbox"
-								className="w-4 h-4 m-0 border-border rounded focus:ring-ring "
-							/>
-							<label
-								htmlFor="checkbox-all-search text-sm"
-								className="sr-only">
-								#
-							</label>
-						</td> */}
+            {enableSelection ? (
+              <TableCell className="w-8 px-2">
+                <Checkbox
+                  aria-label="Select row"
+                  checked={checked}
+                  onCheckedChange={() => toggleRowSelection?.(rowId)}
+                  className="m-0"
+                />
+              </TableCell>
+            ) : null}
             <TableCell className="font-medium  whitespace-nowrap">
               <span>{i + 1}.</span>
             </TableCell>
