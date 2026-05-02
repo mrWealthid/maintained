@@ -10,11 +10,51 @@ import {
   CreateTicketPayload,
   TicketType,
 } from "@/shared/model/model";
-import TextInput from "@/shared/components/form-elements/Text-Input";
-import AutoComplete from "@/shared/components/auto-complete/AutoComplete";
 import FileUpload from "@/shared/components/form-elements/File-Upload";
 import { Button } from "@/components/ui/button";
-import { Loader2, UploadCloud, Video } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import {
+  Check,
+  ChevronsUpDown,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  MapPin,
+  Paperclip,
+  PlusCircle,
+  Settings2,
+  Video,
+  Wrench,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import {
   Select,
@@ -25,7 +65,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Label from "@/shared/components/form-elements/Label";
 import { batchUpload } from "../helpers/helpers";
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
@@ -103,6 +142,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
     setValue,
     getValues,
     control,
+    watch,
     formState: { errors, isValid, isDirty },
   } = useFormContext<ManageTicketForm>();
   // const { errors, isValid, isDirty } = formState;
@@ -554,66 +594,87 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
     }
   };
 
+  const watchedType = watch("type");
+  const selectedTypeName = data?.find((t) => t.id === watchedType)?.name;
+
   return (
     <form
       onSubmit={handleSubmit(formSubmit, onError)}
-      className="flex bg-card w-full flex-1 p-6 rounded-lg border items-center"
+      className="w-full"
+      noValidate
     >
-      <section className="flex-col flex gap-2 w-full">
-        <section className="flex mb-5 justify-between items-center">
-          <h3>Create Maintenance Ticket</h3>
-        </section>
+      <div className="space-y-5">
+          <Card className="rounded-2xl shadow-sm">
+            <CardHeader className="px-6 pb-2 pt-5">
+              <SectionHeader
+                step={1}
+                icon={<FileText className="h-4 w-4" />}
+                title="Ticket Details"
+                subtitle="Provide a clear title and description of the issue"
+              />
+            </CardHeader>
+            <Separator className="mx-6 w-auto" />
+            <CardContent className="space-y-5 px-6 pb-6 pt-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="title" required>
+                  Title
+                </Label>
+                <Input
+                  id="title"
+                  type="text"
+                  placeholder="e.g. Leaking faucet in master bathroom"
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors?.title}
+                  className="h-10 rounded-xl"
+                  {...register("title", {
+                    required: "This field is required",
+                  })}
+                />
+                {errors?.title?.message ? (
+                  <ErrorMessage errorMsg={errors.title.message.toString()} />
+                ) : null}
+              </div>
 
-        <TextInput
-          name={"title"}
-          placeholder="Enter Title"
-          label="Title"
-          required={true}
-          error={errors?.["title"]?.message?.toString()}
-        >
-          <input
-            {...register("title", {
-              required: "This field is required",
-            })}
-            className="input-style"
-            type="text"
-            disabled={isSubmitting}
-            id="title"
-          />
-        </TextInput>
+              <div className="space-y-1.5">
+                <Label htmlFor="description" required>
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  rows={4}
+                  placeholder="Describe the issue in detail — when it started, severity, hazards…"
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors?.description}
+                  className="rounded-xl"
+                  {...register("description", {
+                    required: "This field is required",
+                  })}
+                />
+                {errors?.description?.message ? (
+                  <ErrorMessage
+                    errorMsg={errors.description.message.toString()}
+                  />
+                ) : null}
+              </div>
 
-        <TextInput
-          name={"description"}
-          placeholder="Kindly describe"
-          label="Description"
-          required={true}
-          error={errors?.["description"]?.message?.toString()}
-        >
-          <textarea
-            className="input-style"
-            {...register("description", {
-              required: "This field is required",
-            })}
-            disabled={isSubmitting}
-            id="description"
-            cols={40}
-            rows={4}
-          ></textarea>
-        </TextInput>
-
-        <div>
-          <AutoComplete<Category>
-            queryKey="category"
-            service={fetchTicketCategory}
-            label={"Category"}
-            optionKey={"id"}
-            // custom={'regularPrice'}
-            displayValue={"name"}
-            initialValue={ticket?.category}
-            handler={handleAutoCompleteValues}
-          />
-          {/* Autocomplete usage with static data */}
-          {/* <AutoComplete<Category>
+              <div className="space-y-1.5">
+                <Label htmlFor="category-combobox" required>
+                  Category
+                </Label>
+                <CategoryCombobox
+                  value={getValues("category")}
+                  initialCategory={
+                    typeof ticket?.category === "object"
+                      ? (ticket?.category as Category)
+                      : undefined
+                  }
+                  disabled={isSubmitting}
+                  onChange={(cat) => {
+                    handleAutoCompleteValues({ category: cat });
+                  }}
+                />
+                {/* Autocomplete usage with static data */}
+                {/* <AutoComplete<Category>
 							queryKey='category'
 							// service={fetchTicketCategory}
 							label={'Category'}
@@ -684,115 +745,326 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 							]}
 						/> */}
 
-          <div className="hidden">
-            <TextInput
-              name={"category"}
-              error={errors?.["category"]?.message?.toString()}
-            >
-              <input
-                title="category"
-                {...register("category", {
-                  required: "This field is required",
-                })}
-                className="input-style"
-                type="text"
-                hidden
-                id="category"
+                <input
+                  title="category"
+                  type="hidden"
+                  id="category"
+                  {...register("category", {
+                    required: "This field is required",
+                  })}
+                />
+                {errors?.category?.message ? (
+                  <ErrorMessage
+                    errorMsg={errors.category.message.toString()}
+                  />
+                ) : null}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl shadow-sm">
+            <CardHeader className="px-6 pb-2 pt-5">
+              <SectionHeader
+                step={2}
+                icon={<MapPin className="h-4 w-4" />}
+                title="Location & Type"
+                subtitle="Where the issue is and what kind of service is needed"
               />
-            </TextInput>
+            </CardHeader>
+            <Separator className="mx-6 w-auto" />
+            <CardContent className="px-6 pb-6 pt-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="area" required>
+                    Area
+                  </Label>
+                  <InputGroup className="h-10 rounded-xl">
+                    <InputGroupAddon align="inline-start">
+                      <MapPin className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="area"
+                      type="text"
+                      placeholder="e.g. Kitchen, Bedroom 2…"
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors?.area}
+                      {...register("area", {
+                        required: "This field is required",
+                      })}
+                    />
+                  </InputGroup>
+                  {errors?.area?.message ? (
+                    <ErrorMessage errorMsg={errors.area.message.toString()} />
+                  ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="ticketType" required>
+                    Request Type
+                  </Label>
+                  <Controller
+                    name="type"
+                    control={control}
+                    rules={{ required: "Please select a ticket type" }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-10 rounded-xl">
+                          <div className="flex items-center gap-2">
+                            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+                            <SelectValue placeholder="Select a ticket type" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Ticket Types</SelectLabel>
+                            {data?.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors?.type?.message ? (
+                    <ErrorMessage errorMsg={errors.type.message.toString()} />
+                  ) : null}
+                </div>
+              </div>
+
+              {selectedTypeName && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                    <Settings2 className="h-3 w-3" />
+                    {selectedTypeName} request — a technician will be assigned
+                    after review
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl shadow-sm">
+            <CardHeader className="px-6 pb-2 pt-5">
+              <SectionHeader
+                step={3}
+                icon={<Paperclip className="h-4 w-4" />}
+                title="Attachments"
+                subtitle="Photos, videos, or documents that help describe the issue"
+              />
+            </CardHeader>
+            <Separator className="mx-6 w-auto" />
+            <CardContent className="space-y-6 px-6 pb-6 pt-5">
+              <FileUpload
+                id="image"
+                label={"Images"}
+                hint="PNG, JPG, WEBP up to 10 MB each"
+                onFileSelect={handleImageSelect}
+                multiple={true}
+                accept={"image/*"}
+                icon={<ImageIcon className="h-3.5 w-3.5" />}
+                onPreviewFileRemove={onPreviewFileRemove}
+                uploadProgress={uploadProgress}
+                initialFiles={initialImageFiles}
+                onRemoveInitialFile={handleRemoveInitialAsset}
+              />
+              <Separator />
+              <FileUpload
+                id="video"
+                label={"Videos"}
+                hint="MP4, MOV up to 50 MB each"
+                onFileSelect={handleVideoSelect}
+                multiple={true}
+                accept={"video/*"}
+                icon={<Video className="h-3.5 w-3.5" />}
+                onPreviewFileRemove={onPreviewFileRemove}
+                uploadProgress={uploadProgress}
+                initialFiles={initialVideoFiles}
+                onRemoveInitialFile={handleRemoveInitialAsset}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="sticky bottom-0 z-10 -mx-1 pb-2">
+            <div className="rounded-2xl border bg-card/95 px-5 py-4 shadow-lg backdrop-blur-sm">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Fields marked{" "}
+                  <span className="font-medium text-destructive">*</span> are
+                  required before submitting.
+                </p>
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-xl"
+                    disabled={isSubmitting}
+                    onClick={() => router.back()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="rounded-xl px-6"
+                    disabled={!isValid || isSubmitting || !isDirty}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Submitting…
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircle className="mr-2 size-4" />
+                        {isEditing ? "Update" : "Create"} Ticket
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <TextInput
-          name={"area"}
-          placeholder="Enter Area"
-          required={true}
-          label="Area (Ex. Kitchen)"
-          error={errors?.["area"]?.message?.toString()}
-        >
-          <input
-            {...register("area", {
-              required: "This field is required",
-            })}
-            className="input-style"
-            type="text"
-            disabled={isSubmitting}
-            id="area"
-          />
-        </TextInput>
-
-        <Label
-          text={"Specify Request Type"}
-          name={"ticketType"}
-          required={true}
-        />
-        <Controller
-          name="type"
-          control={control}
-          rules={{ required: "Please select a ticket type" }}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="py-3 h-fit">
-                <SelectValue placeholder="Select a ticket type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Ticket Types</SelectLabel>
-                  {data?.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <section className="w-full items-start flex-col mt-3 lg:flex-row flex gap-10">
-          <div className=" w-full lg:w-1/2  border   p-2 rounded-2xl">
-            <FileUpload
-              id="image"
-              label={"Upload Images"}
-              onFileSelect={handleImageSelect}
-              multiple={true}
-              accept={"image/*"}
-              icon={<UploadCloud className="h-5 w-5" />}
-              onPreviewFileRemove={onPreviewFileRemove}
-              uploadProgress={uploadProgress}
-              initialFiles={initialImageFiles}
-              onRemoveInitialFile={handleRemoveInitialAsset}
-            />
-          </div>
-
-          <div className="w-full lg:w-1/2 border   p-2 rounded-2xl">
-            <FileUpload
-              id="video"
-              label={"Upload Videos"}
-              onFileSelect={handleVideoSelect}
-              multiple={true}
-              accept={"video/*"}
-              icon={<Video className="h-5 w-5" />}
-              onPreviewFileRemove={onPreviewFileRemove}
-              uploadProgress={uploadProgress}
-              initialFiles={initialVideoFiles}
-              onRemoveInitialFile={handleRemoveInitialAsset}
-            />
-          </div>
-        </section>
-
-        <hr className="my-3" />
-        <section className="flex justify-end   gap-4">
-          <Button
-            type="submit"
-            disabled={!isValid || isSubmitting || !isDirty}
-          >
-            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {isEditing ? "Update" : "Create"} Ticket
-          </Button>
-        </section>
-      </section>
+      </div>
     </form>
   );
 };
+
+function SectionHeader({
+  icon,
+  title,
+  subtitle,
+  step,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  step: number;
+}) {
+  return (
+    <div className="mb-2 flex items-start gap-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            {step}
+          </span>
+          <h2 className="text-base font-semibold">{title}</h2>
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+function CategoryCombobox({
+  value,
+  initialCategory,
+  onChange,
+  disabled,
+}: {
+  value?: string;
+  initialCategory?: Category;
+  onChange: (category: Category) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Category | undefined>(
+    initialCategory
+  );
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["category", search],
+    queryFn: () => fetchTicketCategory<Category>(search || null),
+  });
+
+  const categories = (data?.data || []) as Category[];
+  const display =
+    selected?.name ||
+    categories.find((c) => c.id === value)?.name ||
+    "";
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id="category-combobox"
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className="h-10 w-full justify-between rounded-xl font-normal"
+        >
+          <span className={cn(!display && "text-muted-foreground")}>
+            {display || "Select a category…"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search categories…"
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            {isLoading ? (
+              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                Loading…
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>No categories found.</CommandEmpty>
+                <CommandGroup>
+                  {categories.map((cat) => (
+                    <CommandItem
+                      key={cat.id}
+                      value={cat.id}
+                      onSelect={() => {
+                        setSelected(cat);
+                        onChange(cat);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          (selected?.id || value) === cat.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {cat.name}
+                        </span>
+                        {cat.description && (
+                          <span className="text-xs text-muted-foreground line-clamp-1">
+                            {cat.description}
+                          </span>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default TicketForm;

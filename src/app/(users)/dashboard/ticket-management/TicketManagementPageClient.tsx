@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ManageTicketForm } from "@/features/tickets/models/ticket.model";
 import { FormProvider, useForm } from "react-hook-form";
 import TicketForm from "@/features/tickets/forms/TicketForm";
+import TicketSummary from "@/features/tickets/components/TicketSummary";
 import { CreateTicketPayload } from "@/shared/model/model";
 import { Sheet } from "@/components/ui/sheet";
 import {
@@ -114,8 +115,28 @@ export default function Home() {
                   description="Create a maintenance request from a focused workspace."
                   icon={Wrench}
                 />
-                <AppSheetBody className="mx-auto w-full max-w-4xl">
-                  <TicketForm onSubmit={onSubmit} />
+                <AppSheetBody className="flex justify-center">
+                  <div className="w-3/4">
+                    <div className="mb-6">
+                      <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+                        Create Maintenance Ticket
+                      </h1>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Submit a new repair or maintenance request. Fields
+                        marked{" "}
+                        <span className="font-medium text-destructive">*</span>{" "}
+                        are required.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-6">
+                      <div className="min-w-0 flex-1">
+                        <TicketForm onSubmit={onSubmit} />
+                      </div>
+                      <div className="w-80 shrink-0">
+                        <TicketSummary />
+                      </div>
+                    </div>
+                  </div>
                 </AppSheetBody>
               </AppSheetContent>
             </Sheet>

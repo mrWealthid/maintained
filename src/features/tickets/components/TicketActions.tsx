@@ -42,6 +42,7 @@ import {
   useDeleteTicket,
 } from "../hooks/ticketHooks";
 import TicketForm from "../forms/TicketForm";
+import TicketSummary from "./TicketSummary";
 import HandOffTicketForm from "../forms/HandOffTicketForm";
 import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
 
@@ -255,11 +256,38 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
             description="Update this maintenance request from a focused workspace."
             icon={Wrench}
           />
-          <AppSheetBody className="mx-auto w-full max-w-4xl">
-            {createTicketError ? <ErrorList error={createTicketError} /> : null}
-            <FormProvider {...methods}>
-              <TicketForm ticket={ticket} onSubmit={onSubmit} />
-            </FormProvider>
+          <AppSheetBody className="flex justify-center">
+            <div className="w-3/4">
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+                  Edit Maintenance Ticket
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Update this maintenance request. Fields marked{" "}
+                  <span className="font-medium text-destructive">*</span> are
+                  required.
+                </p>
+              </div>
+              {createTicketError ? (
+                <ErrorList error={createTicketError} />
+              ) : null}
+              <FormProvider {...methods}>
+                <div className="flex items-start gap-6">
+                  <div className="min-w-0 flex-1">
+                    <TicketForm ticket={ticket} onSubmit={onSubmit} />
+                  </div>
+                  <div className="w-80 shrink-0">
+                    <TicketSummary
+                      initialAttachmentCounts={{
+                        images: ticket?.images?.length || 0,
+                        videos: ticket?.videos?.length || 0,
+                        documents: ticket?.documents?.length || 0,
+                      }}
+                    />
+                  </div>
+                </div>
+              </FormProvider>
+            </div>
           </AppSheetBody>
         </AppSheetContent>
       </Sheet>
