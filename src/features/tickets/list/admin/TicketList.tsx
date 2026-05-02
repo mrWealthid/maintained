@@ -7,6 +7,7 @@ import Table from "@/shared/components/table/Table";
 import { Ticket } from "@/shared/model/model";
 import TicketHeaderActions from "./TicketHeaderActions";
 import TableComponent from "@/shared/components/table/Table";
+import { TICKET_LIST_FILTER_FIELDS } from "@/features/tickets/data/list-data";
 
 const TicketList: FC = () => {
   const columns: TableColumn<Ticket>[] = [
@@ -77,6 +78,7 @@ const TicketList: FC = () => {
         searchKey="title"
         defaultParams={{ status: TICKET_STATUS.pending }}
         headerActions={<TicketHeaderActions />}
+        filterFields={TICKET_LIST_FILTER_FIELDS}
         columns={columns}
       >
         <Table.TableHeader />

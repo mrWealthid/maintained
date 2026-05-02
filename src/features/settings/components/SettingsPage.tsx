@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, FolderOpen, Mail, Shield, Ticket } from "lucide-react";
+import { Bell, FolderOpen, Mail, Shield } from "lucide-react";
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,23 @@ import CategoryManagement from "./CategoryManagement";
 import TicketTypeManagement from "./TicketTypeManagement";
 import { useAppContext } from "@/shared/contexts/AppContext";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+
+function OperationsSettings() {
+  const { user } = useAppContext();
+  const canManageCategories = user.permissions.includes(
+    PERMISSION.TICKET_CATEGORIES_MANAGE
+  );
+  const canManageTicketTypes = user.permissions.includes(
+    PERMISSION.TICKET_TYPES_MANAGE
+  );
+
+  return (
+    <div className="space-y-6">
+      {canManageCategories ? <CategoryManagement /> : null}
+      {canManageTicketTypes ? <TicketTypeManagement /> : null}
+    </div>
+  );
+}
 
 const tabs = [
   {
@@ -39,18 +56,14 @@ const tabs = [
     content: SecuritySettings,
   },
   {
-    value: "categories",
-    label: "Categories",
+    value: "operations",
+    label: "Operations",
     icon: FolderOpen,
-    permission: PERMISSION.TICKET_CATEGORIES_MANAGE,
-    content: CategoryManagement,
-  },
-  {
-    value: "ticket-types",
-    label: "Ticket Types",
-    icon: Ticket,
-    permission: PERMISSION.TICKET_TYPES_MANAGE,
-    content: TicketTypeManagement,
+    permissions: [
+      PERMISSION.TICKET_CATEGORIES_MANAGE,
+      PERMISSION.TICKET_TYPES_MANAGE,
+    ],
+    content: OperationsSettings,
   },
 ] as const;
 
@@ -60,7 +73,11 @@ const tabTriggerClassName =
 const SettingsPage: React.FC = () => {
   const { user } = useAppContext();
   const visibleTabs = tabs.filter((tab) =>
-    user.permissions.includes(tab.permission)
+    "permissions" in tab
+      ? tab.permissions.some((permission) =>
+          user.permissions.includes(permission)
+        )
+      : user.permissions.includes(tab.permission)
   );
   const defaultTab = visibleTabs[0]?.value ?? "notifications";
 
@@ -98,7 +115,11 @@ const SettingsPage: React.FC = () => {
           {visibleTabs.map((tab) => {
             const Content = tab.content;
             return (
-              <TabsContent key={tab.value} value={tab.value} className="space-y-6">
+              <TabsContent
+                key={tab.value}
+                value={tab.value}
+                className="space-y-6"
+              >
                 <Content />
               </TabsContent>
             );

@@ -5,9 +5,9 @@ import TechnicianTicketList from "@/features/tickets/list/technician/TicketList"
 import ToggleView from "@/shared/components/toggle-views/ToggleView";
 import TicketComponent from "@/features/tickets/components/TicketComponent";
 import { CiCirclePlus } from "react-icons/ci";
-import TransitionReveal from "@/shared/components/animation/TransitionReveal";
 import { InteractiveTicketChat } from "@/features/tickets/components/InteractiveTicketChat";
 import { Bot, FilePlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ManageTicketForm } from "@/features/tickets/models/ticket.model";
 import { FormProvider, useForm } from "react-hook-form";
 import TicketForm from "@/features/tickets/forms/TicketForm";
@@ -74,13 +74,10 @@ export default function Home() {
           <FormProvider {...methods}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="btn-primary bg-card flex items-center gap-1 rounded-lg"
-                >
+                <Button type="button" variant="outline" className="gap-1">
                   <CiCirclePlus size={18} />
                   Create Ticket
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuGroup>
@@ -131,16 +128,9 @@ export default function Home() {
 
         <ToggleView isList={isList} onChangeView={handleChangeView} />
       </section>
-      {isList ? (
-        <TransitionReveal keyId="list">
-          {isTechnician ? <TechnicianTicketList /> : null}
-          {!isTechnician ? <AdminTicketList /> : null}
-        </TransitionReveal>
-      ) : (
-        <TransitionReveal keyId="tile">
-          <TicketComponent />
-        </TransitionReveal>
-      )}
+      {!isList ? <TicketComponent /> : null}
+      {isList && isTechnician ? <TechnicianTicketList /> : null}
+      {isList && !isTechnician ? <AdminTicketList /> : null}
     </section>
   );
 }

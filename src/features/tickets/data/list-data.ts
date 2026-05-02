@@ -1,5 +1,6 @@
 import { TICKET_PRIORITY, type TicketPriority } from "../models/ticket-priority.model";
 import { TICKET_STATUS, type TicketStatus } from "../models/ticket-status.model";
+import type { TableFilterField } from "@/shared/components/table/models/table.model";
 
 /**
  * Static badge / label metadata for ticket lists. Lives in feature
@@ -86,3 +87,46 @@ export const TICKET_PRIORITY_FILTER_OPTIONS = (
   value,
   label: TICKET_PRIORITY_META[value].label,
 }));
+
+export const TICKET_LIST_FILTER_FIELDS: TableFilterField[] = [
+  {
+    key: "title",
+    label: "Title",
+    searchType: "TEXT",
+    placeholder: "Search by title",
+  },
+  {
+    key: "user",
+    label: "User",
+    searchType: "TEXT",
+    placeholder: "User name",
+  },
+  {
+    key: "area",
+    label: "Area",
+    searchType: "TEXT",
+    placeholder: "Area",
+  },
+  {
+    key: "status",
+    label: "Status",
+    searchType: "DROPDOWN",
+    selectOptions: (Object.keys(TICKET_STATUS_META) as TicketStatus[]).map(
+      (value) => ({
+        name: TICKET_STATUS_META[value].label,
+        value,
+      }),
+    ),
+  },
+  {
+    key: "priority",
+    label: "Priority",
+    searchType: "DROPDOWN",
+    selectOptions: (Object.keys(TICKET_PRIORITY_META) as TicketPriority[]).map(
+      (value) => ({
+        name: TICKET_PRIORITY_META[value].label,
+        value,
+      }),
+    ),
+  },
+];

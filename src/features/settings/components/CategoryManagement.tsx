@@ -1,13 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -28,6 +21,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Category } from "@/shared/model/model";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { SettingsSection } from "./SettingsSection";
 
 const CategoryManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,98 +78,91 @@ const CategoryManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Category Management</h2>
-          <p className="text-muted-foreground">Create and manage ticket categories</p>
-        </div>
-        {canManageCategories && (
-          <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Category
-          </Button>
+      <SettingsSection
+        title="Category Management"
+        description="Create and manage ticket categories"
+        icon={Plus}
+        actions={
+          canManageCategories ? (
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
+          ) : null
+        }
+      >
+        {isLoading && (
+          <div className="text-center py-4">Loading categories...</div>
         )}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Categories</CardTitle>
-          <CardDescription>Manage existing ticket categories</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading && (
-            <div className="text-center py-4">Loading categories...</div>
-          )}
-          {!isLoading && !hasCategories && (
-            <div className="text-center py-4 text-muted-foreground">
-              No categories found
-            </div>
-          )}
-          {!isLoading && hasCategories && (
-            <div className="space-y-3">
-              {categories!.map((category: Category) => (
-                <div
-                  key={category.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-medium">{category.name}</h3>
-                      <Badge
-                        variant={category.isActive ? "outline" : "secondary"}
-                      >
-                        {category.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                      {category.isDefault && (
-                        <Badge variant="outline">Default</Badge>
-                      )}
-                    </div>
-                    {category.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {category.description}
-                      </p>
-                    )}
-                  </div>
+        {!isLoading && !hasCategories && (
+          <div className="text-center py-4 text-muted-foreground">
+            No categories found
+          </div>
+        )}
+        {!isLoading && hasCategories && (
+          <div className="space-y-3">
+            {categories!.map((category: Category) => (
+              <div
+                key={category.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
+                <div className="flex-1">
                   <div className="flex items-center space-x-2">
-                    {canManageCategories && (
-                      <>
-                        <Switch
-                          checked={category.isActive}
-                          onCheckedChange={() => handleToggleStatus(category)}
-                        />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem
-                              onClick={() => handleEdit(category)}
-                            >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            {!category.isDefault && (
-                              <DropdownMenuItem
-                                onClick={() => handleDelete(category)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </>
+                    <h3 className="font-medium">{category.name}</h3>
+                    <Badge
+                      variant={category.isActive ? "outline" : "secondary"}
+                    >
+                      {category.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                    {category.isDefault && (
+                      <Badge variant="outline">Default</Badge>
                     )}
                   </div>
+                  {category.description && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {category.description}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <div className="flex items-center space-x-2">
+                  {canManageCategories && (
+                    <>
+                      <Switch
+                        checked={category.isActive}
+                        onCheckedChange={() => handleToggleStatus(category)}
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          {!category.isDefault && (
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(category)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SettingsSection>
 
       <CategoryModal
         isOpen={isModalOpen}

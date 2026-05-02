@@ -18,13 +18,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import {
   isValidIpAddress,
   normalizeIpAddress,
@@ -51,6 +43,9 @@ import {
   useSecuritySettings,
   useUpdateSecuritySettings,
 } from "../hooks/settingsHooks";
+import { SettingsField } from "./SettingsField";
+import { SettingsSection } from "./SettingsSection";
+import { SettingsToggleRow } from "./SettingsToggleRow";
 
 const EMPTY_WHITELIST_MESSAGE =
   "Add at least one allowed IP address before enabling IP whitelisting.";
@@ -274,19 +269,12 @@ const SecuritySettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="size-5 text-primary" />
-              Security Settings
-            </CardTitle>
-            <CardDescription>
-              Manage authentication, active sessions, and workspace access
-              restrictions.
-            </CardDescription>
-          </div>
-          {canManageSecurity ? (
+      <SettingsSection
+        title="Security Settings"
+        description="Manage authentication, active sessions, and workspace access restrictions"
+        icon={Shield}
+        actions={
+          canManageSecurity ? (
             <Button
               type="button"
               onClick={handleSave}
@@ -298,23 +286,17 @@ const SecuritySettings: React.FC = () => {
             >
               {updateSecuritySettings.isPending ? "Saving..." : "Save Changes"}
             </Button>
-          ) : null}
-        </CardHeader>
-        <CardContent className="space-y-6">
+          ) : null
+        }
+      >
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-foreground">
               Authentication
             </h4>
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4">
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  Two-Factor Authentication (2FA)
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Require 2FA for privileged workspace access.
-                </p>
-              </div>
-              <Switch
+            <div className="rounded-2xl border border-border/70 bg-muted/35 p-4">
+              <SettingsToggleRow
+                label="Two-Factor Authentication (2FA)"
+                description="Require 2FA for privileged workspace access."
                 checked={settings.require2fa}
                 disabled={!canManageSecurity}
                 onCheckedChange={(value) =>
@@ -331,10 +313,7 @@ const SecuritySettings: React.FC = () => {
               Session Management
             </h4>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Session Timeout (Minutes)
-                </label>
+              <SettingsField label="Session Timeout (Minutes)">
                 <Input
                   type="text"
                   inputMode="numeric"
@@ -350,12 +329,9 @@ const SecuritySettings: React.FC = () => {
                 <p className="text-xs text-muted-foreground">
                   Enter a whole number between 5 and 1440 minutes.
                 </p>
-              </div>
+              </SettingsField>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Maximum Active Sessions
-                </label>
+              <SettingsField label="Maximum Active Sessions">
                 <Select
                   value={String(settings.maxActiveSessions)}
                   disabled={!canManageSecurity}
@@ -378,7 +354,7 @@ const SecuritySettings: React.FC = () => {
                     <SelectItem value="unlimited">Unlimited</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </SettingsField>
             </div>
 
             {canViewSessions ? (
@@ -428,14 +404,10 @@ const SecuritySettings: React.FC = () => {
             <h4 className="text-sm font-medium text-foreground">
               Access Control
             </h4>
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-muted/35 p-4">
-              <div>
-                <p className="text-sm font-medium">IP Whitelisting</p>
-                <p className="text-sm text-muted-foreground">
-                  Restrict workspace access to specific public IP addresses.
-                </p>
-              </div>
-              <Switch
+            <div className="rounded-2xl border border-border/70 bg-muted/35 p-4">
+              <SettingsToggleRow
+                label="IP Whitelisting"
+                description="Restrict workspace access to specific public IP addresses."
                 checked={settings.ipWhitelist.enabled}
                 disabled={!canManageSecurity}
                 onCheckedChange={(value) =>
@@ -543,8 +515,7 @@ const SecuritySettings: React.FC = () => {
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </SettingsSection>
     </div>
   );
 };

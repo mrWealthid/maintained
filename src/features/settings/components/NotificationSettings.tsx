@@ -69,56 +69,56 @@ const NotificationSettings: React.FC = () => {
           </Button>
         }
       >
-          <div>
-            <Label className="text-base font-medium">
-              Preferred Notification Method
-            </Label>
-            <RadioGroup
-              value={localPreferences.mode}
-              onValueChange={handleModeChange}
-              className="mt-3"
-            >
-              {notificationModes.map((mode) => (
-                <div key={mode.value} className="flex items-center space-x-3">
-                  <RadioGroupItem value={mode.value} id={mode.value} />
-                  <Label htmlFor={mode.value} className="flex-1">
-                    <div className="font-medium">{mode.label}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {mode.description}
-                    </div>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
+        <div>
+          <Label className="text-base font-medium">
+            Preferred Notification Method
+          </Label>
+          <RadioGroup
+            value={localPreferences.mode}
+            onValueChange={handleModeChange}
+            className="mt-3"
+          >
+            {notificationModes.map((mode) => (
+              <div key={mode.value} className="flex items-center space-x-3">
+                <RadioGroupItem value={mode.value} id={mode.value} />
+                <Label htmlFor={mode.value} className="flex-1">
+                  <div className="font-medium">{mode.label}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {mode.description}
+                  </div>
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
 
-          <Separator />
+        <Separator />
 
-          <div className="space-y-4">
-            <Label className="text-base font-medium">
-              Notification Channels
-            </Label>
-            <div className="space-y-3">
-              <SettingsToggleRow
-                label="SMS Notifications"
-                description="Receive text message notifications"
-                checked={localPreferences.smsEnabled}
-                onCheckedChange={() => handleToggle("smsEnabled")}
-              />
-              <SettingsToggleRow
-                label="Email Notifications"
-                description="Receive email notifications"
-                checked={localPreferences.emailEnabled}
-                onCheckedChange={() => handleToggle("emailEnabled")}
-              />
-              <SettingsToggleRow
-                label="Phone Call Notifications"
-                description="Receive phone call notifications"
-                checked={localPreferences.phoneEnabled}
-                onCheckedChange={() => handleToggle("phoneEnabled")}
-              />
-            </div>
+        <div className="space-y-4">
+          <Label className="text-base font-medium">
+            Notification Channels
+          </Label>
+          <div className="space-y-3">
+            <SettingsToggleRow
+              label="SMS Notifications"
+              description="Receive text message notifications"
+              checked={localPreferences.smsEnabled}
+              onCheckedChange={() => handleToggle("smsEnabled")}
+            />
+            <SettingsToggleRow
+              label="Email Notifications"
+              description="Receive email notifications"
+              checked={localPreferences.emailEnabled}
+              onCheckedChange={() => handleToggle("emailEnabled")}
+            />
+            <SettingsToggleRow
+              label="Phone Call Notifications"
+              description="Receive phone call notifications"
+              checked={localPreferences.phoneEnabled}
+              onCheckedChange={() => handleToggle("phoneEnabled")}
+            />
           </div>
+        </div>
       </SettingsSection>
     </div>
   );

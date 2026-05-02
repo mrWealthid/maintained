@@ -129,6 +129,9 @@ export type TicketQueryprops<T = TICKET_STATUS> = {
 
 export type TicketFilterQuery<T = TICKET_STATUS> = {
   status?: T;
+  dateFilter?: string;
+  startDate?: string;
+  endDate?: string;
 };
 // export type TechnicianTicketFilterQuery = {
 // 	status?: TECHNICIAN_RESPONSE;
