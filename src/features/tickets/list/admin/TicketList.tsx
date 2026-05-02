@@ -1,15 +1,163 @@
+"use client";
+import React, { FC, useState, type ComponentType } from "react";
+import { Trash2, UserPlus, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TableColumn } from "@/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
 import { TICKET_STATUS } from "@/shared/enums/enums";
-import React, { FC } from "react";
 import { fetchTicketList } from "@/features/tickets/services/ticket-service";
 import Table from "@/shared/components/table/Table";
 import { Ticket } from "@/shared/model/model";
 import TicketHeaderActions from "./TicketHeaderActions";
 import TableComponent from "@/shared/components/table/Table";
 import { TICKET_LIST_FILTER_FIELDS } from "@/features/tickets/data/list-data";
+import type { BulkTicketAction } from "@/features/tickets/services/ticket-service";
+import { useBulkTicketAction } from "@/features/tickets/hooks/ticketHooks";
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
+import type { SelectionActionRenderArgs } from "@/shared/model/action-confirm.model";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+type ConfirmConfigItem = {
+  title: string;
+  describe: (count: number) => string;
+  confirmLabel: string;
+  variant?: "default" | "destructive";
+  icon: ComponentType<{ className?: string }>;
+};
+
+const BULK_CONFIRM_CONFIG: Record<BulkTicketAction, ConfirmConfigItem> = {
+  delete: {
+    title: "Delete Tickets",
+    describe: (n) =>
+      `${n} ticket${n === 1 ? "" : "s"} will be permanently removed.`,
+    confirmLabel: "Delete",
+    variant: "destructive",
+    icon: Trash2,
+  },
+  "assign-self": {
+    title: "Assign to Me",
+    describe: (n) =>
+      `${n} ticket${n === 1 ? "" : "s"} will be actioned by you.`,
+    confirmLabel: "Assign",
+    icon: UserPlus,
+  },
+  decline: {
+    title: "Decline Tickets",
+    describe: (n) => `${n} ticket${n === 1 ? "" : "s"} will be declined.`,
+    confirmLabel: "Decline",
+    variant: "destructive",
+    icon: XCircle,
+  },
+};
 
 const TicketList: FC = () => {
+  const { mutateAsync: runBulk, isPending: isBulkPending } =
+    useBulkTicketAction();
+
+  const [confirmState, setConfirmState] = useState<{
+    action: BulkTicketAction;
+    ticketIds: string[];
+    clearSelection: () => void;
+  } | null>(null);
+
+  const canDeleteTicket = useHasPermission(PERMISSION.TICKETS_DELETE);
+  const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
+  const canManageTicketStatus = useHasPermission(
+    PERMISSION.TICKETS_STATUS_MANAGE,
+  );
+
+  const openConfirm = (
+    action: BulkTicketAction,
+    ticketIds: string[],
+    clearSelection: () => void,
+  ) => {
+    if (!ticketIds.length) return;
+    setConfirmState({ action, ticketIds, clearSelection });
+  };
+
+  const handleConfirmBulkAction = async () => {
+    if (!confirmState) return;
+    await runBulk({
+      action: confirmState.action,
+      ticketIds: confirmState.ticketIds,
+    });
+    confirmState.clearSelection();
+    setConfirmState(null);
+  };
+
+  const activeConfig = confirmState
+    ? BULK_CONFIRM_CONFIG[confirmState.action]
+    : null;
+
+  const renderBulkSelectionActions = ({
+    selectedRows,
+    clearSelection,
+  }: SelectionActionRenderArgs<Ticket>) => {
+    const ids = Array.from(
+      new Set(
+        selectedRows
+          .map((row) => (row as { id?: string; _id?: string }).id ?? (row as { _id?: string })._id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    if (ids.length === 0) return null;
+
+    type ActionEntry = {
+      key: BulkTicketAction;
+      label: string;
+      icon: ComponentType<{ className?: string }>;
+      variant?: "outline" | "destructive";
+      enabled: boolean;
+    };
+
+    const actions: ActionEntry[] = [
+      {
+        key: "assign-self",
+        label: "Assign to me",
+        icon: UserPlus,
+        variant: "outline",
+        enabled: canAssignTicket,
+      },
+      {
+        key: "decline",
+        label: "Decline",
+        icon: XCircle,
+        variant: "outline",
+        enabled: canManageTicketStatus,
+      },
+      {
+        key: "delete",
+        label: "Delete",
+        icon: Trash2,
+        variant: "destructive",
+        enabled: canDeleteTicket,
+      },
+    ];
+
+    return (
+      <>
+        {actions
+          .filter((a) => a.enabled)
+          .map((action) => (
+            <Button
+              key={action.key}
+              type="button"
+              size="sm"
+              variant={action.variant === "destructive" ? "destructive" : "outline"}
+              disabled={isBulkPending}
+              onClick={() => openConfirm(action.key, ids, clearSelection)}
+              className="gap-1"
+            >
+              <action.icon className="size-3.5" />
+              {action.label}
+            </Button>
+          ))}
+      </>
+    );
+  };
+
   const columns: TableColumn<Ticket>[] = [
     {
       header: "Title",
@@ -69,6 +217,9 @@ const TicketList: FC = () => {
     },
   ];
 
+  const enableSelection =
+    canDeleteTicket || canAssignTicket || canManageTicketStatus;
+
   return (
     <>
       <TableComponent<Ticket>
@@ -79,6 +230,8 @@ const TicketList: FC = () => {
         defaultParams={{ status: TICKET_STATUS.pending }}
         headerActions={<TicketHeaderActions />}
         filterFields={TICKET_LIST_FILTER_FIELDS}
+        enableSelection={enableSelection}
+        renderSelectionActions={renderBulkSelectionActions}
         columns={columns}
       >
         <Table.TableHeader />
@@ -86,6 +239,24 @@ const TicketList: FC = () => {
           <RequestRow />
         </Table.TableRow>
       </TableComponent>
+
+      {confirmState && activeConfig ? (
+        <ActionConfirmDialog
+          open={!!confirmState}
+          onOpenChange={(open) => {
+            if (!open) setConfirmState(null);
+          }}
+          title={activeConfig.title}
+          description={activeConfig.describe(confirmState.ticketIds.length)}
+          confirmLabel={
+            isBulkPending ? "Working..." : activeConfig.confirmLabel
+          }
+          variant={activeConfig.variant}
+          icon={activeConfig.icon}
+          isLoading={isBulkPending}
+          onConfirm={handleConfirmBulkAction}
+        />
+      ) : null}
     </>
   );
 };

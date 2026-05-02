@@ -18,6 +18,7 @@ import {
   fetchTickets,
   handOffTicket,
   ProcessTechnicianResponse,
+  runBulkTicketAction,
   sendTechnicianRequest,
 } from "../services/ticket-service";
 import {
@@ -288,4 +289,38 @@ export function useFetchRequestTypes(page: number = 1, limit: number = 50) {
     isRefetching,
     data,
   };
+}
+
+export function useBulkTicketAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: runBulkTicketAction,
+    onSuccess: (res) => {
+      const action = res.data.action;
+      if (action === "delete") {
+        const count = res.data.deletedCount ?? 0;
+        toast.success(
+          count > 0
+            ? `${count} ticket${count === 1 ? "" : "s"} deleted.`
+            : "No tickets were deleted.",
+        );
+      } else if (action === "assign-self") {
+        const count = res.data.modifiedCount ?? 0;
+        toast.success(
+          count > 0
+            ? `${count} ticket${count === 1 ? "" : "s"} assigned to you.`
+            : "No tickets were changed.",
+        );
+      } else if (action === "decline") {
+        const count = res.data.modifiedCount ?? 0;
+        toast.success(
+          count > 0
+            ? `${count} ticket${count === 1 ? "" : "s"} declined.`
+            : "No tickets were changed.",
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
 }

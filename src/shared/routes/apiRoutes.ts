@@ -60,6 +60,7 @@ export const API_ROUTES = {
     send_technician_request: (id: string) =>
       resourceById("tickets/technician-request")(id),
     get_technician_requests: `${base}/tickets/technician-request`,
+    bulk_actions: `${base}/tickets/bulk-actions`,
   },
   chat: {
     get_rooms: `${base}/chat/rooms`,

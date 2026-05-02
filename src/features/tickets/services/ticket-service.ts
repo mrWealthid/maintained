@@ -181,6 +181,34 @@ export async function deleteTicket(id: string) {
     throw ApiErrorHandler.toUIError(err);
   }
 }
+
+export type BulkTicketAction = "delete" | "assign-self" | "decline";
+
+export type BulkTicketActionPayload = {
+  action: BulkTicketAction;
+  ticketIds: string[];
+};
+
+export type BulkTicketActionResponse = {
+  success: boolean;
+  data: {
+    action: BulkTicketAction;
+    deletedCount?: number;
+    modifiedCount?: number;
+  };
+};
+
+export async function runBulkTicketAction(payload: BulkTicketActionPayload) {
+  try {
+    const { data } = await http.post<BulkTicketActionResponse>(
+      API_ROUTES.ticketManagement.bulk_actions,
+      payload,
+    );
+    return data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
 export async function assignTicket(
   id: string,
   payload: { actionedBy?: string; status: TICKET_STATUS }
