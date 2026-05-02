@@ -4,7 +4,7 @@ import TicketCard from "./TicketCard";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { Ticket } from "@/shared/model/model";
 import { ticketListFilterData } from "../data/data";
-import FilterTabs from "@/shared/components/tabs/FilterTabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Search from "@/shared/components/search/Search";
 import { useDebounce } from "@uidotdev/usehooks";
 import Empty from "@/shared/components/empty/Empty";
@@ -35,11 +35,23 @@ const TicketComponent: FC = () => {
       <div className="flex flex-col md:flex-row overflow-x-auto gap-2   mb-3 md:justify-between flex-wrap  md:items-center">
         <Search placeHolder="Enter title" onSearch={handleSearchValue} />
 
-        <FilterTabs
-          status={status}
-          onSelectValue={handleSelectedValue}
-          data={ticketListFilterData}
-        />
+        <Tabs
+          value={status}
+          onValueChange={(val) => handleSelectedValue(val as TICKET_STATUS)}
+          className="w-full xl:w-auto"
+        >
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm sm:w-auto">
+            {ticketListFilterData.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="justify-start gap-3 rounded-full px-3 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {isLoading && (

@@ -23,13 +23,12 @@ export default async function DashboardLayout({
           {
             "--sidebar-width": "17rem",
             "--header-height": "3rem",
-            "--sidebar": "transparent",
           } as CSSProperties
         }
       >
         <AppSidebar role={verify.role} workspaceRole={verify.workspaceRole} />
 
-        <SidebarInset className="bg-card">
+        <SidebarInset className="bg-background shadow-none!">
           <HeaderBar />
           <div className="flex flex-1 flex-col overflow-hidden">
             <div className="@container/main flex flex-1 flex-col overflow-y-auto overflow-x-hidden">

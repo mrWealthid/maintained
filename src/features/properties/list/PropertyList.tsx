@@ -4,8 +4,6 @@ import { FC } from "react";
 import { fetchPropertyList } from "@/features/properties/services/property-service";
 import Table from "@/shared/components/table/Table";
 import { Property } from "@/features/properties/services/property-service";
-import PropertyHeaderActions from "./PropertyHeaderActions";
-
 const PropertyList: FC = () => {
   const columns: TableColumn<Property>[] = [
     {
@@ -61,7 +59,6 @@ const PropertyList: FC = () => {
         queryKey="properties"
         exportTitle="Properties"
         searchKey="name"
-        headerActions={<PropertyHeaderActions />}
         columns={columns}
       >
         <Table.TableHeader />

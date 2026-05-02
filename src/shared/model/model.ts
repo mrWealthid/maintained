@@ -98,23 +98,6 @@ export interface ApiPaginatedResponse<T> {
   results: number;
 }
 
-export interface ITab {
-  title: string;
-  order: number;
-  icon: React.ReactNode;
-}
-
-export interface ButtonGroupTabsProps<T = string> {
-  onSelectValue: (type: TICKET_STATUS) => void;
-  status: TICKET_STATUS;
-  data: TabData<T>[];
-}
-
-interface TabData<T> {
-  label: string;
-  value: T;
-}
-
 export type Routes = {
   name: string;
   path: string;

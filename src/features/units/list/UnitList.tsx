@@ -4,8 +4,6 @@ import { FC } from "react";
 import { fetchUnitList } from "@/features/units/services/unit-service";
 import Table from "@/shared/components/table/Table";
 import { Unit } from "@/features/units/services/unit-service";
-import UnitHeaderActions from "./UnitHeaderActions";
-
 const UnitList: FC = () => {
   const columns: TableColumn<Unit>[] = [
     {
@@ -58,7 +56,6 @@ const UnitList: FC = () => {
         queryKey="units"
         exportTitle="Units"
         searchKey="label"
-        headerActions={<UnitHeaderActions />}
         columns={columns}
       >
         <Table.TableHeader />
