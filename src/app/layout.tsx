@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Plus_Jakarta_Sans, Lora, Roboto_Mono } from "next/font/google";
 import "./global.css";
 import Provider from "@/utils/Provider";
 import { Toaster } from "react-hot-toast";
 import { Toaster as Toasts } from "@/components/ui/sonner";
 import { ThemeProvider } from "../shared/contexts/ThemeProvider";
 
-const raleway = Raleway({ subsets: ["latin"] });
+const fontSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fontSerif = Lora({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const fontMono = Roboto_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Maintainly",
@@ -20,8 +36,12 @@ export default async function RootLayout({
 }>) {
   // const theme = await getThemeFromCookie();
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${raleway.className}`}>
+    <html
+      lang="en"
+      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

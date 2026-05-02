@@ -128,7 +128,7 @@ export default function SidebarProfileShell({
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             size="lg"
-            className="h-auto min-h-14 rounded-2xl border border-border/60 bg-muted/30 px-3 py-3 shadow-sm transition-colors hover:bg-muted/60 focus-visible:ring-0 data-[state=open]:bg-muted/70 data-[state=open]:text-foreground group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:border-border/50 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            className="h-auto min-h-14 rounded-2xl border border-border/60 bg-muted/30 px-3 py-3 shadow-xs transition-colors hover:bg-muted/60 focus-visible:ring-0 data-[state=open]:bg-muted/70 data-[state=open]:text-foreground group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:border-border/50 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
           >
             {hasResolvedProfile ? (
               <Profile {...profile} expanded={open} />

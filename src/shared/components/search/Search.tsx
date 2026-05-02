@@ -34,7 +34,7 @@ const Search: FC<SearchProps> = ({
         id="search"
         name="search"
         className={cn(
-          "w-full border-none bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-0",
+          "w-full border-none bg-transparent text-xs text-foreground outline-hidden placeholder:text-muted-foreground/70 focus-visible:outline-hidden focus-visible:ring-0",
           inputClassName,
         )}
         onChange={(e) => onSearch(e.target.value)}

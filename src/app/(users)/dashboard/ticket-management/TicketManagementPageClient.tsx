@@ -93,7 +93,7 @@ export default function Home() {
                     <InteractiveTicketChat onSubmit={onSubmit}>
                       <button
                         type="button"
-                        className="relative flex gap-2 cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent w-full  hover:bg-accent focus:text-accent-foreground hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                        className="relative flex gap-2 cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden transition-colors focus:bg-accent w-full  hover:bg-accent focus:text-accent-foreground hover:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
                         role="button"
                       >
                         <Bot size={14} />

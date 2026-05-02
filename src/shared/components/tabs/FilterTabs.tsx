@@ -17,7 +17,7 @@ const FilterTabs: FC<ButtonGroupTabsProps<TICKET_STATUS>> = ({
         onValueChange={(val) => onSelectValue(val as TICKET_STATUS)}
         className="w-auto"
       >
-        <TabsList className="bg-muted p-1 rounded-full shadow-sm space-x-1">
+        <TabsList className="bg-muted p-1 rounded-full shadow-xs space-x-1">
           {data.map((tab) => (
             <TabsTrigger
               key={tab.value}

@@ -221,7 +221,7 @@ export default function AddressField<
             variant={!manualMode ? "default" : "ghost"}
             size="sm"
             onClick={switchToSearch}
-            className={cn("gap-2", !manualMode && "shadow-sm")}
+            className={cn("gap-2", !manualMode && "shadow-xs")}
           >
             <Search className="h-4 w-4" />
             Search Address
@@ -231,7 +231,7 @@ export default function AddressField<
             variant={manualMode ? "default" : "ghost"}
             size="sm"
             onClick={switchToManual}
-            className={cn("gap-2", manualMode && "shadow-sm")}
+            className={cn("gap-2", manualMode && "shadow-xs")}
           >
             <MapPinned className="h-4 w-4" />
             Enter Manually

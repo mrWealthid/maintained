@@ -88,7 +88,7 @@ const NativeTimeField = forwardRef<HTMLInputElement, NativeTimeFieldProps>(
         <div
           aria-hidden="true"
           className={cn(
-            "border-input dark:bg-input/30 flex h-10 w-full min-w-0 items-center rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[border-color,box-shadow] sm:h-9 sm:py-1 sm:text-sm",
+            "border-input dark:bg-input/30 flex h-10 w-full min-w-0 items-center rounded-md border bg-transparent px-3 py-2 text-base shadow-2xs transition-[border-color,box-shadow] sm:h-9 sm:py-1 sm:text-sm",
             "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
             disabled ? "cursor-not-allowed opacity-50" : null,
             props["aria-invalid"]

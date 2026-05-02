@@ -519,7 +519,7 @@ export default function BulkAudienceMessageDialog({
                       type="button"
                       onClick={() => setView("edit")}
                       className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "edit"
-                          ? "bg-background text-foreground shadow-sm"
+                          ? "bg-background text-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                         }`}
                     >
@@ -531,7 +531,7 @@ export default function BulkAudienceMessageDialog({
                       type="button"
                       onClick={() => setView("preview")}
                       className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${view === "preview"
-                          ? "bg-background text-foreground shadow-sm"
+                          ? "bg-background text-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                         }`}
                     >

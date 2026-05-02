@@ -467,7 +467,7 @@ function TableComponent<T>({
   }, [onSelectionChange, selectedRows, enableSelection]);
 
   const CardContent = (
-    <div className="bg-card/80 backdrop-blur-sm p-3 border border-border/80 rounded-xl space-y-3">
+    <div className="bg-card/80 backdrop-blur-xs p-3 border border-border/80 rounded-xl space-y-3">
       <TableHeaderAction>
         {headerActions as React.ReactElement<Record<string, unknown>> | null}
       </TableHeaderAction>
@@ -1105,7 +1105,7 @@ function TableHeaders() {
     enableSelection && data.length > 0 && selectedRowIds.size === data.length;
 
   return (
-    <TableHeader className="bg-muted/80 backdrop-blur capitalize sticky top-0 z-10">
+    <TableHeader className="bg-muted/80 backdrop-blur-sm capitalize sticky top-0 z-10">
       <TableRow>
         {enableSelection && (
           <TableHead className="w-8 px-2 py-3">

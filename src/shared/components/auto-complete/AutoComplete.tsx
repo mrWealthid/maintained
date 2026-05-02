@@ -96,7 +96,7 @@ export default function AutoComplete<T>({
 						leaveFrom='opacity-100'
 						leaveTo='opacity-0'
 						afterLeave={() => setQuery('')}>
-						<Combobox.Options className='absolute bg-card z-50 mt-1 max-h-60 w-full overflow-auto rounded-md  py-1  shadow-lg ring-1   focus:outline-none sm:text-sm'>
+						<Combobox.Options className='absolute bg-card z-50 mt-1 max-h-60 w-full overflow-auto rounded-md  py-1  shadow-lg ring-1   focus:outline-hidden sm:text-sm'>
 							{options?.length === 0 && query !== '' ? (
 								<div className='relative cursor-default select-none py-2 px-4'>
 									Nothing found.

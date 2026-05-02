@@ -21,13 +21,13 @@ import {
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 const calendarPlainTone =
-  "[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary/90 [&>button]:focus:bg-primary/90 dark:[&>button]:bg-white dark:[&>button]:text-black dark:[&>button]:hover:bg-white/90 dark:[&>button]:focus:bg-white/90";
+  "[&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary/90 focus:[&>button]:bg-primary/90 dark:[&>button]:bg-white dark:[&>button]:text-black dark:hover:[&>button]:bg-white/90 dark:focus:[&>button]:bg-white/90";
 
 const calendarPlainToneSoft =
   "[&>button]:border [&>button]:border-primary/30 [&>button]:bg-primary/10 [&>button]:text-primary dark:[&>button]:border-white/20 dark:[&>button]:bg-white/10 dark:[&>button]:text-white";
 
 const calendarDisabledTone =
-  "[&>button]:cursor-not-allowed [&>button]:border-transparent [&>button]:bg-muted/40 [&>button]:text-muted-foreground [&>button]:opacity-60 [&>button]:line-through [&>button]:hover:bg-muted/40 dark:[&>button]:bg-muted/25 dark:[&>button]:text-muted-foreground/80 dark:[&>button]:hover:bg-muted/25";
+  "[&>button]:cursor-not-allowed [&>button]:border-transparent [&>button]:bg-muted/40 [&>button]:text-muted-foreground [&>button]:opacity-60 [&>button]:line-through hover:[&>button]:bg-muted/40 dark:[&>button]:bg-muted/25 dark:[&>button]:text-muted-foreground/80 dark:hover:[&>button]:bg-muted/25";
 
 function CalendarDropdown({
   className,

@@ -286,7 +286,7 @@ export default function ErrorList({
       role="alert"
       aria-live="assertive"
       className={cn(
-        "rounded-lg border  border-destructive/20 bg-background shadow-sm overflow-hidden",
+        "rounded-lg border  border-destructive/20 bg-background shadow-xs overflow-hidden",
         className,
       )}
     >

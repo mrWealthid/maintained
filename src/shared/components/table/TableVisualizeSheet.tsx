@@ -705,7 +705,7 @@ export default function TableVisualizeSheet({
                   </div>
 
                   <div className="grid gap-3 md:grid-cols-3">
-                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-sm">
+                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-xs">
                       <div className="mb-3 flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground">Loaded rows</span>
                         <Database className="size-4 text-primary" />
@@ -718,7 +718,7 @@ export default function TableVisualizeSheet({
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-sm">
+                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-xs">
                       <div className="mb-3 flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground">Filtered total</span>
                         <ChartColumn className="size-4 text-primary" />
@@ -731,7 +731,7 @@ export default function TableVisualizeSheet({
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-sm">
+                    <div className="rounded-2xl border border-border bg-background/85 p-4 shadow-xs">
                       <div className="mb-3 flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground">Plotted groups</span>
                         <BarChart3 className="size-4 text-primary" />
@@ -814,7 +814,7 @@ export default function TableVisualizeSheet({
                           disabled={disabled}
                           className={cn(
                             "h-auto min-h-14 justify-start rounded-2xl border-border bg-background px-4 py-3 text-left text-xs",
-                            active && "border-primary bg-primary/8 text-primary shadow-sm",
+                            active && "border-primary bg-primary/8 text-primary shadow-xs",
                           )}
                           onClick={() => setChartType(option.key)}
                         >
@@ -841,7 +841,7 @@ export default function TableVisualizeSheet({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border bg-background p-5 shadow-sm">
+              <div className="rounded-3xl border border-border bg-background p-5 shadow-xs">
                 {chartData.length ? (
                   <>
                     <div className="mb-5 flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between">

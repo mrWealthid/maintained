@@ -263,7 +263,7 @@ function FileRow({
   const complete = progress >= 100;
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-xl border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
+    <div className="group relative flex items-center gap-3 rounded-xl border bg-card p-3 shadow-xs transition-shadow hover:shadow-md">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
         {previewUrl ? (
           <Image

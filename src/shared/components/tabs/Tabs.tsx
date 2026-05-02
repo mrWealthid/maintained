@@ -22,8 +22,8 @@ export default function TabComponent({ tabData, updateOrder }: any) {
 							className={({ selected }) =>
 								classNames(
 									'w-full rounded-lg py-2.5 text-xs font-medium leading-5  ',
-									'ring-white/60  flex items-center  justify-center focus:outline-none ',
-									selected ? ' shadow' : 'border-white  '
+									'ring-white/60  flex items-center  justify-center focus:outline-hidden ',
+									selected ? ' shadow-sm' : 'border-white  '
 								)
 							}>
 							{tab.icon}

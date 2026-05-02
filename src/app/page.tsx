@@ -31,7 +31,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col max-h-screen overflow-y-auto bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-3">
             <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
@@ -176,19 +176,19 @@ export default function LandingPage() {
                 <CardContent>
                   <ul className="space-y-3">
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Multi-criteria filtering system
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         360° virtual property tours
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         AI-powered recommendations
                       </span>
@@ -215,19 +215,19 @@ export default function LandingPage() {
                 <CardContent>
                   <ul className="space-y-3">
                     <li className="flex items-center space-x-3">
-                      <Clock className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <Clock className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         24/7 request submission portal
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Real-time status updates
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <Shield className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <Shield className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Certified service provider network
                       </span>
@@ -254,19 +254,19 @@ export default function LandingPage() {
                 <CardContent>
                   <ul className="space-y-3">
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Professional photography service
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Automated tenant screening
                       </span>
                     </li>
                     <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
                       <span className="text-sm text-muted-foreground">
                         Digital lease management
                       </span>
