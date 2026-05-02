@@ -14,6 +14,7 @@ const UnitList: FC = () => {
       filterKey: "label",
       searchType: "TEXT",
       colspan: 2,
+      exportValue: (row) => row.label ?? "",
     },
     {
       header: "Property",
@@ -21,6 +22,7 @@ const UnitList: FC = () => {
       searchType: "TEXT",
       filterKey: "property",
       colspan: 2,
+      exportValue: (row) => row.property?.name ?? "",
     },
     {
       header: "Status",
@@ -31,17 +33,21 @@ const UnitList: FC = () => {
         { name: "Occupied", value: "true" },
         { name: "Vacant", value: "false" },
       ],
+      exportValue: (row) => (row.tenantActive ? "Occupied" : "Vacant"),
     },
     {
       header: "Tenant",
       accessor: "tenantUser.name",
       searchType: "TEXT",
       filterKey: "tenant",
+      exportValue: (row) => row.tenantUser?.name ?? "",
     },
     {
       header: "Created",
       accessor: "createdAt",
       searchType: "TEXT",
+      exportValue: (row) =>
+        row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "",
     },
   ];
 
@@ -50,6 +56,7 @@ const UnitList: FC = () => {
       <Table<Unit>
         service={fetchUnitList}
         queryKey="units"
+        exportTitle="Units"
         searchKey="label"
         headerActions={<UnitHeaderActions />}
         columns={columns}

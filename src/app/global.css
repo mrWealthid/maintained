@@ -49,11 +49,7 @@ body {
 }
 
 .dashboard-body {
-  /* margin-top: calc(5vh + var(--dashboard-header-height));
-  margin-bottom: calc(5vh + var(--dashboard-header-height)); */
   height: calc(95vh - var(--dashboard-header-height));
-  /* min-height: calc(100vh - var(--dashboard-header-height)); */
-  transition: 0.2s ease-in;
 }
 
 @layer components {
@@ -112,7 +108,7 @@ input:not([type="email"])::placeholder {
 }
 
 .btn-primary {
-  @apply py-2 px-5 bg-button-primary hover:bg-button-primary dark:hover:bg-white text-button-primary-foreground transition-all ease-in-out duration-1000 hover:translate-y-1 text-sm font-medium gap-2 border outline-none inline-flex justify-center items-center;
+  @apply py-2 px-5 bg-button-primary hover:bg-button-primary/90 text-button-primary-foreground text-sm font-medium gap-2 border outline-none inline-flex justify-center items-center;
 }
 
 .btn-primary:disabled {

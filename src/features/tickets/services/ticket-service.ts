@@ -12,6 +12,7 @@ import {
   ListQueryParams,
   ProcessRequest,
   SendTechnicianRequestPayload,
+  TechnicianRequest,
   TicketDetailsResponse,
   TicketListFilter,
 } from "../models/ticket.model";
@@ -157,7 +158,7 @@ export async function fetchRequestTicketList({
   page = 1,
   search,
 }: ListQueryParams<TicketListFilter>): Promise<
-  TablePaginatedResponse<Ticket[]>
+  TablePaginatedResponse<TechnicianRequest[]>
 > {
   const queryString = buildQueryString({ limit, page, ...search });
   const url = `${API_ROUTES.ticketManagement.get_technician_requests}?${queryString}`;

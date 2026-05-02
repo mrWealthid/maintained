@@ -14,6 +14,7 @@ const PropertyList: FC = () => {
       filterKey: "name",
       searchType: "TEXT",
       colspan: 3,
+      exportValue: (row) => row.name ?? "",
     },
     {
       header: "Type",
@@ -21,29 +22,35 @@ const PropertyList: FC = () => {
       searchType: "TEXT",
       filterKey: "type",
       colspan: 2,
+      exportValue: (row) => row.type ?? "",
     },
     {
       header: "Address",
       accessor: "address.line1",
       searchType: "TEXT",
       filterKey: "address",
+      exportValue: (row) => row.address?.line1 ?? "",
     },
     {
       header: "City",
       accessor: "address.city",
       searchType: "TEXT",
       filterKey: "city",
+      exportValue: (row) => row.address?.city ?? "",
     },
     {
       header: "State",
       accessor: "address.state",
       searchType: "TEXT",
       filterKey: "state",
+      exportValue: (row) => row.address?.state ?? "",
     },
     {
       header: "Created",
       accessor: "createdAt",
       searchType: "TEXT",
+      exportValue: (row) =>
+        row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "",
     },
   ];
 
@@ -52,6 +59,7 @@ const PropertyList: FC = () => {
       <Table<Property>
         service={fetchPropertyList}
         queryKey="properties"
+        exportTitle="Properties"
         searchKey="name"
         headerActions={<PropertyHeaderActions />}
         columns={columns}

@@ -4,6 +4,10 @@ import { Bell, FolderOpen, Mail, Shield, Ticket } from "lucide-react";
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  SettingsIconBadge,
+  SETTINGS_TAB_ICON_BADGE_CLASSNAME,
+} from "./SettingsIconBadge";
 import NotificationSettings from "./NotificationSettings";
 import EmailSettings from "./EmailSettings";
 import SecuritySettings from "./SecuritySettings";
@@ -80,9 +84,11 @@ const SettingsPage: React.FC = () => {
                   value={tab.value}
                   className={tabTriggerClassName}
                 >
-                  <span className="grid size-6 place-items-center rounded-md bg-primary/10 text-primary">
-                    <Icon className="size-3.5" />
-                  </span>
+                  <SettingsIconBadge
+                    icon={Icon}
+                    size="sm"
+                    className={SETTINGS_TAB_ICON_BADGE_CLASSNAME}
+                  />
                   <span className="text-xs sm:text-sm">{tab.label}</span>
                 </TabsTrigger>
               );

@@ -1,23 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import { notificationModes } from "../data/settings.data";
 import { NotificationPreferences } from "../models/settings.model";
 import {
   useNotificationPreferences,
   useUpdateNotificationPreferences,
 } from "../hooks/settingsHooks";
+import { SettingsSection } from "./SettingsSection";
+import { SettingsToggleRow } from "./SettingsToggleRow";
 
 const NotificationSettings: React.FC = () => {
   const { data: preferences, isLoading } = useNotificationPreferences();
@@ -60,15 +56,19 @@ const NotificationSettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Notification Preferences</CardTitle>
-          <CardDescription>
-            Configure how you want to receive notifications about tickets and
-            updates
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <SettingsSection
+        title="Notification Preferences"
+        description="Configure how you receive ticket and workspace updates"
+        icon={Bell}
+        actions={
+          <Button
+            onClick={handleSave}
+            disabled={updatePreferences.isPending || isLoading}
+          >
+            {updatePreferences.isPending ? "Saving..." : "Save Preferences"}
+          </Button>
+        }
+      >
           <div>
             <Label className="text-base font-medium">
               Preferred Notification Method
@@ -92,65 +92,34 @@ const NotificationSettings: React.FC = () => {
             </RadioGroup>
           </div>
 
+          <Separator />
+
           <div className="space-y-4">
             <Label className="text-base font-medium">
               Notification Channels
             </Label>
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="sms-toggle">SMS Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive text message notifications
-                  </p>
-                </div>
-                <Switch
-                  id="sms-toggle"
-                  checked={localPreferences.smsEnabled}
-                  onCheckedChange={() => handleToggle("smsEnabled")}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="email-toggle">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive email notifications
-                  </p>
-                </div>
-                <Switch
-                  id="email-toggle"
-                  checked={localPreferences.emailEnabled}
-                  onCheckedChange={() => handleToggle("emailEnabled")}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="phone-toggle">Phone Call Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive phone call notifications
-                  </p>
-                </div>
-                <Switch
-                  id="phone-toggle"
-                  checked={localPreferences.phoneEnabled}
-                  onCheckedChange={() => handleToggle("phoneEnabled")}
-                />
-              </div>
+              <SettingsToggleRow
+                label="SMS Notifications"
+                description="Receive text message notifications"
+                checked={localPreferences.smsEnabled}
+                onCheckedChange={() => handleToggle("smsEnabled")}
+              />
+              <SettingsToggleRow
+                label="Email Notifications"
+                description="Receive email notifications"
+                checked={localPreferences.emailEnabled}
+                onCheckedChange={() => handleToggle("emailEnabled")}
+              />
+              <SettingsToggleRow
+                label="Phone Call Notifications"
+                description="Receive phone call notifications"
+                checked={localPreferences.phoneEnabled}
+                onCheckedChange={() => handleToggle("phoneEnabled")}
+              />
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={updatePreferences.isPending || isLoading}
-            >
-              {updatePreferences.isPending ? "Saving..." : "Save Preferences"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      </SettingsSection>
     </div>
   );
 };

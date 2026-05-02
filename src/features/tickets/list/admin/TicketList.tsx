@@ -16,23 +16,39 @@ const TicketList: FC = () => {
       filterKey: "title",
       searchType: "TEXT",
       colspan: 3,
+      exportValue: (row) => row.title,
     },
     {
-      header: "user",
+      header: "User",
       accessor: "user.name",
       searchType: "TEXT",
       filterKey: "user",
       colspan: 2,
+      exportValue: (row) => row.user?.name ?? "",
     },
-    { header: "category", accessor: "category.name", searchType: "TEXT" },
-    { header: "area", accessor: "area", searchType: "TEXT" },
     {
-      header: "actionedBy",
+      header: "Category",
+      accessor: "category.name",
+      searchType: "TEXT",
+      exportValue: (row) =>
+        typeof row.category === "object"
+          ? (row.category?.name ?? "")
+          : (row.category ?? ""),
+    },
+    {
+      header: "Area",
+      accessor: "area",
+      searchType: "TEXT",
+      exportValue: (row) => row.area ?? "",
+    },
+    {
+      header: "Actioned By",
       accessor: "actionedBy.name",
       searchType: "TEXT",
+      exportValue: (row) => row.actionedBy?.name ?? "",
     },
     {
-      header: "status",
+      header: "Status",
       accessor: "status",
       searchType: "DROPDOWN",
       filterKey: "status",
@@ -42,11 +58,13 @@ const TicketList: FC = () => {
         { name: "Completed", value: TICKET_STATUS.completed },
         { name: "Declined", value: TICKET_STATUS.declined },
       ],
+      exportValue: (row) => row.status ?? "",
     },
-
     {
       header: "Date",
       accessor: "",
+      exportValue: (row) =>
+        row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "",
     },
   ];
 
@@ -55,6 +73,7 @@ const TicketList: FC = () => {
       <TableComponent<Ticket>
         service={fetchTicketList}
         queryKey="tickets"
+        exportTitle="Tickets"
         searchKey="title"
         defaultParams={{ status: TICKET_STATUS.pending }}
         headerActions={<TicketHeaderActions />}

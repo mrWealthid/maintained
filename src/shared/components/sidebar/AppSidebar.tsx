@@ -84,7 +84,7 @@ function AppSidebar({
                     >
                       <Link
                         href={link.path}
-                        className="flex items-center gap-2 rounded-lg text-sm transition-transform duration-200 ease-out hover:translate-x-1"
+                        className="flex items-center gap-2 rounded-lg text-sm"
                       >
                         {link.icon &&
                           React.createElement(link.icon, {
