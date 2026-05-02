@@ -28,8 +28,8 @@ type AppDialogSectionProps = React.ComponentProps<"div">;
 
 function getToneClasses(tone: DialogTone) {
   return tone === "destructive"
-    ? "border-destructive/40 bg-destructive text-destructive dark:border-destructive/40/40 dark:bg-destructive/30 dark:text-destructive"
-    : "border-primary/30 bg-primary/5 text-primary dark:border-primary/40/40 dark:bg-primary/10/30 dark:text-primary";
+    ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : "border-primary/30 bg-primary/10 text-primary";
 }
 
 export function AppDialogContent({ className, ...props }: AppDialogContentProps) {

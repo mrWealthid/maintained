@@ -24,19 +24,18 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { Check, ChevronDown, ChevronDownIcon } from "lucide-react";
+import { Check, ChevronDown, ChevronDownIcon, Send } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns/format";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 
 type Props = Pick<SendTechnicianRequestFormProps, "ticket"> & {
   open: boolean;
@@ -80,17 +79,17 @@ export default function SendTechnicianRequestForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Send Technicians Ticket Request</DialogTitle>
-          <DialogDescription>
-            The request will be sent to eligible technicians.
-          </DialogDescription>
-        </DialogHeader>
+      <AppDialogContent>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-1 items-center"
+          className="flex min-h-0 flex-1 flex-col"
         >
+          <AppDialogHeader
+            title="Send Technicians Ticket Request"
+            description="The request will be sent to eligible technicians."
+            icon={Send}
+          />
+          <AppDialogBody>
         <section className="flex-col flex gap-2 w-full">
           <div className="w-full">
             <Controller
@@ -273,7 +272,9 @@ export default function SendTechnicianRequestForm({
               />
             </div>
           </section>
-          <DialogFooter>
+        </section>
+          </AppDialogBody>
+          <AppDialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -288,10 +289,9 @@ export default function SendTechnicianRequestForm({
               {isSending && <Loader2 className="mr-2 size-4 animate-spin" />}
               Submit
             </Button>
-          </DialogFooter>
-        </section>
-      </form>
-      </DialogContent>
+          </AppDialogFooter>
+        </form>
+      </AppDialogContent>
     </Dialog>
   );
 }

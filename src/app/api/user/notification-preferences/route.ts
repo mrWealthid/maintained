@@ -9,10 +9,21 @@ import User from "@/models/userModel";
 connect();
 
 const notificationPreferencesSchema = z.object({
-  mode: z.enum(["SMS", "EMAIL", "PHONE"]).default("SMS"),
-  smsEnabled: z.boolean().default(true),
-  emailEnabled: z.boolean().default(false),
-  phoneEnabled: z.boolean().default(false),
+  ticketCreatedAlerts: z.boolean().default(true),
+  ticketStatusAlerts: z.boolean().default(true),
+  ticketAssignmentAlerts: z.boolean().default(true),
+  technicianRequestAlerts: z.boolean().default(true),
+  tenantMessageAlerts: z.boolean().default(true),
+  commentAlerts: z.boolean().default(true),
+  emailFrequency: z
+    .enum(["immediate", "hourly", "daily", "weekly", "off"])
+    .default("immediate"),
+  smsPreference: z.enum(["all", "urgent", "off"]).default("urgent"),
+  pushPreference: z.enum(["all", "important", "off"]).default("important"),
+  mode: z.enum(["SMS", "EMAIL", "PHONE"]).optional(),
+  smsEnabled: z.boolean().optional(),
+  emailEnabled: z.boolean().optional(),
+  phoneEnabled: z.boolean().optional(),
 });
 
 function getRequestId(request: NextRequest) {

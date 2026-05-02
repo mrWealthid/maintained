@@ -1,17 +1,16 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
+import { Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import TextInput from "@/shared/components/form-elements/Text-Input";
 
 import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
@@ -47,30 +46,35 @@ export default function DeclineForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Decline Maintenance Ticket</DialogTitle>
-          <DialogDescription>The request will be declined.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <TextInput
-            name="reason"
-            placeholder="Kindly describe"
-            label="reason"
-            required
-            error={errors?.reason?.message?.toString()}
-          >
-            <textarea
-              className="input-style"
-              {...register("reason", { required: "This field is required" })}
-              disabled={isSubmitting}
-              id="reason"
-              cols={40}
-              rows={4}
-            />
-          </TextInput>
-
-          <DialogFooter>
+      <AppDialogContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <AppDialogHeader
+            title="Decline Maintenance Ticket"
+            description="The request will be declined and the requester notified."
+            icon={XCircle}
+            tone="destructive"
+          />
+          <AppDialogBody>
+            <TextInput
+              name="reason"
+              placeholder="Kindly describe"
+              label="Reason"
+              required
+              error={errors?.reason?.message?.toString()}
+            >
+              <textarea
+                className="input-style"
+                {...register("reason", { required: "This field is required" })}
+                disabled={isSubmitting}
+                id="reason"
+                rows={4}
+              />
+            </TextInput>
+          </AppDialogBody>
+          <AppDialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -80,14 +84,15 @@ export default function DeclineForm({
             </Button>
             <Button
               type="submit"
+              variant="destructive"
               disabled={!isValid || isSubmitting || !isDirty || isProcessing}
             >
               {isProcessing && <Loader2 className="mr-2 size-4 animate-spin" />}
               Submit
             </Button>
-          </DialogFooter>
+          </AppDialogFooter>
         </form>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

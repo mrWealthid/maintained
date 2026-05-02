@@ -1,10 +1,19 @@
 import type { PermissionKey } from "@/shared/auth/permission-registry";
 
 export interface NotificationPreferences {
-  mode: "SMS" | "EMAIL" | "PHONE";
-  smsEnabled: boolean;
-  emailEnabled: boolean;
-  phoneEnabled: boolean;
+  ticketCreatedAlerts: boolean;
+  ticketStatusAlerts: boolean;
+  ticketAssignmentAlerts: boolean;
+  technicianRequestAlerts: boolean;
+  tenantMessageAlerts: boolean;
+  commentAlerts: boolean;
+  emailFrequency: "immediate" | "hourly" | "daily" | "weekly" | "off";
+  smsPreference: "all" | "urgent" | "off";
+  pushPreference: "all" | "important" | "off";
+  mode?: "SMS" | "EMAIL" | "PHONE";
+  smsEnabled?: boolean;
+  emailEnabled?: boolean;
+  phoneEnabled?: boolean;
 }
 
 export interface SecuritySettings {

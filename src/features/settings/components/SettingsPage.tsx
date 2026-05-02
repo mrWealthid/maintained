@@ -1,13 +1,30 @@
 "use client";
 
-import { Bell, FolderOpen, Mail, Shield } from "lucide-react";
+import { useState } from "react";
+import { Bell, FolderOpen, Mail, Shield, Ticket, Workflow } from "lucide-react";
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   SettingsIconBadge,
   SETTINGS_TAB_ICON_BADGE_CLASSNAME,
 } from "./SettingsIconBadge";
+import { SettingsSection } from "./SettingsSection";
 import NotificationSettings from "./NotificationSettings";
 import EmailSettings from "./EmailSettings";
 import SecuritySettings from "./SecuritySettings";
@@ -15,9 +32,67 @@ import CategoryManagement from "./CategoryManagement";
 import TicketTypeManagement from "./TicketTypeManagement";
 import { useAppContext } from "@/shared/contexts/AppContext";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { useCategories, useTicketTypes } from "../hooks/settingsHooks";
+
+type OperationsSheet = "categories" | "ticket-types" | null;
+
+function OperationsConfigCard({
+  title,
+  description,
+  statLabel,
+  statValue,
+  buttonLabel,
+  icon,
+  onConfigure,
+}: {
+  title: string;
+  description: string;
+  statLabel: string;
+  statValue: number | string;
+  buttonLabel: string;
+  icon: typeof FolderOpen;
+  onConfigure: () => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <SettingsIconBadge icon={icon} />
+          {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Configure this setup from a focused side sheet.
+          </p>
+          <Button type="button" variant="outline" onClick={onConfigure}>
+            {buttonLabel}
+          </Button>
+        </div>
+
+        <div className="rounded-xl border border-border/70 bg-muted/40 p-4">
+          <p className="text-xs text-muted-foreground">{statLabel}</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">
+            {statValue}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Active and inactive records are managed in the configuration sheet.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function OperationsSettings() {
   const { user } = useAppContext();
+  const [openSheet, setOpenSheet] = useState<OperationsSheet>(null);
+  const { data: categories = [], isLoading: loadingCategories } =
+    useCategories();
+  const { data: ticketTypes = [], isLoading: loadingTicketTypes } =
+    useTicketTypes();
   const canManageCategories = user.permissions.includes(
     PERMISSION.TICKET_CATEGORIES_MANAGE
   );
@@ -26,10 +101,87 @@ function OperationsSettings() {
   );
 
   return (
-    <div className="space-y-6">
-      {canManageCategories ? <CategoryManagement /> : null}
-      {canManageTicketTypes ? <TicketTypeManagement /> : null}
-    </div>
+    <SettingsSection
+      title="Operations"
+      icon={Workflow}
+      description="Configure ticket categories and request type setup across this workspace."
+    >
+      <div className="space-y-6">
+        {canManageCategories ? (
+          <OperationsConfigCard
+            title="Category Setup"
+            description="Manage ticket categories used for intake, triage, and reporting."
+            statLabel="Configured categories"
+            statValue={loadingCategories ? "..." : categories.length}
+            buttonLabel="Configure categories"
+            icon={FolderOpen}
+            onConfigure={() => setOpenSheet("categories")}
+          />
+        ) : null}
+
+        {canManageTicketTypes ? (
+          <OperationsConfigCard
+            title="Ticket Type Setup"
+            description="Manage request types that drive ticket workflows and technician routing."
+            statLabel="Configured ticket types"
+            statValue={loadingTicketTypes ? "..." : ticketTypes.length}
+            buttonLabel="Configure ticket types"
+            icon={Ticket}
+            onConfigure={() => setOpenSheet("ticket-types")}
+          />
+        ) : null}
+      </div>
+
+      <Sheet
+        open={openSheet === "categories"}
+        onOpenChange={(open) => setOpenSheet(open ? "categories" : null)}
+      >
+        <SheetContent
+          side="right"
+          className="flex h-full min-h-0 w-full flex-col p-0 sm:max-w-2xl"
+        >
+          <SheetHeader className="shrink-0 border-b border-border bg-card/80 px-6 pb-4 pt-6 pr-14 text-left">
+            <div className="flex items-start gap-3">
+              <SettingsIconBadge icon={FolderOpen} />
+              <div className="space-y-1">
+                <SheetTitle>Category Configuration</SheetTitle>
+                <SheetDescription>
+                  Manage ticket categories from a dedicated workspace.
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <CategoryManagement />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet
+        open={openSheet === "ticket-types"}
+        onOpenChange={(open) => setOpenSheet(open ? "ticket-types" : null)}
+      >
+        <SheetContent
+          side="right"
+          className="flex h-full min-h-0 w-full flex-col p-0 sm:max-w-2xl"
+        >
+          <SheetHeader className="shrink-0 border-b border-border bg-card/80 px-6 pb-4 pt-6 pr-14 text-left">
+            <div className="flex items-start gap-3">
+              <SettingsIconBadge icon={Ticket} />
+              <div className="space-y-1">
+                <SheetTitle>Ticket Type Configuration</SheetTitle>
+                <SheetDescription>
+                  Manage request types from a dedicated workspace.
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <TicketTypeManagement />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </SettingsSection>
   );
 }
 
@@ -49,21 +201,21 @@ const tabs = [
     content: EmailSettings,
   },
   {
-    value: "security",
-    label: "Security",
-    icon: Shield,
-    permission: PERMISSION.SETTINGS_VIEW,
-    content: SecuritySettings,
-  },
-  {
     value: "operations",
     label: "Operations",
-    icon: FolderOpen,
+    icon: Workflow,
     permissions: [
       PERMISSION.TICKET_CATEGORIES_MANAGE,
       PERMISSION.TICKET_TYPES_MANAGE,
     ],
     content: OperationsSettings,
+  },
+  {
+    value: "security",
+    label: "Security",
+    icon: Shield,
+    permission: PERMISSION.SETTINGS_VIEW,
+    content: SecuritySettings,
   },
 ] as const;
 

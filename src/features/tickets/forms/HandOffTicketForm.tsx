@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Check, ChevronDown, Loader2, Repeat } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import {
   PopoverTrigger,
   Popover,
@@ -64,14 +63,17 @@ export default function HandOffTicketForm({ ticket, open, onOpenChange }: Props)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Hand-off Ticket</DialogTitle>
-          <DialogDescription>
-            Reassign this ticket to another admin.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <AppDialogContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <AppDialogHeader
+            title="Hand-off Ticket"
+            description="Reassign this ticket to another admin."
+            icon={Repeat}
+          />
+          <AppDialogBody>
           <Controller
             control={control}
             name="actionedBy"
@@ -122,8 +124,9 @@ export default function HandOffTicketForm({ ticket, open, onOpenChange }: Props)
               );
             }}
           />
+          </AppDialogBody>
 
-          <DialogFooter>
+          <AppDialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -138,9 +141,9 @@ export default function HandOffTicketForm({ ticket, open, onOpenChange }: Props)
               {isUpdating && <Loader2 className="mr-2 size-4 animate-spin" />}
               Submit
             </Button>
-          </DialogFooter>
+          </AppDialogFooter>
         </form>
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }

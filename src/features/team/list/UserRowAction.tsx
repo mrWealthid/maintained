@@ -4,13 +4,12 @@ import { useState, type ComponentType } from "react";
 import { Edit, Mail, Trash2 } from "lucide-react";
 
 import { TableCell } from "@/components/ui/table";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 
@@ -133,17 +132,20 @@ const UserRowAction = ({ user, membership }: UserRowActionsProps) => {
       />
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Manage User</DialogTitle>
-            <DialogDescription>Manage your users</DialogDescription>
-          </DialogHeader>
-          <UserForm
-            user={user}
-            membership={membership}
-            onCloseModal={() => setEditOpen(false)}
+        <AppDialogContent>
+          <AppDialogHeader
+            title="Manage User"
+            description="Update role, permissions, or remove this team member."
+            icon={Edit}
           />
-        </DialogContent>
+          <AppDialogBody>
+            <UserForm
+              user={user}
+              membership={membership}
+              onCloseModal={() => setEditOpen(false)}
+            />
+          </AppDialogBody>
+        </AppDialogContent>
       </Dialog>
 
       {activeConfirm ? (

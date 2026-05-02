@@ -38,14 +38,13 @@ import {
   TICKET_STATUS,
 } from "@/shared/enums/enums";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -604,47 +603,51 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
         open={!!scheduleRequestId}
         onOpenChange={(o) => !o && setScheduleRequestId(null)}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Schedule</DialogTitle>
-            <DialogDescription>
-              Set the date and time window for the technician visit.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmitSchedule} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="schedule-date">Date</Label>
-              <Input
-                id="schedule-date"
-                type="date"
-                value={scheduleDate}
-                onChange={(e) => setScheduleDate(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+        <AppDialogContent>
+          <form
+            onSubmit={handleSubmitSchedule}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <AppDialogHeader
+              title="Update Schedule"
+              description="Set the date and time window for the technician visit."
+              icon={Calendar}
+            />
+            <AppDialogBody>
               <div className="space-y-2">
-                <Label htmlFor="schedule-start">Start</Label>
+                <Label htmlFor="schedule-date">Date</Label>
                 <Input
-                  id="schedule-start"
-                  type="time"
-                  value={scheduleStart}
-                  onChange={(e) => setScheduleStart(e.target.value)}
+                  id="schedule-date"
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="schedule-end">End</Label>
-                <Input
-                  id="schedule-end"
-                  type="time"
-                  value={scheduleEnd}
-                  onChange={(e) => setScheduleEnd(e.target.value)}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-start">Start</Label>
+                  <Input
+                    id="schedule-start"
+                    type="time"
+                    value={scheduleStart}
+                    onChange={(e) => setScheduleStart(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-end">End</Label>
+                  <Input
+                    id="schedule-end"
+                    type="time"
+                    value={scheduleEnd}
+                    onChange={(e) => setScheduleEnd(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <DialogFooter>
+            </AppDialogBody>
+            <AppDialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -658,9 +661,9 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                 )}
                 Save schedule
               </Button>
-            </DialogFooter>
+            </AppDialogFooter>
           </form>
-        </DialogContent>
+        </AppDialogContent>
       </Dialog>
     </div>
   );

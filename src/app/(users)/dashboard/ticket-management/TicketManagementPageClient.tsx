@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
-  const [isList, setIsList] = useState(false);
+  const [isList, setIsList] = useState(true);
   const [open, setOpen] = useState(false);
   const { user } = useAppContext();
   const canCreateTicket = useHasPermission(PERMISSION.TICKETS_CREATE);
