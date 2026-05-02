@@ -10,26 +10,22 @@ export default React.memo(function AuthWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="max-h-screen overflow-y-auto bg-gray-50 dark:bg-gray-950 flex flex-col">
+    <div className="max-h-screen overflow-y-auto bg-muted/40 text-foreground flex flex-col">
       {/* Header */}
-      <header className="w-full border-b sticky top-0 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+      <header className="w-full border-b sticky top-0 border-border bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center space-x-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-600">
-              <Building2 className="h-5 w-5 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">
+            <span className="text-xl font-semibold text-foreground">
               ApartmentHub
             </span>
           </Link>
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 dark:text-gray-300"
-              >
+              <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
               </Button>

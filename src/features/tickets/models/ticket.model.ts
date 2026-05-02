@@ -1,0 +1,187 @@
+import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/shared/enums/enums";
+import { CreateTicketPayload, Ticket, User } from "@/shared/model/model";
+
+export type TicketStatus =
+  | TICKET_STATUS.pending
+  | TICKET_STATUS.assigned
+  | TICKET_STATUS.declined
+  | TICKET_STATUS.completed;
+
+export interface ManageTicketFormProps {
+  ticket?: Ticket | undefined;
+  onSubmit: (
+    data: CreateTicketPayload,
+    actions?: { onSuccess: () => void; onError: () => void }
+  ) => void;
+}
+export interface ManageTicketDetails {
+  ticket: TicketDetailsResponse | undefined;
+}
+
+export interface ManageTicketDetailsProps {
+  ticket?: TicketDetailsResponse | undefined;
+}
+
+export interface TicketDetailsResponse extends Ticket {
+  requests: TechnicianRequestDetails[];
+}
+export interface DeclineTicketFormProps {
+  ticketRequest: TechnicianRequest;
+  onCloseModal?: () => void;
+}
+export interface ApplyTicketFormProps {
+  ticketRequest: TechnicianRequest;
+}
+export interface AssignTechnicianFormProps {
+  ticket: Ticket;
+  onCloseModal?: () => void;
+}
+export interface SendTechnicianRequestFormProps {
+  ticket: Ticket;
+  onCloseModal?: () => void;
+}
+export interface handOffTicketFormProps {
+  ticket: Ticket;
+  onCloseModal?: () => void;
+}
+
+export interface AssignTechnicianFormControls {
+  assignedTo: string;
+}
+export interface ApplyTechnicianFormControls {
+  quote: {
+    total: number;
+    currency?: string;
+    cost: { title: string; amount: number }[];
+  };
+  message?: string;
+  addSchedule: boolean;
+  schedule?: {
+    date?: Date | undefined;
+    startTime?: string;
+    endTime?: string;
+    day?: string;
+  };
+  // cost: { amount: number; title: string }[];
+}
+
+export interface SendTechnicianRequestFormControls {
+  technicianIds: string[];
+  expiresAt: Date;
+}
+
+export interface ManageTicketForm {
+  title: string;
+  description: string;
+  area: string;
+  category: string;
+  images?: File[] | null;
+  videos?: File[] | null;
+  documents?: File[] | null;
+  type: string;
+}
+
+export interface TechnicianRequestDetails {
+  quote: {
+    total: number;
+    currency: string;
+    cost: { title: string; amount: number }[];
+  };
+  id: string;
+  ticket: Ticket;
+  status: TECHNICIAN_RESPONSE;
+  createdAt: string;
+  schedule: {
+    start: string;
+    end: string;
+    day: string;
+    date: string;
+  };
+  message: string;
+  isActive: boolean;
+  technician: User;
+}
+
+export type TechnicianRequest = Omit<
+  TechnicianRequestDetails,
+  "technician" | "isActive"
+>;
+
+export type TicketRowActionsProps = {
+  ticket: Ticket;
+};
+export type TechnicianRowActionsProps = {
+  technicianRequest: TechnicianRequest;
+};
+
+export type TicketRowProps = {
+  data?: Ticket[];
+  enableSelection?: boolean;
+  getRowIdForRow?: (row: Ticket, index: number) => string | number;
+  isRowSelected?: (id: string | number) => boolean;
+  toggleRowSelection?: (id: string | number) => void;
+};
+
+export type TechnicianTicketRowProps = {
+  data?: TechnicianRequest[];
+};
+
+export type TicketQueryprops<T = TICKET_STATUS> = {
+  onFilter?: (query: { status?: T } | null) => void;
+  summary?: Record<string, number>;
+};
+
+export type TicketFilterQuery<T = TICKET_STATUS> = {
+  status?: T;
+  dateFilter?: string;
+  startDate?: string;
+  endDate?: string;
+};
+// export type TechnicianTicketFilterQuery = {
+// 	status?: TECHNICIAN_RESPONSE;
+// };
+
+export type ListQueryParams<T> = {
+  status?: string;
+  page?: number;
+  limit?: number;
+  search?: T | null;
+};
+// export type FetchTicketsListParams = {
+// 	status?: TICKET_STATUS;
+// 	page?: number;
+// 	limit?: number;
+// 	search?: { [key: string]: any };
+// 	// [key: string]: any; // to allow future extension
+// };
+
+export interface TicketListFilter {
+  title?: string;
+  status?: TICKET_STATUS;
+  createdAt?: string;
+  user?: string;
+  area?: string;
+  category?: string;
+  id?: string;
+}
+
+export interface ProcessRequest {
+  reason?: string;
+  status: TECHNICIAN_RESPONSE;
+  quote?: {
+    total?: number;
+    currency?: string;
+    cost: { title: string; amount: number }[];
+  };
+  schedule?: {
+    start: string;
+    end: string;
+    day: string;
+  };
+  message?: string;
+}
+
+export interface SendTechnicianRequestPayload {
+  technicianIds: string[];
+  expiresAt: Date;
+}

@@ -1,7 +1,6 @@
-import React from "react";
+import { ChatSkeleton } from "@/features/chat/components/ChatSkeleton";
 
-const loading = () => {
-  return <div>loading...</div>;
-};
-
-export default loading;
+// Delegates this route segment to the shared chat skeleton.
+export default function Loading() {
+  return <ChatSkeleton />;
+}

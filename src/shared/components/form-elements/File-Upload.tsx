@@ -1,306 +1,316 @@
-import React, { ChangeEvent, ReactNode, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import Image from 'next/image';
-import { FileUploadPreview } from '../../model/model';
-import { RiAsterisk } from 'react-icons/ri';
-import toast from 'react-hot-toast';
-import { LiaTimesSolid } from 'react-icons/lia';
+import React, {
+  ChangeEvent,
+  ReactNode,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
+import Image from "next/image";
+import toast from "react-hot-toast";
+import {
+  CheckCircle2,
+  FileText,
+  Image as ImageIcon,
+  Upload,
+  Video,
+  X,
+} from "lucide-react";
+import { FileUploadPreview } from "../../model/model";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
-	label: string;
-	accept: string;
-	multiple: boolean;
-	id: string;
-	icon: ReactNode;
-	onFileSelect: (files: FileList) => void;
-	onPreviewFileRemove: (file: File) => void; // optional
-	uploadProgress?: Record<string, number>;
-	required?: boolean;
-	initialFiles?: { url: string; type: string; id?: string | number }[]; // <-- Add this
-	onRemoveInitialFile?: (
-		file: {
-			url: string;
-			type: string;
-			id?: string | number;
-		},
-		type: 'image' | 'video'
-	) => void; // optional
+  label: string;
+  accept: string;
+  multiple: boolean;
+  id: string;
+  icon: ReactNode;
+  onFileSelect: (files: FileList) => void;
+  onPreviewFileRemove: (file: File) => void;
+  uploadProgress?: Record<string, number>;
+  required?: boolean;
+  hint?: string;
+  initialFiles?: { url: string; type: string; id?: string | number }[];
+  onRemoveInitialFile?: (
+    file: { url: string; type: string; id?: string | number },
+    type: "image" | "video"
+  ) => void;
+}
+
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function pickIcon(type: string) {
+  if (type.startsWith("image/")) return ImageIcon;
+  if (type.startsWith("video/")) return Video;
+  return FileText;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
-	onFileSelect,
-	label,
-	accept,
-	multiple,
-	id,
-	icon,
-	uploadProgress,
-	required = false,
-	initialFiles = [],
-	onRemoveInitialFile,
-	onPreviewFileRemove
+  onFileSelect,
+  label,
+  accept,
+  multiple,
+  id,
+  icon,
+  uploadProgress,
+  required = false,
+  hint,
+  initialFiles = [],
+  onRemoveInitialFile,
+  onPreviewFileRemove,
 }) => {
-	const [selected, setSelected] = useState<FileList | null>(null);
-	const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
-	const [existingFiles, setExistingFiles] = useState(initialFiles);
-	const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
+  const [existingFiles, setExistingFiles] = useState(initialFiles);
+  const [isDragging, setIsDragging] = useState(false);
 
-	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
-		if (!files) return;
+  const allowedType = accept.split("/")[0];
+  const totalCount = existingFiles.length + previews.length;
 
-		onFileSelect(files);
-		setSelected(files);
-		const newPreviews: FileUploadPreview[] = Array.from(files).map(
-			(file, i) => ({
-				id: Date.now() + i,
-				url: URL.createObjectURL(file),
-				type: file.type,
-				file,
-				uploadProgress: 0
-			})
-		);
-		setPreviews(newPreviews);
-	};
+  const buildPreviews = useCallback(
+    (files: File[]): FileUploadPreview[] =>
+      files.map((file, i) => ({
+        id: Date.now() + i,
+        url: URL.createObjectURL(file),
+        type: file.type,
+        file,
+        uploadProgress: 0,
+      })),
+    []
+  );
 
-	const handleRemovePreview = (id: number) => {
-		setPreviews((prev) => {
-			const toRemove = prev.find((p) => p.id === id);
-			if (toRemove) URL.revokeObjectURL(toRemove.url);
-			return prev.filter((p) => p.id !== id);
-		});
-		onPreviewFileRemove?.(previews.find((p) => p.id === id)?.file as File);
-	};
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+    onFileSelect(files);
+    setPreviews(buildPreviews(Array.from(files)));
+  };
 
-	const handleRemoveExisting = (
-		file: {
-			url: string;
-			type: string;
-			id?: string | number;
-		},
-		type: 'image' | 'video'
-	) => {
-		setExistingFiles((prev) => prev.filter((f) => f.url !== file.url));
-		onRemoveInitialFile?.(file, type);
-	};
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-	function UploadFileIcon() {
-		return (
-			<svg
-				width={20}
-				height={20}
-				viewBox='0 0 20 20'
-				fill='none'
-				xmlns='http://www.w3.org/2000/svg'
-				className='text-primary'>
-				<path
-					d='M17.5 12.5V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V12.5'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-				<path
-					d='M14.1673 6.66667L10.0007 2.5L5.83398 6.66667'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-				<path
-					d='M10 2.5V12.5'
-					stroke='#E80F6D'
-					strokeWidth={2}
-					strokeLinecap='round'
-					strokeLinejoin='round'
-				/>
-			</svg>
-		);
-	}
+  const handleDragLeave = () => setIsDragging(false);
 
-	//Drag and drop feature
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    const validFiles = files.filter((f) => f.type.startsWith(allowedType));
 
-	const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault();
-		setIsDragging(true);
-	};
+    if (validFiles.length === 0) {
+      toast.error(`Only ${allowedType} files are allowed in this drop zone.`);
+      return;
+    }
 
-	const handleDragLeave = () => {
-		setIsDragging(false);
-	};
+    const dt = new DataTransfer();
+    validFiles.forEach((f) => dt.items.add(f));
+    onFileSelect(dt.files);
+    setPreviews(buildPreviews(validFiles));
+  };
 
-	const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault();
-		setIsDragging(false);
-		const files = Array.from(event.dataTransfer.files);
+  const handleRemovePreview = (previewId: number) => {
+    const target = previews.find((p) => p.id === previewId);
+    if (!target) return;
+    URL.revokeObjectURL(target.url);
+    setPreviews((prev) => prev.filter((p) => p.id !== previewId));
+    onPreviewFileRemove?.(target.file as File);
+  };
 
-		const allowedType = accept.split('/')[0]; // "image" or "video"
+  const handleRemoveExisting = (file: {
+    url: string;
+    type: string;
+    id?: string | number;
+  }) => {
+    const kind = file.type.startsWith("image/") ? "image" : "video";
+    setExistingFiles((prev) => prev.filter((f) => f.url !== file.url));
+    onRemoveInitialFile?.(file, kind);
+  };
 
-		const validFiles = files.filter((file) =>
-			file.type.startsWith(allowedType)
-		);
+  const triggerFilePicker = () => inputRef.current?.click();
 
-		if (validFiles.length === 0) {
-			toast.error(
-				`Only ${allowedType} files are allowed in this drop zone.`
-			);
-		}
+  return (
+    <div className="space-y-3">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent text-accent-foreground">
+          {icon}
+        </div>
+        <label htmlFor={id} className="cursor-pointer text-sm font-semibold">
+          {label}
+          {required && <span className="ml-1 text-destructive">*</span>}
+        </label>
+        {totalCount > 0 && (
+          <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            {totalCount} file{totalCount !== 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
 
-		onFileSelect(validFiles as unknown as FileList);
-		setSelected(validFiles as unknown as FileList);
+      {/* Drop zone */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={`Upload ${label}`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onClick={triggerFilePicker}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            triggerFilePicker();
+          }
+        }}
+        className={cn(
+          "relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-all duration-200",
+          isDragging
+            ? "border-primary bg-primary/5 scale-[1.01]"
+            : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/60"
+        )}
+      >
+        <div
+          className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-xl transition-colors",
+            isDragging
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-muted-foreground"
+          )}
+        >
+          <Upload className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-foreground">
+            {isDragging ? "Drop files here" : "Drag & drop or click to browse"}
+          </p>
+          {hint && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+          )}
+        </div>
+        <input
+          ref={inputRef}
+          title="filepicker"
+          type="file"
+          onChange={handleFileChange}
+          accept={accept}
+          multiple={multiple}
+          className="sr-only"
+          id={id}
+        />
+      </div>
 
-		const newPreviews: FileUploadPreview[] = validFiles.map((file, i) => ({
-			id: Date.now() + i,
-			url: URL.createObjectURL(file),
-			type: file.type,
-			file,
-			uploadProgress: 0
-		}));
-
-		setPreviews(newPreviews);
-	};
-
-	// const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-	// 	event.preventDefault();
-	// 	setIsDragging(false);
-	// 	const files = event.dataTransfer.files;
-	// 	if (!files) return;
-	// 	onFileSelect(files);
-	// 	setSelected(files);
-	// 	const newPreviews: FileUploadPreview[] = Array.from(files).map(
-	// 		(file, i) => ({
-	// 			id: Date.now() + i,
-	// 			url: URL.createObjectURL(file),
-	// 			type: file.type,
-	// 			file,
-	// 			uploadProgress: 0
-	// 		})
-	// 	);
-	// 	setPreviews(newPreviews);
-	// };
-
-	return (
-		<div>
-			<label htmlFor={id} className='text-xs cursor-pointer'>
-				{label}
-			</label>
-			<label
-				htmlFor={id}
-				onDragOver={handleDragOver}
-				onDragLeave={handleDragLeave}
-				onDrop={handleDrop}
-				className=' p-4 flex flex-col gap-2 cursor-pointer border    rounded-lg justify-center items-center h-32'>
-				<span className='p-4  shadow border bg-secondary text-green-600 rounded-full'>
-					{icon}
-				</span>
-				<span className='text-xs text-gray-500'>
-					Select a file or drag and drop here
-				</span>
-				{required && <RiAsterisk color='red' />}
-			</label>
-			<input
-				title='filepicker'
-				type='file'
-				onChange={handleFileChange}
-				accept={accept}
-				multiple={multiple}
-				className='hidden p-1'
-				id={id}
-			/>
-
-			{(existingFiles.length > 0 || previews.length > 0) && (
-				<div className='mt-4 grid grid-cols-2 gap-4'>
-					{/* Existing files */}
-					{existingFiles.map((file, idx) => (
-						<div
-							key={file.id || file.url}
-							className='relative rounded-md border p-1'>
-							<button
-								type='button'
-								onClick={() =>
-									handleRemoveExisting(
-										file,
-										file.type.startsWith('image/')
-											? 'image'
-											: 'video'
-									)
-								}
-								className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
-								title='Remove'>
-								<LiaTimesSolid color='red' size={12} />
-							</button>
-							{file.type.startsWith('image/') ? (
-								<Image
-									src={file.url}
-									alt='preview'
-									width={100}
-									height={100}
-									className='w-full h-32 object-cover rounded-md'
-								/>
-							) : file.type.startsWith('video/') ? (
-								<video
-									src={file.url}
-									controls
-									className='w-full h-32 object-cover rounded-md'
-								/>
-							) : (
-								<p>Unsupported file type</p>
-							)}
-						</div>
-					))}
-					{/* New previews */}
-					{previews.map((file) => {
-						const progress = uploadProgress?.[file.file.name] ?? 0;
-						const angle = Math.round(progress * 3.6);
-						return (
-							<div
-								key={file.id}
-								className='relative rounded-md border p-1'>
-								<button
-									onClick={() => handleRemovePreview(file.id)}
-									className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
-									title='Remove'>
-									<LiaTimesSolid color='red' size={12} />
-								</button>
-								{file.type.startsWith('image/') ? (
-									<Image
-										src={file.url}
-										alt='preview'
-										width={100}
-										height={100}
-										className='w-full h-32 object-cover rounded-md'
-									/>
-								) : file.type.startsWith('video/') ? (
-									<video
-										src={file.url}
-										controls
-										className='w-full h-32 object-cover rounded-md'
-									/>
-								) : (
-									<p>Unsupported file type</p>
-								)}
-								{progress > 0 && progress <= 100 && (
-									<div className='absolute inset-0 flex items-center justify-center z-20'>
-										<div className='relative w-10 h-10'>
-											<div
-												className='absolute inset-0 rounded-full'
-												style={{
-													background: `conic-gradient(green ${angle}deg, #e5e7eb 0deg)`
-												}}
-											/>
-											<div className='absolute inset-1 rounded-full  flex items-center justify-center text-xs font-medium '>
-												{progress}%
-											</div>
-										</div>
-									</div>
-								)}
-							</div>
-						);
-					})}
-				</div>
-			)}
-		</div>
-	);
+      {/* File list */}
+      {(existingFiles.length > 0 || previews.length > 0) && (
+        <div className="space-y-2">
+          {existingFiles.map((file) => (
+            <FileRow
+              key={file.id || file.url}
+              name={file.url.split("/").pop() || "Existing file"}
+              type={file.type}
+              previewUrl={
+                file.type.startsWith("image/") ? file.url : undefined
+              }
+              progress={100}
+              onRemove={() => handleRemoveExisting(file)}
+            />
+          ))}
+          {previews.map((preview) => {
+            const progress =
+              uploadProgress?.[preview.file.name] ??
+              preview.uploadProgress ??
+              0;
+            return (
+              <FileRow
+                key={preview.id}
+                name={preview.file.name}
+                size={preview.file.size}
+                type={preview.type}
+                previewUrl={
+                  preview.type.startsWith("image/") ? preview.url : undefined
+                }
+                progress={progress}
+                onRemove={() => handleRemovePreview(preview.id)}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 };
+
+function FileRow({
+  name,
+  size,
+  type,
+  previewUrl,
+  progress,
+  onRemove,
+}: {
+  name: string;
+  size?: number;
+  type: string;
+  previewUrl?: string;
+  progress: number;
+  onRemove: () => void;
+}) {
+  const FileTypeIcon = pickIcon(type);
+  const complete = progress >= 100;
+
+  return (
+    <div className="group relative flex items-center gap-3 rounded-xl border bg-card p-3 shadow-xs transition-shadow hover:shadow-md">
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+        {previewUrl ? (
+          <Image
+            src={previewUrl}
+            alt={name}
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <FileTypeIcon className="h-5 w-5 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{name}</p>
+        <p className="text-xs text-muted-foreground">
+          {size != null ? formatSize(size) : "—"}
+        </p>
+        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-700"
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-1.5">
+        {complete && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 rounded-lg text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          aria-label={`Remove ${name}`}
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default FileUpload;

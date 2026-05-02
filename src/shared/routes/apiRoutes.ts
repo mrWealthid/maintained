@@ -3,11 +3,29 @@ const resourceById = (resource: string) => (id: string) =>
   `${base}/${resource}/${id}`;
 
 export const API_ROUTES = {
+  dashboard: {
+    exports: {
+      table: `${base}/dashboard/exports/table`,
+    },
+    settings: {
+      securitySessions: `${base}/dashboard/settings/security/sessions`,
+      securitySessionById: (sessionId: string) =>
+        `${base}/dashboard/settings/security/sessions/${sessionId}`,
+      securitySessionsRevokeOthers:
+        `${base}/dashboard/settings/security/sessions/revoke-others`,
+    },
+  },
   auth: {
     login: `${base}/auth/login`,
     register: `${base}/auth/register`,
     logout: `${base}/auth/logout`,
     onboard: `${base}/auth/onboard`,
+    sidebarProfile: `${base}/auth/sidebar-profile`,
+    workspaceCreate: `${base}/auth/workspaces`,
+    workspaceSwitch: `${base}/auth/workspaces/switch`,
+    workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
+    passwordPolicyConfig: `${base}/auth/password-policy/config`,
+    sessionKeepAlive: `${base}/auth/session/keep-alive`,
     forgot_password: `${base}/auth/forgotPassword`,
     reset_password: `${base}/auth/resetPassword`,
     update_password: `${base}/auth/updatePassword`,
@@ -20,6 +38,10 @@ export const API_ROUTES = {
     switch_currentBusiness: `${base}/users/switch-business`,
     notification_preferences: `${base}/user/notification-preferences`,
     change_password: `${base}/user/change-password`,
+  },
+  settings: {
+    email: `${base}/dashboard/settings/email`,
+    security: `${base}/dashboard/settings/security`,
   },
 
   ticketManagement: {
@@ -38,6 +60,7 @@ export const API_ROUTES = {
     send_technician_request: (id: string) =>
       resourceById("tickets/technician-request")(id),
     get_technician_requests: `${base}/tickets/technician-request`,
+    bulk_actions: `${base}/tickets/bulk-actions`,
   },
   chat: {
     get_rooms: `${base}/chat/rooms`,

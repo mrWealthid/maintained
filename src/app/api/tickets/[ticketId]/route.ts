@@ -1,194 +1,102 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Ticket from "@/models/ticketModel";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const ticketUpdateBodySchema = ticketFormSchema.partial();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const { ticketId } = await params;
-
-    // const ticket = await Ticket.findOne({
-    // 	id: ticketId
-    // }).populate([
-    // 	{
-    // 		path: 'category',
-    // 		select: 'name'
-    // 	},
-    // 	{
-    // 		path: 'user',
-    // 		select: 'name email'
-    // 	},
-    // 	{ path: 'requests' }
-    // ]);
+    const verify = await getUserFromCookies(request);
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
 
     const ticket = await Ticket.findById(ticketId).populate([
-      {
-        path: "category",
-        select: "name",
-      },
-      {
-        path: "user",
-        select: "name email",
-      },
+      { path: "category", select: "name" },
+      { path: "user", select: "name email" },
       {
         path: "requests",
         populate: { path: "technician", select: "name email" },
       },
     ]);
 
-    console.log("Populated Ticket:", ticket);
-
-    if (!ticket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
-    }
+    if (!ticket) throw ApiError.notFound("Ticket not found");
 
     return NextResponse.json({
       status: "success",
-      data: ticket.toJSON(), // ✅ includes virtuals like 'requests'
+      data: ticket.toJSON(),
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
-// export async function GET(
-// 	request: NextRequest,
-// 	{ params }: { params: { ticketId: string } }
-// ) {
-// 	try {
-// 		const verify =await getUserFromCookies();
-
-// 		if (!verify) {
-// 			return NextResponse.json(
-// 				{ error: 'Unauthorized access' },
-// 				{ status: 401 }
-// 			);
-// 		}
-
-// 		const ticketId = params.ticketId;
-
-// 		const ticket = await Ticket.findOne({
-// 			id: ticketId,
-// 			user: verify.id
-// 		}).populate({
-// 			path: 'category',
-// 			select: 'name '
-// 		});
-
-// 		if (!ticket) {
-// 			return NextResponse.json(
-// 				{
-// 					error: 'No ticket not found'
-// 				},
-// 				{ status: 403 }
-// 			);
-// 		}
-
-// 		const response = NextResponse.json({
-// 			status: 'success',
-// 			data: ticket
-// 		});
-
-// 		return response;
-// 	} catch (error: any) {
-// 		return NextResponse.json({ error: error.message }, { status: 500 });
-// 	}
-// }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
-  const { ticketId } = await params;
   try {
+    const { ticketId } = await params;
     const verify = await getUserFromCookies();
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    const { status, ...rest } = await request.json();
-
-    // const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, rest, {
-    // 	new: true,
-    // 	runValidators: true
-    // });
+    const rest = parseOrThrow(ticketUpdateBodySchema, await request.json());
 
     const updatedRequest = await Ticket.findOneAndUpdate(
-      { _id: ticketId, user: verify.id }, // Ensure user is the owner
+      { _id: ticketId, user: verify.id },
       rest,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedRequest) {
-      return NextResponse.json(
-        {
-          error:
-            "You are not authorized to update this ticket or ticket not found",
-        },
-        { status: 403 }
+      throw ApiError.forbidden(
+        "You are not authorized to update this ticket or ticket not found",
       );
     }
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       message: "Ticket Updated Successfully",
       success: true,
       data: updatedRequest,
     });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
-  const { ticketId } = await params;
   try {
+    const { ticketId } = await params;
     const verify = await getUserFromCookies();
-
-    if (!verify || !verify.isUserRole) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    if (!verify || !verify.isUserRole) throw ApiError.unauthorized();
 
     const ticket = await Ticket.findOneAndDelete({
       _id: ticketId,
-      user: verify.id, // ← only delete if the user owns the ticket
+      user: verify.id,
     });
 
-    console.log(ticket);
-
-    console.log(verify.id);
-    console.log(ticket?.user);
     if (!ticket) {
-      return NextResponse.json(
-        {
-          error:
-            "Ticket not found or you are not authorized to delete this ticket",
-        },
-        { status: 403 }
+      throw ApiError.forbidden(
+        "Ticket not found or you are not authorized to delete this ticket",
       );
     }
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       message: "Ticket deleted Successfully",
       success: true,
     });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

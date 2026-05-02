@@ -2,6 +2,8 @@ export interface ITableProps<T> {
   queryKey: string;
   children: React.ReactNode;
   columns: TableColumn<T>[];
+  filterFields?: TableFilterField[];
+  exportTitle?: string;
   headerActions?: React.ReactElement | null;
   /**
    * Initial page size. Defaults to 5.
@@ -53,16 +55,12 @@ export interface ITableProps<T> {
   }) => React.ReactNode;
 }
 
-export interface IsearchParams {
-  [key: string]: any;
-}
+export type IsearchParams = Record<string, unknown>;
 
-interface TableConfig {
-  actionable?: boolean;
-  checkable?: boolean;
-}
+export type TableSearchType = "TEXT" | "DROPDOWN" | "NUMBER" | "RADIO";
+export type TableSortType = "string" | "number" | "date";
 
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   header: string;
   /**
    * Supports nested accessors via dot notation, e.g. "user.name".
@@ -75,15 +73,33 @@ export interface TableColumn<T = any> {
     prefix?: string;
     bolden?: boolean;
   };
-  searchType?: "TEXT" | "DROPDOWN" | "NUMBER";
+  searchType?: TableSearchType;
   selectOptions?: IselectOptions[];
   filterKey?: string;
+  sortType?: TableSortType;
   colspan?: number;
+  exportValue?: (row: T) => unknown;
 }
 
 export interface IselectOptions {
   name: string;
   value: string | number;
+  description?: string;
+}
+
+export interface TableFilterField {
+  key: string;
+  label: string;
+  searchType: TableSearchType;
+  placeholder?: string;
+  selectOptions?: IselectOptions[];
+  renderField?: (props: TableFilterFieldRenderProps) => React.ReactNode;
+}
+
+export interface TableFilterFieldRenderProps {
+  value: unknown;
+  onChange: (value: unknown) => void;
+  disabled?: boolean;
 }
 export interface IListResponse<T> {
   isLoading: boolean;
@@ -93,11 +109,14 @@ export interface IListResponse<T> {
   results: number;
   isRefetching: boolean;
   summary: Record<string, number>;
+  reload: () => Promise<unknown>;
 }
 
 export interface TableContextType<T = unknown> {
   data: T[];
   columns: TableColumn<T>[];
+  filterFields: TableFilterField[];
+  exportTitle?: string;
   headerActions?: React.ReactElement | null;
   service: ITableProps<T>["service"];
   limit: number;
@@ -113,6 +132,7 @@ export interface TableContextType<T = unknown> {
   queryKey: string;
   isDownloadable: boolean;
   isRefetching: boolean;
+  reload: () => Promise<unknown>;
   search: IsearchParams | null;
   searchKey?: string;
   summary: Record<string, number>;

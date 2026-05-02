@@ -1,22 +1,23 @@
 // app/api/onboarding/checklist/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
 import Property from "@/models/propertyModel";
 import Unit from "@/models/unitModel";
 import User from "@/models/userModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const me = await getUserFromCookies();
-    if (!me?.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!me?.id) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(me, PERMISSION.WORKSPACE_DASHBOARD_VIEW);
 
     const businessId = me.currentBusiness;
-    if (!businessId)
-      return NextResponse.json(
-        { error: "businessId required" },
-        { status: 400 }
-      );
+    if (!businessId) throw ApiError.badRequest("businessId required");
 
     const [
       propertiesCount,
@@ -29,22 +30,21 @@ export async function GET(req: Request) {
       Unit.countDocuments({ business: businessId, isActive: true }),
       User.countDocuments({
         "memberships.business": businessId,
-        "memberships.role": "ADMIN",
-        "memberships.status": "ACTIVATED",
+        "memberships.role": ROLES.admin,
+        "memberships.status": INVITE_STATUS.activated,
       }),
       User.countDocuments({
         "memberships.business": businessId,
-        "memberships.role": "TECHNICIAN",
-        "memberships.status": "ACTIVATED",
+        "memberships.role": ROLES.technician,
+        "memberships.status": INVITE_STATUS.activated,
       }),
       User.countDocuments({
         "memberships.business": businessId,
-        "memberships.role": "USER",
-        "memberships.status": "ACTIVATED",
+        "memberships.role": ROLES.user,
+        "memberships.status": INVITE_STATUS.activated,
       }),
     ]);
 
-    // You can pull email verification from your auth profile if you store it
     const emailVerified = true;
 
     return NextResponse.json({
@@ -55,7 +55,7 @@ export async function GET(req: Request) {
       techniciansCount,
       tenantsCount,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (error) {
+    return errorToNextResponse(error, req.headers.get("x-request-id"));
   }
 }

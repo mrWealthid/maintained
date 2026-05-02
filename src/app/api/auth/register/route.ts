@@ -1,104 +1,114 @@
 import { connect } from "@/dbConfig/dbConfig";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
+import {
+  ensurePlatformRoleDefinitions,
+  ensureWorkspaceRoleDefinitions,
+  resolveWorkspaceRoleDefinitionId,
+} from "@/lib/auth/role-definitions";
 import User, { UserDoc } from "@/models/userModel";
 import Business from "@/models/businessModel";
-import { NextResponse } from "next/server";
-import jwt, { SignOptions } from "jsonwebtoken";
+import { NextRequest } from "next/server";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
-import { ApiErrorHandler } from "@/utils/apiError";
+import { WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { z } from "zod";
 
 connect();
 
-const signToken = (user: UserDoc) => {
+const getLegacyTokenPreview = (user: UserDoc) => {
   const { id } = user;
   const tenants = user.tenantsClaim();
-  return jwt.sign(
-    {
-      id,
-      role: tenants[0].role || ROLES.user,
-      tenants,
-    },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
-  );
+  return {
+    id,
+    role: tenants[0]?.role || ROLES.user,
+    tenants,
+  };
 };
 
-const createSendToken = (user: UserDoc, statusCode: number) => {
-  const token = signToken(user);
+const registerBodySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Please provide a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  businessName: z.string().min(1, "Business name is required"),
+  registrationId: z.string().min(1, "Registration ID is required"),
+  businessContact: z.string().min(1, "Business contact is required"),
+  countryCode: z.string().min(1, "Country code is required"),
+  country: z.string().min(1, "Country is required"),
+  businessAddress: z.string().min(1, "Business address is required"),
+  businessEmail: z.string().email("Please provide a valid business email"),
+});
 
-  //Remove password from output
-  delete (user as any).password;
-  const response = NextResponse.json(
-    {
-      status: "success",
-      token,
-      data: {
-        user,
-      },
-    },
-    { status: statusCode }
-  );
-  const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-  const expires = new Date(Date.now() + timeInMs);
-  response.cookies.set("token", token, {
-    httpOnly: true,
-    expires,
-  });
-
-  return response;
-};
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const req = await request.json();
+    const body = parseOrThrow(registerBodySchema, await request.json());
 
-    // Check user existence
-    const existingUser = await User.findOne({ email: req.email });
+    const existingUser = await User.findOne({ email: body.email });
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email is already in use" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Email is already in use");
     }
 
     const business = await Business.create({
-      name: req.businessName,
-      registrationId: req.registrationId,
-      contact: req.businessContact,
-      countryCode: req.countryCode,
-      country: req.country,
-      address: req.businessAddress,
-      email: req.businessEmail,
-      creator: req.name,
+      name: body.businessName,
+      registrationId: body.registrationId,
+      contact: body.businessContact,
+      countryCode: body.countryCode,
+      country: body.country,
+      address: body.businessAddress,
+      email: body.businessEmail,
+      creator: body.name,
     });
 
     if (!business) {
-      return NextResponse.json(
-        { error: "Business could not be created" },
-        { status: 404 }
-      );
+      throw ApiError.internal("Business could not be created");
     }
 
-    // Create User
+    await Promise.all([
+      ensurePlatformRoleDefinitions(),
+      ensureWorkspaceRoleDefinitions({
+        workspaceId: business.id,
+        options: { createdBy: null },
+      }),
+    ]);
+    const ownerRoleDefinitionId = await resolveWorkspaceRoleDefinitionId({
+      workspaceId: business.id,
+      role: WORKSPACE_ROLE.owner,
+    });
+
     const newUser = await User.create({
-      name: req.name,
-      email: req.email,
-      password: req.password,
+      name: body.name,
+      email: body.email,
+      password: body.password,
       memberships: [
         {
           business: business.id,
           role: ROLES.admin,
           status: INVITE_STATUS.activated,
           isCreator: true,
+          roleDefinition: ownerRoleDefinitionId ?? undefined,
         },
       ],
       currentBusiness: business.id,
     });
 
-    return createSendToken(newUser, 201);
+    delete (newUser as any).password;
+
+    return buildAuthSuccessResponse({
+      request,
+      user: newUser,
+      status: 201,
+      body: {
+        status: "success",
+        ...getLegacyTokenPreview(newUser),
+        data: {
+          user: newUser,
+        },
+      },
+    });
   } catch (error) {
-    return NextResponse.json(
-      { error: ApiErrorHandler.parse(error) },
-      { status: 500 }
-    );
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

@@ -1,88 +1,88 @@
 import { connect } from "@/dbConfig/dbConfig";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import User, { IUser } from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+import { teamListQuerySchema } from "@/features/team/models/team-form.model";
 import APIFeatures from "@/utils/apiFeatures";
-import { mapToObject } from "@/utils/helpers";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
-    if (!verify) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (verify.isUserRole) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const currentBusinessId = new mongoose.Types.ObjectId(
-      verify.currentBusiness
+    await assertWorkspacePermissionKey(verify, PERMISSION.TEAM_VIEW);
+    const parsedQuery = parseOrThrow(
+      teamListQuerySchema.extend({
+        name: teamListQuerySchema.shape.search.optional(),
+        excludeSelf: teamListQuerySchema.shape.search.optional(),
+        excludeInactive: teamListQuerySchema.shape.search.optional(),
+      }),
+      Object.fromEntries(request.nextUrl.searchParams.entries())
     );
 
-    // Base filter: must have a membership for the current business
-    let filter: any = { "memberships.business": currentBusinessId };
+    const currentBusinessId = new mongoose.Types.ObjectId(verify.businessId);
+    const filter: Record<string, unknown> = {
+      "memberships.business": currentBusinessId,
+    };
 
-    const query = request.nextUrl.searchParams;
-    const transformedQuery = mapToObject(query as any);
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
 
-    // Exclude current user
-    if (query.get("excludeSelf") === "true") {
+    if (request.nextUrl.searchParams.get("excludeSelf") === "true") {
       filter._id = { $ne: verify.id };
       delete transformedQuery.excludeSelf;
     }
 
-    // Name (partial)
-    if (transformedQuery.name) {
-      filter.name = { $regex: new RegExp(transformedQuery.name, "i") };
+    const searchName = parsedQuery.name ?? parsedQuery.search;
+    if (searchName) {
+      filter.name = { $regex: new RegExp(searchName, "i") };
       delete transformedQuery.name;
+      delete transformedQuery.search;
     }
 
-    // Build one $elemMatch for memberships so we don't overwrite previous filters
-    const elemMatch: any = { business: currentBusinessId };
+    const elemMatch: Record<string, unknown> = { business: currentBusinessId };
 
-    // If 'status' is provided, it takes precedence over excludeInactive
-    if (transformedQuery.status) {
-      elemMatch.status = transformedQuery.status;
+    if (parsedQuery.status) {
+      elemMatch.status = parsedQuery.status;
       delete transformedQuery.status;
-    } else if (query.get("excludeInactive") === "true") {
-      // Only active per business
+    } else if (request.nextUrl.searchParams.get("excludeInactive") === "true") {
       elemMatch.status = "ACTIVATED";
-      // remove the flag from query map so it doesn't leak into APIFeatures
-      delete (transformedQuery as any).excludeInactive;
+      delete transformedQuery.excludeInactive;
     }
 
-    if (transformedQuery.role) {
-      elemMatch.role = transformedQuery.role;
+    if (parsedQuery.role) {
+      elemMatch.role = parsedQuery.role;
       delete transformedQuery.role;
     }
 
-    // Apply the $elemMatch only if we added any qualifiers beyond 'business'
     if (Object.keys(elemMatch).length > 1) {
       filter.memberships = { $elemMatch: elemMatch };
     }
 
-    // Query + features
-    const userQuery = User.find(filter);
-    const features = new APIFeatures(userQuery, transformedQuery)
+    const features = new APIFeatures(User.find(filter), transformedQuery)
       .filter()
       .sort()
       .limitFields()
       .paginate()
       .populate([
-        { path: "currentBusiness", select: "businessName country" },
-        { path: "memberships.business", select: "businessName" },
+        { path: "currentBusiness", select: "name country" },
+        { path: "memberships.business", select: "name" },
       ]);
 
     const users = await features.query;
-
     const countFeatures = new APIFeatures<IUser>(
       User.find(filter),
       transformedQuery
     ).filter();
-
     const count = await countFeatures.query.countDocuments();
 
     return NextResponse.json({
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       results: users.length,
       data: users,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

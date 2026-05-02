@@ -1,32 +1,31 @@
 // app/api/chat/rooms/route.ts
 import "@/models/ticketModel";
 import "@/models/userModel";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 import ChatRoom from "@/models/chatRoom";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 import Ticket from "@/models/ticketModel";
 import ChatMessage from "@/models/chatMessage";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const verify = await getUserFromCookies();
-    if (!verify?.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!verify?.id) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_VIEW);
     if (!Types.ObjectId.isValid(verify.id)) {
-      return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+      throw ApiError.badRequest("Invalid user id");
     }
 
     const { searchParams } = new URL(req.url);
     const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10), 50);
 
-    // --- business filter (from user’s current business) ---
-    const businessId = verify.currentBusiness; // ensure your auth sets this
+    const businessId = verify.currentBusiness;
     if (!businessId || !Types.ObjectId.isValid(businessId)) {
-      return NextResponse.json(
-        { error: "Missing/invalid currentBusiness" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Missing/invalid currentBusiness");
     }
 
     // 1) tickets in this business
@@ -116,10 +115,8 @@ export async function GET(req: Request) {
     );
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (err: any) {
-    const msg = err?.message || "Failed to fetch chat rooms";
-    const code = /unauthorized|forbidden/i.test(msg) ? 401 : 500;
-    return NextResponse.json({ error: msg }, { status: code });
+  } catch (error) {
+    return errorToNextResponse(error, req.headers.get("x-request-id"));
   }
 }
 

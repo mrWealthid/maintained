@@ -3,7 +3,9 @@ import crypto from "crypto";
 import { INVITE_STATUS, ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { Membership, User } from "@/shared/model/model";
 
-export function mapToObject(map: Map<string, any>): { [key: string]: any } {
+export function mapToObject(
+  map: Map<string, any> | URLSearchParams
+): { [key: string]: any } {
   const obj: { [key: string]: any } = {};
   for (let [key, value] of Array.from(map)) {
     // Checking if the value is a string representation of a number
@@ -125,22 +127,19 @@ export function getMembershipForBusiness(
 export const getStatusColor = (status: TICKET_STATUS) => {
   switch (status) {
     case TICKET_STATUS.pending:
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
     case TICKET_STATUS.pending_assignment:
-      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      return "bg-status-open text-status-open-foreground";
     case TICKET_STATUS.assigned:
-      return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200";
     case TICKET_STATUS.processing:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
     case TICKET_STATUS.scheduled:
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      return "bg-status-progress text-status-progress-foreground";
     case TICKET_STATUS.completed:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      return "bg-status-resolved text-status-resolved-foreground";
     case TICKET_STATUS.declined:
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      return "bg-status-overdue text-status-overdue-foreground";
 
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      return "bg-muted text-muted-foreground";
   }
 };
 
@@ -179,16 +178,12 @@ export function parseGooglePlace(
   const postalCode = get("postal_code");
   const country = get("country") || "United States";
   const loc = details.geometry?.location;
-  const lat = loc
-    ? typeof loc.lat === "function"
-      ? loc.lat()
-      : (loc as any).lat
-    : null;
-  const lng = loc
-    ? typeof loc.lng === "function"
-      ? loc.lng()
-      : (loc as any).lng
-    : null;
+  let lat = null;
+  let lng = null;
+  if (loc) {
+    lat = typeof loc.lat === "function" ? loc.lat() : (loc as any).lat;
+    lng = typeof loc.lng === "function" ? loc.lng() : (loc as any).lng;
+  }
 
   return {
     line1,

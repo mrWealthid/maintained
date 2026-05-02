@@ -3,15 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 import Ticket from "@/models/ticketModel";
 import Category from "@/models/ticketCategoryModel";
 import { connect } from "@/dbConfig/dbConfig";
-import { mapToObject } from "@/utils/helpers";
 import MiddlewareFeatures from "@/middlewareFeatures";
 import { Types } from "mongoose";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
-import { TICKET_STATUS } from "@/shared/enums/enums";
+import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 import { Ticket as ITicket } from "@/shared/model/model";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import {
+  ticketFormSchema,
+  ticketListQuerySchema,
+} from "@/features/tickets/models/ticket-form.model";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
 
@@ -20,15 +30,16 @@ export async function GET(request: NextRequest) {
     //2) Check if user exists & password is correct after it's hashed
     const verify = await getUserFromCookies();
     if (!verify) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw ApiError.unauthorized();
     }
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
 
     let filter = {};
     const user = await User.findById(verify.id);
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw ApiError.notFound("User not found");
     }
-    if (verify.isAdminRole) {
+    if (verify.role === ROLES.admin) {
       filter = { business: user.currentBusiness };
     }
 
@@ -54,18 +65,26 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    const query: any = request.nextUrl.searchParams;
-
-    const transformedQuery = mapToObject(query);
+    const parsedQuery = parseOrThrow(
+      ticketListQuerySchema
+        .extend({
+          title: ticketListQuerySchema.shape.search.optional(),
+          category: ticketListQuerySchema.shape.search.optional(),
+          user: ticketListQuerySchema.shape.search.optional(),
+        })
+        .passthrough(),
+      Object.fromEntries(request.nextUrl.searchParams.entries())
+    );
+    const transformedQuery: Record<string, unknown> = { ...parsedQuery };
     //handling nested filters / partial match
-    if (transformedQuery.title) {
-      const regex = new RegExp(transformedQuery.title, "i"); // 'i' for case-insensitive
+    if (parsedQuery.title) {
+      const regex = new RegExp(parsedQuery.title, "i"); // 'i' for case-insensitive
       filter = { ...filter, title: { $regex: regex } };
       delete transformedQuery.title; // Remove name from transformedQuery so it doesn't get double-filtered
     }
 
-    if ("category" in transformedQuery) {
-      const categoryName = String(transformedQuery["category"]).trim();
+    if (parsedQuery.category) {
+      const categoryName = parsedQuery.category.trim();
       const categoryFound = await Category.findOne({
         name: new RegExp(categoryName, "i"),
       }).select("_id");
@@ -75,8 +94,8 @@ export async function GET(request: NextRequest) {
       // if (!categoryFound) delete transformedQuery["category"];
     }
 
-    if ("user" in transformedQuery) {
-      const userName = String(transformedQuery["user"]).trim();
+    if (parsedQuery.user) {
+      const userName = parsedQuery.user.trim();
       const userFound = await User.findOne({
         name: new RegExp(userName, "i"),
       }).select("_id");
@@ -158,35 +177,40 @@ export async function GET(request: NextRequest) {
     );
 
     return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
 
-export async function POST(request: NextRequest, { params }: any) {
+const ticketCreateBodySchema = ticketFormSchema.partial({
+  // The route resolves property/unit from the verified user when omitted,
+  // so they are optional in the wire schema even though the form requires them.
+  property: true,
+  unit: true,
+  images: true,
+  videos: true,
+  documents: true,
+});
+
+export async function POST(request: NextRequest) {
   try {
-    //2) Check if user exists & password is correct after it's hashed
     const verify = await getUserFromCookies();
-    if (!verify) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_CREATE);
+
     const user = await User.findById(verify.id);
+    if (!user) throw ApiError.notFound("User not found");
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-    const body = await request.json();
+    const body = parseOrThrow(ticketCreateBodySchema, await request.json());
 
-    //create Ticket
     const data = await Ticket.create({
       ...body,
-      property: verify.property,
-      unit: verify.unit,
+      property: body.property ?? verify.property,
+      unit: body.unit ?? verify.unit,
       user: verify.id,
       business: user.currentBusiness,
     });
 
-    //Log Ticket Activity
     await TicketActivity.create({
       ticket: data.id,
       action: "created",
@@ -199,15 +223,8 @@ export async function POST(request: NextRequest, { params }: any) {
       },
     });
 
-    const response = NextResponse.json(
-      {
-        status: "success",
-        data,
-      },
-      { status: 201 }
-    );
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ status: "success", data }, { status: 201 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

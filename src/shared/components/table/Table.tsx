@@ -14,19 +14,25 @@ import {
   TableColumn,
   IsearchParams,
   IselectOptions,
+  TableFilterField,
+  TableFilterFieldRenderProps,
   TableContextType,
+  TableSortType,
 } from "./models/table.model";
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -34,21 +40,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { formatCurrency } from "@/utils/helper";
 import { useTable } from "./hooks/useTable";
 import { useForm } from "react-hook-form";
-import { DownloadTableExcel } from "react-export-table-to-excel";
-import TextInput from "../form-elements/Text-Input";
-import Modal from "../modal/Modal";
-import ButtonComponent from "../form-elements/Button";
+import { useWatch } from "react-hook-form";
 import Search from "../search/Search";
 import Empty from "../empty/Empty";
 import AnimatedBorderWrapper from "../animation/AnimatedBorder";
 import {
   Table,
   TableBody,
-  TableCell,
+  // TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -62,13 +65,43 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { FolderInput, Funnel, FunnelX } from "lucide-react";
+import { Download, Funnel, FunnelX, RotateCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
+import { useTableExport } from "./hooks/use-table-export";
+import {
+  TABLE_EXPORT_MAX_ROWS,
+  TABLE_EXPORT_SCOPE,
+  type TableExportScope,
+} from "./models/table-export.model";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import TableVisualizeSheet from "./TableVisualizeSheet";
+import { getValueByAccessor } from "./helpers/table-value.helper";
+import {
+  createProgressToast,
+  downloadBlob,
+} from "@/shared/lib/resource-download";
 
 const TableContext = createContext<TableContextType<unknown> | undefined>(
-  undefined
+  undefined,
 );
+
+const TABLE_FILTER_CLEAR_VALUE = "__all__";
+const TABLE_SORT_DIRECTION_ASC = "asc";
+const TABLE_SORT_DIRECTION_DESC = "desc";
 
 function useTypedTableContext<T>() {
   const ctx = useContext(TableContext);
@@ -78,10 +111,212 @@ function useTypedTableContext<T>() {
   return ctx as TableContextType<T>;
 }
 
+function normalizeExportText(value: string) {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(" • ");
+}
+
+function formatExportCellValue(value: unknown): string {
+  if (value == null) return "--";
+  if (typeof value === "string") {
+    const normalized = normalizeExportText(value);
+    return normalized || "--";
+  }
+  if (typeof value === "number" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    const serialized = value
+      .map((item) => formatExportCellValue(item))
+      .filter((item) => item !== "--")
+      .join(", ");
+    return serialized || "--";
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+function humanizeQueryKey(queryKey: string) {
+  return queryKey
+    .replace(/[-_]+/g, " ")
+    .replace(/\b[a-z]/g, (char) => char.toUpperCase());
+}
+
+function slugifyFileName(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "table-export"
+  );
+}
+
+function removeEmptySearchValues(data: IsearchParams) {
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      ([, value]) =>
+        value !== "" && value != null && !(typeof value === "number" && Number.isNaN(value)),
+    ),
+  );
+}
+
+function buildFilterFieldsFromColumns(
+  columns: TableColumn<unknown>[],
+): TableFilterField[] {
+  return columns
+    .filter((column) => column.searchType)
+    .map((column) => ({
+      key: column.filterKey ?? column.header,
+      label: column.header,
+      searchType: column.searchType!,
+      selectOptions: column.selectOptions,
+    }));
+}
+
+function hasActiveFilterFields(
+  search: IsearchParams | null | undefined,
+  filterFields: TableFilterField[],
+) {
+  if (!search) {
+    return false;
+  }
+
+  return filterFields.some((field) => {
+    const value = search[field.key];
+    return (
+      value !== "" &&
+      value != null &&
+      !(typeof value === "number" && Number.isNaN(value))
+    );
+  }) || typeof search.sort === "string" && search.sort.trim().length > 0;
+}
+
+function parseSortValue(sort: unknown) {
+  if (typeof sort !== "string" || !sort.trim()) {
+    return {
+      sortField: "",
+      sortDirection: TABLE_SORT_DIRECTION_DESC,
+    };
+  }
+
+  const normalizedSort = sort.trim();
+  const isDesc = normalizedSort.startsWith("-");
+
+  return {
+    sortField: isDesc ? normalizedSort.slice(1) : normalizedSort,
+    sortDirection: isDesc
+      ? TABLE_SORT_DIRECTION_DESC
+      : TABLE_SORT_DIRECTION_ASC,
+  };
+}
+
+function buildSortValue(sortField: unknown, sortDirection: unknown) {
+  if (typeof sortField !== "string" || !sortField.trim()) {
+    return "";
+  }
+
+  const normalizedField = sortField.trim();
+  return sortDirection === TABLE_SORT_DIRECTION_ASC
+    ? normalizedField
+    : `-${normalizedField}`;
+}
+
+type TableSortOption = {
+  name: string;
+  value: string;
+  sortType: TableSortType;
+};
+
+function inferSortType(column: TableColumn<unknown>): TableSortType {
+  if (column.sortType) {
+    return column.sortType;
+  }
+
+  const source = `${String(column.header ?? "")} ${String(column.accessor ?? "")}`.toLowerCase();
+
+  if (
+    /\b(date|time|created|updated|paid|start|end|scheduled|deadline|window)\b/.test(
+      source,
+    )
+  ) {
+    return "date";
+  }
+
+  if (
+    /\b(amount|price|capacity|count|total|qty|quantity|tickets|guests|hours|rate|percent|percentage|revenue|seats|spots|attendees|volunteers)\b/.test(
+      source,
+    )
+  ) {
+    return "number";
+  }
+
+  return "string";
+}
+
+function getSortDirectionOptions(sortType: TableSortType): IselectOptions[] {
+  if (sortType === "date") {
+    return [
+      { name: "Newest first", value: TABLE_SORT_DIRECTION_DESC },
+      { name: "Oldest first", value: TABLE_SORT_DIRECTION_ASC },
+    ];
+  }
+
+  if (sortType === "number") {
+    return [
+      { name: "Highest first", value: TABLE_SORT_DIRECTION_DESC },
+      { name: "Lowest first", value: TABLE_SORT_DIRECTION_ASC },
+    ];
+  }
+
+  return [
+    { name: "A to Z", value: TABLE_SORT_DIRECTION_ASC },
+    { name: "Z to A", value: TABLE_SORT_DIRECTION_DESC },
+  ];
+}
+
+function buildSortableOptions(columns: TableColumn<unknown>[]) {
+  const seen = new Set<string>();
+
+  return columns
+    .map((column) => {
+      const accessor = String(column.accessor ?? "").trim();
+      if (!accessor || accessor === ".") {
+        return null;
+      }
+
+      if (seen.has(accessor)) {
+        return null;
+      }
+
+      seen.add(accessor);
+
+      const option: TableSortOption = {
+        name: column.header,
+        value: accessor,
+        sortType: inferSortType(column),
+      };
+      return option;
+    })
+    .filter((option): option is TableSortOption => option !== null);
+}
+
 function TableComponent<T>({
   queryKey,
   children,
   columns,
+  filterFields,
+  exportTitle,
   headerActions,
   service,
   limit: limitVal,
@@ -97,56 +332,36 @@ function TableComponent<T>({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(limitVal || 5);
   const [search, setSearch] = useState<IsearchParams | null>(
-    defaultParams ?? null
+    defaultParams ?? null,
   );
-  const [filterIsActive, setfilterIsActive] =
-    useState<boolean>(!!defaultParams);
+  const resolvedFilterFields = useMemo<TableFilterField[]>(
+    () =>
+      filterFields?.length
+        ? filterFields
+        : buildFilterFieldsFromColumns(columns as TableColumn<unknown>[]),
+    [columns, filterFields],
+  );
+  const filterIsActive = useMemo(
+    () => hasActiveFilterFields(search, resolvedFilterFields),
+    [resolvedFilterFields, search],
+  );
 
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(
-    new Set()
+    new Set(),
   );
 
   const {
     isLoading,
-    error,
+    // error,
     data = [],
     summary,
     totalRecords,
-    results,
+    // results,
     isRefetching,
+    reload,
   }: IListResponse<T> = useTable<T>(page, limit, service, queryKey, search);
 
-  //reload my table
-  // function reloadTable() {
-  // 	setPage(1);
-  // 	// Remove all filters
-  // 	setSearch(null);
-  // 	setfilterIsActive(false);
-  // }
 
-  // function onFilter(val: IsearchParams | null) {
-  //   let transformedSearchQuery = "";
-  //   if (!val) {
-  //     setfilterIsActive(false);
-  //     setSearch(null);
-  //     return;
-  //   }
-
-  //   // transformedSearchQuery = buildQueryString(val);
-
-  //   // transformedSearchQuery = objectToQueryParams(val);
-
-  //   setSearch((search) => ({ ...search, ...val }));
-  //   setPage(1);
-
-  //   setfilterIsActive(true);
-  // }
-
-  // const queryClient = useQueryClient();
-
-  // function updatePage(val: number) {
-  //   setPage(val);
-  // }
 
   // --- actions (memoize) ---
   const updateLimit = React.useCallback((n: number) => setLimit(n), []);
@@ -155,32 +370,52 @@ function TableComponent<T>({
     setLimit(limit);
   }, []);
   const onFilter = React.useCallback((val: IsearchParams | null) => {
-    // let transformedSearchQuery = "";
     if (!val) {
-      setfilterIsActive(false);
       setSearch(null);
+      setPage(1);
       return;
     }
 
-    setSearch((search) => ({ ...search, ...val }));
-    setPage(1);
+    const nextSearch = { ...(search ?? {}) };
 
-    setfilterIsActive(true);
-  }, []);
+    Object.entries(val).forEach(([key, value]) => {
+      if (
+        value === "" ||
+        value == null ||
+        (typeof value === "number" && Number.isNaN(value))
+      ) {
+        delete nextSearch[key];
+        return;
+      }
+
+      nextSearch[key] = value;
+    });
+
+    const hasSearchParams = Object.keys(nextSearch).length > 0;
+
+    setSearch(hasSearchParams ? nextSearch : null);
+    setPage(1);
+  }, [search]);
 
   const cancelFilter = React.useCallback(() => {
-    setfilterIsActive(false);
-    setSearch(null);
-  }, []);
+    const nextSearch = { ...(search ?? {}) };
 
-  const tableRef = useRef(null);
+    resolvedFilterFields.forEach((field) => {
+      delete nextSearch[field.key];
+    });
+
+    setSearch(Object.keys(nextSearch).length ? nextSearch : null);
+    setPage(1);
+  }, [resolvedFilterFields, search]);
+
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   const getRowIdForRow = React.useCallback(
     (row: T, index: number) => {
       if (getRowId) return getRowId(row, index);
       return index;
     },
-    [getRowId]
+    [getRowId],
   );
 
   const toggleRowSelection = React.useCallback((id: string | number) => {
@@ -210,7 +445,7 @@ function TableComponent<T>({
 
   const isRowSelected = React.useCallback(
     (id: string | number) => selectedRowIds.has(id),
-    [selectedRowIds]
+    [selectedRowIds],
   );
 
   const selectedRows: T[] = useMemo(() => {
@@ -232,7 +467,7 @@ function TableComponent<T>({
   }, [onSelectionChange, selectedRows, enableSelection]);
 
   const CardContent = (
-    <div className="bg-card/80 backdrop-blur-sm p-3 border border-border/80 rounded-xl space-y-3">
+    <div className="bg-card/80 backdrop-blur-xs p-3 border border-border/80 rounded-xl space-y-3">
       <TableHeaderAction>
         {headerActions as React.ReactElement<Record<string, unknown>> | null}
       </TableHeaderAction>
@@ -264,6 +499,8 @@ function TableComponent<T>({
     () => ({
       data: data as unknown[],
       columns: columns as TableColumn<unknown>[],
+      filterFields: resolvedFilterFields,
+      exportTitle,
       headerActions: headerActions ?? null,
       service: service as ITableProps<unknown>["service"],
       limit,
@@ -279,6 +516,7 @@ function TableComponent<T>({
       queryKey,
       isDownloadable,
       isRefetching,
+      reload,
       search,
       searchKey,
       summary,
@@ -292,19 +530,21 @@ function TableComponent<T>({
       selectedRows: selectedRows as unknown[],
       getRowIdForRow: getRowIdForRow as (
         row: unknown,
-        index: number
+        index: number,
       ) => string | number,
       renderSelectionActions: renderSelectionActions
         ? (((params) =>
-            renderSelectionActions({
-              selectedRows: params.selectedRows as T[],
-              clearSelection: params.clearSelection,
-            })) as TableContextType<unknown>["renderSelectionActions"])
+          renderSelectionActions({
+            selectedRows: params.selectedRows as T[],
+            clearSelection: params.clearSelection,
+          })) as TableContextType<unknown>["renderSelectionActions"])
         : undefined,
     }),
     [
       data,
       columns,
+      resolvedFilterFields,
+      exportTitle,
       headerActions,
       service,
       limit,
@@ -320,6 +560,7 @@ function TableComponent<T>({
       queryKey,
       isDownloadable,
       isRefetching,
+      reload,
       search,
       searchKey,
       summary,
@@ -333,7 +574,7 @@ function TableComponent<T>({
       selectedRows,
       getRowIdForRow,
       renderSelectionActions,
-    ]
+    ],
   );
   return (
     <TableContext.Provider value={memoizedValue}>
@@ -358,150 +599,451 @@ function TableFilterForm({ onCloseModal }: TableFilterFormProps) {
     onFilter,
     cancelFilter,
     search,
+    filterFields,
     columns,
     isRefetching,
   }: TableContextType<unknown> = useTypedTableContext<unknown>();
+  const currentSort = useMemo(() => parseSortValue(search?.sort), [search]);
+  const syncedValuesSignature = useMemo(
+    () =>
+      JSON.stringify(
+        {
+          ...Object.fromEntries(
+            filterFields.map((field) => [field.key, search?.[field.key] ?? ""]),
+          ),
+          sortField: currentSort.sortField,
+          sortDirection: currentSort.sortDirection,
+        },
+      ),
+    [currentSort.sortDirection, currentSort.sortField, filterFields, search],
+  );
+  const syncedValues = useMemo(
+    () => JSON.parse(syncedValuesSignature) as IsearchParams,
+    [syncedValuesSignature],
+  );
 
-  const { register, handleSubmit, formState, setValue, watch } =
-    useForm<IsearchParams>({
-      mode: "onChange",
-      defaultValues: { ...(search ?? {}) },
-    });
+  const form = useForm<IsearchParams>({
+    mode: "onChange",
+    defaultValues: syncedValues,
+  });
 
-  function removeEmptyObjValues(data: IsearchParams) {
-    return Object.fromEntries(
-      Object.entries(data).filter(
-        ([, v]) =>
-          v !== "" && v != null && !(typeof v === "number" && Number.isNaN(v))
-      )
+  const { control, handleSubmit, reset } = form;
+  const watchedSortField = useWatch({
+    control,
+    name: "sortField",
+  });
+  const filterKeys = useMemo(
+    () => filterFields.map((field) => field.key),
+    [filterFields],
+  );
+  const sortableOptions = useMemo(
+    () => buildSortableOptions(columns as TableColumn<unknown>[]),
+    [columns],
+  );
+  const selectedSortOption = useMemo(
+    () =>
+      sortableOptions.find((option) => option.value === String(watchedSortField ?? "")) ??
+      null,
+    [sortableOptions, watchedSortField],
+  );
+  const sortDirectionOptions = useMemo(
+    () => getSortDirectionOptions(selectedSortOption?.sortType ?? "date"),
+    [selectedSortOption],
+  );
+
+  useEffect(() => {
+    reset(syncedValues);
+  }, [reset, syncedValues]);
+
+  const buildSearchSignature = (params: IsearchParams | null | undefined) => {
+    const normalized = removeEmptySearchValues(params ?? {});
+    return JSON.stringify(
+      Object.entries(normalized).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
     );
-  }
+  };
 
   const handleSubmitFilter = (data: IsearchParams) => {
-    const query = removeEmptyObjValues(data);
+    const normalizedData = Object.fromEntries(
+      Object.entries(data).map(([key, value]) => {
+        if (key === "sortField" || key === "sortDirection") {
+          return [key, value];
+        }
 
-    onFilter({ ...(search ?? {}), ...query });
+        return [key, value === TABLE_FILTER_CLEAR_VALUE ? "" : value];
+      }),
+    );
+    const sortValue = buildSortValue(
+      normalizedData.sortField,
+      normalizedData.sortDirection,
+    );
+    const query = removeEmptySearchValues(normalizedData);
+    delete query.sortField;
+    delete query.sortDirection;
+    if (sortValue) {
+      query.sort = sortValue;
+    }
+    const preservedSearch = Object.fromEntries(
+      Object.entries(search ?? {}).filter(
+        ([key]) => !filterKeys.includes(key) && key !== "sort",
+      ),
+    );
+    const nextSearch = { ...preservedSearch, ...query };
+
+    if (buildSearchSignature(nextSearch) === buildSearchSignature(search)) {
+      onCloseModal?.();
+      return;
+    }
+
+    onFilter(nextSearch);
     onCloseModal?.();
   };
 
   const handleCancel = () => {
+    const preservedSearch = Object.fromEntries(
+      Object.entries(search ?? {}).filter(
+        ([key]) => !filterKeys.includes(key) && key !== "sort",
+      ),
+    );
+
+    if (buildSearchSignature(search) === buildSearchSignature(preservedSearch)) {
+      onCloseModal?.();
+      return;
+    }
+
     cancelFilter();
     onCloseModal?.();
   };
 
-  const getKeyForColumn = (column: TableColumn<unknown>): string =>
-    column.filterKey ?? column.header;
-
   return (
-    <form
-      onSubmit={handleSubmit(handleSubmitFilter)}
-      className="flex flex-col gap-4"
-    >
-      <section className="grid grid-cols-1 gap-3">
-        {columns
-          .slice()
-          .filter((col) => col.searchType)
-          .map((column: TableColumn<unknown>) => {
-            const formKey = getKeyForColumn(column);
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(handleSubmitFilter)}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
+        <AppDialogBody className="min-h-0 flex-1">
+          <section className="space-y-6">
+            <div className="space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Default Sort</h3>
+                <p className="text-xs text-muted-foreground">
+                  Choose how rows should be ordered when filters are applied.
+                </p>
+              </div>
 
-            /** ========== TEXT ========== */
-            if (column.searchType === "TEXT") {
-              return (
-                <div
-                  key={String(column.accessor)}
-                  className="flex flex-col gap-1"
-                >
-                  <Label htmlFor={String(column.header)}>{column.header}</Label>
-                  <Input
-                    id={String(column.header)}
-                    type="text"
-                    placeholder={`Enter ${column.header}`}
-                    {...register(formKey)}
-                  />
-                </div>
-              );
-            }
-
-            /** ========== NUMBER ========== */
-            if (column.searchType === "NUMBER") {
-              return (
-                <div
-                  key={String(column.accessor)}
-                  className="flex flex-col gap-1"
-                >
-                  <Label htmlFor={String(column.header)}>{column.header}</Label>
-                  <Input
-                    id={String(column.header)}
-                    type="number"
-                    {...register(formKey, { valueAsNumber: true })}
-                  />
-                </div>
-              );
-            }
-
-            /** ========== DROPDOWN ========== */
-            if (column.searchType === "DROPDOWN") {
-              const currentValue = watch(formKey) ?? "";
-
-              return (
-                <div
-                  key={String(column.accessor)}
-                  className="flex flex-col gap-1"
-                >
-                  <Label>{column.header}</Label>
-                  <Select
-                    value={
-                      currentValue === undefined ? "" : String(currentValue)
-                    }
-                    onValueChange={(val) => {
-                      setValue(formKey, val || "");
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={`Select ${column.header.toLowerCase()}`}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All</SelectItem>
-                      {column.selectOptions?.map(
-                        (opt: IselectOptions, idx: number) => (
-                          <SelectItem key={idx} value={String(opt.value)}>
-                            {opt.name}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={control}
+                  name="sortField"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sort by</FormLabel>
+                      <Select
+                        value={
+                          field.value == null || field.value === ""
+                            ? undefined
+                            : String(field.value)
+                        }
+                        onValueChange={(value) =>
+                          field.onChange(
+                            value === TABLE_FILTER_CLEAR_VALUE ? "" : value,
+                          )
+                        }
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full min-w-full">
+                            <SelectValue placeholder="Select field" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="w-(--radix-select-trigger-width) min-w-(--radix-select-trigger-width)">
+                          <SelectItem value={TABLE_FILTER_CLEAR_VALUE}>
+                            No default sort
                           </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            }
+                          {sortableOptions.map((option) => (
+                            <SelectItem
+                              key={`sort-field-${option.value}`}
+                              value={String(option.value)}
+                            >
+                              {option.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            return null;
-          })}
-      </section>
+                <FormField
+                  control={control}
+                  name="sortDirection"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Direction</FormLabel>
+                      <Select
+                        value={
+                          field.value == null || field.value === ""
+                            ? TABLE_SORT_DIRECTION_DESC
+                            : String(field.value)
+                        }
+                        onValueChange={field.onChange}
+                        disabled={!watchedSortField}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full min-w-full">
+                            <SelectValue placeholder="Select direction" />
+                          </SelectTrigger>
+                        </FormControl>
+                          <SelectContent className="w-(--radix-select-trigger-width) min-w-(--radix-select-trigger-width)">
+                          {sortDirectionOptions.map((option) => (
+                            <SelectItem
+                              key={`sort-direction-${option.value}`}
+                              value={String(option.value)}
+                            >
+                              {option.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-      <hr className="my-3" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {filterFields.map((fieldDefinition) => {
+              const formKey = fieldDefinition.key;
+              const renderField = fieldDefinition.renderField;
 
-      <section className="flex justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="rounded-3xl"
-          onClick={handleCancel}
-        >
-          Cancel
-        </Button>
+              /** ========== TEXT ========== */
+              if (renderField) {
+                return (
+                  <FormField
+                    key={formKey}
+                    control={control}
+                    name={formKey}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{fieldDefinition.label}</FormLabel>
+                        <FormControl>
+                          {renderField({
+                            value: field.value,
+                            onChange: field.onChange as TableFilterFieldRenderProps["onChange"],
+                            disabled: isRefetching,
+                          })}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              }
 
-        <Button
-          type="submit"
-          className="rounded-3xl"
-          disabled={!formState.isValid || isRefetching}
-        >
-          {isRefetching ? "Searching..." : "Search"}
-        </Button>
-      </section>
-    </form>
+              /** ========== TEXT ========== */
+              if (fieldDefinition.searchType === "TEXT") {
+                return (
+                  <FormField
+                    key={formKey}
+                    control={control}
+                    name={formKey}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{fieldDefinition.label}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder={
+                              fieldDefinition.placeholder ??
+                              `Enter ${fieldDefinition.label}`
+                            }
+                            value={field.value == null ? "" : String(field.value)}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              }
+
+              /** ========== NUMBER ========== */
+              if (fieldDefinition.searchType === "NUMBER") {
+                return (
+                  <FormField
+                    key={formKey}
+                    control={control}
+                    name={formKey}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{fieldDefinition.label}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            value={field.value == null ? "" : String(field.value)}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              field.onChange(value === "" ? "" : Number(value));
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              }
+
+              /** ========== DROPDOWN ========== */
+              if (fieldDefinition.searchType === "DROPDOWN") {
+                return (
+                  <FormField
+                    key={formKey}
+                    control={control}
+                    name={formKey}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{fieldDefinition.label}</FormLabel>
+                        <Select
+                          value={
+                            field.value == null || field.value === ""
+                              ? undefined
+                              : String(field.value)
+                          }
+                          onValueChange={(value) =>
+                            field.onChange(
+                              value === TABLE_FILTER_CLEAR_VALUE ? "" : value,
+                            )
+                          }
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full min-w-full">
+                              <SelectValue
+                                placeholder={`Select ${fieldDefinition.label.toLowerCase()}`}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="w-(--radix-select-trigger-width) min-w-(--radix-select-trigger-width)">
+                            <SelectItem value={TABLE_FILTER_CLEAR_VALUE}>
+                              Clear selection
+                            </SelectItem>
+                            {fieldDefinition.selectOptions?.map(
+                              (opt: IselectOptions, idx: number) => (
+                                <SelectItem key={idx} value={String(opt.value)}>
+                                  {opt.name}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              }
+
+              /** ========== RADIO ========== */
+              if (fieldDefinition.searchType === "RADIO") {
+                return (
+                  <FormField
+                    key={formKey}
+                    control={control}
+                    name={formKey}
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>{fieldDefinition.label}</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            value={
+                              field.value == null || field.value === ""
+                                ? undefined
+                                : String(field.value)
+                            }
+                            onValueChange={(value) =>
+                              field.onChange(
+                                value === TABLE_FILTER_CLEAR_VALUE ? "" : value,
+                              )
+                            }
+                            className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3"
+                          >
+                            {fieldDefinition.selectOptions?.map((option) => {
+                              const isSelected =
+                                String(field.value ?? "") ===
+                                String(option.value);
+
+                              return (
+                                <div
+                                  key={`${formKey}-${option.value}`}
+                                  onClick={() =>
+                                    field.onChange(
+                                      isSelected ? "" : String(option.value),
+                                    )
+                                  }
+                                  className={cn(
+                                    "flex cursor-pointer items-start gap-2.5 rounded-lg border-2 p-3 transition-all",
+                                    isSelected
+                                      ? "border-primary bg-primary/5"
+                                      : "border-border hover:border-muted-foreground/30",
+                                  )}
+                                  role="presentation"
+                                >
+                                  <RadioGroupItem
+                                    value={String(option.value)}
+                                    className="pointer-events-none mt-0.5"
+                                  />
+                                  <div className="flex-1 space-y-1 text-left">
+                                    <div className="text-sm font-medium text-foreground">
+                                      {option.name}
+                                    </div>
+                                    {option.description ? (
+                                      <p className="text-[11px] leading-5 text-muted-foreground">
+                                        {option.description}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </RadioGroup>
+                        </FormControl>
+                        <p className="text-[11px] text-muted-foreground">
+                          Leave unselected to avoid applying this filter.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              }
+
+              return null;
+            })}
+            </div>
+          </section>
+        </AppDialogBody>
+
+        <AppDialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+          >
+            Clear filters
+          </Button>
+
+          <Button
+            type="submit"
+            disabled={isRefetching}
+          >
+            {isRefetching ? "Applying..." : "Apply filters"}
+          </Button>
+        </AppDialogFooter>
+      </form>
+    </Form>
   );
 }
 
@@ -520,12 +1062,11 @@ export function TableFilter() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="secondary"
-          className={`flex items-center gap-1 text-xs px-4 py-2 rounded-lg font-light ${
-            filterIsActive
-              ? "ring-1 ring-offset-2 text-green-600 ring-green-600"
-              : ""
-          }`}
+          variant={"ghost"}
+          className={`flex shrink-0 items-center justify-center gap-1 rounded-lg border px-4 py-2 text-xs font-light whitespace-nowrap transition-colors ${filterIsActive
+            ? "border-primary bg-primary/5 text-primary ring-1 ring-primary/20"
+            : "border-border text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/40 hover:text-foreground"
+            }`}
         >
           {filterIsActive ? (
             <FunnelX color="green" size={12} className="mr-1" />
@@ -536,16 +1077,15 @@ export function TableFilter() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Manage filters</DialogTitle>
-          <DialogDescription>
-            Quickly find table records using the available filters.
-          </DialogDescription>
-        </DialogHeader>
+      <AppDialogContent className="flex h-[min(100dvh-1rem,52rem)] flex-col sm:h-auto sm:max-h-[min(100dvh-2rem,52rem)] sm:max-w-3xl">
+        <AppDialogHeader
+          title="Manage filters"
+          description="Refine the current table results with the available filter options."
+          icon={Funnel}
+        />
 
         <TableFilterForm onCloseModal={handleClose} />
-      </DialogContent>
+      </AppDialogContent>
     </Dialog>
   );
 }
@@ -565,7 +1105,7 @@ function TableHeaders() {
     enableSelection && data.length > 0 && selectedRowIds.size === data.length;
 
   return (
-    <TableHeader className="bg-muted/80 backdrop-blur capitalize sticky top-0 z-10">
+    <TableHeader className="bg-muted/80 backdrop-blur-sm capitalize sticky top-0 z-10">
       <TableRow>
         {enableSelection && (
           <TableHead className="w-8 px-2 py-3">
@@ -611,14 +1151,30 @@ export function TableHeaderAction({
     tableRef,
     queryKey,
     isDownloadable,
+    filterFields,
     searchKey,
     search,
     summary,
+    reload,
+    isRefetching,
+    data,
+    columns,
+    exportTitle,
+    service,
+    totalRecords,
+    limit,
+    actionable,
+    enableSelection,
     hasSelection,
     selectedRows,
     clearSelection,
     renderSelectionActions,
   } = useTypedTableContext<unknown>();
+  const { mutateAsync: exportTablePdf, isPending: isExporting } =
+    useTableExport();
+  const [exportScopeInFlight, setExportScopeInFlight] =
+    useState<TableExportScope | null>(null);
+  const [visualizeOpen, setVisualizeOpen] = useState(false);
 
   // const [searchValue, setSearchValue] = useState("");
 
@@ -638,85 +1194,268 @@ export function TableHeaderAction({
           ...(searchKey ? { [searchKey]: value ?? undefined } : {}),
         });
       }, 500),
-    [onFilter, search, searchKey]
+    [onFilter, search, searchKey],
   );
 
-  const primaryActions: React.ReactNode =
-    hasSelection && renderSelectionActions
-      ? renderSelectionActions({
-          selectedRows,
-          clearSelection,
-        })
-      : children
-        ? cloneElement(children, {
-            onFilter,
+  const resolvedExportTitle = exportTitle ?? humanizeQueryKey(queryKey);
+  const exportHeaders = useMemo(
+    () => columns.map((column) => column.header),
+    [columns],
+  );
+
+  const buildCurrentPageRows = React.useCallback(() => {
+    const table = tableRef.current;
+    if (!table) {
+      throw new Error("The table is not ready for export yet.");
+    }
+
+    const bodyRows = Array.from(table.querySelectorAll("tbody tr"));
+    const startIndex = enableSelection ? 2 : 1;
+
+    return bodyRows
+      .map((row) => {
+        const cells = Array.from(row.querySelectorAll("td"));
+        const endIndex = actionable ? cells.length - 1 : cells.length;
+        return cells
+          .slice(startIndex, endIndex)
+          .slice(0, exportHeaders.length)
+          .map((cell) =>
+            formatExportCellValue((cell as HTMLElement).innerText),
+          );
+      })
+      .filter((row) => row.length > 0);
+  }, [actionable, enableSelection, exportHeaders.length, tableRef]);
+
+  const buildAllFilteredRows = React.useCallback(async () => {
+    const exportLimit = Math.min(
+      Math.max(totalRecords, data.length, limit, 1),
+      TABLE_EXPORT_MAX_ROWS,
+    );
+    const response = await service({
+      page: 1,
+      limit: exportLimit,
+      search,
+    });
+
+    return response.data.map((row) =>
+      columns.map((column) => {
+        const rawValue = column.exportValue
+          ? column.exportValue(row)
+          : getValueByAccessor(row, column.accessor);
+        return formatExportCellValue(rawValue);
+      }),
+    );
+  }, [columns, data.length, limit, search, service, totalRecords]);
+
+  const handleExport = React.useCallback(
+    async (scope: TableExportScope) => {
+      let progressToast: ReturnType<typeof createProgressToast> | null = null;
+
+      try {
+        setExportScopeInFlight(scope);
+        const rows =
+          scope === TABLE_EXPORT_SCOPE.ALL_FILTERED
+            ? await buildAllFilteredRows()
+            : buildCurrentPageRows();
+
+        if (!rows.length) {
+          toast.error("There are no rows available to export.");
+          return;
+        }
+
+        if (
+          scope === TABLE_EXPORT_SCOPE.ALL_FILTERED &&
+          totalRecords > TABLE_EXPORT_MAX_ROWS
+        ) {
+          toast.info(
+            `Only the first ${TABLE_EXPORT_MAX_ROWS.toLocaleString()} filtered rows were exported.`,
+          );
+        }
+
+        const scopeLabel =
+          scope === TABLE_EXPORT_SCOPE.ALL_FILTERED
+            ? "all filtered"
+            : "current page";
+        progressToast = createProgressToast(
+          `Generating ${scopeLabel} table export...`,
+        );
+
+        const blob = await exportTablePdf({
+          payload: {
+            title: resolvedExportTitle,
+            scope,
+            headers: exportHeaders,
+            rows,
             summary,
-          } as Record<string, unknown>)
-        : null;
+            exportedAt: new Date().toISOString(),
+          },
+          onProgress: progressToast.updateProgress,
+        });
 
-  return (
-    <div className="flex flex-col gap-2 justify-between mb-1">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div className="flex-1 min-w-[220px] max-w-md text-xs">
-          <Search
-            placeHolder={`Search by ${searchKey}`}
-            onSearch={debouncedFilter}
-          />
-        </div>
+        const filenameScopeLabel =
+          scope === TABLE_EXPORT_SCOPE.ALL_FILTERED
+            ? "all-filtered"
+            : "current-page";
+        downloadBlob(
+          blob,
+          `${slugifyFileName(resolvedExportTitle)}-${filenameScopeLabel}.pdf`,
+        );
+        progressToast.success("Table export downloaded.");
+      } catch (error) {
+        if (error instanceof Error) {
+          progressToast?.error(error.message);
+          if (!progressToast) {
+            toast.error(error.message);
+          }
+        } else {
+          progressToast?.error("Unable to export the current table.");
+          if (!progressToast) {
+            toast.error("Unable to export the current table.");
+          }
+        }
+      } finally {
+        setExportScopeInFlight(null);
+      }
+    },
+    [
+      buildAllFilteredRows,
+      buildCurrentPageRows,
+      exportHeaders,
+      exportTablePdf,
+      resolvedExportTitle,
+      summary,
+      totalRecords,
+    ],
+  );
 
-        <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
-          {primaryActions}
-          <TableFilter />
-          {isDownloadable && (
-            <DownloadTableExcel
-              filename={`${queryKey} table`}
-              sheet={queryKey}
-              currentTableRef={tableRef}
-            >
-              <Button
-                variant={"secondary"}
-                className=" text-xs px-4 py-2 gap-1 rounded-lg flex items-center font-light"
-              >
-                <FolderInput color="orange" size={12} />
-                Export
-              </Button>
-            </DownloadTableExcel>
-          )}
-        </div>
-      </div>
+  let primaryActions: React.ReactNode = null;
 
-      <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground">
-        {hasSelection ? (
-          /* ------------------ SELECTION STATE ------------------ */
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+  if (children) {
+    primaryActions = cloneElement(children, {
+      onFilter,
+      summary,
+    } as Record<string, unknown>);
+  }
+
+  let selectionActions: React.ReactNode = null;
+
+  if (hasSelection && renderSelectionActions) {
+    const renderedSelectionActions = renderSelectionActions({
+      selectedRows,
+      clearSelection,
+    });
+
+    if (renderedSelectionActions) {
+      selectionActions = (
+        <div className="flex w-full flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="plain" className="px-2.5 py-1 text-[11px] font-medium">
               {selectedRows.length} selected
             </Badge>
 
             <button
               type="button"
               onClick={clearSelection}
-              className="underline-offset-2 hover:underline text-[11px]"
+              className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
             >
-              Clear
+              Clear selection
             </button>
           </div>
-        ) : summary && Object.keys(summary).length ? (
-          /* ----------------------- SUMMARY ----------------------- */
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[11px]">Summary:</span>
-            {Object.entries(summary).map(([key, value], idx) => (
-              <Badge
-                key={idx}
-                variant="outline"
-                className="text-[10px] font-normal px-2 py-0.5"
-              >
-                {key}: {value}
-              </Badge>
-            ))}
+
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 xl:w-auto">
+            {renderedSelectionActions}
           </div>
-        ) : null}
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className="mb-1 flex flex-col gap-3">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div className="w-full text-xs xl:max-w-md">
+          <Search
+            placeHolder={`Search by ${searchKey}`}
+            onSearch={debouncedFilter}
+          />
+        </div>
+
+        <div className="flex w-full flex-col gap-2 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-start xl:justify-end">
+          {primaryActions ? <div className="w-full xl:w-auto">{primaryActions}</div> : null}
+
+          <div className="ml-auto flex w-full flex-nowrap items-center justify-end gap-2 overflow-x-auto pb-1 xl:w-auto xl:overflow-visible xl:pb-0">
+            {filterFields.length > 0 ? <TableFilter /> : null}
+            <Button
+              type="button"
+              variant={"ghost"}
+              className="flex shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-xs font-light whitespace-nowrap"
+              onClick={() => setVisualizeOpen(true)}
+              disabled={!data.length}
+            >
+              <span className="inline-flex size-3.5 items-center justify-center rounded-full border border-primary/30 text-[10px] font-semibold text-primary">
+                V
+              </span>
+              Visualize
+            </Button>
+            <Button
+              type="button"
+              variant={"ghost"}
+              className="flex shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-xs font-light whitespace-nowrap"
+              onClick={() => void reload()}
+              disabled={isRefetching}
+            >
+              <RotateCw className={`size-3.5 text-primary ${isRefetching ? "animate-spin" : ""}`} />
+              {isRefetching ? "Reloading..." : "Reload"}
+            </Button>
+            {isDownloadable && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant={"ghost"}
+                    className="flex shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-xs font-light whitespace-nowrap"
+                    disabled={!data.length || isExporting}
+                  >
+                    <Download
+                      className={`size-3.5 text-primary ${isExporting ? "animate-pulse" : ""}`}
+                    />
+                    {isExporting ? "Generating..." : "Export"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => void handleExport(TABLE_EXPORT_SCOPE.CURRENT_PAGE)}
+                  >
+                    {exportScopeInFlight === TABLE_EXPORT_SCOPE.CURRENT_PAGE
+                      ? "Generating current page PDF..."
+                      : "Current page PDF"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => void handleExport(TABLE_EXPORT_SCOPE.ALL_FILTERED)}
+                  >
+                    {exportScopeInFlight === TABLE_EXPORT_SCOPE.ALL_FILTERED
+                      ? "Generating all filtered PDF..."
+                      : "All filtered PDF"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
       </div>
+
+      {selectionActions}
+
+      <TableVisualizeSheet
+        open={visualizeOpen}
+        onOpenChange={setVisualizeOpen}
+        title={`Visualize ${resolvedExportTitle}`}
+        rows={data}
+        columns={columns}
+        totalRecords={totalRecords}
+      />
     </div>
   );
 }
@@ -725,11 +1464,11 @@ interface TableRowsProps {
   customRow?: boolean;
 }
 
-function TableRows({ children, customRow }: TableRowsProps) {
+function TableRows({ children }: TableRowsProps) {
   const {
-    columns,
+    // columns,
     data,
-    actionable,
+    // actionable,
     enableSelection,
     toggleRowSelection,
     isRowSelected,
@@ -747,172 +1486,167 @@ function TableRows({ children, customRow }: TableRowsProps) {
   // }
 
   return (
-    <TableBody className="">
-      {!customRow
+    <TableBody className="bg-card [&_tr:nth-child(even)]:bg-muted/30">
+      {/* {!customRow
         ? data?.map((row, i: number) => {
-            const rowId = getRowIdForRow(row as unknown, i);
-            const checked = enableSelection && isRowSelected(rowId);
-            return (
-              <TableRow
-                key={String(rowId)}
-                className="px-2 relative border-b hover:bg-muted/40 transition-colors"
-              >
-                {enableSelection && (
-                  <TableCell className="w-8 px-2">
-                    <input
-                      title="Select row"
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleRowSelection(rowId)}
-                      className="w-4 h-4 m-0 border-gray-300 rounded focus:ring-ring"
-                    />
-                  </TableCell>
-                )}
-                <TableCell className=" font-medium">
-                  <span>{i + 1}.</span>
+          const rowId = getRowIdForRow(row as unknown, i);
+          const checked = enableSelection && isRowSelected(rowId);
+          return (
+            <TableRow
+              key={String(rowId)}
+              className="px-2 relative border-b hover:bg-muted/40 transition-colors"
+            >
+              {enableSelection && (
+                <TableCell className="w-8 px-2">
+                  <input
+                    title="Select row"
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleRowSelection(rowId)}
+                    className="w-4 h-4 m-0 border-border rounded focus:ring-ring"
+                  />
                 </TableCell>
+              )}
+              <TableCell className=" font-medium">
+                <span>{i + 1}.</span>
+              </TableCell>
 
-                {columns.map((column: TableColumn, i: number) => {
-                  //This logic helps check for more accessors; double items in a row cell
-                  const value = String(column.accessor)
-                    ?.split(".")
-                    .reduce((obj: unknown, key) => {
-                      if (obj && typeof obj === "object") {
-                        const record = obj as Record<string, unknown>;
-                        return record[key] as unknown;
-                      }
-                      return undefined;
-                    }, row as unknown);
+              {columns.map((column: TableColumn, i: number) => {
+                //This logic helps check for more accessors; double items in a row cell
+                const value = String(column.accessor)
+                  ?.split(".")
+                  .reduce((obj: unknown, key) => {
+                    if (obj && typeof obj === "object") {
+                      const record = obj as Record<string, unknown>;
+                      return record[key] as unknown;
+                    }
+                    return undefined;
+                  }, row as unknown);
 
-                  if (column.custom) {
-                    if (column.custom.type === "style") {
-                      return (
-                        <TableCell
-                          className={`${
-                            column.custom.bolden ? "font-semibold" : ""
+                if (column.custom) {
+                  if (column.custom.type === "style") {
+                    return (
+                      <TableCell
+                        className={`${column.custom.bolden ? "font-semibold" : ""
                           }`}
-                          key={`${String(column.accessor)}-${i}`}
-                        >
-                          <span
-                            title={
-                              value !== undefined && value !== null
-                                ? String(value)
-                                : undefined
-                            }
-                            className="bg-green-400 text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
-                          >
-                            {value !== undefined && value !== null
-                              ? String(value)
-                              : "--"}
-                          </span>
-                        </TableCell>
-                      );
-                    }
-                    if (column.custom.type === "date") {
-                      const dateValue = value as
-                        | string
-                        | number
-                        | Date
-                        | undefined;
-                      const dateText = dateValue
-                        ? new Date(dateValue).toDateString()
-                        : "--";
-                      return (
-                        <TableCell
-                          className={`${
-                            column.custom.bolden ? "font-semibold" : ""
-                          } ellipisis-overflow block`}
-                          title={dateText !== "--" ? dateText : undefined}
-                          key={`${String(column.accessor)}-${i}`}
-                        >
-                          {dateText}
-                        </TableCell>
-                      );
-                    }
-                    if (column.custom.type === "currency") {
-                      const numValue = value as number | string | undefined;
-                      return (
-                        <TableCell
-                          className={`${
-                            column.custom.bolden ? "font-semibold" : ""
-                          }`}
-                          key={`${String(column.accessor)}-${i}`}
-                        >
-                          <span
-                            title={
-                              numValue !== undefined
-                                ? formatCurrency(numValue)
-                                : undefined
-                            }
-                            className="ellipsis-overflow block"
-                          >
-                            {numValue !== undefined
-                              ? formatCurrency(numValue)
-                              : "--"}
-                          </span>
-                        </TableCell>
-                      );
-                    }
-                    if (column.custom.type === "percent") {
-                      const numValue = value as number | string | undefined;
-                      return (
-                        <TableCell
-                          className={`${
-                            column.custom.bolden ? "font-semibold" : ""
-                          }`}
+                        key={`${String(column.accessor)}-${i}`}
+                      >
+                        <span
                           title={
                             value !== undefined && value !== null
                               ? String(value)
                               : undefined
                           }
-                          key={`${String(column.accessor)}-${i}`}
+                          className="bg-status-resolved text-xs capitalize w-1/2 lg:w-1/4 justify-center text-white py-2 px-3 rounded-3xl inline-flex"
                         >
-                          {numValue ?? "--"} %
-                        </TableCell>
-                      );
-                    }
-                    if (column.custom.type === "sentence") {
-                      const text = String(value ?? "");
-                      return (
-                        <TableCell
-                          className={`${
-                            column.custom.bolden ? "font-semibold" : ""
-                          }`}
-                          key={`${String(column.accessor)}-${i}`}
-                        >
-                          {text} {""} {column.custom.suffix}
-                        </TableCell>
-                      );
-                    }
+                          {value !== undefined && value !== null
+                            ? String(value)
+                            : "--"}
+                        </span>
+                      </TableCell>
+                    );
                   }
-                  return (
-                    <TableCell key={`${String(column.accessor)}-${i}`}>
-                      <span
-                        title={value as string | undefined}
-                        className="block ellipsis-overflow"
+                  if (column.custom.type === "date") {
+                    const dateValue = value as
+                      | string
+                      | number
+                      | Date
+                      | undefined;
+                    const dateText = dateValue
+                      ? new Date(dateValue).toDateString()
+                      : "--";
+                    return (
+                      <TableCell
+                        className={`${column.custom.bolden ? "font-semibold" : ""
+                          } ellipisis-overflow block`}
+                        title={dateText !== "--" ? dateText : undefined}
+                        key={`${String(column.accessor)}-${i}`}
                       >
-                        {value !== undefined && value !== null
-                          ? (value as React.ReactNode)
-                          : "--"}
-                      </span>
-                    </TableCell>
-                  );
-                })}
+                        {dateText}
+                      </TableCell>
+                    );
+                  }
+                  if (column.custom.type === "currency") {
+                    const numValue = value as number | string | undefined;
+                    return (
+                      <TableCell
+                        className={`${column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                        key={`${String(column.accessor)}-${i}`}
+                      >
+                        <span
+                          title={
+                            numValue !== undefined
+                              ? formatCurrency(numValue)
+                              : undefined
+                          }
+                          className="ellipsis-overflow block"
+                        >
+                          {numValue !== undefined
+                            ? formatCurrency(numValue)
+                            : "--"}
+                        </span>
+                      </TableCell>
+                    );
+                  }
+                  if (column.custom.type === "percent") {
+                    const numValue = value as number | string | undefined;
+                    return (
+                      <TableCell
+                        className={`${column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                        title={
+                          value !== undefined && value !== null
+                            ? String(value)
+                            : undefined
+                        }
+                        key={`${String(column.accessor)}-${i}`}
+                      >
+                        {numValue ?? "--"} %
+                      </TableCell>
+                    );
+                  }
+                  if (column.custom.type === "sentence") {
+                    const text = String(value ?? "");
+                    return (
+                      <TableCell
+                        className={`${column.custom.bolden ? "font-semibold" : ""
+                          }`}
+                        key={`${String(column.accessor)}-${i}`}
+                      >
+                        {text} {""} {column.custom.suffix}
+                      </TableCell>
+                    );
+                  }
+                }
+                return (
+                  <TableCell key={`${String(column.accessor)}-${i}`}>
+                    <span
+                      title={value as string | undefined}
+                      className="block ellipsis-overflow"
+                    >
+                      {value !== undefined && value !== null
+                        ? (value as React.ReactNode)
+                        : "--"}
+                    </span>
+                  </TableCell>
+                );
+              })}
 
-                {actionable &&
-                  cloneElement(children, {
-                    rowData: row,
-                  } as Record<string, unknown>)}
-              </TableRow>
-            );
-          })
-        : cloneElement(children, {
-            data,
-            enableSelection,
-            getRowIdForRow,
-            isRowSelected,
-            toggleRowSelection,
-          } as Record<string, unknown>)}
+              {actionable &&
+                cloneElement(children, {
+                  rowData: row,
+                } as Record<string, unknown>)}
+            </TableRow>
+          );
+        }) */}
+      {cloneElement(children, {
+        data,
+        enableSelection,
+        getRowIdForRow,
+        isRowSelected,
+        toggleRowSelection,
+      } as Record<string, unknown>)}
     </TableBody>
   );
 }

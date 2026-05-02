@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRegister } from "../hooks/useAuth";
 import AuthWrapper from "../AuthWrapper";
 import {
@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AddressSchema } from "@/lib/validation/address";
 import AddressField from "@/shared/components/address/AddressField";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
 import { RegisterPayload } from "../model/model";
 import { InternationalPhoneField } from "@/shared/components/phone-number/International-phonefield";
 import parsePhoneNumberFromString, { CountryCode } from "libphonenumber-js";
@@ -68,9 +68,11 @@ export default function SignupComponent() {
       businessContact: "",
       countryCode: "US",
       address: {
+        source: "manual",
         line1: "",
         line2: "",
         city: "",
+        countryCode: "US",
         state: "NC",
         postalCode: "",
         country: "United States",
@@ -125,7 +127,7 @@ export default function SignupComponent() {
       city: address.city,
       state: address.state,
       postalCode: address.postalCode,
-      country: "United States",
+      country: address.country,
       placeId: address.placeId,
       lat: address.lat ?? null,
       lng: address.lng ?? null,
@@ -402,7 +404,11 @@ export default function SignupComponent() {
                                     : "Show password"
                                 }
                               >
-                                {showPassword ? <FaEye /> : <FaEyeSlash />}
+                                {showPassword ? (
+                                  <Eye className="h-4 w-4" />
+                                ) : (
+                                  <EyeOff className="h-4 w-4" />
+                                )}
                               </button>
                             </div>
                           </FormControl>
@@ -419,13 +425,14 @@ export default function SignupComponent() {
                   </div>
                 </section>
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Register"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Register
+                </Button>
 
                 <p className="text-sm text-center">
                   Already have an account?{" "}

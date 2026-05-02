@@ -2,12 +2,19 @@ import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ensureTicketRoom } from "@/lib/chat/chat";
 import { pusherServer } from "@/lib/pusher/pusher";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket, { ITicket } from "@/models/ticketModel";
 import User from "@/models/userModel";
 import mongoose, { Types, HydratedDocument } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const assignTechnicianBodySchema = z.object({
+  assignedTo: z.string().min(1),
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -17,44 +24,28 @@ export async function PATCH(
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
 
-    if (!verify || verify.isUserRole) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_ASSIGN);
 
-    const { assignedTo } = await request.json();
+    const { assignedTo } = parseOrThrow(
+      assignTechnicianBodySchema,
+      await request.json()
+    );
 
     const adminUser = await User.findById(verify.id);
-    if (!adminUser) {
-      return NextResponse.json(
-        { error: "Admin user not found" },
-        { status: 404 }
-      );
-    }
+    if (!adminUser) throw ApiError.notFound("Admin user not found");
 
-    const businessId = new mongoose.Types.ObjectId(verify.currentBusiness); // or from payload/context
+    const businessId = new mongoose.Types.ObjectId(verify.currentBusiness);
 
     const technician = await User.findById(assignedTo);
+    if (!technician) throw ApiError.notFound("Technician not found");
 
-    if (!technician) {
-      return NextResponse.json(
-        { error: "Technician not found" },
-        { status: 404 }
-      );
-    }
-
-    // Check role in the current business
     const membership = technician.memberships.find(
       (m) => m.business.equals(businessId) && m.role === ROLES.technician
     );
 
     if (!membership) {
-      return NextResponse.json(
-        { error: "User is not a technician in this business" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("User is not a technician in this business");
     }
 
     const previous = (await Ticket.findById(ticketId)
@@ -70,12 +61,7 @@ export async function PATCH(
       actionedBy?: { name: string; id: string };
     };
 
-    if (!previous) {
-      return NextResponse.json(
-        { error: "No ticket found with id" },
-        { status: 404 }
-      );
-    }
+    if (!previous) throw ApiError.notFound("No ticket found with id");
 
     // send assignment technician request
     const updatedRequest = (await Ticket.findByIdAndUpdate(
@@ -143,7 +129,7 @@ export async function PATCH(
       success: true,
       data: updatedRequest,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

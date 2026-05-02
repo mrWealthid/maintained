@@ -252,7 +252,7 @@ function PhoneInputControl({
               disabled={disabled}
               className={cn(
                 "inline-flex items-center gap-2  h-fit rounded-r-none border-r-0",
-                "min-w-[6.5rem] justify-between"
+                "min-w-26 justify-between"
               )}
               aria-label="Select country"
             >
@@ -268,7 +268,7 @@ function PhoneInputControl({
               <ChevronsUpDown className="h-4 w-4 opacity-60" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-0 w-[22rem]" align="start">
+          <PopoverContent className="p-0 w-88" align="start">
             <Command>
               <CommandInput placeholder="Search country..." />
               <CommandEmpty>No country found.</CommandEmpty>
@@ -326,7 +326,7 @@ function PhoneInputControl({
           aria-describedby={fieldState.error ? `${name}-error` : undefined}
           className={cn(
             "rounded-l-none border-l-0",
-            fieldState.error && "border-red-500 focus-visible:ring-red-500"
+            fieldState.error && "border-destructive/40 focus-visible:ring-red-500"
           )}
           maxLength={enforceDigitHints && limits?.max ? limits.max : undefined}
         />
@@ -339,7 +339,7 @@ function PhoneInputControl({
       {fieldState.error && (
         <p
           id={`${name}-error`}
-          className="mt-1 text-xs text-red-600"
+          className="mt-1 text-xs text-destructive"
           aria-live="polite"
         >
           {fieldState.error.message}

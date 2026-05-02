@@ -2,10 +2,10 @@
 import Link from "next/link";
 import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useUpdatePassword } from "../../hooks/useAuth";
 import { IUpdatePassword } from "../../model/model";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -53,20 +53,20 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
     <AuthWrapper>
       <section className="w-full dashboard-body flex gap-4 flex-col items-center justify-center">
         <div className="text-center space-y-2">
-          {/* <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {/* <h1 className="text-2xl font-bold text-foreground">
               Update Password Today
             </h1> */}
-          {/* <p className="text-gray-600 dark:text-gray-400">
+          {/* <p className="text-muted-foreground">
               Seamlessly update password in few steps
             </p> */}
         </div>
 
-        <Card className="border-gray-200 dark:border-gray-700 w-full lg:w-1/3 bg-white dark:bg-gray-900">
+        <Card className="border-border w-full lg:w-1/3 bg-card">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
+            <CardTitle className="text-xl font-semibold text-center text-foreground">
               Update Password
             </CardTitle>
-            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+            <CardDescription className="text-center text-muted-foreground">
               Enter new password to complete reset
             </CardDescription>
           </CardHeader>
@@ -104,7 +104,11 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                               showPassword ? "Hide password" : "Show password"
                             }
                           >
-                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
@@ -146,7 +150,11 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                                 : "Show password"
                             }
                           >
-                            {showNewPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showNewPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
@@ -161,17 +169,18 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                   )}
                 />
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Login"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Update Password
+                </Button>
 
                 <p className="flex gap-3 text-sm justify-center">
                   Need An Account?
-                  <Link href="/auth/signup" className="text-blue-600 text-sm">
+                  <Link href="/auth/signup" className="text-primary text-sm">
                     Sign up
                   </Link>
                 </p>
@@ -181,18 +190,18 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
         </Card>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             By signing in, you agree to our{" "}
             <Link
               href=""
-              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+              className="underline hover:text-foreground"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href=""
-              className="underline hover:text-gray-700 dark:hover:text-gray-300"
+              className="underline hover:text-foreground"
             >
               Privacy Policy
             </Link>

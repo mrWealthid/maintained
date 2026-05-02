@@ -4,8 +4,10 @@ import {
   TICKET_PRIORITY,
   TICKET_STATUS,
 } from "@/shared/enums/enums";
-import { TechnicianRequest } from "../../features/ticket-feat/model/ticket.model";
+import type { ComponentType } from "react";
+import { TechnicianRequest } from "../../features/tickets/models/ticket.model";
 import { IUser } from "@/models/userModel";
+import type { PermissionKey } from "@/shared/auth/permission-registry";
 
 export interface Category {
   id: string;
@@ -96,27 +98,11 @@ export interface ApiPaginatedResponse<T> {
   results: number;
 }
 
-export interface ITab {
-  title: string;
-  order: number;
-  icon: React.ReactNode;
-}
-
-export interface ButtonGroupTabsProps<T = string> {
-  onSelectValue: (type: TICKET_STATUS) => void;
-  status: TICKET_STATUS;
-  data: TabData<T>[];
-}
-
-interface TabData<T> {
-  label: string;
-  value: T;
-}
-
 export type Routes = {
   name: string;
   path: string;
   icon: React.ElementType;
+  permission?: PermissionKey;
 };
 
 //USER
@@ -212,10 +198,16 @@ export interface CreateMultipleUsersPayload {
   users: CreateUserPayload[];
 }
 
-export interface CrumbLabelMap {
-  [segment: string]: {
-    label: string;
-    // icon?: ReactNode; // Optional: if you want icons later
-    hide?: boolean; // 🔍 used to omit from breadcrumbs
-  };
+export type BaseActions = {
+  label: string;
+  action: () => void;
+  icon?: ComponentType<{ className?: string }>;
+  disabled?: boolean;
+  className?: string;
+  variant?: "default" | "destructive";
+};
+
+export interface ConfirmActions
+  extends Pick<BaseActions, "label" | "className" | "icon" | "variant"> {
+  key: string;
 }

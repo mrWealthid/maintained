@@ -2,8 +2,7 @@
 import { useLogout } from '@/app/auth/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { PiSpinnerGapLight } from 'react-icons/pi';
-import { GoSignOut } from 'react-icons/go';
+import { Loader2, LogOut } from 'lucide-react';
 
 const Logout = () => {
 	const router = useRouter();
@@ -12,9 +11,9 @@ const Logout = () => {
 		<button
 			className='flex w-full items-center gap-1 cursor-pointer'
 			onClick={() => logOut()}>
-			<GoSignOut />
+			<LogOut className='h-4 w-4' />
 			<span>Logout</span>
-			<span>{isLoading && <PiSpinnerGapLight />}</span>
+			<span>{isLoading && <Loader2 className='h-4 w-4 animate-spin' />}</span>
 		</button>
 	);
 };

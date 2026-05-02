@@ -1,48 +1,82 @@
-import { INVITE_STATUS } from "@/shared/enums/enums";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
 import Business from "@/models/businessModel";
 import User from "@/models/userModel";
-import { Emails } from "@/utils/email-resend";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+import { toLegacySessionRole } from "@/shared/auth/roles";
+import { sendTeamInviteEmail } from "@/lib/email/senders/team/sendTeamInviteEmail";
 import { generateInviteToken } from "@/utils/helpers";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const inviteUserSchema = z.object({
+  name: z.string().trim().min(1),
+  email: z.string().trim().email().toLowerCase(),
+  role: z.string().trim().min(1),
+  dateOfBirth: z.string().optional(),
+  specialties: z.array(z.string()).optional().default([]),
+  propertyId: z.string().optional(),
+  unitId: z.string().optional(),
+});
+
+const inviteBodySchema = inviteUserSchema.or(inviteUserSchema.array().min(1));
+const reinviteBodySchema = z.object({
+  email: z.string().trim().email().toLowerCase(),
+  force: z.boolean().optional().default(false),
+});
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
+function normalizeMembershipRole(role: string) {
+  return toLegacySessionRole(role) ?? (role as ROLES);
+}
+
+function objectIdOrUndefined(value?: string) {
+  return value && mongoose.Types.ObjectId.isValid(value)
+    ? new mongoose.Types.ObjectId(value)
+    : undefined;
+}
+
+async function sendInviteOrThrow(args: {
+  request: NextRequest;
+  businessId: string;
+  to: string;
+  attendeeName: string;
+  workspaceName: string;
+  rawToken: string;
+}) {
+  const emailResult = await sendTeamInviteEmail(args);
+
+  if (!emailResult.sent) {
+    throw ApiError.unavailable(
+      emailResult.error ||
+        emailResult.skippedReason ||
+        "Unable to send team invite email"
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
-  const verify = await getUserFromCookies();
-
   try {
-    if (!verify?.isAdminRole) {
-      return NextResponse.json(
-        { error: "User is not authorized" },
-        { status: 401 }
-      );
-    }
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const currentBusinessId = verify.currentBusiness;
-
-    if (!currentBusinessId) {
-      return NextResponse.json(
-        { error: "No current business context" },
-        { status: 400 }
-      );
-    }
-
-    const body = await request.json();
-
-    // Check if it's bulk creation or single creation
+    await assertWorkspacePermissionKey(verify, PERMISSION.TEAM_INVITE);
+    const body = parseOrThrow(inviteBodySchema, await request.json());
     const isBulk = Array.isArray(body);
     const usersData = isBulk ? body : [body];
-
-    // Validate all users data
-    for (const userData of usersData) {
-      const { name, email, role } = userData;
-      if (!name || !email || !role) {
-        return NextResponse.json(
-          { error: "name, email, and role are required for each user" },
-          { status: 400 }
-        );
-      }
-    }
+    const currentBusinessId = verify.businessId;
+    const business = await Business.findById(currentBusinessId).select("name");
+    if (!business) throw ApiError.notFound("Workspace not found");
 
     const capitalize = (str: string) =>
       str.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -57,6 +91,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const existingUser = await User.findOne({ email: userData.email });
+        const membershipRole = normalizeMembershipRole(userData.role);
 
         if (existingUser) {
           const alreadyMember = existingUser.memberships.some(
@@ -80,13 +115,13 @@ export async function POST(request: NextRequest) {
           // Append the new membership
           existingUser.memberships.push({
             business: businessObjectId,
-            role: userData.role,
+            role: membershipRole,
             status: INVITE_STATUS.invited,
             inviteToken: hashed,
             inviteTokenExpires: expires,
-            specialties: userData.specialties || [],
-            property: userData.propertyId,
-            unit: userData.unitId,
+            specialties: userData.specialties as any,
+            property: objectIdOrUndefined(userData.propertyId),
+            unit: objectIdOrUndefined(userData.unitId),
             isCreator: false,
           });
 
@@ -97,23 +132,18 @@ export async function POST(request: NextRequest) {
 
           await existingUser.save({ validateBeforeSave: false });
 
-          // Construct invite URL
-          const inviteURL =
-            process.env.NODE_ENV === "development"
-              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-          // Send invite email
-          await new Emails(
-            existingUser,
-            inviteURL,
-            verify.currentBusinessName
-          ).sendInviteUser();
+          await sendInviteOrThrow({
+            request,
+            businessId: String(currentBusinessId),
+            to: existingUser.email,
+            attendeeName: existingUser.name,
+            workspaceName: business.name,
+            rawToken: token,
+          });
 
           results.push({
             email: userData.email,
             status: "success",
-            url: inviteURL,
           });
         } else {
           // New user
@@ -126,7 +156,7 @@ export async function POST(request: NextRequest) {
             memberships: [
               {
                 business: currentBusinessId,
-                role: userData.role,
+                role: membershipRole,
                 status: INVITE_STATUS.invited,
                 inviteToken: hashed,
                 inviteTokenExpires: expires,
@@ -140,23 +170,18 @@ export async function POST(request: NextRequest) {
 
           await newUser.save({ validateBeforeSave: false });
 
-          // Construct invite URL
-          const inviteURL =
-            process.env.NODE_ENV === "development"
-              ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-              : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-          // Send invite email
-          await new Emails(
-            newUser,
-            verify.currentBusinessName,
-            inviteURL
-          ).sendInviteUser();
+          await sendInviteOrThrow({
+            request,
+            businessId: String(currentBusinessId),
+            to: newUser.email,
+            attendeeName: newUser.name,
+            workspaceName: business.name,
+            rawToken: token,
+          });
 
           results.push({
             email: userData.email,
             status: "success",
-            url: inviteURL,
           });
         }
       } catch (error: any) {
@@ -175,52 +200,26 @@ export async function POST(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error: any) {
-    console.error("[INVITE_USER_ERROR]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return errorToNextResponse(error, getRequestId(request));
   }
 }
 
 export async function PATCH(request: NextRequest) {
-  const verify = await getUserFromCookies();
-
   try {
-    // 1) Must be admin
-    if (!verify?.isAdminRole) {
-      return NextResponse.json(
-        { error: "User is not authorized" },
-        { status: 401 }
-      );
-    }
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    const currentBusinessId = verify.currentBusiness;
-    if (!currentBusinessId) {
-      return NextResponse.json(
-        { error: "No current business context" },
-        { status: 400 }
-      );
-    }
+    await assertWorkspacePermissionKey(verify, PERMISSION.TEAM_INVITE);
+    const currentBusinessId = verify.businessId;
+    const { email, force } = parseOrThrow(
+      reinviteBodySchema,
+      await request.json()
+    );
+    const business = await Business.findById(currentBusinessId).select("name");
+    if (!business) throw ApiError.notFound("Workspace not found");
 
-    // 2) Input
-    const body = await request.json();
-    const { email, force = false } = body as { email: string; force?: boolean };
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
-
-    // 3) Ensure business exists (optional but nice for safety)
-    // const activeBusiness = await Business.findById(currentBusinessId);
-    // if (!activeBusiness) {
-    //   return NextResponse.json(
-    //     { error: "Business not found" },
-    //     { status: 404 }
-    //   );
-    // }
-
-    // 4) Find the user and their membership for this business
     const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) throw ApiError.notFound("User not found");
 
     const businessIdStr = String(currentBusinessId);
     const membershipIndex = user.memberships.findIndex(
@@ -228,9 +227,8 @@ export async function PATCH(request: NextRequest) {
     );
 
     if (membershipIndex === -1) {
-      return NextResponse.json(
-        { error: "User does not have a membership with this business" },
-        { status: 400 }
+      throw ApiError.badRequest(
+        "User does not have a membership with this business"
       );
     }
 
@@ -238,10 +236,7 @@ export async function PATCH(request: NextRequest) {
 
     // 5) Block re-invite if already activated
     if (membership.status === INVITE_STATUS.activated) {
-      return NextResponse.json(
-        { error: "User is already activated for this business" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("User is already activated for this business");
     }
 
     // 6) Check expiry logic
@@ -255,13 +250,9 @@ export async function PATCH(request: NextRequest) {
 
     if (!isExpired && !force) {
       // Invite still valid → do not rotate unless explicitly forced
-      return NextResponse.json(
-        {
-          error: "Existing invite token is still valid",
-          expiresAt: membership.inviteTokenExpires,
-        },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Existing invite token is still valid", {
+        expiresAt: membership.inviteTokenExpires,
+      });
     }
 
     // 7) Generate a fresh token and update membership
@@ -278,30 +269,21 @@ export async function PATCH(request: NextRequest) {
 
     await user.save({ validateBeforeSave: false });
 
-    // 8) Build invite URL using the *plain* token (not hashed)
-    const inviteURL =
-      process.env.NODE_ENV === "development"
-        ? `${process.env.DEVELOPMENT_URL}/auth/onboard-user/${token}`
-        : `${process.env.PRODUCTION_URL}/auth/onboard-user/${token}`;
-
-    // 9) Send the invite email
-    await new Emails(
-      user,
-      verify.currentBusinessName,
-      inviteURL
-    ).sendInviteUser();
+    await sendInviteOrThrow({
+      request,
+      businessId: String(currentBusinessId),
+      to: user.email,
+      attendeeName: user.name,
+      workspaceName: business.name,
+      rawToken: token,
+    });
 
     return NextResponse.json({
       status: "success",
       message: "Invite re-sent successfully",
-      url: inviteURL,
       expiresAt: expires,
     });
   } catch (error: any) {
-    console.error("[REINVITE_USER_ERROR]", error);
-    return NextResponse.json(
-      { error: error.message ?? "Server error" },
-      { status: 500 }
-    );
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

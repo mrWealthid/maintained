@@ -1,21 +1,19 @@
 import { connect } from "@/dbConfig/dbConfig";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
     const user = await User.findById(verify.id).populate([
       {
@@ -28,17 +26,16 @@ export async function GET(request: NextRequest) {
       },
     ]);
 
-    if (!user) NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!user) throw ApiError.notFound("User not found");
 
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         status: "success",
         data: user,
       },
       { status: 200 }
     );
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

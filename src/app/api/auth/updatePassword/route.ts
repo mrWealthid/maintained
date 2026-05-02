@@ -1,65 +1,52 @@
 import { connect } from "@/dbConfig/dbConfig";
+import {
+  ApiError,
+  errorToNextResponse,
+  parseOrThrow,
+} from "@/lib/errors/apiError";
+import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
 import User, { UserDoc } from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
-import jwt, { SignOptions } from "jsonwebtoken";
-import { ROLES } from "@/shared/enums/enums";
+import { NextRequest } from "next/server";
+import { z } from "zod";
 
 connect();
 
-const signToken = (user: UserDoc) => {
-  const tenants = user.tenantsClaim();
+const updatePasswordBodySchema = z.object({
+  email: z.string().email("Please provide a valid email"),
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-  const tenant = tenants.find(
-    (tenant) => user.currentBusiness.toString() === tenant.business
-  );
-
-  return jwt.sign(
-    {
-      id: user.id,
-      role: tenant?.role || ROLES.user,
-      tenants,
-    },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions
-  );
-};
 export async function POST(request: NextRequest) {
-  const { email, newPassword, currentPassword } = await request.json();
   try {
+    const { email, newPassword, currentPassword } = parseOrThrow(
+      updatePasswordBodySchema,
+      await request.json()
+    );
+
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw ApiError.notFound("User not found");
     }
 
-    //2 Check if the password is correct
     if (!(await user.correctPassword(currentPassword, user.password))) {
-      return NextResponse.json(
-        { error: "Your current password is wrong" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Your current password is wrong");
     }
-    //3 If so, update password
 
     user.password = newPassword;
     user.passwordConfirm = newPassword;
     await user.save();
 
-    const token = signToken(user);
-    const response = NextResponse.json({
-      status: "success",
-      message: "Token sent to email",
+    return buildAuthSuccessResponse({
+      request,
+      user: user as UserDoc,
+      body: {
+        status: "success",
+        message: "Token sent to email",
+      },
     });
-
-    const timeInMs = Number(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000; // 2 minutes in milliseconds
-    const expires = new Date(Date.now() + timeInMs);
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      expires,
-    });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

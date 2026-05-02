@@ -28,10 +28,19 @@ export interface IUser extends Document {
   passwordChangePasscodeExpires?: Date;
   active?: boolean;
   notificationPreferences?: {
-    mode: "SMS" | "EMAIL" | "PHONE";
-    smsEnabled: boolean;
-    emailEnabled: boolean;
-    phoneEnabled: boolean;
+    ticketCreatedAlerts: boolean;
+    ticketStatusAlerts: boolean;
+    ticketAssignmentAlerts: boolean;
+    technicianRequestAlerts: boolean;
+    tenantMessageAlerts: boolean;
+    commentAlerts: boolean;
+    emailFrequency: "immediate" | "hourly" | "daily" | "weekly" | "off";
+    smsPreference: "all" | "urgent" | "off";
+    pushPreference: "all" | "important" | "off";
+    mode?: "SMS" | "EMAIL" | "PHONE";
+    smsEnabled?: boolean;
+    emailEnabled?: boolean;
+    phoneEnabled?: boolean;
   };
   // status?: 'INVITED' | 'ACTIVATED' | 'DEACTIVATED';
   changedPasswordAfter(JWTTimestamp: number): Promise<boolean>;
@@ -50,6 +59,7 @@ export interface IUser extends Document {
     property?: Types.ObjectId;
     unit?: Types.ObjectId;
     accessibleUnits?: Types.ObjectId[];
+    roleDefinition?: Types.ObjectId;
     isCreator: boolean;
   }[];
   currentBusiness: Types.ObjectId;
@@ -133,6 +143,7 @@ const MembershipSchema = new Schema(
 
     // 🔵 NEW — optional: allow multi-unit tenants (admin-assigned)
     accessibleUnits: [{ type: Schema.Types.ObjectId, ref: "Unit" }],
+    roleDefinition: { type: Schema.Types.ObjectId, ref: "RoleDefinition" },
 
     // keep your technician specialties exactly as you had
     specialties: {
@@ -265,6 +276,45 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     notificationPreferences: {
+      ticketCreatedAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      ticketStatusAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      ticketAssignmentAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      technicianRequestAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      tenantMessageAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      commentAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      emailFrequency: {
+        type: String,
+        enum: ["immediate", "hourly", "daily", "weekly", "off"],
+        default: "immediate",
+      },
+      smsPreference: {
+        type: String,
+        enum: ["all", "urgent", "off"],
+        default: "urgent",
+      },
+      pushPreference: {
+        type: String,
+        enum: ["all", "important", "off"],
+        default: "important",
+      },
       mode: {
         type: String,
         enum: ["SMS", "EMAIL", "PHONE"],
@@ -327,6 +377,8 @@ export type UserDoc = mongoose.Document &
       property?: Types.ObjectId;
       unit?: Types.ObjectId;
       accessibleUnits?: Types.ObjectId[];
+      roleDefinition?: Types.ObjectId;
+      isCreator?: boolean;
       locationSnapshot?: {
         propertyName?: string;
         unitLabel?: string;

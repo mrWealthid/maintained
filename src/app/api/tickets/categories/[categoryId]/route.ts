@@ -1,97 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Category from "@/models/ticketCategoryModel";
 import { ROLES } from "@/shared/enums/enums";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
 connect();
 
+const categoryUpdateBodySchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  description: z.string().trim().optional(),
+  isActive: z.boolean().optional(),
+});
+
+function assertCategoryAdmin(role: string | undefined) {
+  if (role !== ROLES.admin && role !== ROLES.super_admin) {
+    throw ApiError.forbidden("Admin access required");
+  }
+}
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> }
+  { params }: { params: Promise<{ categoryId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
+    assertCategoryAdmin(verify.role);
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (verify.role !== ROLES.admin && verify.role !== ROLES.super_admin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    const { name, description, isActive } = await request.json();
+    const { name, description, isActive } = parseOrThrow(
+      categoryUpdateBodySchema,
+      await request.json()
+    );
     const { categoryId } = await params;
 
     const category = await Category.findByIdAndUpdate(
       categoryId,
       { name, description, isActive },
-      { new: true }
+      { new: true },
     );
 
-    if (!category) {
-      return NextResponse.json(
-        { error: "Category not found" },
-        { status: 404 }
-      );
-    }
+    if (!category) throw ApiError.notFound("Category not found");
 
     return NextResponse.json({
       status: "success",
       message: "Category updated successfully",
       data: category,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> }
+  { params }: { params: Promise<{ categoryId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
-
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (verify.role !== ROLES.admin && verify.role !== ROLES.super_admin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
+    assertCategoryAdmin(verify.role);
 
     const { categoryId } = await params;
 
     const category = await Category.findById(categoryId);
-    if (!category) {
-      return NextResponse.json(
-        { error: "Category not found" },
-        { status: 404 }
-      );
-    }
-
-    // Prevent deletion of default categories
+    if (!category) throw ApiError.notFound("Category not found");
     if (category.isDefault) {
-      return NextResponse.json(
-        { error: "Cannot delete default categories" },
-        { status: 400 }
-      );
+      throw ApiError.badRequest("Cannot delete default categories");
     }
 
     await Category.findByIdAndDelete(categoryId);
@@ -100,7 +81,7 @@ export async function DELETE(
       status: "success",
       message: "Category deleted successfully",
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

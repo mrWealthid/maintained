@@ -1,175 +1,119 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connect } from "@/dbConfig/dbConfig";
-import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import User from "@/models/userModel";
-import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { Emails } from "@/utils/email-resend";
+import { z } from "zod";
+
+import { connect } from "@/dbConfig/dbConfig";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import User from "@/models/userModel";
+import { sendPasswordChangePasscodeEmail } from "@/lib/email/senders/security/sendPasswordChangePasscodeEmail";
 
 connect();
 
-// Step 1: Initiate password change - validate passwords and send passcode
+const requestPasswordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+});
+
+const completePasswordChangeSchema = z.object({
+  passcode: z
+    .string()
+    .regex(/^\d{6}$/, "Passcode must be 6 digits"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+});
+
+function getRequestId(request: NextRequest) {
+  return request.headers.get("x-request-id");
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    if (!verify.currentBusiness) {
-      return NextResponse.json(
-        { error: "No current business context" },
-        { status: 400 }
-      );
-    }
-
-    const { currentPassword, newPassword } = await request.json();
-
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: "Both current and new passwords are required" },
-        { status: 400 }
-      );
-    }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: "New password must be at least 8 characters long" },
-        { status: 400 }
-      );
-    }
-
-    const user = await User.findById(verify.id).select("+password");
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password
+    const { currentPassword } = parseOrThrow(
+      requestPasswordChangeSchema,
+      await request.json()
     );
 
-    if (!isCurrentPasswordValid) {
-      return NextResponse.json(
-        { error: "Current password is incorrect" },
-        { status: 400 }
-      );
+    const user = await User.findById(verify.id).select("+password");
+    if (!user) throw ApiError.notFound("User not found");
+
+    if (!(await user.correctPassword(currentPassword, user.password))) {
+      throw ApiError.badRequest("Current password is incorrect");
     }
 
-    // Generate and store passcode
     const passcode = user.createPasswordChangePasscode();
     await user.save({ validateBeforeSave: false });
 
-    // // Send passcode via email
-    try {
-      await new Emails(user, verify.currentBusiness).sendPasswordChangePasscode(
-        passcode
+    const emailResult = await sendPasswordChangePasscodeEmail({
+      to: user.email,
+      attendeeName: user.name,
+      passcode,
+    });
+
+    if (!emailResult.sent) {
+      throw ApiError.unavailable(
+        emailResult.error ||
+          emailResult.skippedReason ||
+          "Unable to send password change passcode email"
       );
-    } catch (emailError) {
-      console.error("Error sending passcode email:", emailError);
-      // Don't fail the request if email fails, but log it
     }
 
     return NextResponse.json({
       status: "success",
       message: "Verification passcode sent to your email",
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }
 
-// Step 2: Verify passcode and complete password change
 export async function PUT(request: NextRequest) {
   try {
-    const verify = await getUserFromCookies();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
 
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    const { passcode, newPassword } = await request.json();
-
-    if (!passcode || !newPassword) {
-      return NextResponse.json(
-        { error: "Passcode and new password are required" },
-        { status: 400 }
-      );
-    }
-
-    if (passcode.length !== 6 || !/^\d{6}$/.test(passcode)) {
-      return NextResponse.json(
-        { error: "Passcode must be 6 digits" },
-        { status: 400 }
-      );
-    }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: "New password must be at least 8 characters long" },
-        { status: 400 }
-      );
-    }
+    const { passcode, newPassword } = parseOrThrow(
+      completePasswordChangeSchema,
+      await request.json()
+    );
 
     const user = await User.findById(verify.id);
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    if (!user) throw ApiError.notFound("User not found");
 
-    // Verify passcode
     if (!user.passwordChangePasscode || !user.passwordChangePasscodeExpires) {
-      return NextResponse.json(
-        { error: "No active passcode found. Please request a new one." },
-        { status: 400 }
+      throw ApiError.badRequest(
+        "No active passcode found. Please request a new one."
       );
     }
 
-    // Check if passcode has expired
-    const now = new Date();
-    if (now > user.passwordChangePasscodeExpires) {
-      return NextResponse.json(
-        { error: "Passcode has expired. Please request a new one." },
-        { status: 400 }
+    if (new Date() > user.passwordChangePasscodeExpires) {
+      throw ApiError.badRequest(
+        "Passcode has expired. Please request a new one."
       );
     }
 
-    // Verify the passcode
     const hashedPasscode = crypto
       .createHash("sha256")
       .update(passcode)
       .digest("hex");
 
-    const isPasscodeValid = hashedPasscode === user.passwordChangePasscode;
-
-    if (!isPasscodeValid) {
-      return NextResponse.json({ error: "Invalid passcode" }, { status: 400 });
+    if (hashedPasscode !== user.passwordChangePasscode) {
+      throw ApiError.badRequest("Invalid passcode");
     }
 
-    // Hash new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-
-    // Update password and clear passcode
-    await User.findByIdAndUpdate(verify.id, {
-      password: hashedNewPassword,
-      passwordChangePasscode: undefined,
-      passwordChangePasscodeExpires: undefined,
-      passwordChangedAt: new Date(),
-    });
+    user.password = newPassword;
+    user.passwordConfirm = newPassword;
+    user.passwordChangePasscode = undefined;
+    user.passwordChangePasscodeExpires = undefined;
+    await user.save();
 
     return NextResponse.json({
       status: "success",
       message: "Password changed successfully",
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

@@ -1,78 +1,83 @@
-// src/app/api/rooms/[roomId]/messages/[messageId]/route.ts
-import { NextResponse } from "next/server";
+// src/app/api/chat/rooms/[roomId]/messages/[messageId]/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
+
 import { pusherServer } from "@/lib/pusher/pusher";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import ChatMessage from "@/models/chatMessage";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
-import { CHAT_TYPE } from "@/features/chat-feat/data/enums";
+import { CHAT_TYPE } from "@/features/chat/data/enums";
+import { ROLES } from "@/shared/enums/enums";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
 
-// If your Pusher server SDK needs Node:
 export const runtime = "nodejs";
 
-// --- helpers ---
-function isValidObjectId(id?: string) {
-  return !!id && Types.ObjectId.isValid(id);
+const editMessageBodySchema = z.object({
+  message: z.string().trim().min(1, "Message is required"),
+});
+
+function assertValidIds(roomId: string, messageId: string) {
+  if (!Types.ObjectId.isValid(roomId) || !Types.ObjectId.isValid(messageId)) {
+    throw ApiError.badRequest("Invalid id(s)");
+  }
 }
 
-function canModifyMessage(verify: any, message: any) {
-  // Adjust these property names to your auth model
-  const isSender = String(message.sender) === String(verify.id);
-  const isAdmin = !!verify.isAdminRole || !!verify.isSuperAdminRole;
-  return isSender || isAdmin;
+function canModifyMessage({
+  userId,
+  canModerate,
+  message,
+}: {
+  userId: string;
+  canModerate: boolean;
+  message: { sender?: unknown };
+}) {
+  const isSender = String(message.sender) === String(userId);
+  return isSender || canModerate;
 }
 
-// =================== PATCH (Edit message text) ===================
 export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ roomId: string; messageId: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ roomId: string; messageId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_SEND);
 
     const { roomId, messageId } = await params;
-
-    if (!isValidObjectId(roomId) || !isValidObjectId(messageId)) {
-      return NextResponse.json({ error: "Invalid id(s)" }, { status: 400 });
-    }
-
+    assertValidIds(roomId, messageId);
     await assertRoomAccess(roomId, verify.id);
 
     const socketId = req.headers.get("x-socket-id") ?? undefined;
-    const body = await req.json().catch(() => ({}));
-    const newText: string | undefined = body?.message;
+    const { message: newText } = parseOrThrow(
+      editMessageBodySchema,
+      await req.json().catch(() => ({}))
+    );
 
-    if (!newText || !newText.trim()) {
-      return NextResponse.json({ error: "Empty message" }, { status: 400 });
-    }
-
-    // Load message to check ownership/permissions
     const existing = await ChatMessage.findOne({
       _id: messageId,
       room: roomId,
     });
-    if (!existing) {
-      return NextResponse.json({ error: "Message not found" }, { status: 404 });
+    if (!existing) throw ApiError.notFound("Message not found");
+    if (
+      !canModifyMessage({
+        userId: verify.id,
+        canModerate: Boolean(
+          verify.isSuperAdminRole || verify.role === ROLES.admin
+        ),
+        message: existing,
+      })
+    ) {
+      throw ApiError.forbidden();
     }
 
-    if (!canModifyMessage(verify, existing)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    existing.text = newText.trim();
-    existing.type = existing.type ?? CHAT_TYPE.USER; // keep or set a default
+    existing.text = newText;
+    existing.type = existing.type ?? CHAT_TYPE.USER;
     await existing.save();
 
-    console.log(existing);
-
-    // Shape a light payload for clients (matches your ChatRoomMessage-ish shape)
     const payload = {
       id: String(existing._id),
       _id: String(existing._id),
@@ -89,39 +94,29 @@ export async function PATCH(
       `private-room-${roomId}`,
       "message:edit",
       payload,
-      { socket_id: socketId }
+      { socket_id: socketId },
     );
 
     return NextResponse.json(
       { status: "success", message: "Message updated", data: payload },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (e) {
-    console.error("PATCH message error:", e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, req.headers.get("x-request-id"));
   }
 }
 
-// =================== DELETE (Remove message) ===================
 export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ roomId: string; messageId: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ roomId: string; messageId: string }> },
 ) {
   try {
     const verify = await getUserFromCookies();
-    if (!verify) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
+    if (!verify) throw ApiError.unauthorized();
+    await assertLegacyWorkspacePermission(verify, PERMISSION.CHAT_SEND);
 
     const { roomId, messageId } = await params;
-
-    if (!isValidObjectId(roomId) || !isValidObjectId(messageId)) {
-      return NextResponse.json({ error: "Invalid id(s)" }, { status: 400 });
-    }
-
+    assertValidIds(roomId, messageId);
     await assertRoomAccess(roomId, verify.id);
 
     const socketId = req.headers.get("x-socket-id") ?? undefined;
@@ -130,22 +125,26 @@ export async function DELETE(
       _id: messageId,
       room: roomId,
     });
-    if (!existing) {
-      return NextResponse.json({ error: "Message not found" }, { status: 404 });
-    }
-
-    if (!canModifyMessage(verify, existing)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!existing) throw ApiError.notFound("Message not found");
+    if (
+      !canModifyMessage({
+        userId: verify.id,
+        canModerate: Boolean(
+          verify.isSuperAdminRole || verify.role === ROLES.admin
+        ),
+        message: existing,
+      })
+    ) {
+      throw ApiError.forbidden();
     }
 
     await ChatMessage.deleteOne({ _id: messageId });
 
-    // Minimal delete payload—your client expects `{ id }`
     await pusherServer.trigger(
       `private-room-${roomId}`,
       "message:delete",
       { id: String(messageId) },
-      { socket_id: socketId }
+      { socket_id: socketId },
     );
 
     return NextResponse.json(
@@ -154,10 +153,9 @@ export async function DELETE(
         message: "Message deleted",
         data: { id: String(messageId) },
       },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (e) {
-    console.error("DELETE message error:", e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, req.headers.get("x-request-id"));
   }
 }

@@ -1,13 +1,12 @@
 import React, { FC } from "react";
-import { CiViewTable } from "react-icons/ci";
-import { TfiViewGrid } from "react-icons/tfi";
+import { Grid3X3, Table2 } from "lucide-react";
 
 const ToggleView: FC<{
   onChangeView: (val: boolean) => void;
   isList: boolean;
 }> = ({ onChangeView, isList }) => {
   return (
-    <div className="flex items-center gap-2 border border-gray-300  rounded-3xl">
+    <div className="flex items-center gap-2 border border-border  rounded-3xl">
       <button
         onClick={() => onChangeView(false)}
         aria-label="Toggle Grid View"
@@ -16,7 +15,7 @@ const ToggleView: FC<{
           !isList ? "bg-button-primary text-button-primary-foreground" : ""
         }`}
       >
-        <TfiViewGrid />
+        <Grid3X3 className="h-4 w-4" />
       </button>
       <button
         onClick={() => onChangeView(true)}
@@ -26,7 +25,7 @@ const ToggleView: FC<{
           isList ? "bg-button-primary text-button-primary-foreground" : ""
         }`}
       >
-        <CiViewTable />
+        <Table2 className="h-4 w-4" />
       </button>
     </div>
   );

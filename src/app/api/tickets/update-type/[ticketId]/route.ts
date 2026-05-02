@@ -1,55 +1,44 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
-import MiddlewareFeatures from "@/middlewareFeatures";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket from "@/models/ticketModel";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+
+const updateTypeBodySchema = z.object({
+  type: z.string().trim().min(1),
+});
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ ticketId: string }> },
 ) {
   try {
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
 
-    if (!verify || !verify.isTechnicianRole || !verify.isSuperAdminRole) {
-      return NextResponse.json(
-        { error: "Unauthorized access" },
-        { status: 401 }
-      );
+    if (!verify || verify.isUserRole || verify.isTechnicianRole) {
+      throw ApiError.unauthorized();
     }
+    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_TYPE_MANAGE);
 
-    const { type } = await request.json();
+    const { type } = parseOrThrow(updateTypeBodySchema, await request.json());
 
     const user = await User.findById(verify.id);
+    if (!user) throw ApiError.notFound("User not found");
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const payload = {
-      actionedBy: verify.id,
-      type,
-    };
-
-    // 1. Get current (pre-update) ticket — for comparison/logging
     const previous = await Ticket.findById(ticketId);
+    if (!previous) throw ApiError.notFound("No ticket found with id");
 
-    if (!previous) {
-      return NextResponse.json(
-        { error: "No ticket found with id" },
-        { status: 404 }
-      );
-    }
+    const updatedRequest = await Ticket.findByIdAndUpdate(
+      ticketId,
+      { actionedBy: verify.id, type },
+      { new: true, runValidators: true, context: "query" },
+    );
 
-    const updatedRequest = await Ticket.findByIdAndUpdate(ticketId, payload, {
-      new: true,
-      runValidators: true,
-      context: "query",
-    });
-
-    //Log Ticket Activity --if it's an admin
     await TicketActivity.create({
       ticket: ticketId,
       action: "type-changed",
@@ -62,14 +51,12 @@ export async function PATCH(
       },
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       message: "Ticket Type Updated Successfully",
       success: true,
       data: updatedRequest,
     });
-
-    return response;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return errorToNextResponse(error, request.headers.get("x-request-id"));
   }
 }

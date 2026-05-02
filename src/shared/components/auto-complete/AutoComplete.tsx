@@ -5,7 +5,7 @@ import Label from '../form-elements/Label';
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import { useDebounce } from '@uidotdev/usehooks';
 import { formatCurrency } from '@/utils/helper';
-import { ImSpinner9 } from 'react-icons/im';
+import { Loader2 } from 'lucide-react';
 import { ApiResponse } from '../../model/model';
 
 interface AutoCompleteProps<T> {
@@ -81,7 +81,7 @@ export default function AutoComplete<T>({
 						/>
 						<Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
 							{isRefetching ? (
-								<ImSpinner9 className='h-3 w-3 animate-spin' />
+								<Loader2 className='h-3 w-3 animate-spin' />
 							) : (
 								<SelectorIcon
 									className='h-5 w-5 '
@@ -96,7 +96,7 @@ export default function AutoComplete<T>({
 						leaveFrom='opacity-100'
 						leaveTo='opacity-0'
 						afterLeave={() => setQuery('')}>
-						<Combobox.Options className='absolute bg-card z-50 mt-1 max-h-60 w-full overflow-auto rounded-md  py-1  shadow-lg ring-1   focus:outline-none sm:text-sm'>
+						<Combobox.Options className='absolute bg-card z-50 mt-1 max-h-60 w-full overflow-auto rounded-md  py-1  shadow-lg ring-1   focus:outline-hidden sm:text-sm'>
 							{options?.length === 0 && query !== '' ? (
 								<div className='relative cursor-default select-none py-2 px-4'>
 									Nothing found.
@@ -155,7 +155,7 @@ export default function AutoComplete<T>({
 
 												{selected ? (
 													<span
-														className={`absolute inset-y-0 left-0  text-green-700 flex items-center pl-3 ${
+														className={`absolute inset-y-0 left-0  text-status-resolved flex items-center pl-3 ${
 															active
 																? 'bg-secondary '
 																: ''
