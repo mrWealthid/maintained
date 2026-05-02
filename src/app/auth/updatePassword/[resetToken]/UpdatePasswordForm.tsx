@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useUpdatePassword } from "../../hooks/useAuth";
 import { IUpdatePassword } from "../../model/model";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -161,13 +162,14 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                   )}
                 />
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Login"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Update Password
+                </Button>
 
                 <p className="flex gap-3 text-sm justify-center">
                   Need An Account?

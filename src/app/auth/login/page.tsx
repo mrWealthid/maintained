@@ -25,7 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -149,13 +150,14 @@ const LoginComponent = () => {
                   )}
                 />
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Login"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Login
+                </Button>
 
                 <p className="flex gap-3 text-sm justify-center text-muted-foreground">
                   Forgot Password?

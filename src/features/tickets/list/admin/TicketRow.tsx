@@ -2,7 +2,6 @@ import { TicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/shared/components/modal/Modal";
 function RequestRow({ data }: TicketRowProps) {
   return (
     <>
@@ -87,9 +86,7 @@ function RequestRow({ data }: TicketRowProps) {
                 </span>
               </span>
             </TableCell>
-            <Modal>
-              <TicketRowActions ticket={row} />
-            </Modal>
+            <TicketRowActions ticket={row} />
           </TableRow>
         );
       })}

@@ -1,14 +1,14 @@
 "use client";
 import React, { FC, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import { useProcessTechnicianResponse } from "@/features/tickets/hooks/ticketHooks";
 import {
   ApplyTechnicianFormControls,
   ApplyTicketFormProps,
 } from "@/features/tickets/models/ticket.model";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -292,13 +292,14 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
               ))}
             </div>
             <div className="flex mt-5 justify-end">
-              <ButtonComponent
-                type="reset"
-                handleClick={handleAddCost}
-                styles="rounded-lg"
-                beforeIcon={<CirclePlus size={14} strokeWidth={1} />}
-                btnText={"Add Cost Item"}
-              ></ButtonComponent>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddCost}
+              >
+                <CirclePlus size={14} strokeWidth={1} className="mr-2" />
+                Add Cost Item
+              </Button>
               {/* <button
 								type='button'
 								onClick={handleAddCost}
@@ -484,21 +485,15 @@ const ApplyForm: FC<ApplyTicketFormProps> = ({ ticketRequest }) => {
 
         <hr className=" my-3" />
         <section className="flex justify-end  gap-4">
-          <ButtonComponent
-            type="reset"
-            // handleClick={() => onCloseModal?.()}
-            styles="rounded-3xl"
-            btnText={"Cancel"}
-          ></ButtonComponent>
+          <Button type="button" variant="outline">Cancel</Button>
 
-          <ButtonComponent
+          <Button
             type="submit"
-            styles="rounded-3xl"
-            disabled={!isDirty || !isValid}
-            loading={isProcessing}
-            btnText={`Submit
-                                    `}
-          ></ButtonComponent>
+            disabled={!isDirty || !isValid || isProcessing}
+          >
+            {isProcessing && <Loader2 className="mr-2 size-4 animate-spin" />}
+            Submit
+          </Button>
         </section>
       </form>
 

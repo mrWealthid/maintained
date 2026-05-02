@@ -2,7 +2,6 @@
 import React, { FC } from "react";
 import { CiUser } from "react-icons/ci";
 import { Ticket, TicketDetails } from "@/shared/model/model";
-import Modal from "@/shared/components/modal/Modal";
 import { TicketActions } from "./TicketActions";
 
 // shadcn/ui
@@ -204,9 +203,7 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
           ) : null}
 
           <section className="flex items-center gap-2">
-            <Modal>
-              <TicketActions ticket={ticket} />
-            </Modal>
+            <TicketActions ticket={ticket} />
           </section>
         </div>
       </CardFooter>

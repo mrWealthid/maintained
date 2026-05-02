@@ -2,7 +2,6 @@ import { PropertyRowProps } from "@/features/properties/models/property.model";
 import PropertyRowActions from "./PropertyRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/shared/components/modal/Modal";
 import { Building2, MapPin } from "lucide-react";
 
 function PropertyRow({ data }: PropertyRowProps) {
@@ -55,9 +54,7 @@ function PropertyRow({ data }: PropertyRowProps) {
                 </span>
               </span>
             </TableCell>
-            <Modal>
-              <PropertyRowActions property={row} />
-            </Modal>
+            <PropertyRowActions property={row} />
           </TableRow>
         );
       })}

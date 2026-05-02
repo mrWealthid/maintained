@@ -1,21 +1,7 @@
 "use client";
-import React, { FC, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TfiMore } from "react-icons/tfi";
-import { Property } from "../services/property-service";
-import { useDeleteProperty } from "../hooks/propertyHooks";
-import Modal from "@/shared/components/modal/Modal";
-import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
-import PropertyForm from "../forms/PropertyForm";
-import PropertyView from "./PropertyView";
-import { useCreateProperty } from "../hooks/propertyHooks";
-import ErrorList from "@/components/ui/ErrorList";
+
+import { useState, type ComponentType } from "react";
+import { Eye, Edit, Trash2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -23,114 +9,132 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
+import ErrorList from "@/components/ui/ErrorList";
+
+import { Property } from "../services/property-service";
+import {
+  useCreateProperty,
+  useDeleteProperty,
+} from "../hooks/propertyHooks";
+import PropertyForm from "../forms/PropertyForm";
+import PropertyView from "./PropertyView";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import type { BaseActions, ConfirmActions } from "@/shared/model/model";
+
+type ConfirmKey = "delete";
+
+type ConfirmConfigItem = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  variant?: "default" | "destructive";
+  icon?: ComponentType<{ className?: string }>;
+  onConfirm: () => Promise<void> | void;
+};
 
 interface PropertyActionsProps {
   property: Property;
 }
 
-const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
+const PropertyActions = ({ property }: PropertyActionsProps) => {
   const { isDeleting, handleDeleteProperty, deletePropertyError } =
     useDeleteProperty();
   const { isCreating, handleCreateProperty, createPropertyError } =
-    useCreateProperty(
-    true,
-    property._id
-  );
-  const [open, setOpen] = useState(false);
+    useCreateProperty(true, property._id);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"view" | "edit">("view");
+  const [confirmKey, setConfirmKey] = useState<ConfirmKey | null>(null);
+
   const canEditProperty = useHasPermission(PERMISSION.PROPERTIES_EDIT);
   const canDeleteProperty = useHasPermission(PERMISSION.PROPERTIES_DELETE);
 
-  function handleDelete(onCloseModal: () => void) {
-    handleDeleteProperty(property._id, {
-      onSuccess: () => onCloseModal(),
-    });
-  }
-
-  function handleEdit() {
-    setViewMode("edit");
-    setOpen(true);
-  }
-
-  function handleView() {
-    setViewMode("view");
-    setOpen(true);
-  }
-
   const onSubmit = (
     data: any,
-    actions?: { onSuccess: () => void; onError: () => void }
+    actions?: { onSuccess: () => void; onError: () => void },
   ) => {
     handleCreateProperty(data, {
       onSuccess: () => {
         actions?.onSuccess();
-        setOpen(false);
+        setSheetOpen(false);
       },
     });
   };
 
+  const confirmConfig: Record<ConfirmKey, ConfirmConfigItem> = {
+    delete: {
+      title: "Delete Property",
+      description:
+        "This action cannot be undone. The property will be permanently removed.",
+      confirmLabel: isDeleting ? "Deleting..." : "Delete",
+      variant: "destructive",
+      icon: Trash2,
+      onConfirm: () => {
+        handleDeleteProperty(property._id, {
+          onSuccess: () => setConfirmKey(null),
+        });
+      },
+    },
+  };
+
+  const activeConfirm = confirmKey ? confirmConfig[confirmKey] : null;
+
+  const baseActions: BaseActions[] = [
+    {
+      label: "View details",
+      action: () => {
+        setMenuOpen(false);
+        setViewMode("view");
+        setSheetOpen(true);
+      },
+      icon: Eye,
+    },
+  ];
+
+  if (canEditProperty) {
+    baseActions.push({
+      label: "Edit",
+      action: () => {
+        setMenuOpen(false);
+        setViewMode("edit");
+        setSheetOpen(true);
+      },
+      icon: Edit,
+    });
+  }
+
+  const confirmableActions: Array<
+    Omit<ConfirmActions, "key"> & { key: ConfirmKey }
+  > = [];
+
+  if (canDeleteProperty) {
+    confirmableActions.push({
+      label: "Delete",
+      key: "delete",
+      icon: Trash2,
+      variant: "destructive",
+    });
+  }
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={"ghost"}
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <TfiMore />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="">
-          <DropdownMenuItem onClick={handleView}>View Details</DropdownMenuItem>
+      <RowActionsMenu
+        ariaLabel={`Actions for property ${property.name ?? property._id}`}
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        baseActions={baseActions}
+        confirmActions={confirmableActions}
+        onConfirmAction={(key) => {
+          setMenuOpen(false);
+          setConfirmKey(key);
+        }}
+      />
 
-          {canEditProperty && (
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onSelect={(e) => {
-                e.stopPropagation();
-                handleEdit();
-              }}
-            >
-              Edit
-            </DropdownMenuItem>
-          )}
-
-          {canDeleteProperty && (
-            <DropdownMenuItem>
-              <Modal.Open opens="delete-property">
-                <button type="button" className="w-full text-left">
-                  Delete
-                </button>
-              </Modal.Open>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Modal.Window
-        name="delete-property"
-        title="Delete Property"
-        description="Property will be deleted permanently"
-      >
-        <div className="space-y-3">
-          <ConfirmationPage
-            handler={(onCloseModal) => {
-              handleDelete(onCloseModal ?? (() => {}));
-            }}
-            isLoading={isDeleting}
-            modalText={"Are you sure you want to delete this property?"}
-          />
-          {deletePropertyError ? (
-            <ErrorList error={deletePropertyError} />
-          ) : null}
-        </div>
-      </Modal.Window>
-
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="bottom"
           className="w-full overflow-y-auto h-full max-h-screen max-w-[100vw] md:max-w-full"
@@ -164,6 +168,26 @@ const PropertyActions: FC<PropertyActionsProps> = ({ property }) => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {activeConfirm ? (
+        <ActionConfirmDialog
+          open={!!activeConfirm}
+          onOpenChange={(o) => !o && setConfirmKey(null)}
+          title={activeConfirm.title}
+          description={activeConfirm.description}
+          confirmLabel={activeConfirm.confirmLabel}
+          variant={activeConfirm.variant}
+          icon={activeConfirm.icon}
+          isLoading={isDeleting}
+          onConfirm={async () => {
+            await activeConfirm.onConfirm();
+          }}
+        >
+          {confirmKey === "delete" && deletePropertyError ? (
+            <ErrorList error={deletePropertyError} />
+          ) : null}
+        </ActionConfirmDialog>
+      ) : null}
     </>
   );
 };

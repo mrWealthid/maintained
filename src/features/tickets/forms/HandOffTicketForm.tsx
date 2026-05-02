@@ -1,13 +1,18 @@
 "use client";
-import React, { FC, useState } from "react";
+
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
-  useFetchAdmins,
-  useHandOffTicket,
-} from "@/features/tickets/hooks/ticketHooks";
-import { handOffTicketFormProps } from "@/features/tickets/models/ticket.model";
-import { User } from "@/shared/model/model";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   PopoverTrigger,
   Popover,
@@ -20,25 +25,35 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { Check, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-const HandOffTicketForm: FC<handOffTicketFormProps> = ({
-  ticket,
-  onCloseModal,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { handleSubmit, control, formState } = useForm<{
+import {
+  useFetchAdmins,
+  useHandOffTicket,
+} from "@/features/tickets/hooks/ticketHooks";
+import type { handOffTicketFormProps } from "@/features/tickets/models/ticket.model";
+import type { User } from "@/shared/model/model";
+
+type Props = Pick<handOffTicketFormProps, "ticket"> & {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export default function HandOffTicketForm({ ticket, open, onOpenChange }: Props) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const { handleSubmit, control, formState, reset } = useForm<{
     actionedBy: string;
   }>({
     mode: "all",
     defaultValues: { actionedBy: "" },
   });
 
-  const { errors, isSubmitting, isValid, isDirty } = formState;
+  const { isSubmitting, isValid, isDirty } = formState;
   const { isUpdating, handleHandleOffTicket } = useHandOffTicket(
     ticket.id,
-    onCloseModal
+    () => {
+      reset();
+      onOpenChange(false);
+    },
   );
 
   const { data: admins } = useFetchAdmins<User>();
@@ -47,94 +62,85 @@ const HandOffTicketForm: FC<handOffTicketFormProps> = ({
     handleHandleOffTicket(data);
   }
 
-  function onError(err: unknown) {
-    console.log(err);
-  }
-
   return (
-    <div className="w-full">
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className=" flex flex-1 items-center"
-      >
-        <section className="flex-col flex gap-2 w-full">
-          <div className="w-full">
-            <Controller
-              control={control}
-              name="actionedBy"
-              render={({ field }) => {
-                const selectedValue = field.value;
-
-                return (
-                  <Popover open={isOpen} onOpenChange={setIsOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between"
-                        type="button"
-                      >
-                        {selectedValue
-                          ? admins?.find((user) => user.id === selectedValue)
-                              ?.name
-                          : "Select Admin"}
-                        <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Hand-off Ticket</DialogTitle>
+          <DialogDescription>
+            Reassign this ticket to another admin.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Controller
+            control={control}
+            name="actionedBy"
+            render={({ field }) => {
+              const selectedValue = field.value;
+              return (
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between"
+                      type="button"
                     >
-                      <Command>
-                        <CommandInput placeholder="Search Admins..." />
-                        <CommandEmpty>No admin found.</CommandEmpty>
-                        <CommandGroup>
-                          {admins?.map((user) => (
-                            <CommandItem
-                              key={user.id}
-                              onSelect={() => {
-                                field.onChange(user.id);
-                                setIsOpen(false);
-                              }}
-                            >
-                              <span className="mr-2">
-                                {selectedValue === user.id && (
-                                  <Check className="h-4 w-4" />
-                                )}
-                              </span>
-                              {user.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                );
-              }}
-            />
-          </div>
+                      {selectedValue
+                        ? admins?.find((u) => u.id === selectedValue)?.name
+                        : "Select Admin"}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[var(--radix-popover-trigger-width)] p-0"
+                    align="start"
+                  >
+                    <Command>
+                      <CommandInput placeholder="Search admins..." />
+                      <CommandEmpty>No admin found.</CommandEmpty>
+                      <CommandGroup>
+                        {admins?.map((u) => (
+                          <CommandItem
+                            key={u.id}
+                            onSelect={() => {
+                              field.onChange(u.id);
+                              setPopoverOpen(false);
+                            }}
+                          >
+                            <span className="mr-2">
+                              {selectedValue === u.id && (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </span>
+                            {u.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              );
+            }}
+          />
 
-          <hr className=" my-3" />
-          <section className="flex justify-end  gap-4">
-            <ButtonComponent
-              type="reset"
-              handleClick={() => onCloseModal?.()}
-              styles="rounded-3xl"
-              btnText={"Cancel"}
-            ></ButtonComponent>
-
-            <ButtonComponent
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               type="submit"
-              styles="rounded-3xl"
-              disabled={!isValid || isSubmitting || !isDirty}
-              loading={isUpdating}
-              btnText={`Submit
-                            `}
-            ></ButtonComponent>
-          </section>
-        </section>
-      </form>
-    </div>
+              disabled={!isValid || isSubmitting || !isDirty || isUpdating}
+            >
+              {isUpdating && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Submit
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default HandOffTicketForm;
+}

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
-// Keep your existing ButtonComponent for actions
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import ErrorList from "@/components/ui/ErrorList";
@@ -447,20 +447,15 @@ const UserForm: FC<ManageUserFormProps> = ({
           <Separator />
           <DialogFooter>
             <section className="flex justify-end gap-3">
-              <ButtonComponent
-                type="reset"
-                handleClick={() => onCloseModal?.()}
-                styles="rounded-3xl"
-                btnText={"Cancel"}
-              />
+              <Button type="button" variant="outline" onClick={() => onCloseModal?.()}>Cancel</Button>
 
-              <ButtonComponent
+              <Button
                 type="submit"
-                styles="rounded-3xl"
-                disabled={!isValid || isSubmitting || !isDirty}
-                loading={isCreating}
-                btnText={`${isEditing ? "Update User" : "Create User"}`}
-              />
+                disabled={!isValid || isSubmitting || !isDirty || isCreating}
+              >
+                {isCreating && <Loader2 className="mr-2 size-4 animate-spin" />}
+                {isEditing ? "Update User" : "Create User"}
+              </Button>
             </section>
           </DialogFooter>
         </section>

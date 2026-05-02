@@ -2,7 +2,6 @@ import { TechnicianTicketRowProps } from "@/features/tickets/models/ticket.model
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/shared/components/modal/Modal";
 
 function RequestRow({ data }: TechnicianTicketRowProps) {
   return (
@@ -94,9 +93,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
               </span>
             </TableCell>
 
-            <Modal>
-              <TicketRowActions technicianRequest={row} />
-            </Modal>
+            <TicketRowActions technicianRequest={row} />
           </TableRow>
         );
       })}

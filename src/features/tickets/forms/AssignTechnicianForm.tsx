@@ -2,7 +2,8 @@
 import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import TextInput from "@/shared/components/form-elements/Text-Input";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useAssignTechnician } from "@/features/tickets/hooks/ticketHooks";
 import {
   AssignTechnicianFormControls,
@@ -85,21 +86,15 @@ const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
           </div>
           <hr className=" my-3" />
           <section className="flex justify-end  gap-4">
-            <ButtonComponent
-              type="reset"
-              handleClick={() => onCloseModal?.()}
-              styles="rounded-3xl"
-              btnText={"Cancel"}
-            ></ButtonComponent>
+            <Button type="button" variant="outline" onClick={() => onCloseModal?.()}>Cancel</Button>
 
-            <ButtonComponent
+            <Button
               type="submit"
-              styles="rounded-3xl"
-              disabled={!isValid || isSubmitting || !isDirty}
-              loading={isAssigning}
-              btnText={`Submit
-							`}
-            ></ButtonComponent>
+              disabled={!isValid || isSubmitting || !isDirty || isAssigning}
+            >
+              {isAssigning && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Submit
+            </Button>
           </section>
         </section>
       </form>

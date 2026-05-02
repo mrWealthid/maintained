@@ -174,8 +174,11 @@ input:not([type="email"])::placeholder {
     --muted: 40 14% 94%;
     --muted-foreground: 200 12% 38%;
 
-    --accent: 36 92% 92%;
-    --accent-foreground: 36 95% 22%;
+    /* accent = shadcn subtle interactive surface (hover/active for ghost,
+       outline, dropdown items). Kept neutral so hovers don't shout amber.
+       For amber highlights, use status-open tokens directly. */
+    --accent: 40 14% 90%;
+    --accent-foreground: 200 25% 18%;
 
     --destructive: 354 72% 44%;
     --destructive-foreground: 0 0% 100%;
@@ -225,70 +228,76 @@ input:not([type="email"])::placeholder {
     --input-label: 200 12% 38%;
   }
 
+  /*
+   * Dark mode: near-monochrome chrome. All surfaces, borders, and muted
+   * tones are neutral grays — no teal cast. Teal survives only as the
+   * primary CTA / focus ring, so brand color appears as an accent on
+   * action affordances rather than washing the whole UI.
+   */
   .dark {
-    --background: 200 32% 7%;
-    --foreground: 40 16% 94%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 96%;
 
-    --card: 200 28% 10%;
-    --card-foreground: 40 16% 94%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 200 28% 11%;
-    --popover-foreground: 40 16% 94%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 184 62% 50%;
-    --primary-foreground: 200 32% 8%;
+    --primary: 184 50% 46%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 22% 16%;
-    --secondary-foreground: 40 16% 94%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 200 22% 14%;
-    --muted-foreground: 200 14% 70%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 36 60% 16%;
-    --accent-foreground: 36 92% 70%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 96%;
 
-    --destructive: 354 70% 55%;
+    --destructive: 354 65% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 18% 22%;
-    --input: 200 18% 22%;
-    --ring: 184 62% 56%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 184 50% 50%;
 
-    --chart-1: 184 62% 55%;
-    --chart-2: 36 92% 62%;
-    --chart-3: 158 55% 55%;
-    --chart-4: 280 60% 68%;
-    --chart-5: 14 80% 65%;
+    --chart-1: 184 50% 52%;
+    --chart-2: 36 75% 55%;
+    --chart-3: 158 45% 50%;
+    --chart-4: 280 45% 62%;
+    --chart-5: 14 65% 58%;
 
-    --sidebar-background: 200 32% 5%;
-    --sidebar-foreground: 40 14% 86%;
-    --sidebar-primary: 184 62% 50%;
-    --sidebar-primary-foreground: 200 32% 8%;
-    --sidebar-accent: 200 22% 14%;
-    --sidebar-accent-foreground: 40 16% 94%;
-    --sidebar-border: 200 18% 18%;
-    --sidebar-ring: 184 62% 56%;
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 184 50% 46%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 184 50% 50%;
 
-    --button-primary: 184 62% 50%;
-    --button-primary-foreground: 200 32% 8%;
-    --button-accent: 36 92% 62%;
-    --button-accent-foreground: 200 32% 8%;
+    --button-primary: 184 50% 46%;
+    --button-primary-foreground: 0 0% 100%;
+    --button-accent: 36 75% 55%;
+    --button-accent-foreground: 0 0% 8%;
 
-    --status-open: 36 92% 58%;
-    --status-open-foreground: 200 32% 8%;
-    --status-progress: 210 80% 62%;
-    --status-progress-foreground: 200 32% 8%;
-    --status-resolved: 158 60% 52%;
-    --status-resolved-foreground: 200 32% 8%;
-    --status-overdue: 354 70% 60%;
-    --status-overdue-foreground: 200 32% 8%;
+    --status-open: 36 75% 55%;
+    --status-open-foreground: 0 0% 8%;
+    --status-progress: 210 65% 55%;
+    --status-progress-foreground: 0 0% 100%;
+    --status-resolved: 158 45% 50%;
+    --status-resolved-foreground: 0 0% 8%;
+    --status-overdue: 354 65% 56%;
+    --status-overdue-foreground: 0 0% 100%;
 
-    --color-text-base: 40 16% 94%;
-    --success-color: 158 60% 52%;
-    --error-color: 354 70% 55%;
-    --pending-color: 36 92% 58%;
-    --light-blue: 210 80% 62%;
-    --input-label: 200 14% 70%;
+    --color-text-base: 0 0% 96%;
+    --success-color: 158 45% 50%;
+    --error-color: 354 65% 52%;
+    --pending-color: 36 75% 55%;
+    --light-blue: 210 65% 55%;
+    --input-label: 0 0% 65%;
   }
 }
 

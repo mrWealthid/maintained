@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useOnboardUser } from "../../hooks/useAuth";
 import { OnboardUserForm } from "../../model/model";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -116,13 +117,14 @@ const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
                   )}
                 />
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Login"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Continue
+                </Button>
 
                 <p className="flex gap-3 text-sm justify-center">
                   Need An Account?

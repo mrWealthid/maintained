@@ -1,5 +1,5 @@
 "use client";
-import type React from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
   Calendar,
   Check,
   ChevronDown,
+  ClipboardCheck,
   Clock,
   FileText,
   ImageIcon,
@@ -36,11 +37,27 @@ import {
   TICKET_PRIORITY,
   TICKET_STATUS,
 } from "@/shared/enums/enums";
-import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
-import Modal from "@/shared/components/modal/Modal";
-import { useAssignTechnician } from "../hooks/ticketHooks";
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  useAssignTechnician,
+  useAssignTicket,
+  useProcessTechnicianResponse,
+} from "../hooks/ticketHooks";
+import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
+import { useAppContext } from "@/shared/contexts/AppContext";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { Loader2, Send, UserPlus, X as XIcon } from "lucide-react";
 
 const getPriorityColor = (priority: TICKET_PRIORITY | undefined) => {
   switch (priority?.toLowerCase()) {
@@ -85,16 +102,129 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
   const hasTechnicianResponseActions =
     canAssignTicket || canManageTicketStatus;
 
-  function handleTechnicianAssign(
-    onCloseModal: () => void,
-    assignedTo: string
-  ) {
-    const payload = {
-      assignedTo,
-    };
-    handleAssignTechnician(payload, {
-      onSuccess: () => onCloseModal(),
-    });
+  const { user } = useAppContext();
+  const { isUpdating: isAssigningSelf, handleAssignTicket } = useAssignTicket(
+    ticket?.id!,
+  );
+  const { isProcessing, processResponse } = useProcessTechnicianResponse(
+    ticket?.id!,
+  );
+
+  type ConfirmKey =
+    | "assign-technician"
+    | "assign-to-me"
+    | "withdraw"
+    | "decline-technician";
+
+  type ConfirmConfigItem = {
+    title: string;
+    description: string;
+    confirmLabel: string;
+    variant?: "default" | "destructive";
+    icon?: React.ComponentType<{ className?: string }>;
+    onConfirm: () => Promise<void> | void;
+  };
+
+  const [confirmKey, setConfirmKey] = useState<ConfirmKey | null>(null);
+  const [targetRequestId, setTargetRequestId] = useState<string | null>(null);
+  const [sendRequestOpen, setSendRequestOpen] = useState(false);
+  const [scheduleRequestId, setScheduleRequestId] = useState<string | null>(
+    null,
+  );
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleStart, setScheduleStart] = useState("");
+  const [scheduleEnd, setScheduleEnd] = useState("");
+
+  const closeConfirm = () => {
+    setConfirmKey(null);
+    setTargetRequestId(null);
+  };
+
+  const isLoading = isAssigning || isAssigningSelf || isProcessing;
+
+  const confirmConfig: Record<ConfirmKey, ConfirmConfigItem> = {
+    "assign-technician": {
+      title: "Assign Technician",
+      description: "Are you sure you want to assign this ticket?",
+      confirmLabel: isAssigning ? "Assigning..." : "Assign",
+      icon: ClipboardCheck,
+      onConfirm: () => {
+        if (!targetRequestId) return;
+        handleAssignTechnician(
+          { assignedTo: targetRequestId },
+          { onSuccess: () => closeConfirm() },
+        );
+      },
+    },
+    "assign-to-me": {
+      title: "Assign to Me",
+      description: "The ticket will be actioned by you.",
+      confirmLabel: isAssigningSelf ? "Assigning..." : "Assign to me",
+      icon: UserPlus,
+      onConfirm: () => {
+        handleAssignTicket(
+          { actionedBy: user?.id, status: TICKET_STATUS.processing },
+          { onSuccess: () => closeConfirm() },
+        );
+      },
+    },
+    withdraw: {
+      title: "Withdraw Assignment",
+      description: "The ticket will revert to pending.",
+      confirmLabel: isAssigningSelf ? "Withdrawing..." : "Withdraw",
+      icon: XIcon,
+      variant: "destructive",
+      onConfirm: () => {
+        handleAssignTicket(
+          { actionedBy: undefined, status: TICKET_STATUS.pending },
+          { onSuccess: () => closeConfirm() },
+        );
+      },
+    },
+    "decline-technician": {
+      title: "Decline Technician Response",
+      description: "The technician's response will be marked declined.",
+      confirmLabel: isProcessing ? "Declining..." : "Decline",
+      icon: XIcon,
+      variant: "destructive",
+      onConfirm: () => {
+        if (!targetRequestId) return;
+        processResponse(
+          {
+            status: TECHNICIAN_RESPONSE.declined,
+            message: targetRequestId,
+          },
+          { onSuccess: () => closeConfirm() } as any,
+        );
+      },
+    },
+  };
+
+  const activeConfirm = confirmKey ? confirmConfig[confirmKey] : null;
+
+  function handleSubmitSchedule(e: React.FormEvent) {
+    e.preventDefault();
+    if (!scheduleRequestId || !scheduleDate || !scheduleStart || !scheduleEnd)
+      return;
+    processResponse(
+      {
+        status: TECHNICIAN_RESPONSE.selected,
+        schedule: {
+          day: scheduleDate,
+          start: `${scheduleDate}T${scheduleStart}`,
+          end: `${scheduleDate}T${scheduleEnd}`,
+        },
+        message: scheduleRequestId,
+      },
+      {
+        onSuccess: () => {
+          setScheduleRequestId(null);
+          setScheduleDate("");
+          setScheduleStart("");
+          setScheduleEnd("");
+        },
+      } as any,
+    );
   }
 
   return (
@@ -132,21 +262,17 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                 </Link>
               </DropdownMenuItem> */}
                 {canAssignTicket && (
-                  <DropdownMenuItem>
-                    <Modal.Open opens="self-assign">
-                      <button type="button" className="w-full text-left">
-                        Assign to me
-                      </button>
-                    </Modal.Open>
+                  <DropdownMenuItem
+                    onSelect={() => setConfirmKey("assign-to-me")}
+                  >
+                    Assign to me
                   </DropdownMenuItem>
                 )}
                 {canCreateTechnicianRequest && (
-                  <DropdownMenuItem>
-                    <Modal.Open opens="send-request-technicians">
-                      <button type="button" className="w-full text-left">
-                        Assign Technician
-                      </button>
-                    </Modal.Open>
+                  <DropdownMenuItem
+                    onSelect={() => setSendRequestOpen(true)}
+                  >
+                    Assign Technician
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -332,52 +458,37 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="">
                           {canAssignTicket && (
-                            <DropdownMenuItem>
-                              <Modal.Open
-                                opens="assign-technician"
-                                payload={request.technician.id}
-                              >
-                                <button
-                                  type="button"
-                                  className="w-full text-left"
-                                >
-                                  Assign
-                                </button>
-                              </Modal.Open>
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setTargetRequestId(request.technician.id);
+                                setConfirmKey("assign-technician");
+                              }}
+                            >
+                              Assign
                             </DropdownMenuItem>
                           )}
 
                           {canManageTicketStatus && (
                             <>
-                              <DropdownMenuItem>
-                                <Modal.Open opens="self-assign">
-                                  <button
-                                    type="button"
-                                    className="w-full text-left"
-                                  >
-                                    Withdraw
-                                  </button>
-                                </Modal.Open>
+                              <DropdownMenuItem
+                                onSelect={() => setConfirmKey("withdraw")}
+                              >
+                                Withdraw
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Modal.Open opens="self-assign">
-                                  <button
-                                    type="button"
-                                    className="w-full text-left"
-                                  >
-                                    Update Schedule
-                                  </button>
-                                </Modal.Open>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  setScheduleRequestId(request.id)
+                                }
+                              >
+                                Update Schedule
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Modal.Open opens="send-request-technicians">
-                                  <button
-                                    type="button"
-                                    className="w-full text-left"
-                                  >
-                                    Decline
-                                  </button>
-                                </Modal.Open>
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  setTargetRequestId(request.id);
+                                  setConfirmKey("decline-technician");
+                                }}
+                              >
+                                Decline
                               </DropdownMenuItem>
                             </>
                           )}
@@ -465,52 +576,92 @@ export default function TicketDetails({ ticket }: ManageTicketDetailsProps) {
         </Card>
       )}
 
-      {/* <Modal.Window
-        name="assign-technician"
-        title="Assign Technician"
-        description="Technician would be assigned to ticket"
-      >
-        {({ onCloseModal, data }) => (
-          <ConfirmationPage
-            handler={() =>
-              handleTechnicianAssign(onCloseModal, (data as any)?.technicianId)
-            }
-            isLoading={isAssigning}
-            modalText="Are you sure you want to assign this ticket"
-            reason="confirm"
-          />
-        )}
-      </Modal.Window> */}
-
-      <Modal.Window
-        name="assign-technician"
-        title="Assign Technician"
-        description="Technician would be assigned to ticket"
-      >
-        <ConfirmationPage
-          handler={(onCloseModal: () => void, data: any) => {
-            handleTechnicianAssign(onCloseModal ?? (() => {}), data);
+      {activeConfirm ? (
+        <ActionConfirmDialog
+          open={!!activeConfirm}
+          onOpenChange={(o) => !o && closeConfirm()}
+          title={activeConfirm.title}
+          description={activeConfirm.description}
+          confirmLabel={activeConfirm.confirmLabel}
+          variant={activeConfirm.variant}
+          icon={activeConfirm.icon}
+          isLoading={isLoading}
+          onConfirm={async () => {
+            await activeConfirm.onConfirm();
           }}
-          isLoading={isAssigning}
-          modalText="Are you sure you want to assign this ticket"
-          reason="confirm"
         />
-      </Modal.Window>
+      ) : null}
 
-      {/* <Modal.Window
-        name="assign-technician"
-        title="Assign Technician"
-        description="Technician would be assigned to ticket"
-      >
-        <ConfirmationPage
-          handler={(onCloseModal) => {
-            handleTechnicianAssign(onCloseModal ?? (() => {}), "66777");
-          }}
-          isLoading={isAssigning}
-          modalText={"Are you sure you want to assign this ticket"}
-          reason="confirm"
+      {ticket ? (
+        <SendTechnicianRequestForm
+          ticket={ticket as any}
+          open={sendRequestOpen}
+          onOpenChange={setSendRequestOpen}
         />
-      </Modal.Window> */}
+      ) : null}
+
+      <Dialog
+        open={!!scheduleRequestId}
+        onOpenChange={(o) => !o && setScheduleRequestId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Schedule</DialogTitle>
+            <DialogDescription>
+              Set the date and time window for the technician visit.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitSchedule} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="schedule-date">Date</Label>
+              <Input
+                id="schedule-date"
+                type="date"
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="schedule-start">Start</Label>
+                <Input
+                  id="schedule-start"
+                  type="time"
+                  value={scheduleStart}
+                  onChange={(e) => setScheduleStart(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="schedule-end">End</Label>
+                <Input
+                  id="schedule-end"
+                  type="time"
+                  value={scheduleEnd}
+                  onChange={(e) => setScheduleEnd(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setScheduleRequestId(null)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isProcessing}>
+                {isProcessing && (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                )}
+                Save schedule
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

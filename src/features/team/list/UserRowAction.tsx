@@ -1,46 +1,50 @@
-import React, { FC } from "react";
-import { UserRowActionsProps } from "@/shared/model/model";
-import Modal from "@/shared/components/modal/Modal";
-import ConfirmationPage from "@/shared/components/ui/ConfirmationPage";
-import { useDeleteUser, useReInviteUser } from "../hooks/userHooks";
-import UserForm from "../forms/UserForm";
-import { TfiMore } from "react-icons/tfi";
+"use client";
+
+import { useState, type ComponentType } from "react";
+import { Edit, Mail, Trash2 } from "lucide-react";
+
 import { TableCell } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
+
+import { UserRowActionsProps } from "@/shared/model/model";
+import { useDeleteUser, useReInviteUser } from "../hooks/userHooks";
+import UserForm from "../forms/UserForm";
 import { getMembershipForBusiness } from "@/utils/helpers";
 import { INVITE_STATUS } from "@/shared/enums/enums";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import type { BaseActions, ConfirmActions } from "@/shared/model/model";
 
-const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
+type ConfirmKey = "delete" | "reinvite";
+
+type ConfirmConfigItem = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  variant?: "default" | "destructive";
+  icon?: ComponentType<{ className?: string }>;
+  onConfirm: () => Promise<void> | void;
+};
+
+const UserRowAction = ({ user, membership }: UserRowActionsProps) => {
   const { isDeleting, deleteUser } = useDeleteUser();
   const { isInviting, reInviteUser } = useReInviteUser();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [confirmKey, setConfirmKey] = useState<ConfirmKey | null>(null);
+
   const canEditUser = useHasPermission(PERMISSION.TEAM_ROLE_MANAGE);
   const canInviteTeam = useHasPermission(PERMISSION.TEAM_INVITE);
   const canRemoveTeamMember = useHasPermission(PERMISSION.TEAM_REMOVE);
-
-  function handleDelete(onCloseModal: () => void) {
-    if (!user.id) return;
-    deleteUser(user.id, {
-      onSuccess: () => onCloseModal(),
-    });
-  }
-  function handleReInviteUser(
-    onCloseModal: () => void,
-    payload: { email: string }
-  ) {
-    if (!user.id) return;
-    reInviteUser(payload, {
-      onSuccess: () => onCloseModal(),
-    });
-  }
 
   const member = getMembershipForBusiness(user, user.currentBusiness.id);
   const canReInviteUser =
@@ -51,95 +55,112 @@ const UserRowAction: FC<UserRowActionsProps> = ({ user, membership }) => {
 
   if (!hasRowActions) return <TableCell className="md:px-2 py-2" />;
 
+  const confirmConfig: Record<ConfirmKey, ConfirmConfigItem> = {
+    delete: {
+      title: "Delete User",
+      description: `Are you sure you want to delete ${user.name}? This action cannot be undone.`,
+      confirmLabel: isDeleting ? "Deleting..." : "Delete",
+      variant: "destructive",
+      icon: Trash2,
+      onConfirm: () => {
+        if (!user.id) return;
+        deleteUser(user.id, { onSuccess: () => setConfirmKey(null) });
+      },
+    },
+    reinvite: {
+      title: "Re-Invite User",
+      description: `Are you sure you want to re-invite ${user.name}?`,
+      confirmLabel: isInviting ? "Sending..." : "Re-invite",
+      icon: Mail,
+      onConfirm: () => {
+        if (!user.id) return;
+        reInviteUser(
+          { email: user.email },
+          { onSuccess: () => setConfirmKey(null) },
+        );
+      },
+    },
+  };
+
+  const activeConfirm = confirmKey ? confirmConfig[confirmKey] : null;
+
+  const baseActions: BaseActions[] = [];
+
+  if (canEditUser) {
+    baseActions.push({
+      label: "Edit",
+      action: () => {
+        setMenuOpen(false);
+        setEditOpen(true);
+      },
+      icon: Edit,
+    });
+  }
+
+  const confirmableActions: Array<
+    Omit<ConfirmActions, "key"> & { key: ConfirmKey }
+  > = [];
+
+  if (canReInviteUser) {
+    confirmableActions.push({
+      label: "Re-Invite",
+      key: "reinvite",
+      icon: Mail,
+    });
+  }
+
+  if (canRemoveTeamMember) {
+    confirmableActions.push({
+      label: "Delete",
+      key: "delete",
+      icon: Trash2,
+      variant: "destructive",
+    });
+  }
+
   return (
     <TableCell className="md:px-2 py-2 space-x-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={"ghost"}
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-            size="icon"
-          >
-            <TfiMore />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          {canEditUser && (
-            <DropdownMenuItem>
-              <Modal.Open opens="edit-user-form">
-                <button type="button" className="w-full text-left">
-                  Edit
-                </button>
-              </Modal.Open>
-            </DropdownMenuItem>
-          )}
+      <RowActionsMenu
+        ariaLabel={`Actions for user ${user.name}`}
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        baseActions={baseActions}
+        confirmActions={confirmableActions}
+        onConfirmAction={(key) => {
+          setMenuOpen(false);
+          setConfirmKey(key);
+        }}
+      />
 
-          {canReInviteUser && (
-            <DropdownMenuItem>
-              <Modal.Open opens="re-invite">
-                <button type="button" className="w-full text-left">
-                  Re-Invite
-                </button>
-              </Modal.Open>
-            </DropdownMenuItem>
-          )}
-          {canRemoveTeamMember && <DropdownMenuSeparator />}
-          {canRemoveTeamMember && (
-            <DropdownMenuItem>
-              <Modal.Open opens="delete-user">
-                <button type="button" className="w-full text-left">
-                  Delete
-                </button>
-              </Modal.Open>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage User</DialogTitle>
+            <DialogDescription>Manage your users</DialogDescription>
+          </DialogHeader>
+          <UserForm
+            user={user}
+            membership={membership}
+            onCloseModal={() => setEditOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
-      <Modal.Window
-        title="Manage User"
-        description="Manage your users"
-        name="edit-user-form"
-      >
-        <UserForm user={user} membership={membership} />
-      </Modal.Window>
-
-      <Modal.Window
-        title="Delete User"
-        description="User will be deleted permanently"
-        name="delete-user"
-      >
-        <ConfirmationPage
-          handler={(onCloseModal: () => void) => {
-            handleDelete(onCloseModal);
+      {activeConfirm ? (
+        <ActionConfirmDialog
+          open={!!activeConfirm}
+          onOpenChange={(o) => !o && setConfirmKey(null)}
+          title={activeConfirm.title}
+          description={activeConfirm.description}
+          confirmLabel={activeConfirm.confirmLabel}
+          variant={activeConfirm.variant}
+          icon={activeConfirm.icon}
+          isLoading={isDeleting || isInviting}
+          onConfirm={async () => {
+            await activeConfirm.onConfirm();
           }}
-          isLoading={isDeleting}
-          modalText={
-            <span>
-              Are you sure you want to delete <b>{user.name}</b>
-            </span>
-          }
         />
-      </Modal.Window>
-
-      <Modal.Window
-        title="Re-Invite"
-        description="User will be re-invited"
-        name="re-invite"
-      >
-        <ConfirmationPage
-          handler={(onCloseModal: () => void) => {
-            handleReInviteUser(onCloseModal, { email: user.email });
-          }}
-          isLoading={isInviting}
-          modalText={
-            <span>
-              Are you sure you want to re-invite <b>{user.name}</b>
-            </span>
-          }
-        />
-      </Modal.Window>
+      ) : null}
     </TableCell>
   );
 };

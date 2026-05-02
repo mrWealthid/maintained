@@ -2,7 +2,6 @@ import { UnitRowProps } from "@/features/units/models/unit.model";
 import UnitRowActions from "./UnitRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Modal from "@/shared/components/modal/Modal";
 import { Home, Building2, Users } from "lucide-react";
 
 function UnitRow({ data }: UnitRowProps) {
@@ -62,9 +61,7 @@ function UnitRow({ data }: UnitRowProps) {
                 </span>
               </span>
             </TableCell>
-            <Modal>
-              <UnitRowActions unit={row} />
-            </Modal>
+            <UnitRowActions unit={row} />
           </TableRow>
         );
       })}

@@ -1,6 +1,5 @@
 import { UserRowProps } from "@/shared/model/model";
 import UserRowAction from "./UserRowAction";
-import Modal from "@/shared/components/modal/Modal";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getMembershipForBusiness } from "@/utils/helpers";
@@ -152,9 +151,7 @@ function UserRow({ data }: UserRowProps) {
             <TableCell>
               <Badge variant="secondary">{membership?.role}</Badge>
             </TableCell>
-            <Modal>
-              <UserRowAction user={row} membership={membership} />
-            </Modal>
+            <UserRowAction user={row} membership={membership} />
           </TableRow>
         );
       })}

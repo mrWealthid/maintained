@@ -4,7 +4,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useResetPassword } from "../hooks/useAuth";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { IResetPassword } from "../model/model";
 import {
   Card,
@@ -159,13 +160,14 @@ const ResetPasswordComponent = () => {
                   )}
                 />
 
-                <ButtonComponent
-                  styles="w-full mt-4"
-                  btnText="Login"
-                  loading={isLoading}
+                <Button
                   type="submit"
+                  className="w-full mt-4"
                   disabled={!isValid || isLoading}
-                />
+                >
+                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Send Reset Link
+                </Button>
 
                 <p className="flex gap-3 text-sm justify-center text-muted-foreground">
                   Forgot Password?

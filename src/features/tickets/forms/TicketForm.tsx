@@ -15,7 +15,8 @@ import {
 import TextInput from "@/shared/components/form-elements/Text-Input";
 import AutoComplete from "@/shared/components/auto-complete/AutoComplete";
 import FileUpload from "@/shared/components/form-elements/File-Upload";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   Select,
@@ -783,13 +784,13 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
 
         <hr className="my-3" />
         <section className="flex justify-end   gap-4">
-          <ButtonComponent
+          <Button
             type="submit"
-            styles="rounded-lg"
             disabled={!isValid || isSubmitting || !isDirty}
-            loading={isSubmitting}
-            btnText={` ${isEditing ? "Update" : "Create"} Ticket`}
-          ></ButtonComponent>
+          >
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {isEditing ? "Update" : "Create"} Ticket
+          </Button>
         </section>
       </section>
     </form>

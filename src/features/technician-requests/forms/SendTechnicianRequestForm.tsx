@@ -1,7 +1,8 @@
 "use client";
-import React, { FC, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import ButtonComponent from "@/shared/components/form-elements/Button";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   useFetchTechnicians,
   useFetchTicketDetails,
@@ -24,27 +25,43 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Check, ChevronDown, ChevronDownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns/format";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
+type Props = Pick<SendTechnicianRequestFormProps, "ticket"> & {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export default function SendTechnicianRequestForm({
   ticket,
-  onCloseModal,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { handleSubmit, control, formState } =
+  open,
+  onOpenChange,
+}: Props) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { handleSubmit, control, formState, reset } =
     useForm<SendTechnicianRequestFormControls>({
       mode: "all",
       defaultValues: { technicianIds: [], expiresAt: undefined },
     });
 
-  const { errors, isSubmitting, isValid, isDirty } = formState;
+  const { isSubmitting, isValid, isDirty } = formState;
   const { isSending, handleSendTechnicianRequest } = useSendTechnicianRequest(
     ticket.id,
-    onCloseModal
+    () => {
+      reset();
+      onOpenChange(false);
+    },
   );
 
   const { data: technicians } = useFetchTechnicians();
@@ -55,10 +72,6 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
     handleSendTechnicianRequest(data);
   }
 
-  function onError(err: unknown) {
-    console.log(err);
-  }
-
   function isTechnicianRequestSent(id: string) {
     return (
       ticketDetails?.requests?.some((r) => r.technician?.id === id) ?? false
@@ -66,11 +79,18 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
   }
 
   return (
-    <div className="w-full">
-      <form
-        onSubmit={handleSubmit(onSubmit, onError)}
-        className=" flex flex-1 items-center"
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Send Technicians Ticket Request</DialogTitle>
+          <DialogDescription>
+            The request will be sent to eligible technicians.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-1 items-center"
+        >
         <section className="flex-col flex gap-2 w-full">
           <div className="w-full">
             <Controller
@@ -215,12 +235,12 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                 render={({ field }) => {
                   const hasValue = !!field.value;
                   return (
-                    <Popover open={isOpen} onOpenChange={setIsOpen}>
+                    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           id="date-picker"
-                          onClick={() => setIsOpen(true)}
+                          onClick={() => setIsPopoverOpen(true)}
                           className={` w-full bg-transparent hover:bg-transparent justify-between font-normal ${
                             hasValue
                               ? "text-foreground"
@@ -243,7 +263,7 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
                           captionLayout="dropdown"
                           onSelect={(date) => {
                             field.onChange(date);
-                            setIsOpen(false);
+                            setIsPopoverOpen(false);
                           }}
                         />
                       </PopoverContent>
@@ -253,28 +273,25 @@ const SendTechnicianRequestForm: FC<SendTechnicianRequestFormProps> = ({
               />
             </div>
           </section>
-          <hr className="my-3" />
-          <section className="flex justify-end  gap-4">
-            <ButtonComponent
-              type="reset"
-              handleClick={() => onCloseModal?.()}
-              styles="rounded-3xl"
-              btnText={"Cancel"}
-            ></ButtonComponent>
-
-            <ButtonComponent
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               type="submit"
-              styles="rounded-3xl"
-              disabled={!isValid || isSubmitting || !isDirty}
-              loading={isSending}
-              btnText={`Submit
-                            `}
-            ></ButtonComponent>
-          </section>
+              disabled={!isValid || isSubmitting || !isDirty || isSending}
+            >
+              {isSending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Submit
+            </Button>
+          </DialogFooter>
         </section>
       </form>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default SendTechnicianRequestForm;
+}
