@@ -460,3 +460,32 @@
   --pending-color: 36 75% 55%;
   --light-blue: 210 65% 55%;
 }
+/* Dashboard body: thin styled scrollbar, visible on hover */
+.scroll-fancy {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 200ms ease;
+}
+.scroll-fancy:hover,
+.scroll-fancy:focus-within {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.5) transparent;
+}
+.scroll-fancy::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-fancy::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-fancy::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition: background-color 200ms ease;
+}
+.scroll-fancy:hover::-webkit-scrollbar-thumb,
+.scroll-fancy:focus-within::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+.scroll-fancy::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.7);
+}

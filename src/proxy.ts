@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse, NextRequest } from "next/server";
 import { ROLES } from "./shared/enums/enums";
 
@@ -11,7 +10,7 @@ type DecodedToken = {
   sessionId?: string;
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const path = url.pathname;
 
@@ -36,7 +35,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Middleware only performs fast session-token routing. Server layouts call
+  // Proxy only performs fast session-token routing. Server layouts call
   // requireDashboardAccess for the authoritative DB-backed guard.
   if (token && valid && isAuthRoute) {
     return NextResponse.redirect(getDashboardURL(request, role));
