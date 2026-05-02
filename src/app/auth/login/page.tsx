@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useLogin } from "../hooks/useAuth";
 import { LoginForm } from "../model/model";
 import AuthWrapper from "../AuthWrapper";
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/form";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -137,7 +136,11 @@ const LoginComponent = () => {
                               showPassword ? "Hide password" : "Show password"
                             }
                           >
-                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>

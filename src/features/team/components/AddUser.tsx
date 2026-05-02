@@ -1,15 +1,12 @@
 "use client";
 import React, { FC, useState } from "react";
-import { CiCirclePlus } from "react-icons/ci";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import UserForm from "../forms/UserForm";
 import MultipleUserForm from "../forms/MultipleUserForm";
-import { Plus, Users, UserPlus } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Plus, PlusCircle, Users, UserPlus } from "lucide-react";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 
@@ -34,35 +30,37 @@ const AddUser: FC = () => {
     <>
       {/* Single User Dialog */}
       <Dialog open={singleUserOpen} onOpenChange={setSingleUserOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Add User</DialogTitle>
-            <DialogDescription>
-              Add users to your organization
-            </DialogDescription>
-          </DialogHeader>
-          <Separator />
-          <UserForm
-            successCallback={() => {
-              setSingleUserOpen(false);
-            }}
-            onCloseModal={() => {
-              setSingleUserOpen(false);
-            }}
-            errorCallback={(e) => {
-              console.error("Error creating user:", e);
-            }}
+        <AppDialogContent className="sm:max-w-lg">
+          <AppDialogHeader
+            title="Add User"
+            description="Invite a single user to this workspace."
+            icon={UserPlus}
           />
-        </DialogContent>
+          <AppDialogBody>
+            <UserForm
+              successCallback={() => {
+                setSingleUserOpen(false);
+              }}
+              onCloseModal={() => {
+                setSingleUserOpen(false);
+              }}
+              errorCallback={(e) => {
+                console.error("Error creating user:", e);
+              }}
+            />
+          </AppDialogBody>
+        </AppDialogContent>
       </Dialog>
 
       {/* Multiple Users Dialog */}
       <Dialog open={multipleUsersOpen} onOpenChange={setMultipleUsersOpen}>
-        <DialogContent className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle>Add Multiple Users</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto p-6 pt-4">
+        <AppDialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none">
+          <AppDialogHeader
+            title="Add Multiple Users"
+            description="Invite multiple users to this workspace from one flow."
+            icon={Users}
+          />
+          <AppDialogBody>
             <MultipleUserForm
               successCallback={() => {
                 setMultipleUsersOpen(false);
@@ -74,15 +72,15 @@ const AddUser: FC = () => {
                 console.error("Error creating users:", e);
               }}
             />
-          </div>
-        </DialogContent>
+          </AppDialogBody>
+        </AppDialogContent>
       </Dialog>
 
       {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex items-center gap-1  rounded-3xl">
-            <CiCirclePlus size={18} />
+            <PlusCircle className="h-[18px] w-[18px]" />
             Add User
             <Plus size={14} className="ml-1" />
           </Button>

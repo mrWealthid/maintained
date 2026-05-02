@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Building2 } from "lucide-react";
+
+import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import PropertyForm from "@/features/properties/forms/PropertyForm";
 import MultiplePropertyForm from "@/features/onboarding/components/MultiplePropertyForm";
 import PropertyView from "@/features/properties/components/PropertyView";
@@ -66,13 +67,14 @@ const PropertyDialog: React.FC<PropertyDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogDescription>{dialogDescription}</DialogDescription>
-        </DialogHeader>
+      <AppDialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none">
+        <AppDialogHeader
+          title={dialogTitle}
+          description={dialogDescription}
+          icon={Building2}
+        />
 
-        <div className="flex-1  overflow-y-auto p-6 pt-4">
+        <AppDialogBody>
           <div className="space-y-6">
             {/* Toggle for single vs multiple */}
             <div className="flex justify-center">
@@ -126,8 +128,8 @@ const PropertyDialog: React.FC<PropertyDialogProps> = ({
           )}
 
           {mode === "view" && property && <PropertyView property={property} />}
-        </div>
-      </DialogContent>
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 };

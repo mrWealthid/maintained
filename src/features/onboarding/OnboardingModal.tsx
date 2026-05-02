@@ -1,13 +1,13 @@
 "use client";
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { ClipboardList, LogOut } from "lucide-react";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { useAppContext } from "@/shared/contexts/AppContext";
 import { useLogout } from "@/app/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -38,17 +38,17 @@ export default function OnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal>
-      <DialogContent
-        className="w-screen max-w-none h-full max-h-screen rounded-none border-0 p-0 overflow-hidden"
+      <AppDialogContent
+        className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        <DialogHeader className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="flex items-center justify-between p-4">
-            <DialogTitle className="text-lg font-semibold">
-              Getting Started – {user?.currentBusiness?.name || "Your Business"}
-            </DialogTitle>
-            <div className="flex gap-2">
+        <AppDialogHeader
+          title={`Getting Started - ${user?.currentBusiness?.name || "Your Business"}`}
+          description="Complete the required setup steps for this workspace."
+          icon={ClipboardList}
+          actions={
+            <>
               <ThemeToggle />
               <Button
                 variant="ghost"
@@ -60,18 +60,18 @@ export default function OnboardingModal({
                 <LogOut className="h-4 w-4" />
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
-            </div>
-          </div>
-        </DialogHeader>
+            </>
+          }
+        />
 
-        <div className="pt-16 h-full overflow-y-auto">
+        <AppDialogBody className="p-0">
           <OnboardingMultiStep
             emailVerified={emailVerified}
             checklistData={checklistData}
             onCloseModal={onClose}
           />
-        </div>
-      </DialogContent>
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 }

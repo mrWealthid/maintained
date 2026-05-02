@@ -1370,25 +1370,6 @@ export function TableHeaderAction({
     }
   }
 
-  let footerContent: React.ReactNode = null;
-
-  if (!hasSelection && summary && Object.keys(summary).length) {
-    footerContent = (
-      <div className="flex items-center gap-1 flex-wrap">
-        <span className="text-[11px]">Summary:</span>
-        {Object.entries(summary).map(([key, value], idx) => (
-          <Badge
-            key={idx}
-            variant="outline"
-            className="text-[10px] capitalize font-normal px-2 py-0.5"
-          >
-            {key}: {value}
-          </Badge>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="mb-1 flex flex-col gap-3">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -1466,10 +1447,6 @@ export function TableHeaderAction({
       </div>
 
       {selectionActions}
-
-      <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground">
-        {footerContent}
-      </div>
 
       <TableVisualizeSheet
         open={visualizeOpen}

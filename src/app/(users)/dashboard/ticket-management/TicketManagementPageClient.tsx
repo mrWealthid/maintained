@@ -4,21 +4,19 @@ import AdminTicketList from "@/features/tickets/list/admin/TicketList";
 import TechnicianTicketList from "@/features/tickets/list/technician/TicketList";
 import ToggleView from "@/shared/components/toggle-views/ToggleView";
 import TicketComponent from "@/features/tickets/components/TicketComponent";
-import { CiCirclePlus } from "react-icons/ci";
 import { InteractiveTicketChat } from "@/features/tickets/components/InteractiveTicketChat";
-import { Bot, FilePlus } from "lucide-react";
+import { Bot, FilePlus, PlusCircle, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManageTicketForm } from "@/features/tickets/models/ticket.model";
 import { FormProvider, useForm } from "react-hook-form";
 import TicketForm from "@/features/tickets/forms/TicketForm";
 import { CreateTicketPayload } from "@/shared/model/model";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  AppSheetBody,
+  AppSheetContent,
+  AppSheetHeader,
+} from "@/shared/components/AppSheetShell";
 import { useCreateTicket } from "@/features/tickets/hooks/ticketHooks";
 import { useRouter } from "next/navigation";
 import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
@@ -75,7 +73,7 @@ export default function Home() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="outline" className="gap-1">
-                  <CiCirclePlus size={18} />
+                  <PlusCircle className="h-[18px] w-[18px]" />
                   Create Ticket
                 </Button>
               </DropdownMenuTrigger>
@@ -107,21 +105,19 @@ export default function Home() {
             </DropdownMenu>
 
             <Sheet open={open} onOpenChange={setOpen}>
-              <SheetContent
+              <AppSheetContent
                 side="bottom"
-                className="w-full  overflow-y-auto h-full max-h-screen   max-w-[100vw] md:max-w-full"
+                className="h-full max-h-screen max-w-[100vw] md:max-w-full"
               >
-                <div className="w-full  flex flex-col gap-4 py-4 px-2 sm:w-2/3 sm:mx-auto sm:px-4">
-                  <SheetHeader>
-                    <SheetTitle>Manage Ticket</SheetTitle>
-                    <SheetDescription>
-                      Seamlessly manage requests
-                    </SheetDescription>
-                  </SheetHeader>
-
+                <AppSheetHeader
+                  title="Manage Ticket"
+                  description="Create a maintenance request from a focused workspace."
+                  icon={Wrench}
+                />
+                <AppSheetBody className="mx-auto w-full max-w-4xl">
                   <TicketForm onSubmit={onSubmit} />
-                </div>
-              </SheetContent>
+                </AppSheetBody>
+              </AppSheetContent>
             </Sheet>
           </FormProvider>
         ) : null}

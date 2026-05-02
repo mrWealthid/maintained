@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRegister } from "../hooks/useAuth";
 import AuthWrapper from "../AuthWrapper";
 import {
@@ -27,7 +27,6 @@ import { AddressSchema } from "@/lib/validation/address";
 import AddressField from "@/shared/components/address/AddressField";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { RegisterPayload } from "../model/model";
 import { InternationalPhoneField } from "@/shared/components/phone-number/International-phonefield";
 import parsePhoneNumberFromString, { CountryCode } from "libphonenumber-js";
@@ -405,7 +404,11 @@ export default function SignupComponent() {
                                     : "Show password"
                                 }
                               >
-                                {showPassword ? <FaEye /> : <FaEyeSlash />}
+                                {showPassword ? (
+                                  <Eye className="h-4 w-4" />
+                                ) : (
+                                  <EyeOff className="h-4 w-4" />
+                                )}
                               </button>
                             </div>
                           </FormControl>

@@ -1,11 +1,14 @@
 import MultipleUserForm from "@/features/team/forms/MultipleUserForm";
 import {
   Dialog,
-  DialogTitle,
-  DialogHeader,
-  DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Users } from "lucide-react";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { useState } from "react";
 
 export function ManageUsersInviteDialog({
@@ -20,24 +23,28 @@ export function ManageUsersInviteDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0">
-        <DialogHeader>
-          <DialogTitle>Invite multiple users</DialogTitle>
-        </DialogHeader>
-        <MultipleUserForm
-          successCallback={() => {
-            setOpen(false); // close only on success
-            onInvited?.(); // refresh checklist/counters
-          }}
-          onCloseModal={() => {
-            setOpen(false);
-          }} // still allow manual cancel to close
-          errorCallback={(e) => {
-            // optional: toast with your existing system
-            // toast.error(getErrorMessage(e));
-          }}
+      <AppDialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none">
+        <AppDialogHeader
+          title="Invite Multiple Users"
+          description="Invite multiple users to this workspace from one flow."
+          icon={Users}
         />
-      </DialogContent>
+        <AppDialogBody>
+          <MultipleUserForm
+            successCallback={() => {
+              setOpen(false); // close only on success
+              onInvited?.(); // refresh checklist/counters
+            }}
+            onCloseModal={() => {
+              setOpen(false);
+            }} // still allow manual cancel to close
+            errorCallback={(e) => {
+              // optional: toast with your existing system
+              // toast.error(getErrorMessage(e));
+            }}
+          />
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 }

@@ -14,29 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Send,
   Paperclip,
@@ -92,6 +74,7 @@ import { getMembershipForBusiness } from "@/utils/helpers";
 import { useAppContext } from "../../shared/contexts/AppContext";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 
 // const mockTechnicians = [
 //   {
@@ -526,83 +509,6 @@ export default function ChatComponent() {
                         {currentRoom?.ticket.category.name}
                       </Badge>
                     </div>
-                    {/* <Dialog
-                      open={showAddTechnician}
-                      onOpenChange={setShowAddTechnician}
-                    >
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Add Technician
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Add Technician to Chat</DialogTitle>
-                          <DialogDescription>
-                            Select a technician to add to this maintenance
-                            request conversation.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <Select
-                            value={selectedTechnician}
-                            onValueChange={setSelectedTechnician}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a technician" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {technicians?.map((tech) => {
-                                const membership = getMembershipForBusiness(
-                                  tech,
-                                  tech?.currentBusiness.id!
-                                );
-                                return (
-                                  <SelectItem key={tech.id} value={tech.id}>
-                                    <div className="flex items-center space-x-2">
-                                      <Avatar className="h-6 w-6">
-                                        <AvatarImage
-                                          src={generateAvatar(tech.name)}
-                                        />
-                                        <AvatarFallback>
-                                          {tech.name
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .join("")}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <div>
-                                        <span className="font-medium">
-                                          {tech.name}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground ml-2">
-                                          {membership?.specialties?.[0]}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setShowAddTechnician(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              onClick={handleAddTechnician}
-                              disabled={!selectedTechnician}
-                            >
-                              Add to Chat
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog> */}
                   </div>
                 </div>
 
@@ -928,100 +834,6 @@ export default function ChatComponent() {
                           Call Tenant
                         </Button>
 
-                        {/* <Dialog
-                          open={showAddTechnician}
-                          onOpenChange={setShowAddTechnician}
-                        >
-                          <DialogTrigger asChild>
-                            <Button
-                              className="w-full justify-start bg-transparent"
-                              variant="outline"
-                              size="sm"
-                            >
-                              <UserPlus className="h-4 w-4 mr-2" />
-                              Assign Technician
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Add Technician to Chat</DialogTitle>
-                              <DialogDescription>
-                                Select a technician to add to this maintenance
-                                request conversation.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <Select
-                                value={selectedTechnician}
-                                onValueChange={setSelectedTechnician}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a technician" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {technicians?.map((tech) => {
-                                    const membership = getMembershipForBusiness(
-                                      tech,
-                                      tech?.currentBusiness.id!
-                                    );
-                                    return (
-                                      <SelectItem key={tech.id} value={tech.id}>
-                                        <div className="flex items-center space-x-2">
-                                          <Avatar className="h-6 w-6">
-                                            <AvatarImage
-                                              src={generateAvatar(tech.name)}
-                                            />
-                                            <AvatarFallback>
-                                              {tech.name
-                                                .split(" ")
-                                                .map((n) => n[0])
-                                                .join("")}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <div>
-                                            <span className="font-medium">
-                                              {tech.name}
-                                            </span>
-                                            <span className="flex gap-1 flex-wrap">
-                                              {membership?.specialties
-                                                ?.length! > 0 &&
-                                                membership?.specialties?.map(
-                                                  (speciality) => (
-                                                    <Badge
-                                                      key={speciality}
-                                                      variant={"secondary"}
-                                                    >
-                                                      {speciality}
-                                                    </Badge>
-                                                  )
-                                                )}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
-                              <div className="flex justify-end space-x-2">
-                                <Button
-                                  variant="outline"
-                                  onClick={() => setShowAddTechnician(false)}
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={handleAddTechnician}
-                                  disabled={!selectedTechnician}
-                                >
-                                  Add to Chat
-                                </Button>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog> */}
-                        {/* </Button> */}
                       </div>
                     </div>
                   </div>
@@ -1032,31 +844,20 @@ export default function ChatComponent() {
         )}
       </div>
 
-      <AlertDialog
+      <ActionConfirmDialog
         open={!!deleteMessageId}
-        onOpenChange={() => setDeleteMessageId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Message</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this message? This action cannot
-              be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                deleteMessageId && handleDeleteMessage(deleteMessageId)
-              }
-              className="bg-destructive hover:bg-destructive"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={(open) => {
+          if (!open) setDeleteMessageId(null);
+        }}
+        title="Delete Message"
+        description="Are you sure you want to delete this message? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        icon={Trash2}
+        onConfirm={() => {
+          if (deleteMessageId) handleDeleteMessage(deleteMessageId);
+        }}
+      />
     </div>
   );
 }

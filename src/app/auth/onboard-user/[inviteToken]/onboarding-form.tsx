@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useOnboardUser } from "../../hooks/useAuth";
 import { OnboardUserForm } from "../../model/model";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,7 +103,11 @@ const OnboardingForm: FC<{ inviteToken: string }> = ({ inviteToken }) => {
                               showPassword ? "Hide password" : "Show password"
                             }
                           >
-                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>

@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/card";
 import {
   Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  AppSheetBody,
+  AppSheetContent,
+  AppSheetHeader,
+} from "@/shared/components/AppSheetShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   SettingsIconBadge,
@@ -136,50 +137,38 @@ function OperationsSettings() {
         open={openSheet === "categories"}
         onOpenChange={(open) => setOpenSheet(open ? "categories" : null)}
       >
-        <SheetContent
+        <AppSheetContent
           side="right"
-          className="flex h-full min-h-0 w-full flex-col p-0 sm:max-w-2xl"
+          className="sm:max-w-2xl"
         >
-          <SheetHeader className="shrink-0 border-b border-border bg-card/80 px-6 pb-4 pt-6 pr-14 text-left">
-            <div className="flex items-start gap-3">
-              <SettingsIconBadge icon={FolderOpen} />
-              <div className="space-y-1">
-                <SheetTitle>Category Configuration</SheetTitle>
-                <SheetDescription>
-                  Manage ticket categories from a dedicated workspace.
-                </SheetDescription>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+          <AppSheetHeader
+            title="Category Configuration"
+            description="Manage ticket categories from a dedicated workspace."
+            icon={FolderOpen}
+          />
+          <AppSheetBody>
             <CategoryManagement />
-          </div>
-        </SheetContent>
+          </AppSheetBody>
+        </AppSheetContent>
       </Sheet>
 
       <Sheet
         open={openSheet === "ticket-types"}
         onOpenChange={(open) => setOpenSheet(open ? "ticket-types" : null)}
       >
-        <SheetContent
+        <AppSheetContent
           side="right"
-          className="flex h-full min-h-0 w-full flex-col p-0 sm:max-w-2xl"
+          className="sm:max-w-2xl"
         >
-          <SheetHeader className="shrink-0 border-b border-border bg-card/80 px-6 pb-4 pt-6 pr-14 text-left">
-            <div className="flex items-start gap-3">
-              <SettingsIconBadge icon={Ticket} />
-              <div className="space-y-1">
-                <SheetTitle>Ticket Type Configuration</SheetTitle>
-                <SheetDescription>
-                  Manage request types from a dedicated workspace.
-                </SheetDescription>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+          <AppSheetHeader
+            title="Ticket Type Configuration"
+            description="Manage request types from a dedicated workspace."
+            icon={Ticket}
+          />
+          <AppSheetBody>
             <TicketTypeManagement />
-          </div>
-        </SheetContent>
+          </AppSheetBody>
+        </AppSheetContent>
       </Sheet>
     </SettingsSection>
   );

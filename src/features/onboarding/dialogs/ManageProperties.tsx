@@ -1,10 +1,13 @@
 import {
-  DialogContent,
-  DialogTitle,
   Dialog,
-  DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Building2 } from "lucide-react";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { useState } from "react";
 import MultiplePropertyForm from "../components/MultiplePropertyForm";
 
@@ -21,11 +24,13 @@ export function ManagePropertiesDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="w-screen h-screen max-w-none max-h-none rounded-none border-0 p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>Add multiple properties</DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 overflow-y-auto p-6 pt-4">
+      <AppDialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none">
+        <AppDialogHeader
+          title="Add Multiple Properties"
+          description="Create multiple properties from a focused workspace."
+          icon={Building2}
+        />
+        <AppDialogBody>
           <MultiplePropertyForm
             businessId={businessId}
             successCallback={() => {
@@ -34,8 +39,8 @@ export function ManagePropertiesDialog({
             }}
             onCloseModal={() => setOpen(false)}
           />
-        </div>
-      </DialogContent>
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 }

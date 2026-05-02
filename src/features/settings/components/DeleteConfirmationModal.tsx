@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import React from "react";
+
+import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -32,30 +24,18 @@ function DeleteConfirmationModal({
   isLoading,
 }: DeleteConfirmationModalProps) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-            <br />
-            <strong>&quot;{itemName}&quot;</strong> will be permanently deleted.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              onConfirm();
-            }}
-            className="bg-destructive hover:bg-destructive/90"
-          >
-            {isLoading ? "Deleting" : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ActionConfirmDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title={title}
+      description={`${description} "${itemName}" will be permanently deleted.`}
+      confirmLabel={isLoading ? "Deleting..." : "Delete"}
+      onConfirm={onConfirm}
+      isLoading={isLoading}
+      variant="destructive"
+    />
   );
 }
 

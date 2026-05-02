@@ -1,10 +1,13 @@
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DoorOpen } from "lucide-react";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { useState } from "react";
 import UnitForm from "../components/UnitForm";
 
@@ -21,11 +24,13 @@ export function ManageUnitDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="left-0 top-0 -translate-x-0 -translate-y-0 w-screen h-[100dvh] max-w-none rounded-none p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>Add units</DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 overflow-y-auto p-6 pt-4">
+      <AppDialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none border-0 sm:max-h-[100dvh] sm:max-w-none">
+        <AppDialogHeader
+          title="Add Units"
+          description="Configure units for this workspace."
+          icon={DoorOpen}
+        />
+        <AppDialogBody>
           <UnitForm
             businessId={businessId}
             successCallback={() => {
@@ -33,8 +38,8 @@ export function ManageUnitDialog({
               onAdded?.(); // <- optimistic
             }}
           />
-        </div>
-      </DialogContent>
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 }

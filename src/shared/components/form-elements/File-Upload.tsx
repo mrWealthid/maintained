@@ -1,10 +1,8 @@
 import React, { ChangeEvent, ReactNode, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
 import Image from 'next/image';
 import { FileUploadPreview } from '../../model/model';
-import { RiAsterisk } from 'react-icons/ri';
 import toast from 'react-hot-toast';
-import { LiaTimesSolid } from 'react-icons/lia';
+import { X } from 'lucide-react';
 
 interface FileUploadProps {
 	label: string;
@@ -222,7 +220,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 				<span className='text-xs text-muted-foreground'>
 					Select a file or drag and drop here
 				</span>
-				{required && <RiAsterisk color='red' />}
+				{required && <span className='text-destructive'>*</span>}
 			</label>
 			<input
 				title='filepicker'
@@ -253,7 +251,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 								}
 								className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
 								title='Remove'>
-								<LiaTimesSolid color='red' size={12} />
+								<X className='h-3 w-3 text-destructive' />
 							</button>
 							{renderFilePreview(file.url, file.type)}
 						</div>
@@ -270,7 +268,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 									onClick={() => handleRemovePreview(file.id)}
 									className='absolute top-1 bg-white  cursor-pointer z-10 right-1  rounded-full p-1 shadow '
 									title='Remove'>
-									<LiaTimesSolid color='red' size={12} />
+									<X className='h-3 w-3 text-destructive' />
 								</button>
 								{renderFilePreview(file.url, file.type)}
 								{progress > 0 && progress <= 100 && (

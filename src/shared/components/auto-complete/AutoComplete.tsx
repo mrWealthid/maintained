@@ -5,7 +5,7 @@ import Label from '../form-elements/Label';
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import { useDebounce } from '@uidotdev/usehooks';
 import { formatCurrency } from '@/utils/helper';
-import { ImSpinner9 } from 'react-icons/im';
+import { Loader2 } from 'lucide-react';
 import { ApiResponse } from '../../model/model';
 
 interface AutoCompleteProps<T> {
@@ -81,7 +81,7 @@ export default function AutoComplete<T>({
 						/>
 						<Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
 							{isRefetching ? (
-								<ImSpinner9 className='h-3 w-3 animate-spin' />
+								<Loader2 className='h-3 w-3 animate-spin' />
 							) : (
 								<SelectorIcon
 									className='h-5 w-5 '

@@ -1,11 +1,14 @@
 import UserForm from "@/features/team/forms/UserForm";
 import {
   Dialog,
-  DialogTitle,
-  DialogHeader,
-  DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { UserPlus } from "lucide-react";
+import {
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogHeader,
+} from "@/shared/components/AppDialogShell";
 import { useState } from "react";
 
 export function ManageUserInviteDialog({
@@ -21,18 +24,22 @@ export function ManageUserInviteDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Invite User</DialogTitle>
-        </DialogHeader>
-        <UserForm
-          successCallback={() => {
-            setOpen(false);
-            onInvited?.(); // <- optimistic
-          }}
-          onCloseModal={() => setOpen(false)}
+      <AppDialogContent className="sm:max-w-lg">
+        <AppDialogHeader
+          title="Invite User"
+          description="Invite a user to this workspace."
+          icon={UserPlus}
         />
-      </DialogContent>
+        <AppDialogBody>
+          <UserForm
+            successCallback={() => {
+              setOpen(false);
+              onInvited?.(); // <- optimistic
+            }}
+            onCloseModal={() => setOpen(false)}
+          />
+        </AppDialogBody>
+      </AppDialogContent>
     </Dialog>
   );
 }

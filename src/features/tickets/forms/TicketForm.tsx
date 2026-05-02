@@ -1,8 +1,6 @@
 "use client";
 import React, { FC, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { IoIosCloudUpload } from "react-icons/io";
-import { RiVideoUploadLine } from "react-icons/ri";
 import { useRouter } from "next/navigation";
 import { fetchTicketCategory } from "../services/ticket-service";
 import { ManageTicketForm, ManageTicketFormProps } from "../models/ticket.model";
@@ -16,7 +14,7 @@ import TextInput from "@/shared/components/form-elements/Text-Input";
 import AutoComplete from "@/shared/components/auto-complete/AutoComplete";
 import FileUpload from "@/shared/components/form-elements/File-Upload";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, UploadCloud, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   Select,
@@ -758,7 +756,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
               onFileSelect={handleImageSelect}
               multiple={true}
               accept={"image/*"}
-              icon={<IoIosCloudUpload />}
+              icon={<UploadCloud className="h-5 w-5" />}
               onPreviewFileRemove={onPreviewFileRemove}
               uploadProgress={uploadProgress}
               initialFiles={initialImageFiles}
@@ -773,7 +771,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
               onFileSelect={handleVideoSelect}
               multiple={true}
               accept={"video/*"}
-              icon={<RiVideoUploadLine />}
+              icon={<Video className="h-5 w-5" />}
               onPreviewFileRemove={onPreviewFileRemove}
               uploadProgress={uploadProgress}
               initialFiles={initialVideoFiles}

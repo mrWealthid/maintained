@@ -22,12 +22,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
 	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
 	DialogTrigger
 } from '@/components/ui/dialog';
+import {
+	AppDialogBody,
+	AppDialogContent,
+	AppDialogFooter,
+	AppDialogHeader
+} from '@/shared/components/AppDialogShell';
 import {
 	Send,
 	Paperclip,
@@ -371,17 +373,13 @@ export default function ChatPage({
 										Add Technician
 									</Button>
 								</DialogTrigger>
-								<DialogContent>
-									<DialogHeader>
-										<DialogTitle>
-											Add Technician to Chat
-										</DialogTitle>
-										<DialogDescription>
-											Select a technician to add to this
-											maintenance request conversation.
-										</DialogDescription>
-									</DialogHeader>
-									<div className='space-y-4'>
+								<AppDialogContent className='sm:max-w-lg'>
+									<AppDialogHeader
+										title='Add Technician to Chat'
+										description='Select a technician to add to this maintenance request conversation.'
+										icon={UserPlus}
+									/>
+									<AppDialogBody>
 										<Select
 											value={selectedTechnician}
 											onValueChange={
@@ -436,22 +434,22 @@ export default function ChatPage({
 												))}
 											</SelectContent>
 										</Select>
-										<div className='flex justify-end space-x-2'>
-											<Button
-												variant='outline'
-												onClick={() =>
-													setShowAddTechnician(false)
-												}>
-												Cancel
-											</Button>
-											<Button
-												onClick={handleAddTechnician}
-												disabled={!selectedTechnician}>
-												Add to Chat
-											</Button>
-										</div>
-									</div>
-								</DialogContent>
+									</AppDialogBody>
+									<AppDialogFooter>
+										<Button
+											variant='outline'
+											onClick={() =>
+												setShowAddTechnician(false)
+											}>
+											Cancel
+										</Button>
+										<Button
+											onClick={handleAddTechnician}
+											disabled={!selectedTechnician}>
+											Add to Chat
+										</Button>
+									</AppDialogFooter>
+								</AppDialogContent>
 							</Dialog>
 						</div>
 					</div>

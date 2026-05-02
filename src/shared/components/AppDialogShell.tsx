@@ -22,6 +22,7 @@ type AppDialogHeaderProps = {
   className?: string;
   titleClassName?: string;
   descriptionClassName?: string;
+  actions?: ReactNode;
 };
 
 type AppDialogSectionProps = React.ComponentProps<"div">;
@@ -36,7 +37,7 @@ export function AppDialogContent({ className, ...props }: AppDialogContentProps)
   return (
     <DialogContent
       className={cn(
-        "max-h-[calc(100dvh-1rem)] gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl",
+        "flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl",
         className,
       )}
       {...props}
@@ -52,37 +53,42 @@ export function AppDialogHeader({
   className,
   titleClassName,
   descriptionClassName,
+  actions,
 }: AppDialogHeaderProps) {
   return (
     <DialogHeader
       className={cn("shrink-0 border-b px-6 py-5 pr-12", className)}
     >
-      <div className="flex items-start gap-3 text-left">
-        {Icon ? (
-          <div
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-full border",
-              getToneClasses(tone),
-            )}
-          >
-            <Icon className="size-5" />
-          </div>
-        ) : null}
-
-        <div className="space-y-1">
-          <DialogTitle
-            className={cn("text-xl leading-tight font-semibold tracking-tight", titleClassName)}
-          >
-            {title}
-          </DialogTitle>
-          {description ? (
-            <DialogDescription
-              className={cn("text-sm leading-6 text-muted-foreground", descriptionClassName)}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3 text-left">
+          {Icon ? (
+            <div
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full border",
+                getToneClasses(tone),
+              )}
             >
-              {description}
-            </DialogDescription>
+              <Icon className="size-5" />
+            </div>
           ) : null}
+
+          <div className="min-w-0 space-y-1">
+            <DialogTitle
+              className={cn("text-xl leading-tight font-semibold tracking-tight", titleClassName)}
+            >
+              {title}
+            </DialogTitle>
+            {description ? (
+              <DialogDescription
+                className={cn("text-sm leading-6 text-muted-foreground", descriptionClassName)}
+              >
+                {description}
+              </DialogDescription>
+            ) : null}
+          </div>
         </div>
+
+        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
     </DialogHeader>
   );

@@ -10,16 +10,16 @@ import {
   Repeat,
   Trash2,
   ClipboardCheck,
+  Wrench,
 } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  AppSheetBody,
+  AppSheetContent,
+  AppSheetHeader,
+} from "@/shared/components/AppSheetShell";
 import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import ErrorList from "@/components/ui/ErrorList";
@@ -246,21 +246,22 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
       />
 
       <Sheet open={editOpen} onOpenChange={setEditOpen}>
-        <SheetContent
+        <AppSheetContent
           side="bottom"
-          className="w-full overflow-y-auto h-full max-h-screen max-w-[100vw] md:max-w-full"
+          className="h-full max-h-screen max-w-[100vw] md:max-w-full"
         >
-          <div className="w-full flex flex-col gap-4 py-4 px-2 sm:w-2/3 sm:mx-auto sm:px-4">
-            <SheetHeader>
-              <SheetTitle>Manage Ticket</SheetTitle>
-              <SheetDescription>Seamlessly manage requests</SheetDescription>
-            </SheetHeader>
+          <AppSheetHeader
+            title="Manage Ticket"
+            description="Update this maintenance request from a focused workspace."
+            icon={Wrench}
+          />
+          <AppSheetBody className="mx-auto w-full max-w-4xl">
             {createTicketError ? <ErrorList error={createTicketError} /> : null}
             <FormProvider {...methods}>
               <TicketForm ticket={ticket} onSubmit={onSubmit} />
             </FormProvider>
-          </div>
-        </SheetContent>
+          </AppSheetBody>
+        </AppSheetContent>
       </Sheet>
 
       <HandOffTicketForm

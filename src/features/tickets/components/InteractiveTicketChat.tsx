@@ -16,13 +16,14 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AppSheetBody,
+  AppSheetContent,
+  AppSheetFooter,
+  AppSheetHeader,
+} from "@/shared/components/AppSheetShell";
 import {
   Send,
   Paperclip,
@@ -1044,9 +1045,9 @@ Would you like to submit this request?`;
       }}
     >
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent
+      <AppSheetContent
         side="right"
-        className="w-full   p-0 flex flex-col max-h-screen   max-w-[100vw] md:max-w-3/4"
+        className="w-full max-w-[100vw] md:max-w-3/4"
       >
         {/* <SheetClose asChild>
 					<Button
@@ -1056,22 +1057,16 @@ Would you like to submit this request?`;
 						<X className='w-6 h-6' />{' '}
 					</Button>
 				</SheetClose> */}
-        <SheetHeader className="p-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Wrench className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <SheetTitle className="text-lg font-semibold">
-                  Maintenance Request
-                </SheetTitle>
-                <SheetDescription className="text-sm">
-                  Chat with our assistant to submit your request
-                </SheetDescription>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
+        <AppSheetHeader
+          title="Maintenance Request"
+          description={
+            isSpeechSupported
+              ? "Chat with our assistant to submit your request. Voice input is available."
+              : "Chat with our assistant to submit your request."
+          }
+          icon={Wrench}
+          actions={
+            <>
               {isSpeechSupported && (
                 <Button
                   variant="ghost"
@@ -1090,18 +1085,12 @@ Would you like to submit this request?`;
               <Button variant="ghost" size="sm" onClick={resetChat}>
                 Reset
               </Button>
-            </div>
-          </div>
-          {isSpeechSupported && (
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <Mic className="h-3 w-3" />
-              <span>Voice input available - click the microphone to speak</span>
-            </div>
-          )}
-        </SheetHeader>
+            </>
+          }
+        />
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <AppSheetBody className="space-y-4 p-4">
           {messages.map((message, ind) => (
             <div
               key={message.id + ind}
@@ -1306,10 +1295,10 @@ Would you like to submit this request?`;
             </div>
           )}
           <div ref={messagesEndRef} />
-        </div>
+        </AppSheetBody>
 
         {/* Input Area */}
-        <div className="border-t border-border p-4">
+        <AppSheetFooter className="block">
           <div className="flex space-x-2">
             {messages.length > 0 &&
             messages[messages.length - 1]?.inputType === "textarea" ? (
@@ -1393,8 +1382,8 @@ Would you like to submit this request?`;
               </div>
             )}
           </div>
-        </div>
-      </SheetContent>
+        </AppSheetFooter>
+      </AppSheetContent>
     </Sheet>
   );
 }

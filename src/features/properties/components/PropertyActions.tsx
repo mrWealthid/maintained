@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, type ComponentType } from "react";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Building2, Eye, Edit, Trash2 } from "lucide-react";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  AppSheetBody,
+  AppSheetContent,
+  AppSheetHeader,
+} from "@/shared/components/AppSheetShell";
 import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import ErrorList from "@/components/ui/ErrorList";
@@ -135,22 +134,21 @@ const PropertyActions = ({ property }: PropertyActionsProps) => {
       />
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
+        <AppSheetContent
           side="bottom"
-          className="w-full overflow-y-auto h-full max-h-screen max-w-[100vw] md:max-w-full"
+          className="h-full max-h-screen max-w-[100vw] md:max-w-full"
         >
-          <div className="w-full flex flex-col gap-4 py-4 px-2 sm:w-2/3 sm:mx-auto sm:px-4">
-            <SheetHeader>
-              <SheetTitle>
-                {viewMode === "edit" ? "Edit Property" : "Property Details"}
-              </SheetTitle>
-              <SheetDescription>
-                {viewMode === "edit"
-                  ? "Update property information"
-                  : "View property details and information"}
-              </SheetDescription>
-            </SheetHeader>
+          <AppSheetHeader
+            title={viewMode === "edit" ? "Edit Property" : "Property Details"}
+            description={
+              viewMode === "edit"
+                ? "Update property information from a focused workspace."
+                : "View property details and related information."
+            }
+            icon={Building2}
+          />
 
+          <AppSheetBody className="mx-auto w-full max-w-4xl">
             {viewMode === "edit" ? (
               <>
                 {createPropertyError ? (
@@ -165,8 +163,8 @@ const PropertyActions = ({ property }: PropertyActionsProps) => {
             ) : (
               <PropertyView property={property} />
             )}
-          </div>
-        </SheetContent>
+          </AppSheetBody>
+        </AppSheetContent>
       </Sheet>
 
       {activeConfirm ? (

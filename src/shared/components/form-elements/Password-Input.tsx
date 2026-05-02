@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Eye, EyeOff } from 'lucide-react';
 import Label from './Label';
 import ErrorMessage from './ErrorMessage';
 
@@ -32,13 +32,13 @@ const PasswordInput: FC<PasswordProps> = ({
 					/>
 				)}
 				{!showPassword ? (
-					<FaEyeSlash
-						className='text-status-resolved cursor-pointer'
+					<EyeOff
+						className='h-4 w-4 text-status-resolved cursor-pointer'
 						onClick={togglePassword}
 					/>
 				) : (
-					<FaEye
-						className='text-status-resolved cursor-pointer'
+					<Eye
+						className='h-4 w-4 text-status-resolved cursor-pointer'
 						onClick={togglePassword}
 					/>
 				)}

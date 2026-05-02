@@ -1,6 +1,5 @@
 "use client";
 import React, { FC } from "react";
-import { CiUser } from "react-icons/ci";
 import { Ticket, TicketDetails } from "@/shared/model/model";
 import { TicketActions } from "./TicketActions";
 
@@ -24,6 +23,7 @@ import {
   Image as ImageIcon,
   Video,
   FileText,
+  User,
   UserCheck,
 } from "lucide-react";
 import {
@@ -156,7 +156,7 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
 
       <CardFooter className="flex items-center justify-between text-xs">
         <span className="inline-flex items-center gap-2 min-w-0">
-          <CiUser aria-hidden />
+          <User className="h-4 w-4" aria-hidden />
           <span className="truncate" title={user?.name}>
             {user?.name}
           </span>

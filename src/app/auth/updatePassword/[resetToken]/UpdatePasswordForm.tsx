@@ -2,11 +2,10 @@
 import Link from "next/link";
 import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useUpdatePassword } from "../../hooks/useAuth";
 import { IUpdatePassword } from "../../model/model";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -105,7 +104,11 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                               showPassword ? "Hide password" : "Show password"
                             }
                           >
-                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
@@ -147,7 +150,11 @@ export const UpdatePasswordForm: FC<{ token: string }> = ({ token }) => {
                                 : "Show password"
                             }
                           >
-                            {showNewPassword ? <FaEye /> : <FaEyeSlash />}
+                            {showNewPassword ? (
+                              <Eye className="h-4 w-4" />
+                            ) : (
+                              <EyeOff className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </FormControl>
