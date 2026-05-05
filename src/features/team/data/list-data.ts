@@ -1,9 +1,16 @@
+import { Ban, RefreshCw, Trash2 } from "lucide-react";
+import type { ActionConfirmConfig } from "@/shared/model/action-confirm.model";
+import type { TableFilterField } from "@/shared/components/table/models/table.model";
 import {
   WORKSPACE_ROLE,
   WORKSPACE_ASSIGNABLE_ROLE_VALUES,
   formatWorkspaceRoleLabel,
   type AssignableWorkspaceRole,
 } from "@/shared/auth/roles";
+import {
+  TEAM_MEMBER_STATUS,
+  type TeamListBulkAction,
+} from "../models/team.model";
 
 export type WorkspaceRoleMeta = {
   label: string;
@@ -48,3 +55,62 @@ export const WORKSPACE_ROLE_INVITE_OPTIONS: ReadonlyArray<{
   label: WORKSPACE_ROLE_META[role].label,
   description: WORKSPACE_ROLE_META[role].description,
 }));
+
+export const TEAM_LIST_STATUS_TABS: Array<{
+  label: string;
+  value: "all" | TEAM_MEMBER_STATUS;
+}> = [
+  { label: "All", value: "all" },
+  { label: "Active", value: TEAM_MEMBER_STATUS.active },
+  { label: "Pending", value: TEAM_MEMBER_STATUS.pending },
+  { label: "Accepted", value: TEAM_MEMBER_STATUS.accepted },
+  { label: "Declined", value: TEAM_MEMBER_STATUS.declined },
+];
+
+export const TEAM_LIST_CONFIRM_CONFIG: Record<
+  TeamListBulkAction,
+  ActionConfirmConfig
+> = {
+  resend: {
+    title: "Resend team invites",
+    describe: (count) =>
+      `A fresh onboarding email will be sent to ${count} pending invite${count === 1 ? "" : "s"}.`,
+    confirmLabel: "Resend invites",
+    variant: "default",
+    icon: RefreshCw,
+  },
+  deactivate: {
+    title: "Deactivate selected members",
+    describe: (count) =>
+      `${count} team member${count === 1 ? "" : "s"} will lose workspace access.`,
+    confirmLabel: "Deactivate members",
+    variant: "destructive",
+    icon: Ban,
+  },
+  delete: {
+    title: "Delete selected records",
+    describe: (count) =>
+      `${count} selected team record${count === 1 ? "" : "s"} will be permanently removed.`,
+    confirmLabel: "Delete selected",
+    variant: "destructive",
+    icon: Trash2,
+  },
+};
+
+export const TEAM_LIST_FILTER_FIELDS: TableFilterField[] = [
+  {
+    key: "name",
+    label: "Member name",
+    searchType: "TEXT",
+    placeholder: "Search member name",
+  },
+  {
+    key: "role",
+    label: "Role",
+    searchType: "DROPDOWN",
+    selectOptions: WORKSPACE_ASSIGNABLE_ROLE_VALUES.map((role) => ({
+      name: WORKSPACE_ROLE_META[role].label,
+      value: role,
+    })),
+  },
+];

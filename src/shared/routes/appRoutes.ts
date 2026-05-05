@@ -5,12 +5,13 @@ import {
   Home,
   MessageSquare,
   Settings,
+  Shield,
   Users,
   Wrench,
 } from "lucide-react";
 
 import { ROLES } from "@/shared/enums/enums";
-import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { isPlatformSuperAdminRole, type WORKSPACE_ROLE } from "@/shared/auth/roles";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
 import type { Routes } from "@/shared/model/model";
 import { APP_ROUTE_PATHS } from "./appRoutePaths";
@@ -37,10 +38,16 @@ export const routes: Routes[] = [
     permission: PERMISSION.PROPERTIES_VIEW,
   },
   {
-    name: "User Management",
-    path: APP_ROUTES.DASHBOARD.USERS,
+    name: "Team Management",
+    path: APP_ROUTES.DASHBOARD.TEAM,
     icon: Users,
     permission: PERMISSION.TEAM_VIEW,
+  },
+  {
+    name: "Access Control",
+    path: APP_ROUTES.DASHBOARD.ACCESS_CONTROL,
+    icon: Shield,
+    permission: PERMISSION.TEAM_ROLE_MANAGE,
   },
   {
     name: "Chat",
@@ -56,12 +63,28 @@ export const routes: Routes[] = [
   },
 ];
 
-export const technicianRoutes: Routes[] = [
-  ...routes,
-];
+export const technicianRoutes: Routes[] = [...routes];
 
-export const adminRoutes: Routes[] = [
-  ...routes,
+export const adminRoutes: Routes[] = [...routes];
+
+export const superAdminRoutes: Routes[] = [
+  {
+    name: "Overview",
+    path: APP_ROUTES.DASHBOARD.OVERVIEW,
+    icon: Home,
+  },
+  {
+    name: "Workspaces",
+    path: APP_ROUTES.DASHBOARD.WORKSPACES,
+    icon: Building2,
+    permission: PERMISSION.PLATFORM_WORKSPACES_VIEW,
+  },
+  {
+    name: "Settings",
+    path: APP_ROUTES.DASHBOARD.SETTINGS,
+    icon: Settings,
+    permission: PERMISSION.PLATFORM_SETTINGS_VIEW,
+  },
 ];
 
 export function getDashboardRoutes(args: {
@@ -74,10 +97,13 @@ export function getDashboardRoutes(args: {
   void args.workspaceType;
   void args.canViewPayments;
 
+  if (isPlatformSuperAdminRole(args.role)) {
+    return superAdminRoutes;
+  }
+
   switch (args.role) {
     case ROLES.admin:
     case ROLES.owner:
-    case ROLES.super_admin:
       return adminRoutes;
     case ROLES.technician:
       return technicianRoutes;

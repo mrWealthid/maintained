@@ -1,3 +1,6 @@
+import { NextRequest } from "next/server";
+import mongoose from "mongoose";
+
 import { connect } from "@/dbConfig/dbConfig";
 import {
   ApiError,
@@ -10,91 +13,114 @@ import {
   ensureWorkspaceRoleDefinitions,
   resolveWorkspaceRoleDefinitionId,
 } from "@/lib/auth/role-definitions";
+import {
+  assertPasswordPolicy,
+  getAppPasswordPolicy,
+} from "@/lib/security/password-policy";
+import { normalizeTimeZone } from "@/lib/date/timezone-options";
 import User, { UserDoc } from "@/models/userModel";
 import Business from "@/models/businessModel";
-import { NextRequest } from "next/server";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
 import { WORKSPACE_ROLE } from "@/shared/auth/roles";
-import { z } from "zod";
+import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
+import { SignupSchema } from "@/app/auth/model/model";
 
-connect();
+const getRequestId = (request: NextRequest) =>
+  request.headers.get("x-request-id") ?? undefined;
 
 const getLegacyTokenPreview = (user: UserDoc) => {
-  const { id } = user;
   const tenants = user.tenantsClaim();
   return {
-    id,
+    id: user.id,
     role: tenants[0]?.role || ROLES.user,
     tenants,
   };
 };
 
-const registerBodySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Please provide a valid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  businessName: z.string().min(1, "Business name is required"),
-  registrationId: z.string().min(1, "Registration ID is required"),
-  businessContact: z.string().min(1, "Business contact is required"),
-  countryCode: z.string().min(1, "Country code is required"),
-  country: z.string().min(1, "Country is required"),
-  businessAddress: z.string().min(1, "Business address is required"),
-  businessEmail: z.string().email("Please provide a valid business email"),
-});
-
 export async function POST(request: NextRequest) {
   try {
-    const body = parseOrThrow(registerBodySchema, await request.json());
+    await connect();
 
-    const existingUser = await User.findOne({ email: body.email });
-    if (existingUser) {
-      throw ApiError.badRequest("Email is already in use");
+    const body = await request.json();
+    const attemptedRoleAssignment =
+      "platformRole" in body ||
+      "role" in body ||
+      "memberships" in body ||
+      "currentBusiness" in body;
+    if (attemptedRoleAssignment) {
+      throw ApiError.badRequest("Role assignment is not allowed during signup");
     }
 
-    const business = await Business.create({
-      name: body.businessName,
-      registrationId: body.registrationId,
-      contact: body.businessContact,
-      countryCode: body.countryCode,
-      country: body.country,
-      address: body.businessAddress,
-      email: body.businessEmail,
-      creator: body.name,
+    const payload = parseOrThrow(SignupSchema, body);
+    const timezone = normalizeTimeZone(payload.timezone);
+    const passwordPolicy = await getAppPasswordPolicy();
+    assertPasswordPolicy(payload.password, passwordPolicy);
+    const workspaceType = payload.workspaceType;
+
+    const exists = await User.findOne({ email: payload.email });
+    if (exists) throw ApiError.badRequest("Email already in use");
+
+    const workspaceEmail = payload.businessEmail || payload.email;
+    const businessExists = await Business.findOne({ email: workspaceEmail });
+    if (businessExists) {
+      throw ApiError.badRequest(
+        "Workspace email already in use. Choose a different one.",
+      );
+    }
+
+    const newUser = await User.create({
+      name: payload.name,
+      email: payload.email,
+      password: payload.password,
+      contact: payload.contact,
+      countryCode: payload.countryCode,
+      addressStructured: payload.addressStructured,
+      passwordChangedAt: new Date(),
     });
 
-    if (!business) {
-      throw ApiError.internal("Business could not be created");
-    }
+    const business = await Business.create({
+      name: payload.businessName,
+      workspaceType,
+      email: workspaceEmail,
+      contact: payload.businessContact || payload.contact,
+      countryCode: payload.businessCountryCode || payload.countryCode,
+      addressStructured: payload.addressStructured,
+      creator: newUser._id,
+      owner: newUser._id,
+      settings: {
+        general: {
+          timezone,
+          team: {
+            allowTeamInvitations:
+              workspaceType !== WORKSPACE_TYPE.INDIVIDUAL,
+            defaultRoleForNewMembers: WORKSPACE_ROLE.member,
+          },
+        },
+      },
+    });
 
     await Promise.all([
       ensurePlatformRoleDefinitions(),
       ensureWorkspaceRoleDefinitions({
         workspaceId: business.id,
-        options: { createdBy: null },
+        options: { createdBy: newUser._id as mongoose.Types.ObjectId },
       }),
     ]);
+
     const ownerRoleDefinitionId = await resolveWorkspaceRoleDefinitionId({
       workspaceId: business.id,
       role: WORKSPACE_ROLE.owner,
     });
 
-    const newUser = await User.create({
-      name: body.name,
-      email: body.email,
-      password: body.password,
-      memberships: [
-        {
-          business: business.id,
-          role: ROLES.admin,
-          status: INVITE_STATUS.activated,
-          isCreator: true,
-          roleDefinition: ownerRoleDefinitionId ?? undefined,
-        },
-      ],
-      currentBusiness: business.id,
-    });
-
-    delete (newUser as any).password;
+    newUser.memberships.push({
+      business: business._id as never,
+      role: ROLES.admin,
+      status: INVITE_STATUS.activated,
+      isCreator: true,
+      roleDefinition: ownerRoleDefinitionId ?? undefined,
+    } as never);
+    newUser.currentBusiness = business._id as mongoose.Types.ObjectId;
+    await newUser.save({ validateBeforeSave: false });
 
     return buildAuthSuccessResponse({
       request,
@@ -103,12 +129,10 @@ export async function POST(request: NextRequest) {
       body: {
         status: "success",
         ...getLegacyTokenPreview(newUser),
-        data: {
-          user: newUser,
-        },
+        data: { user: newUser },
       },
     });
   } catch (error) {
-    return errorToNextResponse(error, request.headers.get("x-request-id"));
+    return errorToNextResponse(error, getRequestId(request));
   }
 }

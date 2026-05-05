@@ -302,8 +302,11 @@
   html,
   body {
     height: 100%;
+  }
+
+  html:has(.dashboard-shell),
+  body:has(.dashboard-shell) {
     overflow: hidden;
-    /* Body won't scroll; only your main section will */
   }
 }
 

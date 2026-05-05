@@ -1,6 +1,7 @@
 export const APP_EMAIL_TEMPLATE = {
   FORGOT_PASSWORD: "forgot_password",
   PASSWORD_CHANGE_PASSCODE: "password_change_passcode",
+  PASSWORDLESS_LOGIN: "passwordless_login",
 } as const;
 
 export type AppEmailTemplateKey =

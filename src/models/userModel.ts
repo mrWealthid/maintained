@@ -15,9 +15,10 @@ export interface IUser extends Document {
   name: string;
   email: string;
   photo?: string;
-  // role: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'TECHNICIAN' | 'OWNER';
   password: string;
-  // business: mongoose.Types.ObjectId;
+  contact?: string;
+  countryCode?: string;
+  addressStructured?: Record<string, unknown>;
   createdAt: Date;
   dateOfBirth?: Date;
 
@@ -26,6 +27,8 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   passwordChangePasscode?: string;
   passwordChangePasscodeExpires?: Date;
+  passwordlessLoginToken?: string;
+  passwordlessLoginExpires?: Date;
   active?: boolean;
   notificationPreferences?: {
     ticketCreatedAlerts: boolean;
@@ -47,6 +50,7 @@ export interface IUser extends Document {
   correctPassword(newPassword: string, userPassword: string): Promise<boolean>;
   createPasswordResetToken(): string;
   createPasswordChangePasscode(): string;
+  createPasswordlessLoginToken(): string;
   // createUserInviteToken(): string;
   passwordConfirm: string;
   memberships: {
@@ -265,11 +269,16 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     dateOfBirth: { type: Date },
+    contact: { type: String, trim: true },
+    countryCode: { type: String, trim: true },
+    addressStructured: { type: mongoose.Schema.Types.Mixed },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
     passwordChangePasscode: String,
     passwordChangePasscodeExpires: Date,
+    passwordlessLoginToken: { type: String, select: false },
+    passwordlessLoginExpires: { type: Date, select: false },
     active: {
       type: Boolean,
       default: true,
@@ -477,6 +486,16 @@ userSchema.methods.createPasswordChangePasscode = function (): string {
     .digest("hex");
   this.passwordChangePasscodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
   return passcode;
+};
+
+userSchema.methods.createPasswordlessLoginToken = function (): string {
+  const loginToken = crypto.randomBytes(32).toString("hex");
+  this.passwordlessLoginToken = crypto
+    .createHash("sha256")
+    .update(loginToken)
+    .digest("hex");
+  this.passwordlessLoginExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  return loginToken;
 };
 
 userSchema.methods.createUserInviteToken = function (): string {

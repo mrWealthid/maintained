@@ -5,6 +5,7 @@ import { cookies as getCookiesHeader } from "next/headers";
 import { NextRequest } from "next/server";
 
 import { connect } from "@/dbConfig/dbConfig";
+import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
 import {
   getActiveAuthSession,
   revokeAuthSession,
@@ -50,11 +51,11 @@ export type VerifiedUserState =
 
 async function readAuthToken(request?: NextRequest) {
   if (request) {
-    return request.cookies.get("token")?.value;
+    return request.cookies.get(AUTH_COOKIE_NAME)?.value;
   }
 
   const cookieStore = await getCookiesHeader();
-  return cookieStore.get("token")?.value;
+  return cookieStore.get(AUTH_COOKIE_NAME)?.value;
 }
 
 export async function getVerifiedUserState(

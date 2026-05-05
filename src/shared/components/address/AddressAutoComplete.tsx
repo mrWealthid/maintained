@@ -17,6 +17,48 @@ type Props = {
   countryCode?: "US" | "CA" | "GB" | "NG" | "DE";
 };
 
+type Suggestion = {
+  placeId: string;
+  description: string;
+  mainText: string;
+  secondaryText: string;
+};
+
+let placesReady: Promise<void> | null = null;
+function ensurePlaces(): Promise<void> {
+  if (!placesReady) {
+    setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY! });
+    placesReady = importLibrary("places").then(() => undefined);
+  }
+  return placesReady;
+}
+
+// Adapt the new Place object to the legacy PlaceResult shape parseGooglePlace expects.
+type NewAddressComponent = {
+  longText: string | null;
+  shortText: string | null;
+  types: string[];
+};
+function adaptPlace(place: google.maps.places.Place): google.maps.places.PlaceResult {
+  const components = (place.addressComponents ?? []) as NewAddressComponent[];
+  const address_components: google.maps.GeocoderAddressComponent[] = components.map(
+    (c) => ({
+      long_name: c.longText ?? "",
+      short_name: c.shortText ?? "",
+      types: c.types,
+    })
+  );
+  const loc = place.location ?? null;
+  return {
+    address_components,
+    formatted_address: place.formattedAddress ?? undefined,
+    place_id: place.id ?? undefined,
+    geometry: loc
+      ? ({ location: loc } as google.maps.places.PlaceGeometry)
+      : undefined,
+  };
+}
+
 export default function AddressAutocomplete({
   onSelect,
   proximity,
@@ -26,19 +68,12 @@ export default function AddressAutocomplete({
   countryCode,
 }: Props) {
   const [query, setQuery] = useState("");
-  const [preds, setPreds] = useState<
-    google.maps.places.AutocompletePrediction[]
-  >([]);
+  const [preds, setPreds] = useState<Suggestion[]>([]);
   const [activeIdx, setActiveIdx] = useState(-1);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const acServiceRef = useRef<google.maps.places.AutocompleteService | null>(
-    null
-  );
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(
-    null
-  );
+  const readyRef = useRef(false);
   const sessionTokenRef =
     useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,66 +81,71 @@ export default function AddressAutocomplete({
 
   useEffect(() => {
     if (initialQuery) setQuery(initialQuery);
-    // NOTE: we intentionally don't re-run if initialQuery changes,
-    // to avoid fighting user typing. If you want it reactive, add it to deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // load Google Places
+
   useEffect(() => {
     let alive = true;
-    setOptions({
-      key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    });
-    importLibrary("places").then(() => {
+    ensurePlaces().then(() => {
       if (!alive) return;
-      acServiceRef.current = new google.maps.places.AutocompleteService();
-      // Initialize PlacesService using a detached element to avoid any DOM side-effects
-      const detachedHostEl = document.createElement("div");
-      placesServiceRef.current = new google.maps.places.PlacesService(
-        detachedHostEl
-      );
+      readyRef.current = true;
+      sessionTokenRef.current =
+        new google.maps.places.AutocompleteSessionToken();
     });
     return () => {
       alive = false;
     };
   }, []);
 
-  // fetch predictions — only when focused
   useEffect(() => {
-    if (!acServiceRef.current) return;
+    if (!readyRef.current) return;
     if (!focused) {
       setPreds([]);
       return;
-    } // 👈 block if not focused
+    }
     if (!query.trim()) {
       setPreds([]);
       return;
     }
 
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
-    debounceRef.current = window.setTimeout(() => {
+    debounceRef.current = window.setTimeout(async () => {
       setLoading(true);
-      const req: google.maps.places.AutocompletionRequest = {
-        input: query,
-        types: ["address"],
-        componentRestrictions: {
-          country: [countryCode?.toLowerCase() ?? "us"],
-        },
-        sessionToken: sessionTokenRef.current ?? undefined,
-      };
-
-      if (proximity) {
-        req.locationBias = {
-          center: new google.maps.LatLng(proximity.lat, proximity.lng),
-          radius: 50_000, // ✅ fix
+      try {
+        const req: google.maps.places.AutocompleteRequest = {
+          input: query,
+          includedPrimaryTypes: ["street_address", "premise", "subpremise"],
+          includedRegionCodes: [countryCode ?? "US"],
+          sessionToken: sessionTokenRef.current ?? undefined,
         };
-      }
-      acServiceRef.current!.getPlacePredictions(req, (results) => {
-        if (!focused) return; // 👈 user may have blurred
-        setPreds(results || []);
+        if (proximity) {
+          req.locationBias = {
+            center: { lat: proximity.lat, lng: proximity.lng },
+            radius: 50_000,
+          };
+        }
+        const { suggestions } =
+          await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
+            req
+          );
+        if (!focused) return;
+        const mapped: Suggestion[] = suggestions
+          .map((s) => s.placePrediction)
+          .filter((p): p is google.maps.places.PlacePrediction => p != null)
+          .map((p) => ({
+            placeId: p.placeId,
+            description: p.text?.toString() ?? "",
+            mainText: p.mainText?.toString() ?? p.text?.toString() ?? "",
+            secondaryText: p.secondaryText?.toString() ?? "",
+          }));
+        setPreds(mapped);
         setActiveIdx(-1);
+      } catch (e) {
+        console.error(e);
+        setPreds([]);
+      } finally {
         setLoading(false);
-      });
+      }
     }, 220) as unknown as number;
 
     return () => {
@@ -113,7 +153,6 @@ export default function AddressAutocomplete({
     };
   }, [query, proximity, focused, countryCode]);
 
-  // click-away closes list
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (
@@ -128,33 +167,18 @@ export default function AddressAutocomplete({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const getDetails = (placeId: string) =>
-    new Promise<google.maps.places.PlaceResult>((resolve, reject) => {
-      if (!placesServiceRef.current)
-        return reject(new Error("PlacesService not ready"));
-      placesServiceRef.current.getDetails(
-        {
-          placeId,
-          fields: ["address_component", "geometry", "place_id"],
-          sessionToken: sessionTokenRef.current ?? undefined,
-        },
-        (place, status) => {
-          if (status !== google.maps.places.PlacesServiceStatus.OK || !place)
-            return reject(new Error(`Place details failed: ${status}`));
-          resolve(place);
-        }
-      );
-    });
-
-  const handleSelect = async (p: google.maps.places.AutocompletePrediction) => {
-    setQuery(p.description);
+  const handleSelect = async (s: Suggestion) => {
+    setQuery(s.description);
     setPreds([]);
     try {
-      const place = await getDetails(p.place_id);
+      const place = new google.maps.places.Place({ id: s.placeId });
+      await place.fetchFields({
+        fields: ["addressComponents", "location", "id", "formattedAddress"],
+      });
+      // rotate session token after a selection
       sessionTokenRef.current =
-        new google.maps.places.AutocompleteSessionToken(); // rotate
-      onSelect(parseGooglePlace(place));
-      // optional: blur after select
+        new google.maps.places.AutocompleteSessionToken();
+      onSelect(parseGooglePlace(adaptPlace(place)));
       setFocused(false);
     } catch (e) {
       console.error(e);
@@ -215,7 +239,7 @@ export default function AddressAutocomplete({
         >
           {preds.map((p, i) => (
             <li
-              key={p.place_id}
+              key={p.placeId}
               role="option"
               aria-selected={i === activeIdx}
               onMouseDown={(e) => e.preventDefault()}
@@ -227,11 +251,9 @@ export default function AddressAutocomplete({
                 "border-b border-border last:border-b-0"
               )}
             >
-              <div className="font-medium text-foreground">
-                {p.structured_formatting.main_text}
-              </div>
+              <div className="font-medium text-foreground">{p.mainText}</div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                {p.structured_formatting.secondary_text}
+                {p.secondaryText}
               </div>
             </li>
           ))}

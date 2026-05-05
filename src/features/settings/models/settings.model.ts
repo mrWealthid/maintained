@@ -34,6 +34,21 @@ export interface WorkspaceSecuritySettings {
   currentRequestIp?: string | null;
 }
 
+export interface PlatformPasswordPolicy {
+  minLength: number;
+  expiryDays: number;
+  requireUppercase: boolean;
+  requireNumbers: boolean;
+  requireSpecial: boolean;
+}
+
+export interface PlatformSecuritySettings {
+  require2fa: boolean;
+  enableSSO: boolean;
+  passwordlessLogin: boolean;
+  passwordPolicy: PlatformPasswordPolicy;
+}
+
 export type SecuritySessionSummary = {
   sessionId: string;
   current: boolean;

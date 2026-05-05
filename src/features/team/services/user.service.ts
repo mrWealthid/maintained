@@ -1,7 +1,7 @@
 import {
   ApiPaginatedResponse,
-  CreateMultipleUsersPayload,
-  CreateUserPayload,
+  InviteUsersPayload,
+  InviteUserPayload,
   User,
 } from "@/shared/model/model";
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
@@ -39,8 +39,8 @@ export async function fetchUsers({
   }
 }
 
-export async function handleCreateUser(
-  payload: CreateUserPayload,
+export async function handleInviteUser(
+  payload: InviteUserPayload,
   isEditing: boolean,
   userId?: string
 ) {
@@ -58,9 +58,7 @@ export async function handleCreateUser(
   }
 }
 
-export async function handleCreateMultipleUsers(
-  payload: CreateMultipleUsersPayload
-) {
+export async function handleInviteUsers(payload: InviteUsersPayload) {
   try {
     const response = await http.post(
       `${API_ROUTES.userManagement.invite_user}`,
