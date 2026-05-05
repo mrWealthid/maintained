@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
@@ -385,4 +385,10 @@ const LoginComponent = () => {
   );
 };
 
-export default LoginComponent;
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginComponent />
+    </Suspense>
+  );
+}
