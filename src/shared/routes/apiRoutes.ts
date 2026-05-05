@@ -46,6 +46,9 @@ export const API_ROUTES = {
     categories: `${base}/dashboard/settings/app/categories`,
     categoryById: (id: string) =>
       `${base}/dashboard/settings/app/categories/${id}`,
+    ticketTypes: `${base}/dashboard/settings/app/ticket-types`,
+    ticketTypeById: (id: string) =>
+      `${base}/dashboard/settings/app/ticket-types/${id}`,
     emailTest: `${base}/dashboard/settings/app/email/test`,
   },
   userManagement: {

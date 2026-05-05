@@ -27,18 +27,22 @@ import { TicketTypeFormData } from "../models/settings.model";
 import {
   useCreateTicketType,
   useUpdateTicketType,
+  useCreateAppTicketType,
+  useUpdateAppTicketType,
 } from "../hooks/settingsHooks";
 
 interface TicketTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingType?: any;
+  scope?: "workspace" | "app";
 }
 
 const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
   isOpen,
   onClose,
   editingType,
+  scope = "workspace",
 }) => {
   const form = useForm<TicketTypeFormData>({
     defaultValues: {
@@ -48,8 +52,14 @@ const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
     },
   });
 
-  const createTicketType = useCreateTicketType();
-  const updateTicketType = useUpdateTicketType();
+  const createWorkspaceTicketType = useCreateTicketType();
+  const updateWorkspaceTicketType = useUpdateTicketType();
+  const createAppTicketType = useCreateAppTicketType();
+  const updateAppTicketType = useUpdateAppTicketType();
+  const createTicketType =
+    scope === "app" ? createAppTicketType : createWorkspaceTicketType;
+  const updateTicketType =
+    scope === "app" ? updateAppTicketType : updateWorkspaceTicketType;
 
   useEffect(() => {
     if (editingType) {
@@ -71,7 +81,7 @@ const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
     try {
       if (editingType) {
         await updateTicketType.mutateAsync({
-          id: editingType._id,
+          id: editingType.id ?? editingType._id,
           data,
         });
       } else {
@@ -99,12 +109,20 @@ const TicketTypeModal: React.FC<TicketTypeModalProps> = ({
           description={
             editingType
               ? "Update request type details used for workflow routing."
-              : "Add a new request type for this workspace."
+              : scope === "app"
+                ? "Add a new platform-wide request type available to every workspace."
+                : "Add a new request type for this workspace."
           }
           icon={Ticket}
         />
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+          <form
+            onSubmit={(e) => {
+              e.stopPropagation();
+              form.handleSubmit(onSubmit)(e);
+            }}
+            className="contents"
+          >
             <AppDialogBody>
               <FormField
                 control={form.control}

@@ -81,7 +81,7 @@ const TicketTypeManagement: React.FC = () => {
         icon={Plus}
         actions={
           canManageTicketTypes ? (
-            <Button onClick={handleCreate}>
+            <Button type="button" onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Add Ticket Type
             </Button>
@@ -130,7 +130,7 @@ const TicketTypeManagement: React.FC = () => {
                       />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button type="button" variant="outline" size="sm">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

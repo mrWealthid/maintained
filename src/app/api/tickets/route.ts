@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Ticket from "@/models/ticketModel";
 import Category from "@/models/ticketCategoryModel";
 import { connect } from "@/dbConfig/dbConfig";
-import MiddlewareFeatures from "@/middlewareFeatures";
-import { Types } from "mongoose";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
 import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";

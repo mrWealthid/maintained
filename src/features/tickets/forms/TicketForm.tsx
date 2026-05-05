@@ -6,6 +6,12 @@ import { fetchTicketCategory } from "../services/ticket-service";
 import { ManageTicketForm, ManageTicketFormProps } from "../models/ticket.model";
 import { useFetchTicketType } from "../hooks/ticketHooks";
 import {
+  useCreateCategory,
+  useCreateTicketType,
+} from "@/features/settings/hooks/settingsHooks";
+import { useHasPermission } from "@/shared/hooks/usePermission";
+import { PERMISSION } from "@/shared/auth/permission-registry";
+import {
   Category,
   CreateTicketPayload,
   TicketType,
@@ -50,21 +56,13 @@ import {
   Loader2,
   MapPin,
   Paperclip,
+  Plus,
   PlusCircle,
   Settings2,
   Video,
   Wrench,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { batchUpload } from "../helpers/helpers";
 
 const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
@@ -807,27 +805,12 @@ const TicketForm: FC<ManageTicketFormProps> = ({ ticket, onSubmit }) => {
                     control={control}
                     rules={{ required: "Please select a ticket type" }}
                     render={({ field }) => (
-                      <Select
+                      <TicketTypeCombobox
                         value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger className="h-10 rounded-xl">
-                          <div className="flex items-center gap-2">
-                            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
-                            <SelectValue placeholder="Select a ticket type" />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Ticket Types</SelectLabel>
-                            {data?.map((type) => (
-                              <SelectItem key={type.id} value={type.id}>
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                        types={data ?? []}
+                        disabled={isSubmitting}
+                        onChange={(type) => field.onChange(type.id)}
+                      />
                     )}
                   />
                   {errors?.type?.message ? (
@@ -984,11 +967,41 @@ function CategoryCombobox({
     queryFn: () => fetchTicketCategory<Category>(search || null),
   });
 
+  const canCreate = useHasPermission(PERMISSION.TICKET_CATEGORIES_MANAGE);
+  const { mutateAsync: createCategory, isPending: isCreating } =
+    useCreateCategory();
+
   const categories = (data?.data || []) as Category[];
   const display =
-    selected?.name ||
-    categories.find((c) => c.id === value)?.name ||
-    "";
+    selected?.name || categories.find((c) => c.id === value)?.name || "";
+
+  const trimmedSearch = search.trim();
+  const showCreate =
+    canCreate &&
+    !!trimmedSearch &&
+    !categories.some(
+      (c) => c.name.toLowerCase() === trimmedSearch.toLowerCase(),
+    );
+
+  const handleCreate = async () => {
+    if (!showCreate) return;
+    try {
+      const res = await createCategory({
+        name: trimmedSearch,
+        description: "",
+        isActive: true,
+      });
+      const created = res?.data as Category | undefined;
+      if (created) {
+        setSelected(created);
+        onChange(created);
+        setSearch("");
+        setOpen(false);
+      }
+    } catch {
+      // Toast surfaced by the mutation hook.
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -999,13 +1012,17 @@ function CategoryCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          disabled={disabled}
+          disabled={disabled || isCreating}
           className="h-10 w-full justify-between rounded-xl font-normal"
         >
           <span className={cn(!display && "text-muted-foreground")}>
             {display || "Select a category…"}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {isCreating ? (
+            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-70" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -1014,19 +1031,40 @@ function CategoryCombobox({
       >
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search categories…"
+            placeholder={
+              canCreate ? "Search or create category…" : "Search categories…"
+            }
             value={search}
             onValueChange={setSearch}
           />
           <CommandList>
+            {showCreate ? (
+              <CommandGroup heading="Create">
+                <CommandItem
+                  onSelect={() => void handleCreate()}
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
+                  {isCreating
+                    ? `Creating "${trimmedSearch}"…`
+                    : `Create "${trimmedSearch}"`}
+                </CommandItem>
+              </CommandGroup>
+            ) : null}
             {isLoading ? (
               <div className="px-3 py-6 text-center text-sm text-muted-foreground">
                 Loading…
               </div>
             ) : (
               <>
-                <CommandEmpty>No categories found.</CommandEmpty>
-                <CommandGroup>
+                {!categories.length && !showCreate ? (
+                  <CommandEmpty>No categories found.</CommandEmpty>
+                ) : null}
+                <CommandGroup heading="Categories">
                   {categories.map((cat) => (
                     <CommandItem
                       key={cat.id}
@@ -1060,6 +1098,153 @@ function CategoryCombobox({
                 </CommandGroup>
               </>
             )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function TicketTypeCombobox({
+  value,
+  types,
+  onChange,
+  disabled,
+}: {
+  value?: string;
+  types: TicketType[];
+  onChange: (type: TicketType) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const canCreate = useHasPermission(PERMISSION.TICKET_TYPES_MANAGE);
+  const { mutateAsync: createTicketType, isPending: isCreating } =
+    useCreateTicketType();
+
+  const trimmedSearch = search.trim();
+  const filtered = trimmedSearch
+    ? types.filter((t) =>
+        t.name.toLowerCase().includes(trimmedSearch.toLowerCase()),
+      )
+    : types;
+
+  const showCreate =
+    canCreate &&
+    !!trimmedSearch &&
+    !types.some(
+      (t) => t.name.toLowerCase() === trimmedSearch.toLowerCase(),
+    );
+
+  const display = types.find((t) => t.id === value)?.name || "";
+
+  const handleCreate = async () => {
+    if (!showCreate) return;
+    try {
+      const res = await createTicketType({
+        name: trimmedSearch,
+        description: "",
+        isActive: true,
+      });
+      const created = res?.data as TicketType | undefined;
+      if (created) {
+        onChange(created);
+        setSearch("");
+        setOpen(false);
+      }
+    } catch {
+      // Toast surfaced by the mutation hook.
+    }
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled || isCreating}
+          className="h-10 w-full justify-between rounded-xl font-normal"
+        >
+          <span
+            className={cn(
+              "flex items-center gap-2",
+              !display && "text-muted-foreground",
+            )}
+          >
+            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+            {display || "Select a ticket type"}
+          </span>
+          {isCreating ? (
+            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-70" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={
+              canCreate ? "Search or create ticket type…" : "Search ticket types…"
+            }
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            {showCreate ? (
+              <CommandGroup heading="Create">
+                <CommandItem
+                  onSelect={() => void handleCreate()}
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
+                  {isCreating
+                    ? `Creating "${trimmedSearch}"…`
+                    : `Create "${trimmedSearch}"`}
+                </CommandItem>
+              </CommandGroup>
+            ) : null}
+            {!filtered.length && !showCreate ? (
+              <CommandEmpty>No ticket types found.</CommandEmpty>
+            ) : null}
+            <CommandGroup heading="Ticket Types">
+              {filtered.map((type) => (
+                <CommandItem
+                  key={type.id}
+                  value={type.id}
+                  onSelect={() => {
+                    onChange(type);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === type.id ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{type.name}</span>
+                    {type.description && (
+                      <span className="text-xs text-muted-foreground line-clamp-1">
+                        {type.description}
+                      </span>
+                    )}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

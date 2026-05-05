@@ -14,103 +14,101 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import {
-  useAppCategories,
-  useDeleteAppCategory,
-  useUpdateAppCategory,
+  useAppTicketTypes,
+  useDeleteAppTicketType,
+  useUpdateAppTicketType,
 } from "../hooks/settingsHooks";
-import { Category } from "@/shared/model/model";
+import { TicketType } from "@/shared/model/model";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { SettingsSection } from "./SettingsSection";
-import CategoryModal from "./CategoryModal";
+import TicketTypeModal from "./TicketTypeModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
-export default function AppCategoryManagement() {
+export default function AppTicketTypeManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
-  );
+  const [editingType, setEditingType] = useState<TicketType | null>(null);
+  const [selectedType, setSelectedType] = useState<TicketType | null>(null);
 
-  const { data: categories, isLoading } = useAppCategories();
-  const { handleDeleteAppCategory, isDeleting } = useDeleteAppCategory();
-  const updateCategory = useUpdateAppCategory();
+  const { data: ticketTypes, isLoading } = useAppTicketTypes();
+  const { handleDeleteAppTicketType, isDeleting } = useDeleteAppTicketType();
+  const updateTicketType = useUpdateAppTicketType();
   const canManage = useHasPermission(PERMISSION.PLATFORM_SETTINGS_MANAGE);
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
+  const handleEdit = (ticketType: TicketType) => {
+    setEditingType(ticketType);
     setIsModalOpen(true);
   };
 
   const handleCreate = () => {
-    setEditingCategory(null);
+    setEditingType(null);
     setIsModalOpen(true);
   };
 
   const confirmDelete = () => {
-    if (!selectedCategory?.id) return;
-    handleDeleteAppCategory(selectedCategory.id, {
-      onSuccess: () => setSelectedCategory(null),
+    if (!selectedType?.id) return;
+    handleDeleteAppTicketType(selectedType.id, {
+      onSuccess: () => setSelectedType(null),
     });
   };
 
-  const handleToggleStatus = async (category: Category) => {
-    await updateCategory.mutateAsync({
-      id: category.id,
+  const handleToggleStatus = async (ticketType: TicketType) => {
+    await updateTicketType.mutateAsync({
+      id: ticketType.id,
       data: {
-        name: category.name,
-        description: category.description,
-        isActive: !category.isActive,
+        name: ticketType.name,
+        description: ticketType.description,
+        isActive: !ticketType.isActive,
       },
     });
   };
 
-  const handleClose = useCallback(() => setSelectedCategory(null), []);
-  const hasCategories = Boolean(categories?.length);
+  const handleClose = useCallback(() => setSelectedType(null), []);
+  const hasTicketTypes = Boolean(ticketTypes?.length);
 
   return (
     <div className="space-y-6">
       <SettingsSection
-        title="Platform Categories"
-        description="Default ticket categories available to every workspace"
+        title="Platform Ticket Types"
+        description="Default ticket types available to every workspace"
         icon={Plus}
         actions={
           canManage ? (
             <Button type="button" onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Category
+              Add Ticket Type
             </Button>
           ) : null
         }
       >
         {isLoading && (
-          <div className="text-center py-4">Loading categories...</div>
+          <div className="text-center py-4">Loading ticket types...</div>
         )}
-        {!isLoading && !hasCategories && (
+        {!isLoading && !hasTicketTypes && (
           <div className="text-center py-4 text-muted-foreground">
-            No platform categories yet
+            No platform ticket types yet
           </div>
         )}
-        {!isLoading && hasCategories && (
+        {!isLoading && hasTicketTypes && (
           <div className="space-y-3">
-            {categories!.map((category: Category) => (
+            {ticketTypes!.map((ticketType: TicketType) => (
               <div
-                key={category.id}
+                key={ticketType.id}
                 className="flex items-center justify-between p-4 border rounded-lg"
               >
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-medium">{category.name}</h3>
+                    <h3 className="font-medium">{ticketType.name}</h3>
                     <Badge
-                      variant={category.isActive ? "outline" : "secondary"}
+                      variant={ticketType.isActive ? "outline" : "secondary"}
                     >
-                      {category.isActive ? "Active" : "Inactive"}
+                      {ticketType.isActive ? "Active" : "Inactive"}
                     </Badge>
                     <Badge variant="outline">Platform</Badge>
                   </div>
-                  {category.description && (
+                  {ticketType.description && (
                     <p className="text-sm text-muted-foreground mt-1">
-                      {category.description}
+                      {ticketType.description}
                     </p>
                   )}
                 </div>
@@ -118,8 +116,8 @@ export default function AppCategoryManagement() {
                   {canManage && (
                     <>
                       <Switch
-                        checked={category.isActive}
-                        onCheckedChange={() => handleToggleStatus(category)}
+                        checked={ticketType.isActive}
+                        onCheckedChange={() => handleToggleStatus(ticketType)}
                       />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -129,13 +127,13 @@ export default function AppCategoryManagement() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
-                            onClick={() => handleEdit(category)}
+                            onClick={() => handleEdit(ticketType)}
                           >
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => setSelectedCategory(category)}
+                            onClick={() => setSelectedType(ticketType)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
@@ -152,20 +150,20 @@ export default function AppCategoryManagement() {
         )}
       </SettingsSection>
 
-      <CategoryModal
+      <TicketTypeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        editingCategory={editingCategory}
+        editingType={editingType}
         scope="app"
       />
 
       <DeleteConfirmationModal
-        isOpen={!!selectedCategory?.id}
+        isOpen={!!selectedType?.id}
         onClose={handleClose}
         onConfirm={confirmDelete}
-        title="Delete Platform Category"
-        description="This category will be removed for every workspace. This action cannot be undone."
-        itemName={selectedCategory?.name || ""}
+        title="Delete Platform Ticket Type"
+        description="This ticket type will be removed for every workspace. This action cannot be undone."
+        itemName={selectedType?.name || ""}
         isLoading={isDeleting}
       />
     </div>
