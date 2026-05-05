@@ -1,10 +1,38 @@
 "use client";
 
-import { Shield } from "lucide-react";
+import { Bell, Globe, Mail, Shield, Workflow } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppSecuritySection } from "./AppSecuritySection";
+import { AppGeneralSection } from "./AppGeneralSection";
+import { AppNotificationsSection } from "./AppNotificationsSection";
+import { AppOperationsSection } from "./AppOperationsSection";
+import AppSettingsEmailFlowWrapper from "./AppSettingsEmailFlowWrapper";
 
 const tabs = [
+  {
+    value: "general",
+    label: "General",
+    icon: Globe,
+    content: AppGeneralSection,
+  },
+  {
+    value: "notifications",
+    label: "Notifications",
+    icon: Bell,
+    content: AppNotificationsSection,
+  },
+  {
+    value: "email",
+    label: "Email",
+    icon: Mail,
+    content: AppSettingsEmailFlowWrapper,
+  },
+  {
+    value: "operations",
+    label: "Operations",
+    icon: Workflow,
+    content: AppOperationsSection,
+  },
   {
     value: "security",
     label: "Security",
@@ -19,7 +47,7 @@ const tabTriggerClassName =
 export type AppSettingsTabValue = (typeof tabs)[number]["value"];
 
 export function AppSettingsTabs({
-  defaultTab = "security",
+  defaultTab = "general",
 }: {
   defaultTab?: AppSettingsTabValue;
 }) {

@@ -32,8 +32,72 @@ const AppSecurityPatchSchema = z
   })
   .partial();
 
+const IntegrationStatePatchSchema = z
+  .object({ connected: z.boolean().optional() })
+  .partial();
+
+const AppGeneralPatchSchema = z
+  .object({
+    timezone: z.string().optional(),
+    dateFormat: z.enum(["mdy", "dmy", "ymd"]).optional(),
+    timeFormat: z.enum(["12h", "24h"]).optional(),
+    language: z.enum(["en", "es", "fr", "de", "pt"]).optional(),
+    integrations: z
+      .object({
+        googleCalendar: IntegrationStatePatchSchema.optional(),
+        slack: IntegrationStatePatchSchema.optional(),
+        mailchimp: IntegrationStatePatchSchema.optional(),
+        zapier: IntegrationStatePatchSchema.optional(),
+      })
+      .partial()
+      .optional(),
+  })
+  .partial();
+
+const EmailTemplatePatchSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    subject: z.string().optional(),
+    preheader: z.string().optional(),
+    body: z.string().optional(),
+    delay: z.enum(["immediate", "1h", "24h", "48h", "custom"]).optional(),
+    triggerDescription: z.string().optional(),
+    includeUnsubscribe: z.boolean().optional(),
+    replyToOverride: z.string().optional(),
+    customDelayMinutes: z.number().int().min(1).max(10080).optional(),
+  })
+  .partial();
+
+const AppEmailPatchSchema = z
+  .object({
+    senderName: z.string().min(1).optional(),
+    senderEmail: z.string().email().optional(),
+    replyTo: z.union([z.string().email(), z.literal("")]).optional(),
+    bcc: z.union([z.string().email(), z.literal("")]).optional(),
+    footer: z.string().optional(),
+    templates: z.record(z.string(), EmailTemplatePatchSchema).optional(),
+  })
+  .partial();
+
+const AppNotificationsPatchSchema = z
+  .object({
+    businessRegistrationAlerts: z.boolean().optional(),
+    teamInviteAlerts: z.boolean().optional(),
+    passwordResetAlerts: z.boolean().optional(),
+    passwordChangeAlerts: z.boolean().optional(),
+    appEmailDeliveryAlerts: z.boolean().optional(),
+    emailFrequency: z
+      .enum(["immediate", "hourly", "daily", "weekly", "off"])
+      .optional(),
+    pushPreference: z.enum(["all", "important", "off"]).optional(),
+  })
+  .partial();
+
 const AppSettingsPatchSchema = z.object({
   settings: z.object({
+    general: AppGeneralPatchSchema.optional(),
+    notifications: AppNotificationsPatchSchema.optional(),
+    email: AppEmailPatchSchema.optional(),
     security: AppSecurityPatchSchema.optional(),
   }),
 });
@@ -70,9 +134,36 @@ export async function GET(request: NextRequest) {
     );
 
     const security = await getAppSecuritySettings();
+    const existing = await AppConfig.findOne({ key: "default" });
+    const general = {
+      ...defaultAppSettings.general,
+      ...((existing?.settings?.general as Record<string, unknown>) ?? {}),
+      integrations: {
+        ...defaultAppSettings.general.integrations,
+        ...((existing?.settings?.general as {
+          integrations?: Record<string, unknown>;
+        })?.integrations ?? {}),
+      },
+    };
+    const notifications = {
+      ...defaultAppSettings.notifications,
+      ...((existing?.settings?.notifications as Record<string, unknown>) ?? {}),
+    };
+    const storedEmail =
+      (existing?.settings?.email as Record<string, unknown>) ?? {};
+    const storedTemplates =
+      (storedEmail.templates as Record<string, unknown>) ?? {};
+    const email = {
+      ...defaultAppSettings.email,
+      ...storedEmail,
+      templates: {
+        ...defaultAppSettings.email.templates,
+        ...storedTemplates,
+      },
+    };
     return NextResponse.json({
       status: "success",
-      data: { settings: { security } },
+      data: { settings: { general, notifications, email, security } },
     });
   } catch (error) {
     return errorToNextResponse(error, getRequestId(request));
@@ -92,13 +183,21 @@ export async function PATCH(request: NextRequest) {
       await request.json(),
     );
     const securityPatch = settings.security ?? {};
+    const generalPatch = settings.general ?? {};
+    const notificationsPatch = settings.notifications ?? {};
+    const emailPatch = settings.email ?? {};
 
     const existing = await AppConfig.findOne({ key: "default" });
     const config =
       existing ??
       (await AppConfig.create({
         key: "default",
-        settings: { security: { ...defaultAppSettings.security } },
+        settings: {
+          general: { ...defaultAppSettings.general },
+          notifications: { ...defaultAppSettings.notifications },
+          email: { ...defaultAppSettings.email },
+          security: { ...defaultAppSettings.security },
+        },
       }));
 
     const currentSecurity = {
@@ -121,8 +220,84 @@ export async function PATCH(request: NextRequest) {
       },
     };
 
+    const currentGeneral = {
+      ...defaultAppSettings.general,
+      ...((config.settings?.general as Record<string, unknown>) ?? {}),
+      integrations: {
+        ...defaultAppSettings.general.integrations,
+        ...((config.settings?.general as {
+          integrations?: Record<string, unknown>;
+        })?.integrations ?? {}),
+      },
+    };
+
+    const nextGeneral = {
+      ...currentGeneral,
+      ...generalPatch,
+      integrations: {
+        ...currentGeneral.integrations,
+        ...Object.fromEntries(
+          Object.entries(generalPatch.integrations ?? {}).map(([key, patch]) => [
+            key,
+            {
+              ...currentGeneral.integrations[
+                key as keyof typeof currentGeneral.integrations
+              ],
+              ...(patch ?? {}),
+            },
+          ]),
+        ),
+      },
+    };
+
+    const currentNotifications = {
+      ...defaultAppSettings.notifications,
+      ...((config.settings?.notifications as Record<string, unknown>) ?? {}),
+    };
+
+    const nextNotifications = {
+      ...currentNotifications,
+      ...notificationsPatch,
+    };
+
+    const storedEmail =
+      (config.settings?.email as Record<string, unknown>) ?? {};
+    const storedTemplates =
+      (storedEmail.templates as Record<string, unknown>) ?? {};
+    const currentEmail = {
+      ...defaultAppSettings.email,
+      ...storedEmail,
+      templates: {
+        ...defaultAppSettings.email.templates,
+        ...storedTemplates,
+      },
+    };
+    const incomingTemplates = (emailPatch.templates ?? {}) as Record<
+      string,
+      Record<string, unknown> | undefined
+    >;
+    const nextEmail = {
+      ...currentEmail,
+      ...emailPatch,
+      templates: {
+        ...currentEmail.templates,
+        ...Object.fromEntries(
+          Object.entries(incomingTemplates).map(([key, patch]) => [
+            key,
+            {
+              ...((currentEmail.templates as Record<string, Record<string, unknown>>)[key] ?? {}),
+              ...(patch ?? {}),
+            },
+          ]),
+        ),
+      },
+    };
+
     config.settings = {
       ...(config.settings ?? {}),
+      general: nextGeneral,
+      notifications: nextNotifications,
+      email: nextEmail,
       security: nextSecurity,
     };
     config.markModified("settings");
@@ -130,7 +305,14 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       status: "success",
-      data: { settings: { security: nextSecurity } },
+      data: {
+        settings: {
+          general: nextGeneral,
+          notifications: nextNotifications,
+          email: nextEmail,
+          security: nextSecurity,
+        },
+      },
     });
   } catch (error) {
     return errorToNextResponse(error, getRequestId(request));

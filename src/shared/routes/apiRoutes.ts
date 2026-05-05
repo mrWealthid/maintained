@@ -43,6 +43,10 @@ export const API_ROUTES = {
   appSettings: {
     root: `${base}/dashboard/settings/app`,
     security: `${base}/dashboard/settings/app/security`,
+    categories: `${base}/dashboard/settings/app/categories`,
+    categoryById: (id: string) =>
+      `${base}/dashboard/settings/app/categories/${id}`,
+    emailTest: `${base}/dashboard/settings/app/email/test`,
   },
   userManagement: {
     get_users: `${base}/users`,

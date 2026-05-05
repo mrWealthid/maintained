@@ -111,3 +111,81 @@ export async function sendAppTemplateEmail(args: {
     };
   }
 }
+
+/**
+ * Send a one-off test email using caller-supplied template + sender values
+ * (rather than reading from DEFAULT_APP_EMAIL_TEMPLATES). This is the path
+ * the settings UI uses to preview unsaved edits.
+ */
+export async function sendAppTestEmail(args: {
+  to: string;
+  subject: string;
+  preheader: string;
+  body: string;
+  footer?: string;
+  variables: MergeVars;
+  senderName?: string;
+  senderEmail?: string;
+  replyTo?: string;
+  bcc?: string;
+}): Promise<DeliveryResult> {
+  if (!resendClient) {
+    return { sent: false, skippedReason: "RESEND_API_KEY is not configured" };
+  }
+
+  const senderEmail =
+    args.senderEmail?.trim() ||
+    process.env.APP_EMAIL_SENDER_EMAIL?.trim() ||
+    process.env.RESEND_FROM_EMAIL?.trim() ||
+    DEFAULT_APP_EMAIL_SETTINGS.senderEmail;
+  const senderName =
+    args.senderName?.trim() ||
+    process.env.APP_EMAIL_SENDER_NAME?.trim() ||
+    DEFAULT_APP_EMAIL_SETTINGS.senderName;
+
+  const variables: MergeVars = {
+    app_name: appName(),
+    support_email:
+      args.replyTo?.trim() ||
+      process.env.APP_SUPPORT_EMAIL?.trim() ||
+      DEFAULT_APP_EMAIL_SETTINGS.replyTo,
+    ...args.variables,
+  };
+  const subject = renderTemplate(args.subject, variables);
+  const preheader = renderTemplate(args.preheader, variables);
+  const bodyText = renderTemplate(normalizeTemplateText(args.body), variables);
+  const footer = renderTemplate(
+    args.footer?.trim() || DEFAULT_APP_EMAIL_SETTINGS.footer,
+    variables,
+  );
+  const contentHtml = buildStandardEmailBody({ preheader, bodyText, footer });
+  const html = wrapWithBrandedEmailShell({
+    appName: appName(),
+    senderName,
+    contentHtml,
+  });
+
+  try {
+    const result = await resendClient.emails.send({
+      from: `${senderName} <${senderEmail}>`,
+      to: args.to,
+      subject: `[TEST] ${subject}`,
+      html,
+      reply_to: args.replyTo || senderEmail,
+      bcc: parseBcc(args.bcc ?? DEFAULT_APP_EMAIL_SETTINGS.bcc),
+    });
+
+    if (result.error) {
+      return {
+        sent: false,
+        error: result.error.message || "Unable to send email",
+      };
+    }
+    return { sent: true, messageId: result.data?.id };
+  } catch (error) {
+    return {
+      sent: false,
+      error: error instanceof Error ? error.message : "Unknown email error",
+    };
+  }
+}

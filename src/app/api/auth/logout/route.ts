@@ -1,8 +1,10 @@
 import { errorToNextResponse } from "@/lib/errors/apiError";
-import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
+import {
+  AUTH_COOKIE_NAME,
+  getClearedAuthCookieOptions,
+} from "@/lib/auth/cookie";
 import { revokeAuthSession } from "@/lib/auth/session";
 import { verifyToken } from "@/lib/auth/token";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -13,12 +15,11 @@ export async function GET(request: NextRequest) {
       await revokeAuthSession(payload.sessionId);
     }
 
-    const cookie = await cookies();
-    cookie.delete(AUTH_COOKIE_NAME);
     const response = NextResponse.json({
       status: "success",
       message: "User was logged out",
     });
+    response.cookies.set(AUTH_COOKIE_NAME, "", getClearedAuthCookieOptions());
 
     return response;
   } catch (error) {

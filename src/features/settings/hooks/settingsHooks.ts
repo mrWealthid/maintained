@@ -23,6 +23,12 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  fetchAppCategories,
+  createAppCategory,
+  updateAppCategory,
+  deleteAppCategory,
+  sendAppTestEmail,
+  type SendAppTestEmailPayload,
   fetchTicketTypes,
   createTicketType,
   updateTicketType,
@@ -236,6 +242,62 @@ export function useDeleteCategory() {
   });
 
   return { handleDeleteCategory, isDeleting };
+}
+
+// Platform (app-wide) Categories Hooks
+export function useAppCategories() {
+  return useQuery({
+    queryKey: ["app-categories"],
+    queryFn: fetchAppCategories,
+    select: (data) => data.data,
+  });
+}
+
+export function useCreateAppCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAppCategory,
+    onSuccess: () => {
+      toast.success("Category created successfully");
+      queryClient.invalidateQueries({ queryKey: ["app-categories"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateAppCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) =>
+      updateAppCategory(id, data),
+    onSuccess: () => {
+      toast.success("Category updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["app-categories"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useDeleteAppCategory() {
+  const queryClient = useQueryClient();
+  const { mutate: handleDeleteAppCategory, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: deleteAppCategory,
+      onSuccess: () => {
+        toast.success("Category deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ["app-categories"] });
+      },
+      onError: (error: Error) => toast.error(error.message),
+    },
+  );
+  return { handleDeleteAppCategory, isDeleting };
+}
+
+// App email — test send
+export function useSendAppTestEmail() {
+  return useMutation({
+    mutationFn: (payload: SendAppTestEmailPayload) => sendAppTestEmail(payload),
+  });
 }
 
 // Ticket Types Hooks
