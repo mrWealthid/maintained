@@ -15,9 +15,10 @@ export interface IUser extends Document {
   name: string;
   email: string;
   photo?: string;
-  // role: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'TECHNICIAN' | 'OWNER';
   password: string;
-  // business: mongoose.Types.ObjectId;
+  contact?: string;
+  countryCode?: string;
+  addressStructured?: Record<string, unknown>;
   createdAt: Date;
   dateOfBirth?: Date;
 
@@ -268,6 +269,9 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     dateOfBirth: { type: Date },
+    contact: { type: String, trim: true },
+    countryCode: { type: String, trim: true },
+    addressStructured: { type: mongoose.Schema.Types.Mixed },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

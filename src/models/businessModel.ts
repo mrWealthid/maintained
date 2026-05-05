@@ -11,24 +11,24 @@ import { defaultBusinessSecuritySettings } from "@/lib/security/business-securit
 import { CountryCode } from "libphonenumber-js";
 import mongoose, { Document, Schema, Model } from "mongoose";
 import validator from "validator";
+import {
+  WORKSPACE_TYPE,
+  WORKSPACE_TYPE_VALUES,
+  type WorkspaceType,
+} from "@/shared/model/workspace.model";
 
 export interface IBusiness extends Document {
   name: string;
-  registrationId: string;
+  registrationId?: string;
   contact: string;
   countryCode: CountryCode;
-
-  // Legacy flat fields (kept for compatibility)
-  country: string;
-  address: string;
-
-  // NEW structured address (optional — recommended to send going forward)
+  workspaceType: WorkspaceType;
   addressStructured?: AddressStructured;
-
   description?: string;
   createdAt: Date;
   email: string;
-  creator: string;
+  creator: mongoose.Types.ObjectId | string;
+  owner?: mongoose.Types.ObjectId | string;
   logo?: string;
   active?: boolean;
   settings?: {
@@ -49,6 +49,13 @@ export interface IBusiness extends Document {
         requireUppercase?: boolean;
         requireNumbers?: boolean;
         requireSpecial?: boolean;
+      };
+    };
+    general?: {
+      timezone?: string;
+      team?: {
+        allowTeamInvitations?: boolean;
+        defaultRoleForNewMembers?: string;
       };
     };
   };
@@ -228,23 +235,32 @@ const SecuritySettingsSchema = new Schema(
   { _id: false }
 );
 
+const GeneralSettingsSchema = new Schema(
+  {
+    timezone: { type: String, default: "America/New_York" },
+    team: {
+      allowTeamInvitations: { type: Boolean, default: true },
+      defaultRoleForNewMembers: { type: String, default: "WORKSPACE_MEMBER" },
+    },
+  },
+  { _id: false }
+);
+
 const businessSchema = new Schema<IBusiness>(
   {
     name: { type: String, required: true, trim: true },
-    registrationId: { type: String, required: true, trim: true },
+    registrationId: { type: String, trim: true },
     contact: { type: String, required: true, trim: true },
     countryCode: { type: String, required: true },
-
-    // Legacy fields (still required to avoid breaking existing API/DB)
-    country: { type: String, required: true, trim: true },
-    address: { type: String, required: true, trim: true },
-
-    // NEW: structured address
+    workspaceType: {
+      type: String,
+      enum: WORKSPACE_TYPE_VALUES,
+      default: WORKSPACE_TYPE.BUSINESS,
+      required: true,
+    },
     addressStructured: { type: AddressStructuredSchema, required: false },
-
     description: { type: String },
     createdAt: { type: Date, default: Date.now },
-
     email: {
       type: String,
       required: [true, "Please provide your business email"],
@@ -252,13 +268,21 @@ const businessSchema = new Schema<IBusiness>(
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email"],
     },
-
-    creator: { type: String, required: true },
+    creator: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     logo: { type: String, default: "default.jpg" },
     active: { type: Boolean, default: true },
     settings: {
       email: { type: EmailSettingsSchema, default: () => ({}) },
       security: { type: SecuritySettingsSchema, default: () => ({}) },
+      general: { type: GeneralSettingsSchema, default: () => ({}) },
     },
   },
   {
@@ -293,37 +317,6 @@ businessSchema.virtual("businessUsers", {
   ref: "User",
   foreignField: "business",
   localField: "_id",
-});
-
-// Build a one-liner address from structured fields
-function formatSingleLine(a?: {
-  line1?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-}) {
-  if (!a) return "";
-  const cityStateZip = [a.city, a.state, a.postalCode]
-    .filter(Boolean)
-    .join(" ");
-  return [a.line1, cityStateZip].filter(Boolean).join(", ");
-}
-
-/* --------------------------- Back-compat convenience ------------------------ */
-// If structured is present (or modified) but legacy `address` is empty,
-// auto-fill `address` from the structured fields. Also sync flat `country`.
-businessSchema.pre("validate", function (next) {
-  const doc = this as mongoose.HydratedDocument<IBusiness>;
-  if (
-    doc.addressStructured &&
-    (!doc.address || doc.isModified("addressStructured"))
-  ) {
-    const line = formatSingleLine(doc.addressStructured);
-    if (line) doc.address = line;
-    if (doc.addressStructured.country)
-      doc.country = doc.addressStructured.country;
-  }
-  next();
 });
 
 /* --------------------------------- Export ---------------------------------- */

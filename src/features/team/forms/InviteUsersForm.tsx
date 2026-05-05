@@ -5,10 +5,10 @@ import { Plus, Users, Loader2, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useCreateMultipleUsers } from "../hooks/userHooks";
+import { useInviteUsers } from "../hooks/userHooks";
 import { ROLES } from "@/shared/enums/enums";
 import { useAppContext } from "@/shared/contexts/AppContext";
-import { CreateMultipleUsersPayload } from "@/shared/model/model";
+import { InviteUsersPayload } from "@/shared/model/model";
 import { useFetchProperties } from "@/features/onboarding/hooks/onboardingHooks";
 import InviteUsersFormRow from "./InviteUsersFormRow";
 
@@ -165,7 +165,7 @@ const InviteUsersForm: FC<InviteUsersFormProps> = ({
   const { user: me } = useAppContext();
   const businessId = me?.currentBusiness?.id;
 
-  const form = useForm<CreateMultipleUsersPayload>({
+  const form = useForm<InviteUsersPayload>({
     mode: "onChange",
     defaultValues: {
       users: [
@@ -188,12 +188,12 @@ const InviteUsersForm: FC<InviteUsersFormProps> = ({
     name: "users",
   });
 
-  const { createMultipleUsers, isCreating } = useCreateMultipleUsers(false);
+  const { inviteUsers, isInviting } = useInviteUsers(false);
 
   const { data: properties, isFetchingProperties } = useFetchProperties();
 
-  function onSubmit(data: CreateMultipleUsersPayload) {
-    createMultipleUsers(data, {
+  function onSubmit(data: InviteUsersPayload) {
+    inviteUsers(data, {
       onSuccess: (result) => successCallback?.(result),
       onError: (err) => errorCallback?.(err),
     });
@@ -297,10 +297,10 @@ const InviteUsersForm: FC<InviteUsersFormProps> = ({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isValid || isCreating}
+                disabled={!form.formState.isValid || isInviting}
                 className="px-8"
               >
-                {isCreating ? (
+                {isInviting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Creating {fields.length} User Invites...

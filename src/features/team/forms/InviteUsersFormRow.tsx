@@ -1,5 +1,5 @@
 import { ROLES } from "@/shared/enums/enums";
-import { CreateMultipleUsersPayload } from "@/shared/model/model";
+import { InviteUsersPayload } from "@/shared/model/model";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,12 +25,12 @@ const InviteUsersFormRow = ({
   properties,
   isFetchingProperties,
 }: {
-  field: FieldArrayWithId<CreateMultipleUsersPayload, "users", "id">;
+  field: FieldArrayWithId<InviteUsersPayload, "users", "id">;
   index: number;
   properties: Property[];
   isFetchingProperties: boolean;
 }) => {
-  const form = useFormContext<CreateMultipleUsersPayload>();
+  const form = useFormContext<InviteUsersPayload>();
   const {
     control,
     watch,

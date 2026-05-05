@@ -175,7 +175,7 @@ export type UserFilterQuery = {
   status?: INVITE_STATUS;
 };
 
-export interface ManageUserFormProps {
+export interface InviteUserFormProps {
   user?: User | undefined;
   membership?: Membership;
   onCloseModal?: () => void;
@@ -183,7 +183,7 @@ export interface ManageUserFormProps {
   errorCallback?: (err: unknown) => void;
 }
 
-export interface ManageUserForm {
+export interface InviteUserFormValues {
   name: string;
   email: string;
   role: ROLES;
@@ -192,10 +192,10 @@ export interface ManageUserForm {
   unitId: string;
 }
 
-export interface CreateUserPayload extends ManageUserForm {}
+export interface InviteUserPayload extends InviteUserFormValues {}
 
-export interface CreateMultipleUsersPayload {
-  users: CreateUserPayload[];
+export interface InviteUsersPayload {
+  users: InviteUserPayload[];
 }
 
 export type BaseActions = {

@@ -9,7 +9,7 @@ import {
   OnboardUser,
   PasswordlessLoginConfig,
   PasswordlessLoginRequestPayload,
-  RegisterPayload,
+  SignupValues,
 } from "../model/model";
 
 export async function handleLogin(payload: LoginPayload) {
@@ -47,7 +47,7 @@ export async function fetchPasswordlessLoginConfig() {
   }
 }
 
-export async function handleRegister(payload: RegisterPayload) {
+export async function handleRegister(payload: SignupValues) {
   try {
     const res = await http.post(API_ROUTES.auth.register, payload);
     return res.data;

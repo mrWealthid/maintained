@@ -26,7 +26,7 @@ import {
   LoginPayload,
   OnboardUser,
   PasswordlessLoginRequestPayload,
-  RegisterPayload,
+  SignupValues,
 } from "../model/model";
 
 export function useLogin() {
@@ -87,16 +87,21 @@ export function useInvitePreview(inviteToken: string | undefined | null) {
 
 export function useRegister() {
   const router = useRouter();
-  const { isPending: isLoading, mutate: registering } = useMutation({
-    mutationFn: (payload: RegisterPayload) => handleRegister(payload),
-    onSuccess: () => router.refresh(),
+  const queryClient = useQueryClient();
+  const {
+    isPending: isLoading,
+    mutate: registering,
+    error,
+  } = useMutation({
+    mutationFn: (payload: SignupValues) => handleRegister(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      router.refresh();
+    },
     onError: (err: ApiError) => toast.error(err.message),
   });
 
-  return {
-    isLoading,
-    registering,
-  };
+  return { isLoading, registering, error };
 }
 
 export function useLogout(router: AppRouterInstance) {

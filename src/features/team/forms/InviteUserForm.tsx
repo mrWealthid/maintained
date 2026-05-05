@@ -1,9 +1,12 @@
 "use client";
 import React, { FC, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useCreateUser } from "../hooks/userHooks";
+import { useInviteUser } from "../hooks/userHooks";
 import { ROLES } from "@/shared/enums/enums";
-import { ManageUserForm, ManageUserFormProps } from "@/shared/model/model";
+import {
+  InviteUserFormValues,
+  InviteUserFormProps,
+} from "@/shared/model/model";
 import { useAppContext } from "@/shared/contexts/AppContext";
 
 // shadcn/ui
@@ -171,7 +174,7 @@ const SpecialtyBadges: FC<{
   );
 };
 
-const InviteUserForm: FC<ManageUserFormProps> = ({
+const InviteUserForm: FC<InviteUserFormProps> = ({
   user,
   membership,
   onCloseModal,
@@ -184,7 +187,7 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
   const businessId = (membership as any)?.business ?? me?.currentBusiness?.id;
 
   const { control, register, handleSubmit, watch, formState, setValue } =
-    useForm<ManageUserForm>({
+    useForm<InviteUserFormValues>({
       mode: "onChange",
       defaultValues: isEditing
         ? { ...user, ...membership }
@@ -217,14 +220,14 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
   }
 
   const { errors, isSubmitting, isValid, isDirty } = formState;
-  const { isCreating, createUser, createUserError } = useCreateUser(
+  const { isInviting, inviteUser, inviteUserError } = useInviteUser(
     isEditing,
     onCloseModal,
     user?.id
   );
 
-  function onSubmit(data: ManageUserForm) {
-    const payload: ManageUserForm = {
+  function onSubmit(data: InviteUserFormValues) {
+    const payload: InviteUserFormValues = {
       ...data,
       ...(data.role === ROLES.technician ? {} : { specialties: [] as any }),
       ...(data.role === ROLES.user
@@ -234,9 +237,9 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
             unitId: data.unitId,
           }
         : {}),
-    } as ManageUserForm;
+    } as InviteUserFormValues;
 
-    createUser(payload, {
+    inviteUser(payload, {
       onSuccess: (user) => successCallback?.(user),
       onError: (err) => errorCallback?.(err),
     });
@@ -253,7 +256,7 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
         className="flex flex-1 items-center"
       >
         <section className="flex-col flex gap-4 w-full">
-          {createUserError ? <ErrorList error={createUserError} /> : null}
+          {inviteUserError ? <ErrorList error={inviteUserError} /> : null}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Name */}
             <div className="space-y-2">
@@ -305,7 +308,7 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
                 <Select
                   value={String(field.value ?? "")}
                   onValueChange={(val) => {
-                    field.onChange(val as ManageUserForm["role"]);
+                    field.onChange(val as InviteUserFormValues["role"]);
                     if (val !== ROLES.technician)
                       setValue("specialties" as any, []);
                     if (val !== ROLES.user) {
@@ -451,9 +454,9 @@ const InviteUserForm: FC<ManageUserFormProps> = ({
 
               <Button
                 type="submit"
-                disabled={!isValid || isSubmitting || !isDirty || isCreating}
+                disabled={!isValid || isSubmitting || !isDirty || isInviting}
               >
-                {isCreating && <Loader2 className="mr-2 size-4 animate-spin" />}
+                {isInviting && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {isEditing ? "Update User" : "Create User"}
               </Button>
             </section>
