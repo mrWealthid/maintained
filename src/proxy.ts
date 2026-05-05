@@ -1,6 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { ROLES } from "./shared/enums/enums";
-import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
+import {
+  AUTH_COOKIE_NAME,
+  getClearedAuthCookieOptions,
+} from "@/lib/auth/cookie";
+import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
 
 type Role = "ADMIN" | "TECHNICIAN" | "USER" | string | null;
 type DecodedToken = {
@@ -11,42 +15,86 @@ type DecodedToken = {
   sessionId?: string;
 };
 
+function isPublicAuthPath(pathname: string) {
+  return (
+    pathname.startsWith(APP_ROUTE_PATHS.AUTH.ONBOARD_USER_PREFIX) ||
+    pathname === APP_ROUTE_PATHS.AUTH.RESET_PASSWORD ||
+    pathname.startsWith(APP_ROUTE_PATHS.AUTH.UPDATE_PASSWORD_PREFIX) ||
+    pathname.startsWith(APP_ROUTE_PATHS.AUTH.PASSWORDLESS_LINK_REVOKED) ||
+    pathname.startsWith(APP_ROUTE_PATHS.AUTH.PASSWORDLESS_REVOKE) ||
+    pathname.startsWith(APP_ROUTE_PATHS.AUTH.PASSWORDLESS_VERIFY) ||
+    pathname === APP_ROUTE_PATHS.AUTH.SESSION_EXPIRED
+  );
+}
+
+function buildProtectedAuthRedirect(args: {
+  request: NextRequest;
+  nextPath: string;
+  hasCookie: boolean;
+}) {
+  const { request, nextPath, hasCookie } = args;
+
+  // No cookie → straight to login with the preserved return path.
+  if (!hasCookie) {
+    return NextResponse.redirect(
+      new URL(
+        `${APP_ROUTE_PATHS.AUTH.LOGIN}?next=${encodeURIComponent(nextPath)}`,
+        request.url
+      )
+    );
+  }
+
+  // Cookie still present but the edge no longer considers it valid.
+  // Route through session-expired so the stale cookie is cleared first.
+  return NextResponse.redirect(
+    new URL(
+      `${APP_ROUTE_PATHS.AUTH.SESSION_EXPIRED}?next=${encodeURIComponent(nextPath)}`,
+      request.url
+    )
+  );
+}
+
 export function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const path = url.pathname;
+  const fullTarget = `${request.nextUrl.pathname}${request.nextUrl.search}`;
 
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value || null;
   const { valid, decoded } = decodeToken(token);
 
   const role: Role = decoded?.role?.toUpperCase() ?? null;
 
-  // --- Route groups ---
   const isHome = path === "/";
   const isAuthBase = path.startsWith("/auth");
-  const isOnboarding = path.startsWith("/auth/onboard-user");
+  const isPublicAuth = isPublicAuthPath(path);
+  const isAuthLanding = isAuthBase && !isPublicAuth;
 
-  const isAuthRoute = isAuthBase && !isOnboarding; // login/register/etc. but NOT onboard-user
   const isUserDash = path.startsWith("/dashboard");
   const isTechDash = path.startsWith("/technician/dashboard");
   const isAdminDash = path.startsWith("/admin/dashboard");
   const isAnyDashboard = isUserDash || isAdminDash || isTechDash;
 
-  // Home page should not be protected
   if (isHome) {
     return NextResponse.next();
   }
 
-  // Proxy only performs fast session-token routing. Server layouts call
-  // requireDashboardAccess for the authoritative DB-backed guard.
-  if (token && valid && isAuthRoute) {
+  // Authed user hitting an auth landing screen → bounce to next or dashboard.
+  if (token && valid && isAuthLanding) {
+    const next = request.nextUrl.searchParams.get("next");
+    if (next && next.startsWith("/")) {
+      return NextResponse.redirect(new URL(next, request.url));
+    }
     return NextResponse.redirect(getDashboardURL(request, role));
   }
 
-  // Protect all dashboard routes
+  // Protected dashboards.
   if (isAnyDashboard) {
-    // No/invalid token → send to login
-    if (!token || !valid) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+    if (!valid) {
+      return buildProtectedAuthRedirect({
+        request,
+        nextPath: fullTarget,
+        hasCookie: Boolean(token),
+      });
     }
 
     const targetPrefix = getDashboardPath(role);
@@ -62,19 +110,22 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // All other /auth routes (like onboard-user) pass through
+  // On an auth screen with a stale cookie → clear it in-place so auth pages
+  // don't keep seeing a dead token.
+  if (isAuthBase && !valid && token) {
+    const res = NextResponse.next();
+    res.cookies.set(AUTH_COOKIE_NAME, "", getClearedAuthCookieOptions());
+    return res;
+  }
 
   return NextResponse.next();
 }
 
-function getDashboardPath(
-  role: Role
-): "/dashboard" {
+function getDashboardPath(role: Role): "/dashboard" {
   void role;
   return "/dashboard";
 }
 
-// Helper: find which dashboard prefix the current path is under
 function matchDashPrefix(
   path: string
 ): "/admin/dashboard" | "/technician/dashboard" | "/dashboard" | null {
@@ -125,13 +176,12 @@ function decodeJwtPayload(token: string): DecodedToken | null {
   return JSON.parse(atob(paddedPayload)) as DecodedToken;
 }
 
-// Only run where needed
 export const config = {
   matcher: [
-    "/", // homepage (unprotected)
-    "/auth/:path*", // login/register + onboard-user
-    "/dashboard/:path*", // user dashboard (protected)
-    "/admin/dashboard/:path*", // legacy dashboard prefix, normalized
-    "/technician/dashboard/:path*", // legacy dashboard prefix, normalized
+    "/",
+    "/auth/:path*",
+    "/dashboard/:path*",
+    "/admin/dashboard/:path*",
+    "/technician/dashboard/:path*",
   ],
 };

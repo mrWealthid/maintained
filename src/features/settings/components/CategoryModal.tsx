@@ -24,18 +24,25 @@ import {
   AppDialogHeader,
 } from "@/shared/components/AppDialogShell";
 import { CategoryFormData } from "../models/settings.model";
-import { useCreateCategory, useUpdateCategory } from "../hooks/settingsHooks";
+import {
+  useCreateCategory,
+  useUpdateCategory,
+  useCreateAppCategory,
+  useUpdateAppCategory,
+} from "../hooks/settingsHooks";
 
 interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingCategory?: any;
+  scope?: "workspace" | "app";
 }
 
 const CategoryModal: React.FC<CategoryModalProps> = ({
   isOpen,
   onClose,
   editingCategory,
+  scope = "workspace",
 }) => {
   const form = useForm<CategoryFormData>({
     defaultValues: {
@@ -45,8 +52,14 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
     },
   });
 
-  const createCategory = useCreateCategory();
-  const updateCategory = useUpdateCategory();
+  const createWorkspaceCategory = useCreateCategory();
+  const updateWorkspaceCategory = useUpdateCategory();
+  const createAppCategory = useCreateAppCategory();
+  const updateAppCategory = useUpdateAppCategory();
+  const createCategory =
+    scope === "app" ? createAppCategory : createWorkspaceCategory;
+  const updateCategory =
+    scope === "app" ? updateAppCategory : updateWorkspaceCategory;
 
   useEffect(() => {
     if (editingCategory) {
@@ -68,7 +81,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
     try {
       if (editingCategory) {
         await updateCategory.mutateAsync({
-          id: editingCategory._id,
+          id: editingCategory.id ?? editingCategory._id,
           data,
         });
       } else {

@@ -1,32 +1,41 @@
-// dbConfig.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import { registerModels } from "@/models/registerModels";
 
-let isConnected = false; // Global variable to track connection
+let cachedPromise: Promise<typeof mongoose> | null = null;
 
 export async function connect() {
-	if (isConnected) {
-		return; // Prevent multiple connections
-	}
+  // Ensure referenced schemas are registered before any populate() runs.
+  registerModels();
 
-	const DB = process.env.DATABASE_URI?.replace(
-		'<PASSWORD>',
-		process.env.DATABASE_PASSWORD!
-	);
+  // 1 = connected, 2 = connecting
+  if (mongoose.connection.readyState === 1) return;
+  if (mongoose.connection.readyState === 2) {
+    if (cachedPromise) await cachedPromise;
+    return;
+  }
 
-	if (!DB) {
-		throw new Error(
-			'Database URI or password is not defined in env variables'
-		);
-	}
+  const DB = process.env.DATABASE_URI?.replace(
+    "<PASSWORD>",
+    process.env.DATABASE_PASSWORD ?? "",
+  );
 
-	try {
-		const db = await mongoose.connect(DB);
+  if (!DB || !process.env.DATABASE_PASSWORD) {
+    throw new Error("Database URI or password is not defined in env variables");
+  }
 
-		isConnected = !!db.connections[0].readyState;
+  cachedPromise = mongoose
+    .connect(DB, {
+      bufferCommands: false,
+    })
+    .then((m) => {
+      console.log("✅ MongoDB connected:", m.connection.host);
+      return m;
+    })
+    .catch((err) => {
+      cachedPromise = null;
+      console.error("❌ MongoDB connection error:", err);
+      throw err;
+    });
 
-		console.log('✅ MongoDB connected:', db.connection.host);
-	} catch (error) {
-		console.error('❌ MongoDB connection error:', error);
-		throw new Error('Could not connect to the database');
-	}
+  await cachedPromise;
 }

@@ -1,6 +1,14 @@
 export const APP_EMAIL_TEMPLATE = {
+  BUSINESS_REGISTRATION: "business_registration",
+  WORKSPACE_CREATED: "workspace_created",
+  WORKSPACE_UPGRADED: "workspace_upgraded",
+  BUSINESS_DEACTIVATED: "business_deactivated",
+  BUSINESS_ACTIVATED: "business_activated",
+  TEAM_INVITE: "team_invite",
+  TEAM_WELCOME: "team_welcome",
   FORGOT_PASSWORD: "forgot_password",
   PASSWORD_CHANGE_PASSCODE: "password_change_passcode",
+  PASSWORD_UPDATED: "password_updated",
   PASSWORDLESS_LOGIN: "passwordless_login",
 } as const;
 

@@ -84,17 +84,18 @@ const AddressStructuredSchema = new Schema<AddressStructured>(
       enum: ["United States"],
     },
     placeId: { type: String, index: true },
+    lat: { type: Number },
+    lng: { type: Number },
     location: {
-      type: { type: String, enum: ["Point"], default: "Point" },
+      // No `default` on `type` — keeps the field absent unless coordinates exist,
+      // which prevents 2dsphere from rejecting partially-formed GeoJSON points.
+      type: { type: String, enum: ["Point"] },
       coordinates: { type: [Number] }, // [lng, lat]
     },
     raw: Schema.Types.Mixed,
   },
   { _id: false }
 );
-
-// Geospatial index for location
-AddressStructuredSchema.index({ location: "2dsphere" });
 
 const EmailTemplateSchema = new Schema(
   {
@@ -298,6 +299,41 @@ businessSchema.index({
   "addressStructured.state": 1,
 });
 businessSchema.index({ "addressStructured.postalCode": 1 });
+
+// Geospatial index — partial so docs without lat/lng don't trip 2dsphere validation.
+businessSchema.index(
+  { "addressStructured.location": "2dsphere" },
+  {
+    partialFilterExpression: {
+      "addressStructured.lat": { $type: "double" },
+      "addressStructured.lng": { $type: "double" },
+    },
+  },
+);
+
+// Normalize GeoJSON: only emit `location` when both coordinates are valid numbers.
+businessSchema.pre("validate", function (next) {
+  const doc = this as mongoose.HydratedDocument<IBusiness>;
+  const a = doc.addressStructured as
+    | (AddressStructured & { location?: unknown })
+    | undefined;
+  if (!a) return next();
+
+  const lat = a.lat;
+  const lng = a.lng;
+  const isFiniteNumber = (v: unknown): v is number =>
+    typeof v === "number" && Number.isFinite(v);
+
+  if (!isFiniteNumber(lat) || !isFiniteNumber(lng)) {
+    a.location = undefined;
+    a.lat = null;
+    a.lng = null;
+    return next();
+  }
+
+  a.location = { type: "Point", coordinates: [lng, lat] };
+  next();
+});
 
 businessSchema.set("toJSON", {
   virtuals: true,

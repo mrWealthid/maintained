@@ -214,6 +214,82 @@ export async function deleteCategory(id: string): Promise<ApiResponse<void>> {
   }
 }
 
+// Platform-wide (app) categories
+export async function fetchAppCategories(): Promise<ApiResponse<Category[]>> {
+  try {
+    const response = await http.get(API_ROUTES.appSettings.categories);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function createAppCategory(
+  data: CategoryFormData
+): Promise<ApiResponse<Category>> {
+  try {
+    const response = await http.post(API_ROUTES.appSettings.categories, data);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updateAppCategory(
+  id: string,
+  data: CategoryFormData
+): Promise<ApiResponse<Category>> {
+  try {
+    const response = await http.put(
+      API_ROUTES.appSettings.categoryById(id),
+      data
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export type SendAppTestEmailPayload = {
+  templateKey: string;
+  to: string;
+  sender: {
+    senderName?: string;
+    senderEmail?: string;
+    replyTo?: string;
+    bcc?: string;
+    footer?: string;
+  };
+  template: {
+    subject: string;
+    preheader: string;
+    body: string;
+    replyToOverride?: string;
+  };
+};
+
+export async function sendAppTestEmail(
+  payload: SendAppTestEmailPayload
+): Promise<ApiResponse<{ messageId?: string }>> {
+  try {
+    const response = await http.post(API_ROUTES.appSettings.emailTest, payload);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function deleteAppCategory(id: string): Promise<ApiResponse<void>> {
+  try {
+    const response = await http.delete(
+      API_ROUTES.appSettings.categoryById(id)
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
 // Ticket Types
 export async function fetchTicketTypes(): Promise<ApiResponse<TicketType[]>> {
   try {

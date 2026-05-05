@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com/"
+    },
+    "mcp-remote": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.v0.dev",
+        "--header",
+        "Authorization: Bearer v1:aXGYGyv0B9bSk3rEMTDQgURv:vcp_30u2bVIL7CS78IKeF2LfB74efjBurwD3OffbAT2nX3nE4PUcwz4E2o4t"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/wealthiduwe/Desktop",
+        "/Users/wealthiduwe/Downloads",
+        "/Users/wealthiduwe/Developer"
+      ]
+    }
+  }
+}

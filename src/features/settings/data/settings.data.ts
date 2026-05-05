@@ -94,3 +94,19 @@ export const emailTemplateGroups = [
     ],
   },
 ] as const;
+
+export const DELAY_ENUM = {
+  IMMEDIATE: "immediate",
+  ONE_HOUR: "1h",
+  TWENTY_FOUR_HOURS: "24h",
+  FORTY_EIGHT_HOURS: "48h",
+  CUSTOM: "custom",
+} as const;
+
+export const delayOptions = [
+  { key: "Send Immediately", value: DELAY_ENUM.IMMEDIATE },
+  { key: "After 1 hour", value: DELAY_ENUM.ONE_HOUR },
+  { key: "After 24 hours", value: DELAY_ENUM.TWENTY_FOUR_HOURS },
+  { key: "After 48 hours", value: DELAY_ENUM.FORTY_EIGHT_HOURS },
+  { key: "Custom delay", value: DELAY_ENUM.CUSTOM },
+] as const;
