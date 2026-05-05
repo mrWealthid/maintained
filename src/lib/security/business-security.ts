@@ -8,11 +8,20 @@ import {
 
 export const defaultBusinessSecuritySettings = {
   require2fa: false,
+  enableSSO: false,
+  passwordlessLogin: false,
   sessionTimeoutMinutes: 60,
   maxActiveSessions: "unlimited" as 1 | 3 | 5 | "unlimited",
   ipWhitelist: {
     enabled: false,
     ips: [] as string[],
+  },
+  passwordPolicy: {
+    minLength: 8,
+    expiryDays: 90,
+    requireUppercase: false,
+    requireNumbers: false,
+    requireSpecial: false,
   },
 };
 
@@ -29,6 +38,10 @@ export function mergeBusinessSecuritySettings(
       ...defaultBusinessSecuritySettings.ipWhitelist,
       ...(settings?.ipWhitelist ?? {}),
       ips: normalizeIpAddressList(settings?.ipWhitelist?.ips),
+    },
+    passwordPolicy: {
+      ...defaultBusinessSecuritySettings.passwordPolicy,
+      ...(settings?.passwordPolicy ?? {}),
     },
   };
 }

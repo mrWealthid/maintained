@@ -85,4 +85,22 @@ export interface OnboardUserForm {
   password: string;
   dateOfBirth: string;
 }
+
+export interface PasswordlessLoginConfig {
+  enabled: boolean;
+}
+
+export interface PasswordlessLoginRequestPayload {
+  email: string;
+  next?: string;
+}
+
+export interface InvitePreview {
+  email: string;
+  name?: string;
+  businessName?: string;
+  inviteExpiresAt?: string;
+  requiresAccountSetup?: boolean;
+  expired?: boolean;
+}
 // password, inviteToken;

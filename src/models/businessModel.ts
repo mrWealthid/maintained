@@ -35,11 +35,20 @@ export interface IBusiness extends Document {
     email?: EmailSettings<BusinessEmailTemplateKey>;
     security?: {
       require2fa?: boolean;
+      enableSSO?: boolean;
+      passwordlessLogin?: boolean;
       sessionTimeoutMinutes?: number;
       maxActiveSessions?: 1 | 3 | 5 | "unlimited";
       ipWhitelist?: {
         enabled?: boolean;
         ips?: string[];
+      };
+      passwordPolicy?: {
+        minLength?: number;
+        expiryDays?: number;
+        requireUppercase?: boolean;
+        requireNumbers?: boolean;
+        requireSpecial?: boolean;
       };
     };
   };
@@ -147,11 +156,49 @@ const EmailSettingsSchema = new Schema(
   { _id: false }
 );
 
+const PasswordPolicySchema = new Schema(
+  {
+    minLength: {
+      type: Number,
+      default: defaultBusinessSecuritySettings.passwordPolicy.minLength,
+      min: 6,
+      max: 64,
+    },
+    expiryDays: {
+      type: Number,
+      default: defaultBusinessSecuritySettings.passwordPolicy.expiryDays,
+      min: 0,
+      max: 365,
+    },
+    requireUppercase: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.passwordPolicy.requireUppercase,
+    },
+    requireNumbers: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.passwordPolicy.requireNumbers,
+    },
+    requireSpecial: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.passwordPolicy.requireSpecial,
+    },
+  },
+  { _id: false }
+);
+
 const SecuritySettingsSchema = new Schema(
   {
     require2fa: {
       type: Boolean,
       default: defaultBusinessSecuritySettings.require2fa,
+    },
+    enableSSO: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.enableSSO,
+    },
+    passwordlessLogin: {
+      type: Boolean,
+      default: defaultBusinessSecuritySettings.passwordlessLogin,
     },
     sessionTimeoutMinutes: {
       type: Number,
@@ -172,6 +219,10 @@ const SecuritySettingsSchema = new Schema(
         type: [String],
         default: () => [],
       },
+    },
+    passwordPolicy: {
+      type: PasswordPolicySchema,
+      default: () => ({}),
     },
   },
   { _id: false }

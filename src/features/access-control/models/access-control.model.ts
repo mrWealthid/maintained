@@ -60,3 +60,37 @@ export type TeamWorkspaceRoleDefinition = {
   status: string;
   memberCount: number;
 };
+
+export type TeamPermissionCatalogSection = {
+  id: string;
+  title: string;
+  scope: string;
+  permissions: Array<{
+    key: PermissionKey;
+    scope: string;
+    group: string;
+    label: string;
+    description: string;
+    riskLevel: string;
+    dependsOn: PermissionKey[];
+  }>;
+};
+
+export type TeamRolesResponse = {
+  roles: TeamWorkspaceRoleDefinition[];
+  permissionCatalog: TeamPermissionCatalogSection[];
+};
+
+export type TeamMemberPermissionOverrideRecord = {
+  id: string;
+  permission: PermissionKey;
+  effect: (typeof PERMISSION_OVERRIDE_EFFECT)[keyof typeof PERMISSION_OVERRIDE_EFFECT];
+  reason: string;
+  expiresAt: string | null;
+  createdAt: string;
+};
+
+export type TeamMemberPermissionsResponse = {
+  effectivePermissions: PermissionKey[];
+  directOverrides: TeamMemberPermissionOverrideRecord[];
+};

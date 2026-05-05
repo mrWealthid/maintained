@@ -3,6 +3,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { SignOptions } from "jsonwebtoken";
 
+import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
 import { createAuthSession } from "@/lib/auth/session";
 import { getRequestSecurityContext } from "@/lib/security/request-context";
 import {
@@ -106,7 +107,22 @@ export async function buildAuthSuccessResponse(
     { status: args.status ?? 200 }
   );
 
-  response.cookies.set("token", issuedAuthSession.token, {
+  response.cookies.set(AUTH_COOKIE_NAME, issuedAuthSession.token, {
+    httpOnly: true,
+    expires: issuedAuthSession.expiresAt,
+  });
+
+  return response;
+}
+
+export async function buildAuthRedirectResponse(
+  args: Omit<AuthSessionIssueArgs, "body" | "status"> & { redirectTo: string }
+) {
+  const issuedAuthSession = await issueAuthSession(args);
+  const redirectUrl = new URL(args.redirectTo, args.request.url);
+  const response = NextResponse.redirect(redirectUrl);
+
+  response.cookies.set(AUTH_COOKIE_NAME, issuedAuthSession.token, {
     httpOnly: true,
     expires: issuedAuthSession.expiresAt,
   });

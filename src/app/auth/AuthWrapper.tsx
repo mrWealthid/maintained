@@ -1,7 +1,4 @@
-import { ThemeToggle } from "@/components/Theme-Toggle";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Building2 } from "lucide-react";
-import Link from "next/link";
+import AppHeader from "@/shared/components/header/AppHeader";
 import React from "react";
 
 export default React.memo(function AuthWrapper({
@@ -10,31 +7,26 @@ export default React.memo(function AuthWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <div className="max-h-screen overflow-y-auto bg-muted/40 text-foreground flex flex-col">
-      {/* Header */}
-      <header className="w-full border-b sticky top-0 border-border bg-background">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-semibold text-foreground">
-              ApartmentHub
-            </span>
-          </Link>
-          <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
+    <div className="grid min-h-dvh grid-rows-[auto_1fr] bg-background">
+      <div>
+        <AppHeader />
+      </div>
+      <div className="relative min-h-0 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(148,163,184,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.12) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage:
+              "radial-gradient(circle at center, black 45%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(circle at center, black 45%, transparent 100%)",
+          }}
+        />
+        <div className="relative flex min-h-full items-center justify-center px-4 py-8 md:px-6 md:py-10">
+          <div className="w-full">{children}</div>
         </div>
-      </header>
-      <div className="flex-1 flex items-center justify-center p-4 py-8">
-        <div className="w-full  space-y-6">{children}</div>
       </div>
     </div>
   );

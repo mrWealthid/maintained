@@ -5,6 +5,7 @@ import { cookies as getCookiesHeader } from "next/headers";
 import User from "@/models/userModel";
 import { ROLES } from "@/shared/enums/enums";
 import Business from "@/models/businessModel";
+import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
 
 export async function getUserFromCookies(
   request?: NextRequest,
@@ -13,10 +14,10 @@ export async function getUserFromCookies(
   let token: string | undefined;
 
   if (request) {
-    token = request.cookies.get("token")?.value;
+    token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   } else {
     const cookieStore = await getCookiesHeader();
-    token = cookieStore.get("token")?.value;
+    token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
   }
 
   if (!token) return null;

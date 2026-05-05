@@ -19,16 +19,30 @@ export const API_ROUTES = {
     login: `${base}/auth/login`,
     register: `${base}/auth/register`,
     logout: `${base}/auth/logout`,
+    me: `${base}/auth/me`,
     onboard: `${base}/auth/onboard`,
     sidebarProfile: `${base}/auth/sidebar-profile`,
     workspaceCreate: `${base}/auth/workspaces`,
     workspaceSwitch: `${base}/auth/workspaces/switch`,
     workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
     passwordPolicyConfig: `${base}/auth/password-policy/config`,
+    passwordlessConfig: `${base}/auth/passwordless/config`,
+    passwordlessRequest: `${base}/auth/passwordless/request`,
+    passwordlessRevoke: `${base}/auth/passwordless/revoke`,
+    passwordlessVerify: `${base}/auth/passwordless/verify`,
     sessionKeepAlive: `${base}/auth/session/keep-alive`,
-    forgot_password: `${base}/auth/forgotPassword`,
-    reset_password: `${base}/auth/resetPassword`,
-    update_password: `${base}/auth/updatePassword`,
+    forgotPassword: `${base}/auth/forgotPassword`,
+    resetPassword: `${base}/auth/resetPassword`,
+    updatePassword: `${base}/auth/updatePassword`,
+  },
+  workspaces: {
+    get_all: `${base}/workspaces`,
+    byId: (id: string) => `${base}/workspaces/${id}`,
+    bulkActions: `${base}/workspaces/bulk/actions`,
+  },
+  appSettings: {
+    root: `${base}/dashboard/settings/app`,
+    security: `${base}/dashboard/settings/app/security`,
   },
   userManagement: {
     get_users: `${base}/users`,
@@ -42,6 +56,14 @@ export const API_ROUTES = {
   settings: {
     email: `${base}/dashboard/settings/email`,
     security: `${base}/dashboard/settings/security`,
+  },
+
+  team: {
+    list: `${base}/team`,
+    byId: (id: string) => `${base}/team/${id}`,
+    resend: (id: string) => `${base}/team/${id}/resend`,
+    permissionsById: (id: string) => `${base}/team/${id}/permissions`,
+    roles: `${base}/team/roles`,
   },
 
   ticketManagement: {

@@ -1,84 +1,90 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+import { ApiError } from "@/shared/model/model";
+import {
+  fetchInvitePreview,
+  fetchPasswordlessLoginConfig,
   handleForgetPassword,
   handleLogin,
   handleLogout,
   handleOnboardUser,
+  handlePasswordlessLoginRequest,
   handleRegister,
   handleResetPassword,
 } from "../service/auth-service";
-import { useRouter } from "next/navigation";
-
-import toast from "react-hot-toast";
 import {
   IResetPassword,
-  IToken,
   IUpdatePassword,
   LoginPayload,
   OnboardUser,
+  PasswordlessLoginRequestPayload,
   RegisterPayload,
 } from "../model/model";
-
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ApiError } from "@/shared/model/model";
-
-// export function useLogins(): {
-//   handleLogins: ({
-//     email,
-//     password,
-//   }: {
-//     email: string;
-//     password: string;
-//   }) => void;
-//   isLoading: boolean;
-//   data: User | null;
-//   error: string | null;
-// } {
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [data, setData] = useState(null);
-//   const [error, setError] = useState(null);
-
-//   async function handleLogins(payload: { email: string; password: string }) {
-//     try {
-//       setIsLoading(true);
-//       const response = await http.post(`${API_ROUTES.auth.login}`, payload);
-
-//       setIsLoading(false);
-//       setData(response.data);
-//       console.log("I fetched", response.data);
-//     } catch (err: any) {
-//       setIsLoading(false);
-//       setError(err);
-//       console.log(err);
-//     }
-//   }
-
-//   return { handleLogins, isLoading, data, error };
-// }
 
 export function useLogin() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const {
-    isPending: isLoading,
-    mutate: login,
-    data,
-  } = useMutation({
+
+  const mutation = useMutation({
     mutationFn: (payload: LoginPayload) => handleLogin(payload),
     onSuccess: () => {
-      console.time("start");
+      queryClient.invalidateQueries({ queryKey: ["me"] });
       router.refresh();
-      console.timeEnd("start");
     },
     onError: (err: ApiError) => toast.error(err.message),
   });
 
   return {
-    isLoading,
-    login,
-    data,
+    isLoading: mutation.isPending,
+    login: mutation.mutate,
+    loginAsync: mutation.mutateAsync,
+    data: mutation.data,
   };
 }
+
+export function usePasswordlessLoginRequest() {
+  const mutation = useMutation({
+    mutationFn: (payload: PasswordlessLoginRequestPayload) =>
+      handlePasswordlessLoginRequest(payload),
+    onError: (err: ApiError) => toast.error(err.message),
+  });
+
+  return {
+    isLoading: mutation.isPending,
+    requestLink: mutation.mutate,
+    requestLinkAsync: mutation.mutateAsync,
+    data: mutation.data,
+  };
+}
+
+export function usePasswordlessLoginConfig() {
+  return useQuery({
+    queryKey: ["auth", "passwordless", "config"],
+    queryFn: fetchPasswordlessLoginConfig,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: false,
+  });
+}
+
+export function useInvitePreview(inviteToken: string | undefined | null) {
+  return useQuery({
+    queryKey: ["auth", "invite-preview", inviteToken],
+    queryFn: () => fetchInvitePreview(inviteToken!),
+    enabled: Boolean(inviteToken),
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+}
+
 export function useRegister() {
   const router = useRouter();
   const { isPending: isLoading, mutate: registering } = useMutation({
@@ -92,6 +98,7 @@ export function useRegister() {
     registering,
   };
 }
+
 export function useLogout(router: AppRouterInstance) {
   const queryClient = useQueryClient();
   const { isPending: isLoading, mutate: logOut } = useMutation({
@@ -99,6 +106,7 @@ export function useLogout(router: AppRouterInstance) {
     onSuccess: () => {
       queryClient.clear();
       router.push("/auth/login");
+      router.refresh();
     },
     onError: (err: ApiError) => toast.error(err.message),
   });
@@ -108,6 +116,7 @@ export function useLogout(router: AppRouterInstance) {
     logOut,
   };
 }
+
 export function useResetPassword() {
   const { isPending: isLoading, mutate: resetPassword } = useMutation({
     mutationFn: (payload: IResetPassword) => handleForgetPassword(payload),
@@ -120,14 +129,11 @@ export function useResetPassword() {
     resetPassword,
   };
 }
+
 export function useUpdatePassword() {
-  const router = useRouter();
   const { isPending: isLoading, mutate: updatePassword } = useMutation({
     mutationFn: (payload: IUpdatePassword) => handleResetPassword(payload),
-    onSuccess: (data) => {
-      // router.refresh();
-      toast.success(data.message);
-    },
+    onSuccess: (data) => toast.success(data.message),
     onError: (err: ApiError) => toast.error(err.message),
   });
 
@@ -136,6 +142,7 @@ export function useUpdatePassword() {
     updatePassword,
   };
 }
+
 export function useOnboardUser() {
   const { isPending: isLoading, mutate: onboardUser } = useMutation({
     mutationFn: (payload: OnboardUser) => handleOnboardUser(payload),

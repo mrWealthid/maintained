@@ -29,8 +29,8 @@ import { SuccessScreen } from "./components/SuccessScreen";
 import { ManagePropertyDialog } from "./dialogs/ManageProperty";
 import { ManagePropertiesDialog } from "./dialogs/ManageProperties";
 import { ManageUnitDialog } from "./dialogs/ManageUnit";
-import { ManageUserInviteDialog } from "./dialogs/ManageUserInvite";
-import { ManageUsersInviteDialog } from "./dialogs/ManageUsersInvite";
+import { InviteUserDialog } from "./dialogs/InviteUserDialog";
+import { InviteUsersDialog } from "./dialogs/InviteUsersDialog";
 
 /* ---------- Dialog wrappers (unchanged UI) ---------- */
 
@@ -162,7 +162,7 @@ export function OnboardingMultiStep({
         estimatedTime: "2 min",
         action: (
           <div className="flex gap-2">
-            <ManageUserInviteDialog
+            <InviteUserDialog
               onInvited={() => setOptimistic((s) => ({ ...s, team: true }))}
               trigger={
                 <Button size="sm" variant="outline" disabled={!unitsCompleted}>
@@ -171,7 +171,7 @@ export function OnboardingMultiStep({
                 </Button>
               }
             />
-            <ManageUsersInviteDialog
+            <InviteUsersDialog
               onInvited={() => setOptimistic((s) => ({ ...s, team: true }))}
               trigger={
                 <Button size="sm" variant="outline" disabled={!unitsCompleted}>

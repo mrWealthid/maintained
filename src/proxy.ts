@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { ROLES } from "./shared/enums/enums";
+import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
 
 type Role = "ADMIN" | "TECHNICIAN" | "USER" | string | null;
 type DecodedToken = {
@@ -14,7 +15,7 @@ export function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const path = url.pathname;
 
-  const token = request.cookies.get("token")?.value || null;
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value || null;
   const { valid, decoded } = decodeToken(token);
 
   const role: Role = decoded?.role?.toUpperCase() ?? null;

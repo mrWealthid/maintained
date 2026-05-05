@@ -1,4 +1,5 @@
 import { errorToNextResponse } from "@/lib/errors/apiError";
+import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
 import { revokeAuthSession } from "@/lib/auth/session";
 import { verifyToken } from "@/lib/auth/token";
 import { cookies } from "next/headers";
@@ -6,14 +7,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
+    const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
     const payload = token ? verifyToken(token) : null;
     if (payload?.sessionId) {
       await revokeAuthSession(payload.sessionId);
     }
 
     const cookie = await cookies();
-    cookie.delete("token");
+    cookie.delete(AUTH_COOKIE_NAME);
     const response = NextResponse.json({
       status: "success",
       message: "User was logged out",
