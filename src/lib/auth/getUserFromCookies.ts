@@ -3,13 +3,15 @@ import { NextRequest } from "next/server";
 import { verifyToken } from "./token";
 import { cookies as getCookiesHeader } from "next/headers";
 import User from "@/models/userModel";
+import type { MembershipRoleValue } from "@/models/userModel";
 import { ROLES } from "@/shared/enums/enums";
 import Business from "@/models/businessModel";
 import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 export async function getUserFromCookies(
   request?: NextRequest,
-  requiredRoles?: ROLES[]
+  requiredRoles?: MembershipRoleValue[]
 ) {
   let token: string | undefined;
 
@@ -28,37 +30,45 @@ export async function getUserFromCookies(
   }
 
   const user = await User.findById(payload.id).select(
-    "memberships currentBusiness name"
+    "currentBusiness name"
   );
   if (!user) return null;
 
-  const currentMembership = user.memberships.find(
-    (m) => m.business.toString() === user.currentBusiness.toString()
-  );
+  const currentMembership = await findActiveWorkspaceMembership({
+    userId: payload.id,
+    workspaceId: user.currentBusiness,
+  }).lean<{
+    role?: MembershipRoleValue | null;
+    property?: unknown;
+    unit?: unknown;
+  } | null>();
 
-  if (!currentMembership) return null;
+  if (!currentMembership?.role) return null;
 
   const currentBusiness = await Business.findById(
-    currentMembership.business
+    user.currentBusiness
   ).select("name");
 
   if (!currentBusiness) return null;
 
   // Check required role(s)
-  if (requiredRoles && !requiredRoles.includes(currentMembership.role)) {
+  if (
+    requiredRoles &&
+    !requiredRoles.includes(currentMembership.role as MembershipRoleValue)
+  ) {
     return null;
   }
 
   return {
     id: payload.id,
     currentBusiness: user.currentBusiness,
-    role: currentMembership.role,
+    role: currentMembership.role as MembershipRoleValue,
     user,
     currentBusinessName: currentBusiness.name,
     property: currentMembership.property,
     unit: currentMembership.unit,
     isAdminRole: currentMembership.role === "ADMIN",
-    isUserRole: currentMembership.role === "USER",
+    isUserRole: currentMembership.role === ROLES.tenant,
     isSuperAdminRole: currentMembership.role === "SUPER_ADMIN",
     isTechnicianRole: currentMembership.role === "TECHNICIAN",
   };

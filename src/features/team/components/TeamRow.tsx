@@ -1,10 +1,10 @@
 "use client";
 
-import { Mail, Shield, UserRound, Wallet } from "lucide-react";
+import { Home, Mail, Shield, UserRound, Wallet } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { USER_TYPE, WORKSPACE_ROLE } from "@/shared/auth/roles";
 import {
   TEAM_MEMBER_STATUS,
   type TeamListItem,
@@ -52,6 +52,7 @@ function getStatusPresentation(status: TeamListItem["status"]) {
 }
 
 function getRoleIcon(role: TeamListItem["role"]) {
+  if (role === USER_TYPE.tenant) return Home;
   if (
     role === WORKSPACE_ROLE.owner ||
     role === WORKSPACE_ROLE.property_manager
@@ -63,6 +64,9 @@ function getRoleIcon(role: TeamListItem["role"]) {
 }
 
 function getRoleBadgeClassName(role: TeamListItem["role"]) {
+  if (role === USER_TYPE.tenant) {
+    return "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900/40 dark:bg-violet-950/30 dark:text-violet-300";
+  }
   if (role === WORKSPACE_ROLE.owner) {
     return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300";
   }

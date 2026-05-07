@@ -1,7 +1,7 @@
 import { ApiErrorHandler } from "@/utils/apiError";
 import { http } from "@/services/http";
 import {
-  ChecklistState,
+  OnboardingState,
   CreatePropertyPayload,
   CreateMultiplePropertiesPayload,
   CreateUnitPayload,
@@ -9,7 +9,6 @@ import {
 } from "../model/model";
 import { ApiResponse } from "@/shared/model/model";
 import { UnitOption } from "../components/PropertyUnitGroupArray";
-import { ApiError } from "next/dist/server/api-utils";
 
 export async function handleCreateProperty(payload: CreatePropertyPayload) {
   try {
@@ -56,9 +55,22 @@ export async function fetchUnits(propertyId: string): Promise<UnitOption[]> {
   }
 }
 
-export async function fetchOnboardingChecklist(): Promise<ChecklistState> {
+export async function fetchOnboardingState(): Promise<
+  ApiResponse<OnboardingState>
+> {
   try {
-    const res = await http(`/api/onboarding/checklist`);
+    const res = await http(`/api/onboarding/state`);
+    return res.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function completeOnboarding(): Promise<
+  ApiResponse<{ onboardingCompletedAt: string }>
+> {
+  try {
+    const res = await http.post(`/api/onboarding/complete`, {});
     return res.data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);

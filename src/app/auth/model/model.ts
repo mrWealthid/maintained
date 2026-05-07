@@ -8,8 +8,8 @@ import { CODES, EmailRegex } from "../data/data";
 
 export interface IUpdatePassword {
   newPassword: string;
-  currentPassword: string;
-  confirmNewPassword: string;
+  currentPassword?: string;
+  confirmNewPassword?: string;
   resetToken: string;
 }
 
@@ -82,13 +82,17 @@ export interface IToken {
 }
 
 export interface OnboardUser {
-  password: string;
   inviteToken: string;
+  password?: string;
+  contact?: string;
+  countryCode?: (typeof CODES)[number];
 }
 
 export interface OnboardUserForm {
+  email: string;
   password: string;
-  dateOfBirth: string;
+  contact: string;
+  countryCode: (typeof CODES)[number];
 }
 
 export interface PasswordlessLoginConfig {
@@ -101,11 +105,24 @@ export interface PasswordlessLoginRequestPayload {
 }
 
 export interface InvitePreview {
+  name: string;
   email: string;
-  name?: string;
-  businessName?: string;
-  inviteExpiresAt?: string;
-  requiresAccountSetup?: boolean;
-  expired?: boolean;
+  role: string;
+  businessName: string;
+  inviteExpiresAt: string | null;
+  requiresAccountSetup: boolean;
 }
-// password, inviteToken;
+
+export const OnboardUserSchema = z.object({
+  inviteToken: z.string().min(1, "Invite token is required"),
+  password: z.string().min(1, "Password is required").optional(),
+  contact: z.string().min(1, "Phone number is required").optional(),
+  countryCode: z.enum(CODES, { required_error: "Select a country" }).optional(),
+});
+
+export const OnboardUserFormSchema = z.object({
+  email: z.string().regex(EmailRegex, "Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+  contact: z.string().min(1, "Phone number is required"),
+  countryCode: z.enum(CODES, { required_error: "Select a country" }),
+});

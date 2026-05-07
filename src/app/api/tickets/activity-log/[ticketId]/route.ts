@@ -12,7 +12,10 @@ export async function GET(
     if (!verify) throw ApiError.unauthorized();
 
     const { ticketId } = await params;
-    const data = await TicketActivity.find({ ticket: ticketId });
+    const data = await TicketActivity.find({ ticket: ticketId })
+      .sort({ createdAt: -1 })
+      .populate({ path: "changedBy", select: "name email photo" })
+      .lean();
 
     return NextResponse.json({ status: "success", data });
   } catch (error) {

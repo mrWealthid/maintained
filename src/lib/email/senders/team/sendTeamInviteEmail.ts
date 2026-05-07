@@ -5,6 +5,7 @@ import { buildTeamInviteEmailHtml } from "@/lib/email/helpers/app-email-layout";
 import { resolveAppBaseUrl } from "@/lib/email/helpers/app-url";
 import { APP_EMAIL_TEMPLATE } from "@/shared/enums/email-template";
 import { getWorkspaceTypeLabel } from "@/shared/model/workspace.model";
+import { getInviteTokenExpiresInHours } from "@/utils/helpers";
 
 /**
  * Promoted to app-level (matches eventSphere). Team invite is platform
@@ -29,7 +30,9 @@ export async function sendTeamInviteEmail(args: {
   const workspaceName = args.workspaceName ?? "Business";
   const workspaceLabel = getWorkspaceTypeLabel(args.workspaceType);
   const expiresHours =
-    args.expiresHours ?? Number(process.env.INVITE_TOKEN_EXPIRES_IN_HOURS) ?? 48;
+    args.expiresHours && Number.isFinite(args.expiresHours)
+      ? args.expiresHours
+      : getInviteTokenExpiresInHours();
 
   return sendAppTemplateEmail({
     templateKey: APP_EMAIL_TEMPLATE.TEAM_INVITE,

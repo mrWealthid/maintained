@@ -35,7 +35,7 @@ import {
   TicketType,
   User,
 } from "@/shared/model/model";
-import { ApiError } from "next/dist/server/api-utils";
+import { ApiError } from "@/shared/model/model";
 import { IListResponse } from "@/shared/components/table/models/table.model";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getMembershipForBusiness } from "@/utils/helpers";
@@ -86,7 +86,7 @@ export function useFetchTickets<T>(
 }
 export function useFetchTicketType<T>(page: number = 1, limit: number = 50) {
   const { isLoading, data, error, isRefetching } = useQuery({
-    queryKey: ["ticket-type"],
+    queryKey: ["ticket-types"],
     queryFn: () => fetchRequestType<T>(),
   });
 
@@ -193,17 +193,11 @@ export function useFetchTechnicians(page: number = 1, limit: number = 50) {
   };
 }
 export function useFetchTicketDetails(id: string) {
-  const { isLoading, data, error, isRefetching } = useQuery({
-    queryKey: ["ticketDetails"],
+  return useQuery({
+    queryKey: ["ticketDetails", id],
     queryFn: () => fetchTicketDetails(id),
+    enabled: Boolean(id),
   });
-
-  return {
-    isLoading,
-    error,
-    isRefetching,
-    ...data,
-  };
 }
 export function useFetchAdmins<T>(page: number = 1, limit: number = 50) {
   const { isLoading, data, error, isRefetching } = useQuery({

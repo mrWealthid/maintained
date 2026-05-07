@@ -22,6 +22,7 @@ import {
   isIpAllowed,
 } from "@/lib/security/business-security";
 import { getRequestSecurityContext } from "@/lib/security/request-context";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 function redirectToLogin(
   request: NextRequest,
@@ -51,16 +52,19 @@ export async function GET(request: NextRequest) {
       passwordlessLoginToken: hashPasswordlessLoginToken(token),
       passwordlessLoginExpires: { $gt: new Date() },
     }).select(
-      "name email memberships currentBusiness createdAt passwordChangedAt +passwordlessLoginToken +passwordlessLoginExpires"
+      "name email currentBusiness createdAt passwordChangedAt +passwordlessLoginToken +passwordlessLoginExpires"
     );
 
     if (!user) {
       return redirectToLogin(request, PASSWORDLESS_LOGIN_STATUS.INVALID_LINK);
     }
 
-    const currentMembership = user.memberships.find(
-      (m) => m.business.toString() === user.currentBusiness?.toString()
-    );
+    const currentMembership = user.currentBusiness
+      ? await findActiveWorkspaceMembership({
+          userId: user._id as never,
+          workspaceId: user.currentBusiness,
+        }).lean<{ role?: string | null } | null>()
+      : null;
 
     if (!currentMembership || currentMembership.role === ROLES.super_admin) {
       return redirectToLogin(request, PASSWORDLESS_LOGIN_STATUS.DISABLED);

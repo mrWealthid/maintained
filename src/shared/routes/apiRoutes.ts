@@ -40,12 +40,18 @@ export const API_ROUTES = {
     byId: (id: string) => `${base}/workspaces/${id}`,
     bulkActions: `${base}/workspaces/bulk/actions`,
   },
+  platform: {
+    roles: `${base}/platform/roles`,
+  },
   appSettings: {
     root: `${base}/dashboard/settings/app`,
     security: `${base}/dashboard/settings/app/security`,
     categories: `${base}/dashboard/settings/app/categories`,
     categoryById: (id: string) =>
       `${base}/dashboard/settings/app/categories/${id}`,
+    ticketTypes: `${base}/dashboard/settings/app/ticket-types`,
+    ticketTypeById: (id: string) =>
+      `${base}/dashboard/settings/app/ticket-types/${id}`,
     emailTest: `${base}/dashboard/settings/app/email/test`,
   },
   userManagement: {

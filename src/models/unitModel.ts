@@ -18,6 +18,16 @@ const UnitSchema = new Schema(
     floor: String,
     isActive: { type: Boolean, default: true },
 
+    // Real property-mgmt details
+    bedrooms: { type: Number, min: 0 },
+    bathrooms: { type: Number, min: 0 },
+    sizeSqft: { type: Number, min: 0 },
+    monthlyRent: {
+      amount: { type: Number, min: 0 },
+      currency: { type: String, default: "USD" },
+    },
+    notes: { type: String, default: "" },
+
     // Current occupancy (optional)
     tenantUser: { type: Schema.Types.ObjectId, ref: "User" },
     tenantActive: { type: Boolean, default: false },

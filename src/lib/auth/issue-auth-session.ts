@@ -12,8 +12,9 @@ import {
   resolveWorkspaceRole,
   toLegacySessionRole,
 } from "@/shared/auth/roles";
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 import type { UserDoc } from "@/models/userModel";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 type AuthSessionIssueArgs = {
   request: NextRequest;
@@ -29,13 +30,22 @@ function getCookieExpiresAt() {
   return new Date(Date.now() + (Number.isFinite(minutes) ? minutes : fallbackMinutes) * 60 * 1000);
 }
 
-function getSessionContext(user: UserDoc) {
+async function getSessionContext(user: UserDoc) {
   const businessId = user.currentBusiness?.toString();
-  const membership = user.memberships.find(
-    (item) => item.business.toString() === businessId
-  );
 
-  if (!businessId || !membership || membership.status !== INVITE_STATUS.activated) {
+  if (!businessId) {
+    return null;
+  }
+
+  const membership = await findActiveWorkspaceMembership({
+    userId: user.id,
+    workspaceId: businessId,
+  }).lean<{
+    role?: string | null;
+    roleDefinition?: unknown;
+  } | null>();
+
+  if (!membership?.role) {
     return null;
   }
 
@@ -46,7 +56,6 @@ function getSessionContext(user: UserDoc) {
     ? null
     : resolveWorkspaceRole({
         storedRole: membership.role,
-        isWorkspaceOwner: membership.isCreator,
       });
   const role = platformRole
     ? ROLES.super_admin
@@ -54,14 +63,14 @@ function getSessionContext(user: UserDoc) {
 
   return {
     businessId,
-    role,
+    role: role as ROLES,
     platformRole,
     workspaceRole,
   };
 }
 
 async function issueAuthSession(args: AuthSessionIssueArgs) {
-  const sessionContext = getSessionContext(args.user);
+  const sessionContext = await getSessionContext(args.user);
   if (!sessionContext) {
     throw new Error("User does not have an active workspace membership");
   }

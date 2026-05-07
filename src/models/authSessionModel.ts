@@ -47,7 +47,7 @@ const authSessionSchema = new Schema<IAuthSession>(
       type: String,
       enum: Object.values(ROLES),
       required: true,
-      default: ROLES.user,
+      default: ROLES.tenant,
     },
     workspaceRole: {
       type: String,

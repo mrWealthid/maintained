@@ -33,6 +33,10 @@ import {
   createTicketType,
   updateTicketType,
   deleteTicketType,
+  fetchAppTicketTypes,
+  createAppTicketType,
+  updateAppTicketType,
+  deleteAppTicketType,
 } from "../services/settings-service";
 import { ApiError } from "@/shared/model/model";
 
@@ -359,4 +363,52 @@ export function useDeleteTicketType() {
   });
 
   return { handleDeleteTicketType, isDeleting };
+}
+
+// Platform (app-wide) Ticket Types Hooks
+export function useAppTicketTypes() {
+  return useQuery({
+    queryKey: ["app-ticket-types"],
+    queryFn: fetchAppTicketTypes,
+    select: (data) => data.data,
+  });
+}
+
+export function useCreateAppTicketType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAppTicketType,
+    onSuccess: () => {
+      toast.success("Ticket type created successfully");
+      queryClient.invalidateQueries({ queryKey: ["app-ticket-types"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateAppTicketType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: TicketTypeFormData }) =>
+      updateAppTicketType(id, data),
+    onSuccess: () => {
+      toast.success("Ticket type updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["app-ticket-types"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useDeleteAppTicketType() {
+  const queryClient = useQueryClient();
+  const { mutate: handleDeleteAppTicketType, isPending: isDeleting } =
+    useMutation({
+      mutationFn: deleteAppTicketType,
+      onSuccess: () => {
+        toast.success("Ticket type deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ["app-ticket-types"] });
+      },
+      onError: (error: ApiError) => toast.error(error.message),
+    });
+  return { handleDeleteAppTicketType, isDeleting };
 }

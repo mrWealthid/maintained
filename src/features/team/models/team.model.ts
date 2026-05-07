@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   WORKSPACE_ASSIGNABLE_ROLE_VALUES,
   WORKSPACE_ROLE,
+  USER_TYPE,
 } from "@/shared/auth/roles";
 
 export enum TEAM_MEMBER_STATUS {
@@ -15,6 +16,16 @@ export const TeamAssignableRoleSchema = z.enum(
   WORKSPACE_ASSIGNABLE_ROLE_VALUES,
 );
 
+export const TEAM_INVITE_ROLE_VALUES = [
+  ...WORKSPACE_ASSIGNABLE_ROLE_VALUES,
+  USER_TYPE.tenant,
+  USER_TYPE.technician,
+] as const;
+
+export const TeamInviteRoleSchema = z.enum(
+  TEAM_INVITE_ROLE_VALUES,
+);
+
 export const TeamInvitePayloadSchema = z.object({
   name: z
     .string()
@@ -22,17 +33,17 @@ export const TeamInvitePayloadSchema = z.object({
     .min(2, "Name is required")
     .max(100, "Name is too long"),
   email: z.string().trim().email("Enter a valid email address"),
-  role: TeamAssignableRoleSchema,
+  role: TeamInviteRoleSchema,
 });
 
 export const TeamRoleAssignmentUpdateSchema = z.union([
   z.object({
     kind: z.literal("invite"),
-    role: TeamAssignableRoleSchema,
+    role: TeamInviteRoleSchema,
   }),
   z.object({
     kind: z.literal("member"),
-    role: TeamAssignableRoleSchema,
+    role: TeamInviteRoleSchema,
   }),
   z.object({
     kind: z.literal("member"),
@@ -50,13 +61,14 @@ export type TeamRoleUpdatePayload = z.infer<
 >;
 export type TeamDeactivatePayload = z.infer<typeof TeamDeactivatePayloadSchema>;
 export type TeamAssignableRole = z.infer<typeof TeamAssignableRoleSchema>;
+export type TeamInviteRole = z.infer<typeof TeamInviteRoleSchema>;
 
 export type TeamListItem = {
   id: string;
   kind: "member" | "invite";
   name: string;
   email: string;
-  role: WORKSPACE_ROLE;
+  role: WORKSPACE_ROLE | TeamInviteRole;
   roleDefinitionId?: string | null;
   roleDefinitionKey?: string | null;
   roleDefinitionName?: string | null;
@@ -75,14 +87,14 @@ export type TeamListFilter = {
   email?: string;
   search?: string;
   status?: TEAM_MEMBER_STATUS;
-  role?: TeamAssignableRole;
+  role?: TeamInviteRole;
 };
 
 export type TeamListBulkAction = "resend" | "deactivate" | "delete";
 
 export type TeamListMeta = {
   allowTeamInvitations: boolean;
-  defaultRoleForNewMembers: TeamAssignableRole;
+  defaultRoleForNewMembers: TeamInviteRole;
   currentUserId: string;
   businessName: string;
 };

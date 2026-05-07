@@ -1,6 +1,7 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Ticket from "@/models/ticketModel";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
@@ -19,11 +20,20 @@ export async function GET(
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
 
     const ticket = await Ticket.findById(ticketId).populate([
-      { path: "category", select: "name" },
-      { path: "user", select: "name email" },
+      { path: "category", select: "name description" },
+      { path: "type", select: "name description" },
+      { path: "user", select: "name email photo contact" },
+      { path: "assignedTo", select: "name email photo" },
+      { path: "actionedBy", select: "name email photo" },
+      { path: "property", select: "name type address code" },
+      { path: "unit", select: "label floor bedrooms bathrooms sizeSqft" },
+      {
+        path: "relatedTo",
+        select: "title status createdAt propertyName unitLabel priority",
+      },
       {
         path: "requests",
-        populate: { path: "technician", select: "name email" },
+        populate: { path: "technician", select: "name email photo" },
       },
     ]);
 
@@ -49,6 +59,20 @@ export async function PATCH(
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
 
     const rest = parseOrThrow(ticketUpdateBodySchema, await request.json());
+    if (rest.relatedTo === ticketId) {
+      throw ApiError.badRequest("A ticket cannot be related to itself");
+    }
+
+    if (rest.relatedTo) {
+      if (!mongoose.Types.ObjectId.isValid(rest.relatedTo)) {
+        throw ApiError.badRequest("Invalid related ticket");
+      }
+
+      const relatedTicket = await Ticket.findById(rest.relatedTo).select("_id");
+      if (!relatedTicket) {
+        throw ApiError.badRequest("Related ticket not found");
+      }
+    }
 
     const updatedRequest = await Ticket.findOneAndUpdate(
       { _id: ticketId, user: verify.id },

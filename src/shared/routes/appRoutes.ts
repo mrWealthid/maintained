@@ -80,6 +80,12 @@ export const superAdminRoutes: Routes[] = [
     permission: PERMISSION.PLATFORM_WORKSPACES_VIEW,
   },
   {
+    name: "Access Control",
+    path: APP_ROUTES.DASHBOARD.ACCESS_CONTROL,
+    icon: Shield,
+    permission: PERMISSION.PLATFORM_SETTINGS_VIEW,
+  },
+  {
     name: "Settings",
     path: APP_ROUTES.DASHBOARD.SETTINGS,
     icon: Settings,

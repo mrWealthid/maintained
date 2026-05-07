@@ -76,7 +76,7 @@ function Profile({
         expanded ? "gap-3" : "w-full justify-center",
       )}
     >
-      <Avatar className="size-10 border border-border/70 shadow-2xs">
+      <Avatar className="size-10 border border-border/70 shadow-xs">
         <AvatarImage src={avatarSrc} alt={name} />
         <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
           {initials}

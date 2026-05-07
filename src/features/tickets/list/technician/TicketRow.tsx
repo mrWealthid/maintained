@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TechnicianTicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -7,7 +8,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
   return (
     <>
       {data?.map((row, i) => {
-        const { area, title, user, category } = row.ticket;
+        const { area, title, user, category, id: ticketId } = row.ticket;
         return (
           <TableRow key={row.id} className="relative  ">
             {/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
@@ -27,9 +28,13 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
               <span>{i + 1}.</span>
             </TableCell>
             <TableCell colSpan={3}>
-              <span title={title} className="block ">
+              <Link
+                href={`/dashboard/ticket-management/${ticketId}`}
+                title={title}
+                className="block font-medium text-foreground hover:text-primary hover:underline"
+              >
                 {title}
-              </span>
+              </Link>
             </TableCell>
             <TableCell colSpan={2}>
               <span

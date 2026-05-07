@@ -24,6 +24,8 @@ import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
 import { WORKSPACE_ROLE } from "@/shared/auth/roles";
 import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
 import { SignupSchema } from "@/app/auth/model/model";
+import { upsertActiveWorkspaceMembership } from "@/lib/tenancy/provisioning";
+import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
 
 const getRequestId = (request: NextRequest) =>
   request.headers.get("x-request-id") ?? undefined;
@@ -76,6 +78,7 @@ export async function POST(request: NextRequest) {
       countryCode: payload.countryCode,
       addressStructured: payload.addressStructured,
       passwordChangedAt: new Date(),
+      emailVerifiedAt: new Date(),
     });
 
     const business = await Business.create({
@@ -119,6 +122,15 @@ export async function POST(request: NextRequest) {
       isCreator: true,
       roleDefinition: ownerRoleDefinitionId ?? undefined,
     } as never);
+    await upsertActiveWorkspaceMembership({
+      workspaceId: business._id as mongoose.Types.ObjectId,
+      userId: newUser._id as mongoose.Types.ObjectId,
+      role: WORKSPACE_ROLE.owner as never,
+      roleDefinition: ownerRoleDefinitionId as mongoose.Types.ObjectId | null,
+      createdBy: newUser._id as mongoose.Types.ObjectId,
+      source: WORKSPACE_MEMBERSHIP_SOURCE.signup,
+      joinedAt: new Date(),
+    });
     newUser.currentBusiness = business._id as mongoose.Types.ObjectId;
     await newUser.save({ validateBeforeSave: false });
 

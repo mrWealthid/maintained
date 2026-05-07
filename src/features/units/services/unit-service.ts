@@ -20,6 +20,7 @@ function withSummary<T>(
 
 export interface Unit {
   _id: string;
+  id?: string;
   label: string;
   floor?: string;
   isActive: boolean;
@@ -31,11 +32,16 @@ export interface Unit {
   };
   tenantActive: boolean;
   tenants: Array<{
-    user: string;
+    user: string | { _id?: string; id?: string; name?: string; email?: string };
     start: string;
     end?: string;
   }>;
   tags: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  sizeSqft?: number;
+  monthlyRent?: { amount?: number; currency?: string };
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

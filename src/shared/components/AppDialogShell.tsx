@@ -37,7 +37,7 @@ export function AppDialogContent({ className, ...props }: AppDialogContentProps)
   return (
     <DialogContent
       className={cn(
-        "flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl",
+        "flex max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:max-w-2xl sm:rounded-lg sm:border",
         className,
       )}
       {...props}
@@ -57,7 +57,10 @@ export function AppDialogHeader({
 }: AppDialogHeaderProps) {
   return (
     <DialogHeader
-      className={cn("shrink-0 border-b px-6 py-5 pr-12", className)}
+      className={cn(
+        "shrink-0 border-b bg-card/95 px-4 py-4 pr-12 sm:px-6 sm:py-5",
+        className,
+      )}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3 text-left">
@@ -98,7 +101,7 @@ export function AppDialogBody({ className, ...props }: AppDialogSectionProps) {
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-6 py-5",
+        "min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5 [-webkit-overflow-scrolling:touch] [touch-action:pan-y] sm:px-6",
         className,
       )}
       {...props}
@@ -109,7 +112,10 @@ export function AppDialogBody({ className, ...props }: AppDialogSectionProps) {
 export function AppDialogFooter({ className, ...props }: React.ComponentProps<typeof DialogFooter>) {
   return (
     <DialogFooter
-      className={cn("shrink-0 border-t px-6 py-4", className)}
+      className={cn(
+        "shrink-0 border-t bg-card/95 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-4",
+        className,
+      )}
       {...props}
     />
   );

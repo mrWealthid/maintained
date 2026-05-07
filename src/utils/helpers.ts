@@ -104,10 +104,25 @@ export function getInviteStatusForBusiness(
   return membership?.status;
 }
 
+export const DEFAULT_INVITE_TOKEN_EXPIRES_IN_HOURS = 24;
+
+export function getInviteTokenExpiresInHours(
+  value = process.env.INVITE_TOKEN_EXPIRES_IN_HOURS
+) {
+  if (!value) return DEFAULT_INVITE_TOKEN_EXPIRES_IN_HOURS;
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0
+    ? parsed
+    : DEFAULT_INVITE_TOKEN_EXPIRES_IN_HOURS;
+}
+
 export function generateInviteToken() {
   const token = crypto.randomBytes(32).toString("hex");
   const hashed = crypto.createHash("sha256").update(token).digest("hex");
-  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  const expires = new Date(
+    Date.now() + getInviteTokenExpiresInHours() * 60 * 60 * 1000
+  );
   return { token, hashed, expires };
 }
 

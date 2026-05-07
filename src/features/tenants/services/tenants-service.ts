@@ -18,7 +18,7 @@ import type {
 
 export async function fetchTenantList(query: TenantListQuery) {
   try {
-    const qs = buildQueryString({ ...query, role: ROLES.user });
+    const qs = buildQueryString({ ...query, role: ROLES.tenant });
     const { data } = await http.get(
       `${API_ROUTES.userManagement.get_users}?${qs}`,
     );
@@ -43,7 +43,7 @@ export async function inviteTenant(payload: TenantInviteFormValues) {
   try {
     const { data } = await http.post(
       API_ROUTES.userManagement.invite_user,
-      { ...payload, role: ROLES.user },
+      { ...payload, role: ROLES.tenant },
     );
     return data;
   } catch (err: unknown) {

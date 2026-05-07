@@ -341,3 +341,52 @@ export async function deleteTicketType(id: string): Promise<ApiResponse<void>> {
     throw ApiErrorHandler.toUIError(err);
   }
 }
+
+// Platform-wide (app) ticket types
+export async function fetchAppTicketTypes(): Promise<ApiResponse<TicketType[]>> {
+  try {
+    const response = await http.get(API_ROUTES.appSettings.ticketTypes);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function createAppTicketType(
+  data: TicketTypeFormData
+): Promise<ApiResponse<TicketType>> {
+  try {
+    const response = await http.post(API_ROUTES.appSettings.ticketTypes, data);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updateAppTicketType(
+  id: string,
+  data: TicketTypeFormData
+): Promise<ApiResponse<TicketType>> {
+  try {
+    const response = await http.put(
+      API_ROUTES.appSettings.ticketTypeById(id),
+      data
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function deleteAppTicketType(
+  id: string
+): Promise<ApiResponse<void>> {
+  try {
+    const response = await http.delete(
+      API_ROUTES.appSettings.ticketTypeById(id)
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}

@@ -3,9 +3,8 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { ArrowLeft, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { useResetPassword } from "../hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { IResetPassword } from "../model/model";
 import {
   Card,
@@ -21,11 +20,11 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
 } from "@/components/ui/form";
 import AuthWrapper from "../AuthWrapper";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import { EmailRegex } from "../data/data";
+import { Button } from "@/components/ui/button";
 
 const ResetPasswordComponent = () => {
   const form = useForm<{ email: string }>({
@@ -42,93 +41,70 @@ const ResetPasswordComponent = () => {
     formState: { errors, isValid },
   } = form;
 
-  function onError(err: any) {
+  function onError(err: unknown) {
     console.log(err);
   }
 
   return (
-    // <>
-    // 	<section className='flex flex-col min-h-screen h-fit items-center justify-center'>
-    // 		<section className='border bg-card w-5/6 md:w-4/6 lg:w-2/3 xl:w-1/3 py-10 px-5 flex gap-4 flex-col items-center justify-center'>
-    // 			<p className='text-center  font-bold text-2xl'>
-    // 				Reset Password
-    // 			</p>
-
-    // 			<section className='w-full'>
-    // 				<form
-    // 					autoFocus
-    // 					onSubmit={handleSubmit(onSubmit, onError)}
-    // 					action=''
-    // 					className='w-full flex flex-col justify-center gap-2 items-center'>
-    // 					<EmailInput
-    // 						name={'email'}
-    // 						label='Email'
-    // 						error={errors?.['email']?.message?.toString()}>
-    // 						<input
-    // 							{...register('email', {
-    // 								required: 'This field is required',
-    // 								pattern: {
-    // 									value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-    // 									message: 'Invalid email address'
-    // 								}
-    // 							})}
-    // 							className='input-style'
-    // 							type='email'
-    // 							id='email'
-    // 							autoFocus
-    // 						/>
-    // 					</EmailInput>
-
-    // 					<ButtonComponent
-    // 						styles='w-full mt-4'
-    // 						btnText='Reset'
-    // 						loading={isLoading}
-    // 						type='submit'
-    // 						disabled={!isValid || isLoading}
-    // 					/>
-
-    // 					<p className='flex gap-3 text-sm'>
-    // 						Need An Account ?
-    // 						<Link
-    // 							href={'/auth/signup'}
-    // 							className='text-primary text-sm'>
-    // 							Sign up
-    // 						</Link>
-    // 					</p>
-    // 				</form>
-    // 			</section>
-    // 		</section>
-    // 	</section>
-    // </>
-
     <AuthWrapper>
-      <section className="w-full dashboard-body flex gap-4 flex-col items-center justify-center">
-        {/* <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">
-            Welcome back
-          </h1>
-          <p className="text-muted-foreground">
-            Sign in to your ApartmentHub account
-          </p>
-        </div> */}
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:flex-row lg:items-start">
+        <Card className="w-full border-border/70 bg-card/95 shadow-sm lg:max-w-sm">
+          <CardHeader className="space-y-5">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <KeyRound className="size-6" />
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-2xl font-semibold text-foreground">
+                Reset your password
+              </CardTitle>
+              <CardDescription className="text-sm leading-6 text-muted-foreground/90">
+                We&apos;ll email a secure reset link so you can set a new password
+                and return to your workspace.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-2xl border border-border/70 bg-muted/35 p-4">
+              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ShieldCheck className="size-4" />
+                </div>
+                <p>
+                  Use the email tied to your account. The reset link is time-bound
+                  and should only be used by you.
+                </p>
+              </div>
+            </div>
 
-        <Card className="w-full lg:w-1/3">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-semibold text-center text-foreground">
-              Reset Password
+            <div className="rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground">
+              <div className="flex items-start gap-3">
+                <Mail className="mt-0.5 size-4 shrink-0 text-primary" />
+                <p>
+                  After the email arrives, follow the link to create a new
+                  password and sign in again.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full border-border/70 bg-card/95 shadow-sm lg:max-w-xl">
+          <CardHeader className="space-y-3 pb-4">
+            <CardTitle className="text-xl font-semibold text-foreground">
+              Send reset email
             </CardTitle>
-            {/* <CardDescription className="text-center text-muted-foreground">
-              Enter your credentials to access your account
-            </CardDescription> */}
+            <CardDescription className="text-sm leading-6 text-muted-foreground/90">
+              Enter your account email and we&apos;ll send password reset
+              instructions.
+            </CardDescription>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="space-y-6">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="w-full flex flex-col justify-center gap-4 items-stretch"
+                onSubmit={form.handleSubmit(onSubmit, onError)}
+                className="flex w-full flex-col items-stretch justify-center gap-4"
               >
-                {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -147,60 +123,45 @@ const ResetPasswordComponent = () => {
                           {...field}
                           type="email"
                           autoFocus
-                          value={field.value ?? ""} // prevent null warnings
+                          value={field.value ?? ""}
                           placeholder="you@example.com"
                         />
                       </FormControl>
-                      <FormMessage>
-                        {errors.email && (
-                          <ErrorMessage errorMsg={errors.email.message!} />
-                        )}
-                      </FormMessage>
+
+                      {errors.email && (
+                        <ErrorMessage errorMsg={errors.email.message!} />
+                      )}
                     </FormItem>
                   )}
                 />
 
-                <Button
-                  type="submit"
-                  className="w-full mt-4"
-                  disabled={!isValid || isLoading}
-                >
-                  {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  Send Reset Link
+                <Button type="submit" disabled={!isValid || isLoading}>
+                  {isLoading ? "Processing..." : "Proceed"}
                 </Button>
 
-                <p className="flex gap-3 text-sm justify-center text-muted-foreground">
-                  Forgot Password?
+                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
                   <Link
-                    href="/auth/resetPassword"
-                    className="text-primary hover:underline text-sm"
+                    href="/auth/login"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
-                    Reset
+                    <ArrowLeft className="size-4" />
+                    Back to login
                   </Link>
-                </p>
-                <p className="flex gap-3 text-sm justify-center text-muted-foreground">
-                  Need An Account?
-                  <Link href="/auth/signup" className="text-primary hover:underline text-sm">
-                    Sign up
-                  </Link>
-                </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Need an account?{" "}
+                    <Link
+                      href="/auth/signup"
+                      className="font-medium text-foreground underline-offset-4 hover:underline"
+                    >
+                      Sign up
+                    </Link>
+                  </p>
+                </div>
               </form>
             </Form>
           </CardContent>
         </Card>
-
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">
-            By signing in, you agree to our{" "}
-            <Link href="" className="underline hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="" className="underline hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-          </p>
-        </div>
       </section>
     </AuthWrapper>
   );

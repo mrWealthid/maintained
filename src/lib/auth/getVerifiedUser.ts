@@ -23,7 +23,8 @@ import {
   toLegacySessionRole,
   type WORKSPACE_ROLE,
 } from "@/shared/auth/roles";
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 export type VerifiedUser = {
   id: string;
@@ -89,13 +90,7 @@ export async function getVerifiedUserState(
       workspaceRole?: WORKSPACE_ROLE | null;
       lastSeenAt?: Date;
     } | null>(),
-    User.findById(payload.id).select("memberships currentBusiness").lean<{
-      memberships: Array<{
-        business: { toString(): string };
-        role: ROLES;
-        status: INVITE_STATUS;
-        isCreator?: boolean;
-      }>;
+    User.findById(payload.id).select("currentBusiness").lean<{
       currentBusiness: { toString(): string };
     } | null>(),
     Business.findById(payload.currentBusiness)
@@ -143,13 +138,12 @@ export async function getVerifiedUserState(
     return { status: VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED };
   }
 
-  const currentMembership = user.memberships.find(
-    (membership) =>
-      membership.business.toString() === payload.currentBusiness &&
-      membership.status === INVITE_STATUS.activated
-  );
+  const currentMembership = await findActiveWorkspaceMembership({
+    userId: payload.id,
+    workspaceId: payload.currentBusiness,
+  }).lean<{ role?: string | null } | null>();
 
-  if (!currentMembership) {
+  if (!currentMembership?.role) {
     await revokeAuthSession(payload.sessionId);
     return { status: VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED };
   }
@@ -161,7 +155,6 @@ export async function getVerifiedUserState(
     ? null
     : resolveWorkspaceRole({
         storedRole: currentMembership.role,
-        isWorkspaceOwner: currentMembership.isCreator,
       });
   const role = platformRole
     ? ROLES.super_admin

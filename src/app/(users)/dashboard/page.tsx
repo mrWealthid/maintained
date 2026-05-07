@@ -1,70 +1,48 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import React, { useMemo, useRef, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import OnboardingModal from "@/features/onboarding/OnboardingModal";
-import TicketComponent from "@/features/tickets/components/TicketComponent";
-import { useAppContext } from "@/shared/contexts/AppContext";
-import { useOnboardingChecklist } from "@/features/onboarding/hooks/onboardingHooks";
+import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { isPlatformSuperAdminRole } from "@/shared/auth/roles";
+import Business from "@/models/businessModel";
+import User from "@/models/userModel";
+import { DashboardAnalyticsView } from "@/features/dashboard/components/DashboardAnalyticsView";
+import { getDashboardAnalytics } from "@/features/dashboard/service/dashboard-analytics";
 
-export default function Home() {
-  const pathname = usePathname();
-  const isDashboard = pathname === "/dashboard";
-  const { data: checklistData, isFetchingChecklist } = useOnboardingChecklist();
-  const { user } = useAppContext();
-  const isWorkspaceOwner = user.isWorkspaceOwner === true;
+export const dynamic = "force-dynamic";
 
-  const isOnboardingCompleted = useMemo(() => {
-    if (!checklistData) return false;
-    const {
-      emailVerified,
-      propertiesCount,
-      unitsCount,
-      adminsCount,
-      techniciansCount,
-    } = checklistData;
-    const teamCount = (adminsCount ?? 0) + (techniciansCount ?? 0);
-    return Boolean(
-      emailVerified &&
-        (propertiesCount ?? 0) > 0 &&
-        (unitsCount ?? 0) > 0 &&
-        teamCount > 1
-    );
-  }, [checklistData]);
+export default async function DashboardPage() {
+  const verify = await getVerifiedUser();
+  if (!verify) redirect("/auth/login");
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const prevCompletedRef = useRef(false);
+  // Platform super admins don't have a tenant workspace and skip onboarding entirely.
+  if (!isPlatformSuperAdminRole(verify.platformRole)) {
+    const [business, user] = await Promise.all([
+      Business.findById(verify.businessId)
+        .select("onboardingCompletedAt")
+        .lean<{ onboardingCompletedAt?: Date | null } | null>(),
+      User.findById(verify.id)
+        .select("memberships")
+        .lean<{
+          memberships?: Array<{ business?: unknown; isCreator?: boolean }>;
+        } | null>(),
+    ]);
 
-  useEffect(() => {
-    if (isFetchingChecklist || !isWorkspaceOwner) return;
+    const isWorkspaceOwner =
+      user?.memberships?.some(
+        (m) =>
+          m.isCreator === true &&
+          String(m.business) === String(verify.businessId),
+      ) ?? false;
 
-    if (isDashboard && isOnboardingCompleted) {
-      setShowOnboarding(false);
-      prevCompletedRef.current = true;
-      return;
+    if (isWorkspaceOwner && !business?.onboardingCompletedAt) {
+      redirect("/onboarding");
     }
+  }
 
-    if (!isOnboardingCompleted) {
-      setShowOnboarding(true);
-    } else if (!prevCompletedRef.current) {
-      setShowOnboarding(true);
-    }
-
-    prevCompletedRef.current = isOnboardingCompleted;
-  }, [isFetchingChecklist, isWorkspaceOwner, isDashboard, isOnboardingCompleted]);
+  const analytics = await getDashboardAnalytics(verify);
 
   return (
-    <main className="flex gap-6 flex-col">
-      {isWorkspaceOwner && showOnboarding ? (
-        <OnboardingModal
-          emailVerified={Boolean(checklistData?.emailVerified)}
-          isOpen
-          onClose={() => setShowOnboarding(false)}
-          checklistData={checklistData}
-        />
-      ) : (
-        <TicketComponent />
-      )}
+    <main className="flex flex-col gap-6">
+      <DashboardAnalyticsView analytics={analytics} />
     </main>
   );
 }

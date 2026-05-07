@@ -4,12 +4,15 @@ import type { TableFilterField } from "@/shared/components/table/models/table.mo
 import {
   WORKSPACE_ROLE,
   WORKSPACE_ASSIGNABLE_ROLE_VALUES,
+  USER_TYPE,
   formatWorkspaceRoleLabel,
   type AssignableWorkspaceRole,
 } from "@/shared/auth/roles";
 import {
+  TEAM_INVITE_ROLE_VALUES,
   TEAM_MEMBER_STATUS,
   type TeamListBulkAction,
+  type TeamInviteRole,
 } from "../models/team.model";
 
 export type WorkspaceRoleMeta = {
@@ -47,14 +50,34 @@ export const WORKSPACE_ROLE_META: Record<WORKSPACE_ROLE, WorkspaceRoleMeta> = {
 };
 
 export const WORKSPACE_ROLE_INVITE_OPTIONS: ReadonlyArray<{
-  value: AssignableWorkspaceRole;
+  value: TeamInviteRole;
   label: string;
   description: string;
-}> = WORKSPACE_ASSIGNABLE_ROLE_VALUES.map((role) => ({
-  value: role,
-  label: WORKSPACE_ROLE_META[role].label,
-  description: WORKSPACE_ROLE_META[role].description,
-}));
+}> = TEAM_INVITE_ROLE_VALUES.map((role) => {
+  if (role === USER_TYPE.tenant) {
+    return {
+      value: role,
+      label: "Tenant",
+      description:
+        "Resident access to raise maintenance tickets and track repairs.",
+    };
+  }
+  if (role === USER_TYPE.technician) {
+    return {
+      value: role,
+      label: "Technician",
+      description:
+        "Service-provider access to assigned work, schedules, and quotes.",
+    };
+  }
+
+  return {
+    value: role,
+    label: WORKSPACE_ROLE_META[role as AssignableWorkspaceRole].label,
+    description:
+      WORKSPACE_ROLE_META[role as AssignableWorkspaceRole].description,
+  };
+});
 
 export const TEAM_LIST_STATUS_TABS: Array<{
   label: string;
@@ -108,9 +131,9 @@ export const TEAM_LIST_FILTER_FIELDS: TableFilterField[] = [
     key: "role",
     label: "Role",
     searchType: "DROPDOWN",
-    selectOptions: WORKSPACE_ASSIGNABLE_ROLE_VALUES.map((role) => ({
-      name: WORKSPACE_ROLE_META[role].label,
-      value: role,
+    selectOptions: WORKSPACE_ROLE_INVITE_OPTIONS.map((role) => ({
+      name: role.label,
+      value: role.value,
     })),
   },
 ];

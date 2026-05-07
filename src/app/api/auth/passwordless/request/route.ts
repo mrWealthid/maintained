@@ -15,6 +15,7 @@ import {
   isPasswordExpired,
 } from "@/lib/security/password-policy";
 import { ROLES } from "@/shared/enums/enums";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 const PasswordlessRequestSchema = z.object({
   email: z.string().email("Please provide a valid email"),
@@ -39,16 +40,19 @@ export async function POST(request: NextRequest) {
     const email = parsed.email.toLowerCase().trim();
 
     const user = await User.findOne({ email }).select(
-      "name email memberships currentBusiness createdAt passwordChangedAt +passwordlessLoginToken +passwordlessLoginExpires"
+      "name email currentBusiness createdAt passwordChangedAt +passwordlessLoginToken +passwordlessLoginExpires"
     );
 
     if (!user) {
       return successResponse();
     }
 
-    const currentMembership = user.memberships.find(
-      (m) => m.business.toString() === user.currentBusiness?.toString()
-    );
+    const currentMembership = user.currentBusiness
+      ? await findActiveWorkspaceMembership({
+          userId: user._id as never,
+          workspaceId: user.currentBusiness,
+        }).lean<{ role?: string | null } | null>()
+      : null;
 
     if (currentMembership?.role === ROLES.super_admin) {
       throw ApiError.forbidden(

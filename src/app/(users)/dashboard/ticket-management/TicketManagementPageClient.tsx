@@ -7,15 +7,21 @@ import TicketComponent from "@/features/tickets/components/TicketComponent";
 import { InteractiveTicketChat } from "@/features/tickets/components/InteractiveTicketChat";
 import { Bot, FilePlus, PlusCircle, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ManageTicketForm } from "@/features/tickets/models/ticket.model";
 import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import TicketForm from "@/features/tickets/forms/TicketForm";
 import TicketSummary from "@/features/tickets/components/TicketSummary";
+import {
+  ticketCreateFormSchema,
+  type TicketCreateFormValues,
+} from "@/features/tickets/models/ticket-form.model";
 import { CreateTicketPayload } from "@/shared/model/model";
+import ErrorList from "@/components/ui/ErrorList";
 import { Sheet } from "@/components/ui/sheet";
 import {
   AppSheetBody,
   AppSheetContent,
+  AppSheetFooter,
   AppSheetHeader,
 } from "@/shared/components/AppSheetShell";
 import { useCreateTicket } from "@/features/tickets/hooks/ticketHooks";
@@ -25,6 +31,7 @@ import { useAppContext } from "@/shared/contexts/AppContext";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { ROLES } from "@/shared/enums/enums";
+import { TICKET_PRIORITY } from "@/features/tickets/models/ticket-priority.model";
 
 import {
   DropdownMenu,
@@ -40,27 +47,46 @@ export default function Home() {
   const { user } = useAppContext();
   const canCreateTicket = useHasPermission(PERMISSION.TICKETS_CREATE);
   const isTechnician = user.role === ROLES.technician;
+  const canSelectTicketLocation =
+    user.role === ROLES.admin ||
+    user.role === ROLES.owner ||
+    user.role === ROLES.super_admin;
 
   const handleChangeView = useCallback((val: boolean) => {
     setIsList(val);
   }, []);
 
-  const { isCreating, handleCreateTicket } = useCreateTicket(false);
+  const { isCreating, handleCreateTicket, createTicketError } =
+    useCreateTicket(false);
 
-  const methods = useForm<ManageTicketForm>({ mode: "all" });
+  const methods = useForm<TicketCreateFormValues>({
+    resolver: zodResolver(ticketCreateFormSchema) as never,
+    mode: "all",
+    defaultValues: {
+      priority: TICKET_PRIORITY.medium,
+      relatedTo: "",
+      property: "",
+      unit: "",
+    },
+  });
+  const {
+    formState: { isDirty, isValid },
+  } = methods;
   const router = useRouter();
+  const ticketFormId = "create-ticket-form";
 
   const onSubmit = (
     data: CreateTicketPayload,
-    actions?: { onSuccess: () => void }
+    actions?: { onSuccess: () => void; onError?: () => void }
   ) => {
-    console.log("🔥 SUBMIT:", data);
-
     handleCreateTicket(data, {
       onSuccess: () => {
         actions?.onSuccess();
         router.push(APP_ROUTE_PATHS.DASHBOARD.TICKETS);
         setOpen(false);
+      },
+      onError: () => {
+        actions?.onError?.();
       },
     });
   };
@@ -108,36 +134,64 @@ export default function Home() {
             <Sheet open={open} onOpenChange={setOpen}>
               <AppSheetContent
                 side="bottom"
-                className="h-full max-h-screen max-w-[100vw] md:max-w-full"
+                className="h-[100dvh] max-h-[100dvh] max-w-[100vw] md:max-w-full"
               >
                 <AppSheetHeader
-                  title="Manage Ticket"
+                  title="Create Maintenance Ticket"
                   description="Create a maintenance request from a focused workspace."
                   icon={Wrench}
                 />
-                <AppSheetBody className="flex justify-center">
-                  <div className="w-3/4">
+                <AppSheetBody className="mx-auto w-full max-w-6xl">
+                  <div className="mb-6">
+                    <h1 className="text-xl font-bold text-foreground sm:text-3xl">
+                      Create Maintenance Ticket
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Submit a new repair or maintenance request.
+                    </p>
+                  </div>
+                  {createTicketError ? (
                     <div className="mb-6">
-                      <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                        Create Maintenance Ticket
-                      </h1>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Submit a new repair or maintenance request. Fields
-                        marked{" "}
-                        <span className="font-medium text-destructive">*</span>{" "}
-                        are required.
-                      </p>
+                      <ErrorList
+                        error={createTicketError}
+                        title="Could not create ticket"
+                      />
                     </div>
-                    <div className="flex items-start gap-6">
-                      <div className="min-w-0 flex-1">
-                        <TicketForm onSubmit={onSubmit} />
-                      </div>
-                      <div className="w-80 shrink-0">
-                        <TicketSummary />
-                      </div>
+                  ) : null}
+                  <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                    <div className="min-w-0">
+                      <TicketForm
+                        formId={ticketFormId}
+                        onSubmit={onSubmit}
+                        showActions={false}
+                        showPropertyUnitFields={canSelectTicketLocation}
+                        onCancel={() => setOpen(false)}
+                      />
+                    </div>
+                    <div className="order-first min-w-0 lg:order-none">
+                      <TicketSummary />
                     </div>
                   </div>
                 </AppSheetBody>
+                <AppSheetFooter className="gap-3 sm:items-center sm:justify-end">
+                  <div className="grid w-full grid-cols-2 gap-3 sm:w-auto sm:flex sm:items-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isCreating}
+                      onClick={() => setOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      form={ticketFormId}
+                      disabled={!isValid || isCreating || !isDirty}
+                    >
+                      {isCreating ? "Creating..." : "Create Ticket"}
+                    </Button>
+                  </div>
+                </AppSheetFooter>
               </AppSheetContent>
             </Sheet>
           </FormProvider>

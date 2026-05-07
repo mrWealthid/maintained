@@ -3,21 +3,24 @@
 import { type ComponentType, useState } from "react";
 import {
   Ban,
+  Home,
   RefreshCw,
   ShieldCheck,
   Trash2,
   UserRound,
   Wallet,
+  Wrench,
 } from "lucide-react";
 import { BaseActions, ConfirmActions } from "@/shared/model/model";
 import {
   formatWorkspaceRoleLabel,
-  WORKSPACE_ASSIGNABLE_ROLE_VALUES,
+  USER_TYPE,
   WORKSPACE_ROLE,
 } from "@/shared/auth/roles";
 import {
+  TEAM_INVITE_ROLE_VALUES,
   TEAM_MEMBER_STATUS,
-  type TeamAssignableRole,
+  type TeamInviteRole,
   type TeamListItem,
 } from "../models/team.model";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
@@ -48,8 +51,10 @@ const TEAM_ROLE_ACTION_META = {
   [WORKSPACE_ROLE.maintenance_coordinator]: { icon: ShieldCheck },
   [WORKSPACE_ROLE.accountant]: { icon: Wallet },
   [WORKSPACE_ROLE.member]: { icon: UserRound },
+  [USER_TYPE.tenant]: { icon: Home },
+  [USER_TYPE.technician]: { icon: Wrench },
 } as const satisfies Record<
-  TeamAssignableRole,
+  TeamInviteRole,
   { icon: ComponentType<{ className?: string }> }
 >;
 
@@ -77,11 +82,11 @@ function toRoleConfirmKey(role: string) {
 type RoleOption = {
   id: string;
   label: string;
-  legacyRole: TeamAssignableRole;
+  legacyRole: TeamInviteRole;
   isSystem: boolean;
 };
 
-function getRoleIcon(role: TeamAssignableRole) {
+function getRoleIcon(role: TeamInviteRole) {
   return TEAM_ROLE_ACTION_META[role].icon;
 }
 
@@ -134,7 +139,7 @@ export default function TeamActions({
         legacyRole: role.legacyRole,
         isSystem: role.isSystem,
       })) ?? [];
-  const inviteRoleOptions: RoleOption[] = WORKSPACE_ASSIGNABLE_ROLE_VALUES.map(
+  const inviteRoleOptions: RoleOption[] = TEAM_INVITE_ROLE_VALUES.map(
     (role) => ({
       id: role,
       label: formatWorkspaceRoleLabel(role),

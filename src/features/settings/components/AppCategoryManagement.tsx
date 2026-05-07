@@ -76,7 +76,7 @@ export default function AppCategoryManagement() {
         icon={Plus}
         actions={
           canManage ? (
-            <Button onClick={handleCreate}>
+            <Button type="button" onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Add Category
             </Button>
@@ -123,7 +123,7 @@ export default function AppCategoryManagement() {
                       />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button type="button" variant="outline" size="sm">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

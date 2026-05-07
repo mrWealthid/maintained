@@ -1,8 +1,8 @@
 import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-export const AUTH_COOKIE_NAME = "token";
-
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+export const AUTH_COOKIE_NAME = IS_PRODUCTION ? "__Host-token" : "token";
 
 type AuthCookieOptions = Pick<
   ResponseCookie,

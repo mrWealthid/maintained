@@ -114,7 +114,13 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           icon={FolderOpen}
         />
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+          <form
+            onSubmit={(e) => {
+              e.stopPropagation();
+              form.handleSubmit(onSubmit)(e);
+            }}
+            className="contents"
+          >
             <AppDialogBody>
               <FormField
                 control={form.control}

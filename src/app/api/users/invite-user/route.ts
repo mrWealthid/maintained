@@ -1,4 +1,4 @@
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
 import {
@@ -8,10 +8,14 @@ import {
 } from "@/lib/errors/apiError";
 import Business from "@/models/businessModel";
 import User from "@/models/userModel";
+import WorkspaceInvite from "@/models/workspaceInviteModel";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { toLegacySessionRole } from "@/shared/auth/roles";
 import { sendTeamInviteEmail } from "@/lib/email/senders/team/sendTeamInviteEmail";
-import { generateInviteToken } from "@/utils/helpers";
+import {
+  generateWorkspaceInviteToken,
+  upsertPendingWorkspaceInvite,
+} from "@/lib/tenancy/invites";
+import { WORKSPACE_INVITE_STATUS } from "@/lib/tenancy/model";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -34,10 +38,6 @@ const reinviteBodySchema = z.object({
 
 function getRequestId(request: NextRequest) {
   return request.headers.get("x-request-id");
-}
-
-function normalizeMembershipRole(role: string) {
-  return toLegacySessionRole(role) ?? (role as ROLES);
 }
 
 function objectIdOrUndefined(value?: string) {
@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
 
       try {
         const existingUser = await User.findOne({ email: userData.email });
-        const membershipRole = normalizeMembershipRole(userData.role);
 
         if (existingUser) {
           const alreadyMember = existingUser.memberships.some(
@@ -110,27 +109,19 @@ export async function POST(request: NextRequest) {
           const businessObjectId = new mongoose.Types.ObjectId(
             currentBusinessId
           );
-          const { token, hashed, expires } = generateInviteToken();
-
-          // Append the new membership
-          existingUser.memberships.push({
-            business: businessObjectId,
-            role: membershipRole,
-            status: INVITE_STATUS.invited,
-            inviteToken: hashed,
-            inviteTokenExpires: expires,
-            specialties: userData.specialties as any,
-            property: objectIdOrUndefined(userData.propertyId),
-            unit: objectIdOrUndefined(userData.unitId),
-            isCreator: false,
+          const token = generateWorkspaceInviteToken();
+          await upsertPendingWorkspaceInvite({
+            workspaceId: businessObjectId,
+            email: existingUser.email,
+            name: existingUser.name,
+            role: userData.role as never,
+            invitedBy: verify.id,
+            invitedUser: existingUser._id as mongoose.Types.ObjectId,
+            rawToken: token,
+            specialties: userData.specialties,
+            propertyId: objectIdOrUndefined(userData.propertyId),
+            unitId: objectIdOrUndefined(userData.unitId),
           });
-
-          // Optional: only update currentBusiness if none is set
-          if (!existingUser.currentBusiness) {
-            existingUser.currentBusiness = businessObjectId;
-          }
-
-          await existingUser.save({ validateBeforeSave: false });
 
           await sendInviteOrThrow({
             request,
@@ -147,28 +138,27 @@ export async function POST(request: NextRequest) {
           });
         } else {
           // New user
-          const { token, hashed, expires } = generateInviteToken();
+          const token = generateWorkspaceInviteToken();
 
           const newUser = new User({
             name: capitalize(userData.name),
             email: userData.email,
             dateOfBirth: userData.dateOfBirth,
-            memberships: [
-              {
-                business: currentBusinessId,
-                role: membershipRole,
-                status: INVITE_STATUS.invited,
-                inviteToken: hashed,
-                inviteTokenExpires: expires,
-                specialties: userData.specialties || [],
-                property: userData.propertyId,
-                unit: userData.unitId,
-              },
-            ],
-            currentBusiness: currentBusinessId,
           });
 
           await newUser.save({ validateBeforeSave: false });
+          await upsertPendingWorkspaceInvite({
+            workspaceId: currentBusinessId,
+            email: newUser.email,
+            name: newUser.name,
+            role: userData.role as never,
+            invitedBy: verify.id,
+            invitedUser: newUser._id as mongoose.Types.ObjectId,
+            rawToken: token,
+            specialties: userData.specialties,
+            propertyId: objectIdOrUndefined(userData.propertyId),
+            unitId: objectIdOrUndefined(userData.unitId),
+          });
 
           await sendInviteOrThrow({
             request,
@@ -211,7 +201,7 @@ export async function PATCH(request: NextRequest) {
 
     await assertWorkspacePermissionKey(verify, PERMISSION.TEAM_INVITE);
     const currentBusinessId = verify.businessId;
-    const { email, force } = parseOrThrow(
+    const { email } = parseOrThrow(
       reinviteBodySchema,
       await request.json()
     );
@@ -221,53 +211,35 @@ export async function PATCH(request: NextRequest) {
     const user = await User.findOne({ email });
     if (!user) throw ApiError.notFound("User not found");
 
-    const businessIdStr = String(currentBusinessId);
-    const membershipIndex = user.memberships.findIndex(
-      (m: any) => String(m.business) === businessIdStr
+    const membership = user.memberships.find(
+      (m: any) => String(m.business) === String(currentBusinessId)
     );
-
-    if (membershipIndex === -1) {
-      throw ApiError.badRequest(
-        "User does not have a membership with this business"
-      );
-    }
-
-    const membership = user.memberships[membershipIndex];
-
-    // 5) Block re-invite if already activated
-    if (membership.status === INVITE_STATUS.activated) {
+    if (membership?.status === INVITE_STATUS.activated) {
       throw ApiError.badRequest("User is already activated for this business");
     }
-
-    // 6) Check expiry logic
-    const now = new Date();
-    const hasExpiry =
-      membership.inviteTokenExpires !== undefined &&
-      membership.inviteTokenExpires !== null;
-    const isExpired = hasExpiry
-      ? now > new Date(membership.inviteTokenExpires as string | number | Date)
-      : true;
-
-    if (!isExpired && !force) {
-      // Invite still valid → do not rotate unless explicitly forced
-      throw ApiError.badRequest("Existing invite token is still valid", {
-        expiresAt: membership.inviteTokenExpires,
-      });
+    const existingInvite = await WorkspaceInvite.findOne({
+      workspace: currentBusinessId,
+      email: user.email,
+      status: WORKSPACE_INVITE_STATUS.pending,
+    }).select("role specialties property unit");
+    const inviteRole = membership?.role ?? existingInvite?.role;
+    if (!inviteRole) {
+      throw ApiError.badRequest("No pending invite exists for this user");
     }
 
-    // 7) Generate a fresh token and update membership
-    const { token, hashed, expires } = generateInviteToken();
-
-    membership.inviteToken = hashed;
-    membership.inviteTokenExpires = expires;
-    membership.status = INVITE_STATUS.invited;
-
-    // (Optional) ensure currentBusiness is set
-    if (!user.currentBusiness) {
-      user.currentBusiness = new mongoose.Types.ObjectId(currentBusinessId);
-    }
-
-    await user.save({ validateBeforeSave: false });
+    const token = generateWorkspaceInviteToken();
+    await upsertPendingWorkspaceInvite({
+      workspaceId: currentBusinessId,
+      email: user.email,
+      name: user.name,
+      role: inviteRole as never,
+      invitedBy: verify.id,
+      invitedUser: user._id as mongoose.Types.ObjectId,
+      rawToken: token,
+      specialties: existingInvite?.specialties,
+      propertyId: existingInvite?.property,
+      unitId: existingInvite?.unit,
+    });
 
     await sendInviteOrThrow({
       request,
@@ -281,7 +253,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({
       status: "success",
       message: "Invite re-sent successfully",
-      expiresAt: expires,
     });
   } catch (error: any) {
     return errorToNextResponse(error, getRequestId(request));

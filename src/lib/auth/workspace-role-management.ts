@@ -15,10 +15,9 @@ import {
 } from "@/shared/auth/permission-registry";
 import {
   WORKSPACE_ROLE,
-  toLegacySessionRole,
   type AssignableWorkspaceRole,
 } from "@/shared/auth/roles";
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { INVITE_STATUS } from "@/shared/enums/enums";
 
 type ObjectIdLike = mongoose.Types.ObjectId | string;
 
@@ -237,8 +236,7 @@ export async function syncWorkspaceMembershipRoleAssignments(args: {
     },
     {
       $set: {
-        "memberships.$[membership].role":
-          toLegacySessionRole(args.legacyRole) ?? ROLES.user,
+        "memberships.$[membership].role": args.legacyRole,
       },
     },
     {

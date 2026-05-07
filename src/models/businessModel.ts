@@ -31,6 +31,7 @@ export interface IBusiness extends Document {
   owner?: mongoose.Types.ObjectId | string;
   logo?: string;
   active?: boolean;
+  onboardingCompletedAt?: Date | null;
   settings?: {
     email?: EmailSettings<BusinessEmailTemplateKey>;
     security?: {
@@ -280,6 +281,7 @@ const businessSchema = new Schema<IBusiness>(
     },
     logo: { type: String, default: "default.jpg" },
     active: { type: Boolean, default: true },
+    onboardingCompletedAt: { type: Date, default: null },
     settings: {
       email: { type: EmailSettingsSchema, default: () => ({}) },
       security: { type: SecuritySettingsSchema, default: () => ({}) },

@@ -13,6 +13,8 @@ import TicketType from "@/models/ticketTypeModel";
 import Unit from "@/models/unitModel";
 import User from "@/models/userModel";
 import UserPermissionOverride from "@/models/userPermissionOverrideModel";
+import WorkspaceInvite from "@/models/workspaceInviteModel";
+import WorkspaceMembership from "@/models/workspaceMembershipModel";
 
 let registered = false;
 
@@ -36,6 +38,8 @@ export function registerModels() {
   void Unit;
   void User;
   void UserPermissionOverride;
+  void WorkspaceInvite;
+  void WorkspaceMembership;
 
   registered = true;
 }

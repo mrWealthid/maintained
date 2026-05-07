@@ -14,6 +14,7 @@ import {
 import { SettingsIconBadge } from "./SettingsIconBadge";
 import { SettingsSection } from "./SettingsSection";
 import AppCategoryManagement from "./AppCategoryManagement";
+import AppTicketTypeManagement from "./AppTicketTypeManagement";
 
 function ComingSoonCard({
   title,
@@ -54,6 +55,8 @@ export function AppOperationsSection() {
     >
       <div className="space-y-6">
         <AppCategoryManagement />
+
+        <AppTicketTypeManagement />
 
         <ComingSoonCard
           title="SLA & Response Times"
