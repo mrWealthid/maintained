@@ -6,11 +6,15 @@ import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { assertPermission } from "@/lib/auth/permission-guards";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { INVITE_STATUS } from "@/shared/enums/enums";
 import Business from "@/models/businessModel";
-import User from "@/models/userModel";
+import WorkspaceInvite from "@/models/workspaceInviteModel";
 import { sendTeamInviteEmail } from "@/lib/email/senders/team/sendTeamInviteEmail";
-import { generateInviteToken } from "@/utils/helpers";
+import {
+  generateWorkspaceInviteToken,
+  upsertPendingWorkspaceInvite,
+} from "@/lib/tenancy/invites";
+import { findPendingWorkspaceInviteForWorkspaceSubject } from "@/lib/tenancy/workspace-invite-access";
+import { WORKSPACE_INVITE_STATUS } from "@/lib/tenancy/model";
 
 const getRequestId = (req: NextRequest) =>
   req.headers.get("x-request-id") ?? undefined;
@@ -37,50 +41,68 @@ export async function POST(
     );
 
     const { id } = await params;
+    const directInvite = mongoose.Types.ObjectId.isValid(id)
+      ? await WorkspaceInvite.findOne({
+          _id: id,
+          workspace: businessId,
+          status: WORKSPACE_INVITE_STATUS.pending,
+        }).select("name email role invitedUser")
+      : null;
+    const workspaceInviteQuery =
+      mongoose.Types.ObjectId.isValid(id)
+        ? findPendingWorkspaceInviteForWorkspaceSubject({
+            workspaceId: businessId,
+            invitedUserId: id,
+          })
+        : null;
+    const workspaceInvite = workspaceInviteQuery
+      ? await workspaceInviteQuery.select("name email role invitedUser")
+      : null;
+    const inviteRecord = directInvite ?? workspaceInvite;
 
-    const user = await User.findOne({
-      _id: id,
-      "memberships.business": new mongoose.Types.ObjectId(businessId),
-    });
-    if (!user) throw ApiError.notFound("Invite not found");
-
-    const membership = user.memberships.find(
-      (m) => String(m.business) === businessId,
-    );
-    if (!membership) throw ApiError.notFound("Invite not found");
-    if (membership.status === INVITE_STATUS.activated) {
-      throw ApiError.badRequest("Member has already accepted the invite.");
+    if (!inviteRecord) {
+      throw ApiError.notFound("Invite not found");
     }
 
-    const invite = generateInviteToken();
-    const rawToken = invite.token;
-    membership.inviteToken = rawToken;
-    membership.inviteTokenExpires = invite.expires;
-    membership.status = INVITE_STATUS.invited;
-    await user.save({ validateBeforeSave: false });
+    const rawToken = generateWorkspaceInviteToken();
+    const sentAt = new Date();
+
+    await upsertPendingWorkspaceInvite({
+      workspaceId: businessId,
+      email: inviteRecord.email,
+      name: inviteRecord.name,
+      role: inviteRecord.role,
+      invitedBy: verify.id,
+      invitedUser: inviteRecord.invitedUser ?? null,
+      rawToken,
+      sentAt,
+    });
 
     const business = await Business.findById(businessId)
-      .select("name")
-      .lean<{ name?: string } | null>();
+      .select("name workspaceType")
+      .lean<{ name?: string; workspaceType?: string | null } | null>();
 
     const emailResult = await sendTeamInviteEmail({
       request,
       businessId,
-      to: user.email,
-      attendeeName: user.name,
+      to: inviteRecord.email,
+      attendeeName: inviteRecord.name,
       workspaceName: business?.name ?? "Workspace",
+      workspaceType: business?.workspaceType,
       rawToken,
     });
 
     if (!emailResult.sent) {
       throw ApiError.unavailable(
-        emailResult.error || "Unable to send the team invitation email",
+        emailResult.error ||
+          emailResult.skippedReason ||
+          "Unable to resend team invite email",
       );
     }
 
     return NextResponse.json({
       status: "success",
-      message: `Invite resent to ${user.email}`,
+      message: "Invitation resent",
     });
   } catch (error) {
     return errorToNextResponse(error, getRequestId(request));

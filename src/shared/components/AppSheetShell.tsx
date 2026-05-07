@@ -46,7 +46,10 @@ export function AppSheetContent({
 }: AppSheetContentProps) {
   return (
     <SheetContent
-      className={cn("flex h-full min-h-0 w-full flex-col gap-0 p-0", className)}
+      className={cn(
+        "flex h-[100dvh] min-h-0 w-full max-w-[100vw] flex-col gap-0 overflow-hidden p-0",
+        className,
+      )}
       {...props}
     />
   );

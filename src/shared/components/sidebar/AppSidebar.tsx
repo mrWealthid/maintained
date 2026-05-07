@@ -78,7 +78,7 @@ function AppSidebar({
                       onClick={() => {
                         if (isMobile) setOpenMobile(false);
                       }}
-                      className="bg-transparent transition-[background-color,color] duration-300 ease-out hover:bg-transparent active:bg-transparent data-[state=open]:hover:bg-transparent data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-medium data-[active=true]:hover:bg-primary data-[active=true]:hover:text-primary-foreground"
+                      className="bg-transparent transition-[background-color,color] duration-300 ease-out hover:bg-transparent active:bg-transparent data-[state=open]:hover:bg-transparent data-[active=true]:bg-muted data-[active=true]:font-medium"
                       asChild
                     >
                       <Link

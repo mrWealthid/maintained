@@ -125,6 +125,10 @@ export async function GET(request: NextRequest) {
           path: "actionedBy",
           select: "name",
         },
+        {
+          path: "relatedTo",
+          select: "title status createdAt propertyName unitLabel",
+        },
         // {
         //   path: "property",
         //   select: "name",
@@ -200,9 +204,24 @@ export async function POST(request: NextRequest) {
     if (!user) throw ApiError.notFound("User not found");
 
     const body = parseOrThrow(ticketCreateBodySchema, await request.json());
+    if (body.relatedTo) {
+      if (!mongoose.Types.ObjectId.isValid(body.relatedTo)) {
+        throw ApiError.badRequest("Invalid related ticket");
+      }
+
+      const relatedTicket = await Ticket.findOne({
+        _id: body.relatedTo,
+        business: user.currentBusiness,
+      }).select("_id");
+
+      if (!relatedTicket) {
+        throw ApiError.badRequest("Related ticket not found");
+      }
+    }
 
     const data = await Ticket.create({
       ...body,
+      relatedTo: body.relatedTo || undefined,
       property: body.property ?? verify.property,
       unit: body.unit ?? verify.unit,
       user: verify.id,

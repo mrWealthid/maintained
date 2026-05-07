@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Category, TicketType } from "@/shared/model/model";
 import { useFetchTicketType } from "../hooks/ticketHooks";
-import { ManageTicketForm } from "../models/ticket.model";
+import { type TicketCreateFormValues } from "../models/ticket-form.model";
 
 interface TicketSummaryProps {
   initialAttachmentCounts?: {
@@ -29,7 +29,7 @@ interface TicketSummaryProps {
 const TicketSummary: React.FC<TicketSummaryProps> = ({
   initialAttachmentCounts = { images: 0, videos: 0, documents: 0 },
 }) => {
-  const { watch } = useFormContext<ManageTicketForm>();
+  const { watch } = useFormContext<TicketCreateFormValues>();
   const watched = watch();
   const { data: ticketTypes } = useFetchTicketType<TicketType>();
 
@@ -51,7 +51,7 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
   const completeness = Math.round((completedFields / 5) * 100);
 
   return (
-    <Card className="sticky top-6 overflow-hidden rounded-2xl py-0 shadow-sm">
+    <Card className="overflow-hidden rounded-2xl py-0 shadow-sm lg:sticky lg:top-6">
       <div className="flex items-center gap-3 bg-primary px-5 py-4 text-primary-foreground">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
           <ClipboardList className="h-5 w-5" />

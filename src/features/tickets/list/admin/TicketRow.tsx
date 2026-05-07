@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -31,9 +32,13 @@ function RequestRow({
               <span>{i + 1}.</span>
             </TableCell>
             <TableCell colSpan={3}>
-              <span title={row.title} className="block ">
+              <Link
+                href={`/dashboard/ticket-management/${row.id}`}
+                title={row.title}
+                className="block font-medium text-foreground hover:text-primary hover:underline"
+              >
                 {row.title}
-              </span>
+              </Link>
             </TableCell>
             <TableCell colSpan={2}>
               <span

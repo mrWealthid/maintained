@@ -48,23 +48,16 @@ export interface Property {
   createdAt: string;
 }
 
-export type ChecklistState = {
+export type OnboardingState = {
   emailVerified: boolean;
-  propertiesCount: number;
-  unitsCount: number;
-  adminsCount: number;
-  techniciansCount: number;
-  tenantsCount: number;
+  emailVerifiedAt: string | null;
+  onboardingCompletedAt: string | null;
+  workspaceType: "BUSINESS" | "INDIVIDUAL" | null;
+  counts: {
+    properties: number;
+    units: number;
+    admins: number;
+    technicians: number;
+    tenants: number;
+  };
 };
-
-// --- Main Component --------------------------------------------------------
-
-export interface OnboardingChecklistProps {
-  emailVerified: boolean;
-}
-
-export interface OnboardingChecklistContentProps {
-  emailVerified: boolean;
-  onCompleted?: () => void;
-  checklistData?: ChecklistState;
-}

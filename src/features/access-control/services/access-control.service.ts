@@ -4,6 +4,7 @@ import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { http } from "@/services/http";
 import { ApiErrorHandler } from "@/utils/apiError";
 import type {
+  PlatformRolesResponse,
   WorkspaceRoleDefinitionPayload,
   TeamRolesResponse,
 } from "../models/access-control.model";
@@ -14,6 +15,18 @@ export async function fetchWorkspaceRoles(): Promise<TeamRolesResponse> {
       status: string;
       data: TeamRolesResponse;
     }>(API_ROUTES.team.roles);
+    return data.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function fetchPlatformRoles(): Promise<PlatformRolesResponse> {
+  try {
+    const { data } = await http.get<{
+      status: string;
+      data: PlatformRolesResponse;
+    }>(API_ROUTES.platform.roles);
     return data.data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);

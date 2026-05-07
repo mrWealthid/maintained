@@ -6,6 +6,7 @@ import type { ApiError } from "@/shared/model/model";
 import {
   archiveWorkspaceRole,
   createWorkspaceRole,
+  fetchPlatformRoles,
   fetchWorkspaceRoles,
   updateWorkspaceRole,
 } from "../services/access-control.service";
@@ -14,6 +15,13 @@ export function useWorkspaceRoles() {
   return useQuery({
     queryKey: ["team-roles"],
     queryFn: fetchWorkspaceRoles,
+  });
+}
+
+export function usePlatformRoles() {
+  return useQuery({
+    queryKey: ["platform-roles"],
+    queryFn: fetchPlatformRoles,
   });
 }
 

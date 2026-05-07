@@ -8,7 +8,7 @@ import {
   WORKSPACE_ASSIGNABLE_ROLE_VALUES,
   type AssignableWorkspaceRole,
 } from "@/shared/auth/roles";
-import { PERMISSION_OVERRIDE_EFFECT } from "@/models/userPermissionOverrideModel";
+import { PERMISSION_OVERRIDE_EFFECT } from "@/shared/auth/permission-overrides";
 
 const WorkspacePermissionKeySchema = z
   .string()
@@ -61,6 +61,18 @@ export type TeamWorkspaceRoleDefinition = {
   memberCount: number;
 };
 
+export type PlatformRoleDefinition = {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  permissions: PermissionKey[];
+  isSystem: boolean;
+  isDefault: boolean;
+  locked: boolean;
+  status: string;
+};
+
 export type TeamPermissionCatalogSection = {
   id: string;
   title: string;
@@ -78,6 +90,11 @@ export type TeamPermissionCatalogSection = {
 
 export type TeamRolesResponse = {
   roles: TeamWorkspaceRoleDefinition[];
+  permissionCatalog: TeamPermissionCatalogSection[];
+};
+
+export type PlatformRolesResponse = {
+  roles: PlatformRoleDefinition[];
   permissionCatalog: TeamPermissionCatalogSection[];
 };
 

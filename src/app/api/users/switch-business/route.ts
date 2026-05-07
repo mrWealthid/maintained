@@ -3,7 +3,7 @@ import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import User, { UserDoc } from "@/models/userModel";
-import { INVITE_STATUS } from "@/shared/enums/enums";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -30,17 +30,16 @@ export async function PATCH(request: NextRequest) {
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
 
-    const membership = user.memberships.find(
-      (item) =>
-        String(item.business) === currentBusiness &&
-        item.status === INVITE_STATUS.activated
-    );
+    const membership = await findActiveWorkspaceMembership({
+      userId: verify.id,
+      workspaceId: currentBusiness,
+    });
 
     if (!membership) {
       throw ApiError.forbidden("You do not have access to this workspace");
     }
 
-    user.currentBusiness = membership.business;
+    user.currentBusiness = membership.workspace;
     await user.save({ validateBeforeSave: false });
 
     const response = await buildAuthSuccessResponse({

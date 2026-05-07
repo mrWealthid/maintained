@@ -65,7 +65,8 @@ export default function SendTechnicianRequestForm({
 
   const { data: technicians } = useFetchTechnicians();
 
-  const { isLoading, data: ticketDetails } = useFetchTicketDetails(ticket.id);
+  const { isLoading, data: ticketResponse } = useFetchTicketDetails(ticket.id);
+  const ticketDetails = ticketResponse?.data;
 
   async function onSubmit(data: SendTechnicianRequestFormControls) {
     handleSendTechnicianRequest(data);

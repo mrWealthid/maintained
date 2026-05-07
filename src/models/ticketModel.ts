@@ -38,6 +38,9 @@ export interface ITicket extends Document {
   relatedTo?: ObjectId;
   type: ObjectId;
   priority: TICKET_PRIORITY;
+  dueDate?: Date;
+  completedAt?: Date;
+  closedAt?: Date;
 
   // NEW — location linkage + denorm labels + snapshot
   property: ObjectId;
@@ -111,11 +114,24 @@ const TicketSchema = new Schema<ITicket>(
       type: mongoose.Schema.Types.ObjectId,
       ref: User,
     },
+
+    relatedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Ticket",
+      default: null,
+      index: true,
+    },
+
     priority: {
       type: String,
       enum: TICKET_PRIORITY,
       default: TICKET_PRIORITY.medium,
     },
+
+    // Lifecycle dates — useful for SLA/reporting
+    dueDate: { type: Date },
+    completedAt: { type: Date },
+    closedAt: { type: Date },
 
     property: {
       type: mongoose.Schema.Types.ObjectId,
@@ -158,6 +174,7 @@ const TicketSchema = new Schema<ITicket>(
 );
 
 TicketSchema.index({ business: 1, property: 1, unit: 1, createdAt: -1 });
+TicketSchema.index({ business: 1, relatedTo: 1, createdAt: -1 });
 
 TicketSchema.set("toJSON", {
   virtuals: true,

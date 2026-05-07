@@ -5,7 +5,8 @@ import {
   CreateUnitPayload,
 } from "../model/model";
 import {
-  fetchOnboardingChecklist,
+  completeOnboarding,
+  fetchOnboardingState,
   fetchProperties,
   fetchUnits,
   handleCreateProperty,
@@ -23,7 +24,7 @@ export function useCreateProperty(isEditing: boolean, close?: () => void) {
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["properties"] });
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding-state"] });
       queryClient.invalidateQueries({ queryKey: ["Users"] });
       close?.();
     },
@@ -46,7 +47,7 @@ export function useCreateMultipleProperties(
       onSuccess: (data) => {
         // Invalidate relevant queries to refresh data
         queryClient.invalidateQueries({ queryKey: ["properties"] });
-        queryClient.invalidateQueries({ queryKey: ["checklist"] });
+        queryClient.invalidateQueries({ queryKey: ["onboarding-state"] });
         queryClient.invalidateQueries({ queryKey: ["Users"] });
         toast.success(`Successfully created ${data.count} properties`);
         close?.();
@@ -65,7 +66,7 @@ export function useCreatePropertyUnit(isEditing: boolean, close?: () => void) {
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["units"] });
-      queryClient.invalidateQueries({ queryKey: ["checklist"] });
+      queryClient.invalidateQueries({ queryKey: ["onboarding-state"] });
       queryClient.invalidateQueries({ queryKey: ["Users"] });
       close?.();
     },
@@ -82,16 +83,24 @@ export function useFetchProperties() {
   });
   return { data, isFetchingProperties };
 }
-export function useOnboardingChecklist() {
-  const { data, isFetching: isFetchingChecklist } = useQuery({
-    queryKey: ["checklist"],
-    queryFn: () => fetchOnboardingChecklist(),
-    staleTime: 0, // Always consider data stale, refetch on every mount
-    refetchOnWindowFocus: true, // Refetch when user focuses the window
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnReconnect: true, // Refetch when network reconnects
+export function useOnboardingState() {
+  return useQuery({
+    queryKey: ["onboarding-state"],
+    queryFn: fetchOnboardingState,
+    select: (response) => response.data,
+    staleTime: 30_000,
   });
-  return { data, isFetchingChecklist };
+}
+
+export function useCompleteOnboarding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: completeOnboarding,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["onboarding-state"] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 }
 
 export function useUpdateUnitLabel(businessId?: string, propertyId?: string) {

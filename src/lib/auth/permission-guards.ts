@@ -16,6 +16,7 @@ import {
   isPlatformSuperAdminRole,
   resolveWorkspaceRole,
 } from "@/shared/auth/roles";
+import { ROLES } from "@/shared/enums/enums";
 
 export type PermissionContext = {
   userId?: string | null;
@@ -142,7 +143,7 @@ export async function assertLegacyWorkspacePermission(
   message?: string
 ) {
   const workspaceRole =
-    user.role === "USER" || user.role === "TECHNICIAN"
+    user.role === ROLES.tenant || user.role === ROLES.technician
       ? WORKSPACE_ROLE.member
       : user.role;
 

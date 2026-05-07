@@ -3,13 +3,12 @@ import mongoose from "mongoose";
 import RoleDefinition, {
   ROLE_DEFINITION_STATUS,
 } from "@/models/roleDefinitionModel";
-import UserPermissionOverride, {
-  PERMISSION_OVERRIDE_EFFECT,
-} from "@/models/userPermissionOverrideModel";
-import User from "@/models/userModel";
+import UserPermissionOverride from "@/models/userPermissionOverrideModel";
+import { PERMISSION_OVERRIDE_EFFECT } from "@/shared/auth/permission-overrides";
 import {
   ALL_PERMISSION_KEYS,
   DEFAULT_WORKSPACE_ROLE_PERMISSIONS,
+  DEFAULT_USER_TYPE_PERMISSIONS,
   PERMISSION_DEFINITION_MAP,
   PERMISSION_SCOPE,
   expandPermissionKeys,
@@ -19,10 +18,11 @@ import {
 import {
   isPlatformSuperAdminRole,
   resolveWorkspaceRole,
+  USER_TYPE_VALUES,
   type PLATFORM_ROLE,
   type WORKSPACE_ROLE,
 } from "@/shared/auth/roles";
-import { INVITE_STATUS } from "@/shared/enums/enums";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 type EffectiveWorkspacePermissionSubject = {
   userId: string;
@@ -37,13 +37,8 @@ type LeanRoleDefinition = {
 };
 
 type LeanMembership = {
-  memberships?: Array<{
-    business?: mongoose.Types.ObjectId | string | null;
-    role?: WORKSPACE_ROLE | string | null;
-    roleDefinition?: mongoose.Types.ObjectId | string | null;
-    status?: string | null;
-    isCreator?: boolean | null;
-  }>;
+  role?: WORKSPACE_ROLE | string | null;
+  roleDefinition?: mongoose.Types.ObjectId | string | null;
 };
 
 type LeanPermissionOverride = {
@@ -74,6 +69,10 @@ function addPermissions(
       set.add(expanded);
     }
   }
+}
+
+function resolveUserType(role?: string | null) {
+  return USER_TYPE_VALUES.find((value) => value === role) ?? null;
 }
 
 function applyOverrides(
@@ -138,15 +137,10 @@ async function getWorkspaceMembership(args: {
   userId: string;
   businessId: string;
 }) {
-  const user = await User.findById(args.userId)
-    .select("memberships")
-    .lean<LeanMembership | null>();
-
-  return user?.memberships?.find(
-    (membership) =>
-      membership.business?.toString() === args.businessId &&
-      membership.status === INVITE_STATUS.activated
-  );
+  return findActiveWorkspaceMembership({
+    userId: args.userId,
+    workspaceId: args.businessId,
+  }).lean<LeanMembership | null>();
 }
 
 export async function getEffectiveWorkspacePermissionSet(
@@ -181,7 +175,6 @@ export async function getEffectiveWorkspacePermissionSet(
   } else {
     const workspaceRole = resolveWorkspaceRole({
       storedRole: membership?.role ?? subject.workspaceRole,
-      isWorkspaceOwner: membership?.isCreator === true,
     });
 
     if (workspaceRole) {
@@ -189,6 +182,11 @@ export async function getEffectiveWorkspacePermissionSet(
         permissions,
         DEFAULT_WORKSPACE_ROLE_PERMISSIONS[workspaceRole]
       );
+    } else {
+      const userType = resolveUserType(membership?.role ?? subject.workspaceRole);
+      if (userType) {
+        addPermissions(permissions, DEFAULT_USER_TYPE_PERMISSIONS[userType]);
+      }
     }
   }
 

@@ -25,15 +25,17 @@ interface FileUploadProps {
   multiple: boolean;
   id: string;
   icon: ReactNode;
-  onFileSelect: (files: FileList) => void;
-  onPreviewFileRemove: (file: File) => void;
+  resourceType?: "image" | "video" | "raw";
+  onFileSelect?: (files: FileList) => void;
+  onFilesChange?: (files: File[]) => void;
+  onPreviewFileRemove?: (file: File, remainingFiles: File[]) => void;
   uploadProgress?: Record<string, number>;
   required?: boolean;
   hint?: string;
   initialFiles?: { url: string; type: string; id?: string | number }[];
   onRemoveInitialFile?: (
     file: { url: string; type: string; id?: string | number },
-    type: "image" | "video"
+    type: "image" | "video" | "raw"
   ) => void;
 }
 
@@ -56,6 +58,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   multiple,
   id,
   icon,
+  resourceType,
+  onFilesChange,
   uploadProgress,
   required = false,
   hint,
@@ -83,11 +87,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
     []
   );
 
+  const commitSelectedFiles = (files: File[]) => {
+    if (files.length === 0) return;
+
+    setPreviews((currentPreviews) => {
+      const nextPreviews = multiple
+        ? [...currentPreviews, ...buildPreviews(files)]
+        : buildPreviews(files);
+      const nextFiles = nextPreviews.map((preview) => preview.file);
+      onFilesChange?.(nextFiles);
+
+      const dt = new DataTransfer();
+      nextFiles.forEach((file) => dt.items.add(file));
+      onFileSelect?.(dt.files);
+
+      return nextPreviews;
+    });
+  };
+
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-    onFileSelect(files);
-    setPreviews(buildPreviews(Array.from(files)));
+    const files = Array.from(event.target.files ?? []);
+    commitSelectedFiles(files);
+    event.target.value = "";
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -101,25 +122,34 @@ const FileUpload: React.FC<FileUploadProps> = ({
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    const validFiles = files.filter((f) => f.type.startsWith(allowedType));
+    const validFiles = files.filter((file) => {
+      if (resourceType === "raw") return !file.type.startsWith("image/") && !file.type.startsWith("video/");
+      return file.type.startsWith(allowedType);
+    });
 
     if (validFiles.length === 0) {
-      toast.error(`Only ${allowedType} files are allowed in this drop zone.`);
+      toast.error(
+        resourceType === "raw"
+          ? "Only document files are allowed in this drop zone."
+          : `Only ${allowedType} files are allowed in this drop zone.`
+      );
       return;
     }
 
-    const dt = new DataTransfer();
-    validFiles.forEach((f) => dt.items.add(f));
-    onFileSelect(dt.files);
-    setPreviews(buildPreviews(validFiles));
+    commitSelectedFiles(validFiles);
   };
 
   const handleRemovePreview = (previewId: number) => {
     const target = previews.find((p) => p.id === previewId);
     if (!target) return;
     URL.revokeObjectURL(target.url);
-    setPreviews((prev) => prev.filter((p) => p.id !== previewId));
-    onPreviewFileRemove?.(target.file as File);
+    setPreviews((prev) => {
+      const nextPreviews = prev.filter((p) => p.id !== previewId);
+      const nextFiles = nextPreviews.map((preview) => preview.file);
+      onFilesChange?.(nextFiles);
+      onPreviewFileRemove?.(target.file as File, nextFiles);
+      return nextPreviews;
+    });
   };
 
   const handleRemoveExisting = (file: {
@@ -127,7 +157,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
     type: string;
     id?: string | number;
   }) => {
-    const kind = file.type.startsWith("image/") ? "image" : "video";
+    let kind: "image" | "video" | "raw" = resourceType ?? "raw";
+    if (file.type.startsWith("image/")) kind = "image";
+    if (file.type.startsWith("video/")) kind = "video";
     setExistingFiles((prev) => prev.filter((f) => f.url !== file.url));
     onRemoveInitialFile?.(file, kind);
   };

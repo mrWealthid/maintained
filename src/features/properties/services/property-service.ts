@@ -91,6 +91,11 @@ export interface Property {
   createdAt: string;
   updatedAt: string;
   units?: number;
+  defaultUnit?: string | { _id?: string; id?: string; label?: string };
+  yearBuilt?: number;
+  amenities?: string[];
+  photos?: string[];
+  notes?: string;
 }
 
 export interface PropertyListFilter {

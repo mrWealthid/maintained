@@ -4,9 +4,8 @@ import { Types } from "mongoose";
 
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
-import { INVITE_STATUS } from "@/shared/enums/enums";
 import Unit from "@/models/unitModel";
-import User from "@/models/userModel";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 function getRequestId(request: NextRequest) {
   return request.headers.get("x-request-id");
@@ -17,21 +16,12 @@ export async function GET(request: NextRequest) {
     const verify = await getVerifiedUser(request);
     if (!verify) throw ApiError.unauthorized();
 
-    const user = await User.findById(verify.id)
-      .select("memberships")
-      .lean<{
-        memberships?: Array<{
-          business?: { toString(): string } | string;
-          status?: string;
-          unit?: string | Types.ObjectId;
-          accessibleUnits?: Array<string | Types.ObjectId>;
-        }>;
-      } | null>();
-    const membership = user?.memberships?.find(
-      (item) =>
-        String(item.business) === String(verify.businessId) &&
-        item.status === INVITE_STATUS.activated
-    );
+    const membership = await findActiveWorkspaceMembership({
+      userId: verify.id,
+      workspaceId: verify.businessId,
+    }).lean<{
+      unit?: string | Types.ObjectId;
+    } | null>();
 
     if (!membership) {
       return NextResponse.json({ data: [] }, { status: 200 });
@@ -39,7 +29,6 @@ export async function GET(request: NextRequest) {
 
     const unitIds = [
       ...(membership.unit ? [membership.unit] : []),
-      ...(membership.accessibleUnits || []),
     ].map((id) => new Types.ObjectId(id));
 
     if (!unitIds.length) {

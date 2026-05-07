@@ -9,9 +9,13 @@ export type TicketStatus =
 
 export interface ManageTicketFormProps {
   ticket?: Ticket | undefined;
+  formId?: string;
+  showActions?: boolean;
+  showPropertyUnitFields?: boolean;
+  onCancel?: () => void;
   onSubmit: (
     data: CreateTicketPayload,
-    actions?: { onSuccess: () => void; onError: () => void }
+    actions?: { onSuccess: () => void; onError?: () => void }
   ) => void;
 }
 export interface ManageTicketDetails {
@@ -68,17 +72,6 @@ export interface ApplyTechnicianFormControls {
 export interface SendTechnicianRequestFormControls {
   technicianIds: string[];
   expiresAt: Date;
-}
-
-export interface ManageTicketForm {
-  title: string;
-  description: string;
-  area: string;
-  category: string;
-  images?: File[] | null;
-  videos?: File[] | null;
-  documents?: File[] | null;
-  type: string;
 }
 
 export interface TechnicianRequestDetails {

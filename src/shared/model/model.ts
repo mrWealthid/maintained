@@ -43,6 +43,10 @@ export interface Ticket {
 
   assignedTo?: User;
   actionedBy?: Pick<User, "id" | "id" | "name">;
+  relatedTo?:
+    | string
+    | Pick<Ticket, "id" | "title" | "status" | "createdAt">
+    | null;
   type: string;
   priority: TICKET_PRIORITY;
   propertyName: string;
@@ -61,16 +65,18 @@ export interface CreateTicketPayload
     Ticket,
     | "id"
     | "createdAt"
-    | "id"
     | "category"
     | "user"
     | "status"
-    | "priority"
     | "propertyName"
     | "unitLabel"
+    | "relatedTo"
   > {
   status?: TICKET_STATUS;
   category: string;
+  property?: string;
+  unit?: string;
+  relatedTo?: string | null;
 }
 
 export interface FileUploadPreview {
@@ -174,29 +180,6 @@ export type UserQueryprops = {
 export type UserFilterQuery = {
   status?: INVITE_STATUS;
 };
-
-export interface InviteUserFormProps {
-  user?: User | undefined;
-  membership?: Membership;
-  onCloseModal?: () => void;
-  successCallback?: (result?: User) => void;
-  errorCallback?: (err: unknown) => void;
-}
-
-export interface InviteUserFormValues {
-  name: string;
-  email: string;
-  role: ROLES;
-  specialties: string[];
-  propertyId: string;
-  unitId: string;
-}
-
-export interface InviteUserPayload extends InviteUserFormValues {}
-
-export interface InviteUsersPayload {
-  users: InviteUserPayload[];
-}
 
 export type BaseActions = {
   label: string;

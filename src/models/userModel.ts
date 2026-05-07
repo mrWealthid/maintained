@@ -10,6 +10,14 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import Business from "./businessModel";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import {
+  USER_TYPE_VALUES,
+  WORKSPACE_ROLE_VALUES,
+  type USER_TYPE,
+  type WORKSPACE_ROLE,
+} from "@/shared/auth/roles";
+
+export type MembershipRoleValue = ROLES | USER_TYPE | WORKSPACE_ROLE;
 
 export interface IUser extends Document {
   name: string;
@@ -22,6 +30,7 @@ export interface IUser extends Document {
   createdAt: Date;
   dateOfBirth?: Date;
 
+  emailVerifiedAt?: Date | null;
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -55,7 +64,7 @@ export interface IUser extends Document {
   passwordConfirm: string;
   memberships: {
     business: Types.ObjectId;
-    role: ROLES;
+    role: MembershipRoleValue;
     status: INVITE_STATUS;
     inviteToken?: string;
     inviteTokenExpires?: Date;
@@ -69,7 +78,7 @@ export interface IUser extends Document {
   currentBusiness: Types.ObjectId;
   tenantsClaim(): Array<{
     business: string;
-    role: ROLES;
+    role: MembershipRoleValue;
     status: INVITE_STATUS;
   }>;
 
@@ -77,11 +86,13 @@ export interface IUser extends Document {
 }
 
 export const MEMBERSHIP_ROLES = [
-  "USER",
+  "TENANT",
   "ADMIN",
   "TECHNICIAN",
   "OWNER",
   "SUPER_ADMIN",
+  ...USER_TYPE_VALUES,
+  ...WORKSPACE_ROLE_VALUES,
 ] as const;
 export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
@@ -157,6 +168,9 @@ const MembershipSchema = new Schema(
       validate: {
         validator(this: any, val?: string[]) {
           if (this.role === "TECHNICIAN") {
+            if (this.status !== INVITE_STATUS.activated) {
+              return val === undefined || Array.isArray(val);
+            }
             return (
               Array.isArray(val) &&
               val.length > 0 &&
@@ -215,8 +229,8 @@ MembershipSchema.pre("validate", function (next) {
       )
     );
   }
-  // 🔒 Enforce property/unit for tenants
-  if (this.role === ROLES.user && (!this.property || !this.unit)) {
+  // Enforce property/unit for tenants.
+  if (this.role === ROLES.tenant && (!this.property || !this.unit)) {
     return next(new Error("Tenant membership requires property and unit"));
   }
   next();
@@ -272,6 +286,7 @@ const userSchema = new Schema<IUser>(
     contact: { type: String, trim: true },
     countryCode: { type: String, trim: true },
     addressStructured: { type: mongoose.Schema.Types.Mixed },
+    emailVerifiedAt: { type: Date, default: null },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
@@ -362,13 +377,13 @@ userSchema.set("toJSON", {
 
 userSchema.methods.tenantsClaim = function (): Array<{
   businessId: string;
-  role: ROLES;
+  role: MembershipRoleValue;
 }> {
   return (this.memberships || [])
     .filter((m: any) => m.status === "ACTIVATED")
     .map((m: any) => ({
       business: String(m.business),
-      role: m.role as ROLES,
+      role: m.role as MembershipRoleValue,
       status: m.status as INVITE_STATUS,
     }));
 };
@@ -377,7 +392,7 @@ export type UserDoc = mongoose.Document &
   Omit<InferSchemaType<typeof userSchema>, "memberships"> & {
     memberships: Array<{
       business: Types.ObjectId;
-      role: ROLES;
+      role: MembershipRoleValue;
       status: INVITE_STATUS;
       specialties?: TechnicianSpecialty[];
       inviteToken?: string;
@@ -405,7 +420,7 @@ export type UserDoc = mongoose.Document &
     }>;
     tenantsClaim(): Array<{
       business: string;
-      role: ROLES;
+      role: MembershipRoleValue;
       status: INVITE_STATUS;
       specialties?: TechnicianSpecialty[];
       // specialty?: TechnicianSpecialty;

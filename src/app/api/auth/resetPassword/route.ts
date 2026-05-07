@@ -1,33 +1,29 @@
-import { connect } from "@/dbConfig/dbConfig";
-import {
-  ApiError,
-  errorToNextResponse,
-  parseOrThrow,
-} from "@/lib/errors/apiError";
-import { buildAuthSuccessResponse } from "@/lib/auth/issue-auth-session";
 import User from "@/models/userModel";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { z } from "zod";
+import { connect } from "@/dbConfig/dbConfig";
+import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import {
+  assertPasswordPolicy,
+  getAppPasswordPolicy,
+} from "@/lib/security/password-policy";
+import { sendPasswordUpdatedEmail } from "@/lib/email/senders/security/sendPasswordUpdatedEmail";
 
-connect();
-
-const resetPasswordBodySchema = z
-  .object({
-    resetToken: z.string().min(1, "Reset token is required"),
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
-    confirmNewPassword: z.string().min(8, "Please confirm your new password"),
-  })
-  .refine((body) => body.newPassword === body.confirmNewPassword, {
-    path: ["confirmNewPassword"],
-    message: "Passwords do not match",
-  });
+const resetPasswordBodySchema = z.object({
+  resetToken: z.string().min(1, "Reset token is required"),
+  newPassword: z.string().min(1, "Password is required"),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { newPassword, currentPassword, confirmNewPassword, resetToken } =
-      parseOrThrow(resetPasswordBodySchema, await request.json());
+    await connect();
+
+    const { resetToken, newPassword } = resetPasswordBodySchema.parse(
+      await request.json(),
+    );
+    const passwordPolicy = await getAppPasswordPolicy();
+    assertPasswordPolicy(newPassword, passwordPolicy);
 
     const hashedToken = crypto
       .createHash("sha256")
@@ -43,29 +39,44 @@ export async function POST(request: NextRequest) {
       throw ApiError.badRequest("Token is invalid or has expired");
     }
 
-    if (!(await user.correctPassword(currentPassword, user.password))) {
-      throw ApiError.badRequest("Your current password is wrong");
-    }
-
-    if (currentPassword === newPassword) {
-      throw ApiError.badRequest("You can't use your old password");
+    if (!user.password) {
+      throw ApiError.badRequest("Password reset is unavailable for this account");
     }
 
     user.password = newPassword;
-    user.passwordConfirm = confirmNewPassword;
+    user.passwordChangedAt = new Date();
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
-    return buildAuthSuccessResponse({
-      request,
-      user,
-      body: {
-        status: "success",
-        message: "Password reset successfully! Kindly Login with Credentials",
-      },
+    try {
+      const emailResult = await sendPasswordUpdatedEmail({
+        request,
+        to: user.email,
+        attendeeName: user.name,
+      });
+
+      if (!emailResult.sent && !emailResult.skippedReason) {
+        console.error(
+          "Password updated email failed:",
+          emailResult.error ?? "unknown error",
+        );
+      }
+    } catch (emailError) {
+      console.error(
+        "Password updated email failed:",
+        emailError instanceof Error ? emailError.message : "unknown error",
+      );
+    }
+
+    return NextResponse.json({
+      status: "success",
+      message: "Password reset successfully! Kindly login with your new password.",
     });
   } catch (error) {
-    return errorToNextResponse(error, request.headers.get("x-request-id"));
+    return errorToNextResponse(
+      error,
+      request.headers.get("x-request-id") ?? undefined,
+    );
   }
 }

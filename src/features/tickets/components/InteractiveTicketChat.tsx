@@ -38,7 +38,7 @@ import {
   VolumeX,
   LoaderCircle,
 } from "lucide-react";
-import { ManageTicketForm } from "../models/ticket.model";
+import { type TicketCreateFormValues } from "../models/ticket-form.model";
 import { CreateTicketPayload } from "@/shared/model/model";
 import { useFormContext } from "react-hook-form";
 import { useFetchCategories, useFetchRequestTypes } from "../hooks/ticketHooks";
@@ -125,7 +125,7 @@ export function InteractiveTicketChat({
   const [uploadResults, setUploadResults] = useState<Record<string, string>>(
     {}
   );
-  const { setValue, getValues, reset } = useFormContext<ManageTicketForm>();
+  const { setValue, getValues, reset } = useFormContext<TicketCreateFormValues>();
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: categories } = useFetchCategories();
@@ -343,15 +343,15 @@ export function InteractiveTicketChat({
       content: label || value,
     });
 
-    const allowed: (keyof ManageTicketForm)[] = [
+    const allowed: (keyof TicketCreateFormValues)[] = [
       "images",
       "videos",
       "documents",
     ];
     // Update request data
     if (field) {
-      if (!allowed.includes(field as keyof ManageTicketForm)) {
-        setValue(field as keyof ManageTicketForm, value);
+      if (!allowed.includes(field as keyof TicketCreateFormValues)) {
+        setValue(field as keyof TicketCreateFormValues, value);
       }
       // setRequestData((prev) => ({ ...prev, [field]: value }));
     }
@@ -645,7 +645,7 @@ Would you like to submit this request?`;
     } else if (option === "Remove All") {
       const types = [
         ...new Set(selectedFiles.map((file) => inferSingleType([file]))),
-      ] as (keyof ManageTicketForm)[];
+      ] as (keyof TicketCreateFormValues)[];
 
       types.forEach((type) => {
         setValue(type, []);
@@ -698,7 +698,7 @@ Would you like to submit this request?`;
   }
 
   function BuildRequestPayload(
-    data: ManageTicketForm,
+    data: TicketCreateFormValues,
     imgUrls?: string[],
     videoUrls?: string[],
     docUrls?: string[]
@@ -938,7 +938,7 @@ Would you like to submit this request?`;
   const removeFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
 
-    const type = inferSingleType(selectedFiles) as keyof ManageTicketForm;
+    const type = inferSingleType(selectedFiles) as keyof TicketCreateFormValues;
 
     const currentFiles = (getValues(type) || []) as File[];
     const updatedFiles = currentFiles.filter((_, i) => i !== index);
@@ -1034,7 +1034,7 @@ Would you like to submit this request?`;
   }, []);
 
   const lastMessage = messages[messages.length - 1];
-  const field = lastMessage?.field as keyof ManageTicketForm;
+  const field = lastMessage?.field as keyof TicketCreateFormValues;
 
   return (
     <Sheet
@@ -1159,7 +1159,7 @@ Would you like to submit this request?`;
                     <div className="mt-2">
                       <Select
                         defaultValue={getValues(
-                          message.field as keyof ManageTicketForm
+                          message.field as keyof TicketCreateFormValues
                         )?.toString()}
                         onValueChange={handleSelectChange}
                       >

@@ -40,6 +40,9 @@ export const API_ROUTES = {
     byId: (id: string) => `${base}/workspaces/${id}`,
     bulkActions: `${base}/workspaces/bulk/actions`,
   },
+  platform: {
+    roles: `${base}/platform/roles`,
+  },
   appSettings: {
     root: `${base}/dashboard/settings/app`,
     security: `${base}/dashboard/settings/app/security`,

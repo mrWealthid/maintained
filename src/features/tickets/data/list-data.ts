@@ -60,15 +60,15 @@ export type TicketPriorityMeta = {
 
 export const TICKET_PRIORITY_META: Record<TicketPriority, TicketPriorityMeta> =
   {
-    [TICKET_PRIORITY.LOW]: {
+    [TICKET_PRIORITY.low]: {
       label: "Low",
       className: "bg-muted text-muted-foreground",
     },
-    [TICKET_PRIORITY.MEDIUM]: {
+    [TICKET_PRIORITY.medium]: {
       label: "Medium",
       className: "bg-status-open text-status-open-foreground",
     },
-    [TICKET_PRIORITY.HIGH]: {
+    [TICKET_PRIORITY.high]: {
       label: "High",
       className: "bg-status-overdue text-status-overdue-foreground",
     },

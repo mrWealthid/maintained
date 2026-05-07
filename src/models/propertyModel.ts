@@ -37,6 +37,13 @@ const PropertySchema = new Schema(
     propertyAddress: { type: String },
     isActive: { type: Boolean, default: true },
     defaultUnit: { type: Schema.Types.ObjectId, ref: "Unit", index: true },
+
+    // Property-management context
+    yearBuilt: { type: Number, min: 1800, max: 2100 },
+    amenities: { type: [String], default: [] },
+    photos: { type: [String], default: [] },
+    notes: { type: String, default: "" },
+
     meta: Schema.Types.Mixed,
   },
   { timestamps: true }

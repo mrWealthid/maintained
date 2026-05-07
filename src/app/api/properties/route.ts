@@ -12,7 +12,6 @@ import {
   propertyFormSchema,
   propertyListQuerySchema,
 } from "@/features/properties/models/property-form.model";
-import { PROPERTY_TYPES } from "@/features/onboarding/data/data";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import APIFeatures from "@/utils/apiFeatures";
 import Property from "@/models/propertyModel";
@@ -57,11 +56,11 @@ export async function POST(request: NextRequest) {
         isActive: true,
       });
 
-      if (PROPERTY_TYPES[0].includes(property.type)) {
+      if (property.type === "HOUSE") {
         const defaultUnit = await Unit.create({
           business: property.business,
           property: property._id,
-          label: "Home",
+          label: "Main",
         });
         property.defaultUnit = defaultUnit._id;
         await property.save();

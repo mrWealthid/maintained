@@ -61,8 +61,8 @@ export type AssignableWorkspaceRole =
  *  technician  – External or in-house tradesperson. Sees assigned tickets only.
  */
 export enum USER_TYPE {
-  tenant = "TENANT",
-  technician = "TECHNICIAN",
+  tenant = ROLES.tenant,
+  technician = ROLES.technician,
 }
 
 export const USER_TYPE_VALUES = Object.values(USER_TYPE);
@@ -78,7 +78,7 @@ export function isPlatformSuperAdminRole(role?: string | null) {
  * Legacy mapping:
  *   ROLES.admin  -> WORKSPACE_ROLE.property_manager
  *   ROLES.owner  -> WORKSPACE_ROLE.owner       (when isWorkspaceOwner is true)
- *   ROLES.user   -> WORKSPACE_ROLE.member
+ *   ROLES.user   -> null (legacy tenant value only)
  * Tenants and technicians are NOT workspace roles in the new model — see
  * USER_TYPE above. This resolver returns null for those.
  */
@@ -188,7 +188,7 @@ export function toLegacySessionRole(role?: string | null): ROLES | null {
   }
 
   if (role === USER_TYPE.tenant || role === ROLES.user) {
-    return ROLES.user;
+    return ROLES.tenant;
   }
   if (role === USER_TYPE.technician || role === ROLES.technician) {
     return ROLES.technician;

@@ -18,6 +18,7 @@ export enum ROLES {
 	admin = 'ADMIN',
 	super_admin = 'SUPER_ADMIN',
 	user = 'USER',
+	tenant = 'TENANT',
 	technician = 'TECHNICIAN',
 	owner = 'OWNER'
 }
