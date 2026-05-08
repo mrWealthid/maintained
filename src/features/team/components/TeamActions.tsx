@@ -3,7 +3,6 @@
 import { type ComponentType, useState } from "react";
 import {
   Ban,
-  Home,
   RefreshCw,
   ShieldCheck,
   Trash2,
@@ -51,7 +50,6 @@ const TEAM_ROLE_ACTION_META = {
   [WORKSPACE_ROLE.maintenance_coordinator]: { icon: ShieldCheck },
   [WORKSPACE_ROLE.accountant]: { icon: Wallet },
   [WORKSPACE_ROLE.member]: { icon: UserRound },
-  [USER_TYPE.tenant]: { icon: Home },
   [USER_TYPE.technician]: { icon: Wrench },
 } as const satisfies Record<
   TeamInviteRole,

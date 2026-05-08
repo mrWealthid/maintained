@@ -105,11 +105,16 @@ const SecuritySettings: React.FC = () => {
   const [settings, setSettings] = useState<WorkspaceSecuritySettings>(
     defaultSecuritySettings
   );
+  const [savedSettings, setSavedSettings] = useState<WorkspaceSecuritySettings>(
+    defaultSecuritySettings
+  );
   const [ipDraft, setIpDraft] = useState("");
   const [ipDraftError, setIpDraftError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data) setSettings(data);
+    if (!data) return;
+    setSettings(data);
+    setSavedSettings(data);
   }, [data]);
 
   const allowedIps = useMemo(
@@ -124,6 +129,27 @@ const SecuritySettings: React.FC = () => {
       ? EMPTY_WHITELIST_MESSAGE
       : null;
   const otherSessionCount = sessions.filter((session) => !session.current).length;
+  const savePayload = useMemo(
+    () => ({
+      ...settings,
+      ipWhitelist: {
+        enabled: settings.ipWhitelist.enabled,
+        ips: allowedIps,
+      },
+    }),
+    [allowedIps, settings],
+  );
+  const savedPayload = useMemo(
+    () => ({
+      ...savedSettings,
+      ipWhitelist: {
+        enabled: savedSettings.ipWhitelist.enabled,
+        ips: normalizeIpAddressList(savedSettings.ipWhitelist.ips),
+      },
+    }),
+    [savedSettings],
+  );
+  const hasChanges = JSON.stringify(savePayload) !== JSON.stringify(savedPayload);
 
   function patchSettings(patch: Partial<WorkspaceSecuritySettings>) {
     setSettings((current) => ({
@@ -180,14 +206,10 @@ const SecuritySettings: React.FC = () => {
     setIpDraftError(null);
   }
 
-  function handleSave() {
-    updateSecuritySettings.mutate({
-      ...settings,
-      ipWhitelist: {
-        enabled: settings.ipWhitelist.enabled,
-        ips: allowedIps,
-      },
-    });
+  async function handleSave() {
+    const saved = await updateSecuritySettings.mutateAsync(savePayload);
+    setSettings(saved.data);
+    setSavedSettings(saved.data);
   }
 
   let activeSessionsContent = (
@@ -281,7 +303,8 @@ const SecuritySettings: React.FC = () => {
               disabled={
                 updateSecuritySettings.isPending ||
                 Boolean(whitelistError) ||
-                isLoading
+                isLoading ||
+                !hasChanges
               }
             >
               {updateSecuritySettings.isPending ? "Saving..." : "Save Changes"}

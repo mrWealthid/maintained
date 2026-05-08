@@ -103,7 +103,8 @@ export default function SidebarProfileShell({
   const hasResolvedProfile = Boolean(data) || !isLoading;
   const availableWorkspaces = profile.workspaces ?? [];
   const canSwitchWorkspaces = availableWorkspaces.length > 1;
-  const canCreateWorkspace = !isSuperAdminRole(profile.role);
+  const canCreateWorkspace =
+    !isSuperAdminRole(profile.role) && profile.isWorkspaceOwner === true;
 
   const handleSwitchWorkspace = async (businessId: string) => {
     if (
@@ -128,7 +129,7 @@ export default function SidebarProfileShell({
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             size="lg"
-            className="h-auto min-h-14 rounded-2xl border border-border/60 bg-muted/30 px-3 py-3 shadow-sm transition-colors hover:bg-muted/60 focus-visible:ring-0 data-[state=open]:bg-muted/70 data-[state=open]:text-foreground group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:border-border/50 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            className="h-auto min-h-14 rounded-xl border border-border/70 bg-background px-3 py-3 shadow-none transition-colors hover:border-primary/40 hover:bg-background focus-visible:ring-0 data-[state=open]:border-primary/50 data-[state=open]:bg-background data-[state=open]:text-foreground group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:border-border/60 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
           >
             {hasResolvedProfile ? (
               <Profile {...profile} expanded={open} />
@@ -138,12 +139,12 @@ export default function SidebarProfileShell({
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-(--radix-dropdown-menu-trigger-width) min-w-72 rounded-xl border-border/70 p-2 shadow-lg"
+          className="w-(--radix-dropdown-menu-trigger-width) min-w-72 rounded-xl border-border/70 bg-background p-2 shadow-xs"
           side={isMobile ? "bottom" : "right"}
           align="end"
           sideOffset={4}
         >
-          <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-3">
+          <div className="rounded-xl border border-border/70 bg-background px-3 py-3">
             {hasResolvedProfile ? (
               <Profile {...profile} expanded />
             ) : (
@@ -268,7 +269,7 @@ export default function SidebarProfileShell({
         open={upgradeDialogOpen}
         onOpenChange={setUpgradeDialogOpen}
         title="Upgrade to Business Workspace"
-        description="This will convert your current solo organizer workspace into a business workspace and enable team invitations."
+        description="This will convert your current solo owner workspace into a business workspace and enable team invitations."
         confirmLabel={
           upgradeWorkspaceMutation.isPending
             ? "Upgrading..."

@@ -4,9 +4,16 @@ import {
   CategoryFormData,
   TicketTypeFormData,
   NotificationPreferences,
+  PersonalProfileSettings,
+  WorkspaceProfileSettings,
+  DeepPartial,
   EmailSettingsUpdateData,
 } from "../models/settings.model";
 import {
+  fetchPersonalProfile,
+  updatePersonalProfile,
+  fetchWorkspaceProfileSettings,
+  updateWorkspaceProfileSettings,
   fetchNotificationPreferences,
   updateNotificationPreferences,
   fetchEmailSettings,
@@ -39,6 +46,59 @@ import {
   deleteAppTicketType,
 } from "../services/settings-service";
 import { ApiError } from "@/shared/model/model";
+
+export function usePersonalProfile() {
+  return useQuery({
+    queryKey: ["personal-profile"],
+    queryFn: fetchPersonalProfile,
+    select: (data) => data.data,
+  });
+}
+
+export function useUpdatePersonalProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Omit<PersonalProfileSettings, "email">) =>
+      updatePersonalProfile(data),
+    onSuccess: () => {
+      toast.success("Personal information updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["personal-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["sidebar-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useWorkspaceProfileSettings() {
+  return useQuery({
+    queryKey: ["business-settings"],
+    queryFn: fetchWorkspaceProfileSettings,
+    select: (data) => data.data,
+  });
+}
+
+export function useUpdateWorkspaceProfileSettings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: DeepPartial<WorkspaceProfileSettings>) =>
+      updateWorkspaceProfileSettings(data),
+    onSuccess: () => {
+      toast.success("General settings saved");
+      queryClient.invalidateQueries({ queryKey: ["business-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["personal-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["sidebar-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+}
 
 // Notification Preferences Hooks
 export function useNotificationPreferences() {

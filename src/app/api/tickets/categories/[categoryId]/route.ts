@@ -4,10 +4,10 @@ import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Category from "@/models/ticketCategoryModel";
-import { ROLES } from "@/shared/enums/enums";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import mongoose from "mongoose";
 
 connect();
 
@@ -17,12 +17,6 @@ const categoryUpdateBodySchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-function assertCategoryAdmin(role: string | undefined) {
-  if (role !== ROLES.admin && role !== ROLES.super_admin) {
-    throw ApiError.forbidden("Admin access required");
-  }
-}
-
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ categoryId: string }> },
@@ -31,7 +25,6 @@ export async function PUT(
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
-    assertCategoryAdmin(verify.role);
 
     const { name, description, isActive } = parseOrThrow(
       categoryUpdateBodySchema,
@@ -39,8 +32,12 @@ export async function PUT(
     );
     const { categoryId } = await params;
 
-    const category = await Category.findByIdAndUpdate(
-      categoryId,
+    const category = await Category.findOneAndUpdate(
+      {
+        _id: categoryId,
+        business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+        isDefault: { $ne: true },
+      },
       { name, description, isActive },
       { new: true },
     );
@@ -65,11 +62,13 @@ export async function DELETE(
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_CATEGORIES_MANAGE);
-    assertCategoryAdmin(verify.role);
 
     const { categoryId } = await params;
 
-    const category = await Category.findById(categoryId);
+    const category = await Category.findOne({
+      _id: categoryId,
+      business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+    });
     if (!category) throw ApiError.notFound("Category not found");
     if (category.isDefault) {
       throw ApiError.badRequest("Cannot delete default categories");

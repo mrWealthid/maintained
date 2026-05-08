@@ -1,6 +1,7 @@
 import React, {
   ChangeEvent,
   ReactNode,
+  useEffect,
   useRef,
   useState,
   useCallback,
@@ -68,6 +69,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
   onPreviewFileRemove,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const didMountRef = useRef(false);
+  const shouldNotifyFileChangeRef = useRef(false);
+  const pendingFileListRef = useRef<FileList | null>(null);
+  const pendingRemovedPreviewFileRef = useRef<File | null>(null);
   const [previews, setPreviews] = useState<FileUploadPreview[]>([]);
   const [existingFiles, setExistingFiles] = useState(initialFiles);
   const [isDragging, setIsDragging] = useState(false);
@@ -87,22 +92,44 @@ const FileUpload: React.FC<FileUploadProps> = ({
     []
   );
 
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    if (!shouldNotifyFileChangeRef.current) return;
+
+    shouldNotifyFileChangeRef.current = false;
+    const nextFiles = previews.map((preview) => preview.file);
+
+    if (pendingFileListRef.current) {
+      onFileSelect?.(pendingFileListRef.current);
+      pendingFileListRef.current = null;
+    }
+
+    onFilesChange?.(nextFiles);
+
+    if (pendingRemovedPreviewFileRef.current) {
+      onPreviewFileRemove?.(pendingRemovedPreviewFileRef.current, nextFiles);
+      pendingRemovedPreviewFileRef.current = null;
+    }
+  }, [onFileSelect, onFilesChange, onPreviewFileRemove, previews]);
+
   const commitSelectedFiles = (files: File[]) => {
     if (files.length === 0) return;
 
-    setPreviews((currentPreviews) => {
-      const nextPreviews = multiple
-        ? [...currentPreviews, ...buildPreviews(files)]
-        : buildPreviews(files);
-      const nextFiles = nextPreviews.map((preview) => preview.file);
-      onFilesChange?.(nextFiles);
+    const selectedPreviews = buildPreviews(files);
+    const nextPreviews = multiple
+      ? [...previews, ...selectedPreviews]
+      : selectedPreviews;
+    const nextFiles = nextPreviews.map((preview) => preview.file);
+    const dt = new DataTransfer();
+    nextFiles.forEach((file) => dt.items.add(file));
 
-      const dt = new DataTransfer();
-      nextFiles.forEach((file) => dt.items.add(file));
-      onFileSelect?.(dt.files);
-
-      return nextPreviews;
-    });
+    shouldNotifyFileChangeRef.current = true;
+    pendingFileListRef.current = dt.files;
+    setPreviews(nextPreviews);
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -143,13 +170,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const target = previews.find((p) => p.id === previewId);
     if (!target) return;
     URL.revokeObjectURL(target.url);
-    setPreviews((prev) => {
-      const nextPreviews = prev.filter((p) => p.id !== previewId);
-      const nextFiles = nextPreviews.map((preview) => preview.file);
-      onFilesChange?.(nextFiles);
-      onPreviewFileRemove?.(target.file as File, nextFiles);
-      return nextPreviews;
-    });
+    const nextPreviews = previews.filter((p) => p.id !== previewId);
+
+    shouldNotifyFileChangeRef.current = true;
+    pendingFileListRef.current = null;
+    pendingRemovedPreviewFileRef.current = target.file as File;
+    setPreviews(nextPreviews);
   };
 
   const handleRemoveExisting = (file: {
@@ -200,7 +226,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           }
         }}
         className={cn(
-          "relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-all duration-200",
+          "relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-8 text-center transition-all duration-200",
           isDragging
             ? "border-primary bg-primary/5 scale-[1.01]"
             : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/60"
@@ -208,7 +234,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       >
         <div
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-xl transition-colors",
+            "flex h-11 w-11 items-center justify-center rounded-lg transition-colors",
             isDragging
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground"
@@ -295,7 +321,7 @@ function FileRow({
   const complete = progress >= 100;
 
   return (
-    <div className="group relative flex items-center gap-3 rounded-xl border bg-card p-3 shadow-xs transition-shadow hover:shadow-md">
+    <div className="group relative flex items-center gap-3 rounded-lg border bg-card p-3 shadow-none transition-colors hover:bg-muted/30">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
         {previewUrl ? (
           <Image

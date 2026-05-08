@@ -40,7 +40,7 @@ const TicketComponent: FC = () => {
           onValueChange={(val) => handleSelectedValue(val as TICKET_STATUS)}
           className="w-full xl:w-auto"
         >
-          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm sm:w-auto">
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none sm:w-auto">
             {ticketListFilterData.map((tab) => (
               <TabsTrigger
                 key={tab.value}

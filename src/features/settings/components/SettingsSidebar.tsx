@@ -26,7 +26,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     <div className="h-full w-64 bg-background border-border">
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={onTabChange}>
-          <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm">
+          <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-1 rounded-2xl border border-border/70 bg-secondary p-1 shadow-none">
             {filteredTabs.map((tab) => {
               const Icon = tab.icon;
               return (

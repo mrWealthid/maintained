@@ -139,10 +139,15 @@ const EmailSettings: React.FC = () => {
   const updateEmailSettings = useUpdateEmailSettings();
   const [localSettings, setLocalSettings] =
     useState<BusinessEmailSettings | null>(null);
+  const [savedSettings, setSavedSettings] =
+    useState<BusinessEmailSettings | null>(null);
   const [view, setView] = useState<EmailView>({ mode: "list" });
 
   useEffect(() => {
-    if (settings) setLocalSettings(cloneSettings(settings));
+    if (!settings) return;
+    const nextSettings = cloneSettings(settings);
+    setLocalSettings(nextSettings);
+    setSavedSettings(nextSettings);
   }, [settings]);
 
   const updateTemplate = (
@@ -172,12 +177,18 @@ const EmailSettings: React.FC = () => {
   const handleSave = async () => {
     if (!localSettings) return;
 
-    await updateEmailSettings.mutateAsync({
+    const saved = await updateEmailSettings.mutateAsync({
       replyTo: localSettings.replyTo,
       bcc: localSettings.bcc,
       templates: localSettings.templates,
     });
+    const nextSettings = cloneSettings(saved.data);
+    setLocalSettings(nextSettings);
+    setSavedSettings(nextSettings);
   };
+  const hasChanges =
+    Boolean(localSettings && savedSettings) &&
+    JSON.stringify(localSettings) !== JSON.stringify(savedSettings);
 
   if (isLoading || !localSettings) {
     return (
@@ -200,6 +211,7 @@ const EmailSettings: React.FC = () => {
         settings={localSettings}
         template={view.template}
         saving={updateEmailSettings.isPending}
+        hasChanges={hasChanges}
         onBack={() =>
           setView(view.returnTo === "gallery" ? { mode: "gallery" } : { mode: "list" })
         }
@@ -225,6 +237,7 @@ const EmailSettings: React.FC = () => {
     <EmailSection
       settings={localSettings}
       saving={updateEmailSettings.isPending}
+      hasChanges={hasChanges}
       onSave={handleSave}
       onPatchSettings={patchSettings}
       onUpdateTemplate={updateTemplate}
@@ -239,6 +252,7 @@ const EmailSettings: React.FC = () => {
 function EmailSection({
   settings,
   saving,
+  hasChanges,
   onSave,
   onPatchSettings,
   onUpdateTemplate,
@@ -247,6 +261,7 @@ function EmailSection({
 }: {
   settings: BusinessEmailSettings;
   saving: boolean;
+  hasChanges: boolean;
   onSave: () => void;
   onPatchSettings: (patch: Partial<BusinessEmailSettings>) => void;
   onUpdateTemplate: (
@@ -267,7 +282,7 @@ function EmailSection({
       icon={Mail}
       description="Customize email templates and sender settings"
       actions={
-        <Button type="button" onClick={onSave} disabled={saving}>
+        <Button type="button" onClick={onSave} disabled={saving || !hasChanges}>
           <Save className="mr-2 h-4 w-4" />
           {saving ? "Saving..." : "Save Changes"}
         </Button>
@@ -570,6 +585,7 @@ function EmailTemplateEditorScreen({
   settings,
   template,
   saving,
+  hasChanges,
   onBack,
   onSave,
   onUpdateTemplate,
@@ -577,6 +593,7 @@ function EmailTemplateEditorScreen({
   settings: BusinessEmailSettings;
   template: BusinessEmailSettingsTemplateMeta;
   saving: boolean;
+  hasChanges: boolean;
   onBack: () => void;
   onSave: () => void;
   onUpdateTemplate: (
@@ -646,7 +663,7 @@ function EmailTemplateEditorScreen({
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
-          <Button type="button" onClick={onSave} disabled={saving}>
+          <Button type="button" onClick={onSave} disabled={saving || !hasChanges}>
             <Save className="mr-2 h-4 w-4" />
             {saving ? "Saving..." : "Save Changes"}
           </Button>

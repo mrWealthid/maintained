@@ -39,12 +39,19 @@ const NotificationSettings: React.FC = () => {
   const updatePreferences = useUpdateNotificationPreferences();
   const [localPreferences, setLocalPreferences] =
     useState<NotificationPreferences>(defaultPreferences);
+  const [savedPreferences, setSavedPreferences] =
+    useState<NotificationPreferences>(defaultPreferences);
 
   useEffect(() => {
     if (preferences) {
-      setLocalPreferences({ ...defaultPreferences, ...preferences });
+      const nextPreferences = { ...defaultPreferences, ...preferences };
+      setLocalPreferences(nextPreferences);
+      setSavedPreferences(nextPreferences);
     }
   }, [preferences]);
+
+  const hasChanges =
+    JSON.stringify(localPreferences) !== JSON.stringify(savedPreferences);
 
   const patchPreference = <K extends keyof NotificationPreferences>(
     key: K,
@@ -54,7 +61,10 @@ const NotificationSettings: React.FC = () => {
   };
 
   const handleSave = async () => {
-    await updatePreferences.mutateAsync(localPreferences);
+    const saved = await updatePreferences.mutateAsync(localPreferences);
+    const nextPreferences = { ...defaultPreferences, ...saved.data };
+    setLocalPreferences(nextPreferences);
+    setSavedPreferences(nextPreferences);
   };
 
   return (
@@ -66,7 +76,7 @@ const NotificationSettings: React.FC = () => {
         <Button
           type="button"
           onClick={handleSave}
-          disabled={updatePreferences.isPending || isLoading}
+          disabled={updatePreferences.isPending || isLoading || !hasChanges}
         >
           <Save className="mr-2 h-4 w-4" />
           {updatePreferences.isPending ? "Saving..." : "Save Changes"}

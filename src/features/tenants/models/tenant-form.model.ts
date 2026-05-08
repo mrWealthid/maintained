@@ -20,3 +20,36 @@ export const tenantListQuerySchema = z.object({
 });
 
 export type TenantListQuery = z.infer<typeof tenantListQuerySchema>;
+
+export type TenantListItem = {
+  id: string;
+  kind: "tenant" | "invite";
+  name: string;
+  email: string;
+  status: "active" | "pending";
+  property?: {
+    _id?: string;
+    id?: string;
+    name?: string;
+  } | null;
+  unit?: {
+    _id?: string;
+    id?: string;
+    label?: string;
+  } | null;
+  joinedAt?: string | null;
+  invitedAt?: string | null;
+  inviteExpiresAt?: string | null;
+};
+
+export type TenantListResponse = {
+  status: string;
+  data: TenantListItem[];
+  totalRecords: number;
+  results: number;
+  summary: {
+    total: number;
+    active: number;
+    pending: number;
+  };
+};

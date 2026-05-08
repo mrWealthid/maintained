@@ -182,7 +182,7 @@ const UnitForm: FC<OnboardingPropWrapper<{ businessId: string }>> = ({
               return (
                 <Card
                   key={property._id}
-                  className={`cursor-pointer bg-card transition-all hover:shadow-lg ${
+                  className={`cursor-pointer bg-card transition-colors hover:bg-muted/30 ${
                     selected ? "ring-2 ring-primary " : "hover:bg-accent/50"
                   }`}
                   onClick={() => toggleProperty(property._id)}

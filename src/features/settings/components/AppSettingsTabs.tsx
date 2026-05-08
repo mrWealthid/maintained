@@ -42,7 +42,7 @@ const tabs = [
 ] as const;
 
 const tabTriggerClassName =
-  "group h-10 min-w-[120px] flex-none gap-2 rounded-lg px-3 data-[state=active]:shadow-md";
+  "group h-10 min-w-[120px] flex-none gap-2 rounded-full px-3 data-[state=active]:shadow-none";
 
 export type AppSettingsTabValue = (typeof tabs)[number]["value"];
 
@@ -53,7 +53,7 @@ export function AppSettingsTabs({
 }) {
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className="bg-muted/40">
+      <TabsList className="bg-secondary">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (

@@ -1,4 +1,66 @@
 import type { PermissionKey } from "@/shared/auth/permission-registry";
+import { z } from "zod";
+
+const integrationStateSchema = z.object({
+  connected: z.boolean(),
+});
+
+const workspaceGeneralSettingsSchema = z.object({
+  timezone: z.string(),
+  dateFormat: z.enum(["mdy", "dmy", "ymd"]),
+  timeFormat: z.enum(["12h", "24h"]),
+  language: z.enum(["en", "es", "fr", "de", "pt"]),
+  integrations: z.object({
+    googleCalendar: integrationStateSchema,
+    slack: integrationStateSchema,
+    mailchimp: integrationStateSchema,
+    zapier: integrationStateSchema,
+  }),
+});
+
+const addressStructuredSchema = z
+  .object({
+    line1: z.string().optional().default(""),
+    line2: z.string().optional().default(""),
+    city: z.string().optional().default(""),
+    state: z.string().optional().default(""),
+    postalCode: z.string().optional().default(""),
+    countryCode: z.string().optional().default("US"),
+    country: z.string().optional().default("United States"),
+    lat: z.number().nullable().optional(),
+    lng: z.number().nullable().optional(),
+    placeId: z.string().optional().default(""),
+    source: z.enum(["google", "manual"]).optional().default("manual"),
+  })
+  .passthrough();
+
+export const WorkspaceProfileSettingsSchema = z.object({
+  personalProfile: z.object({
+    name: z.string().trim().min(2, "Name is required").max(120),
+    email: z.string().email("Enter a valid email"),
+    contact: z.string().trim().optional().default(""),
+    countryCode: z.string().trim().max(4).optional().default("US"),
+  }),
+  business: z.object({
+    name: z.string().trim().min(2, "Workspace name is required").max(160),
+    email: z.string().email("Enter a valid email"),
+    contact: z.string().trim().optional().default(""),
+    countryCode: z.string().trim().max(4).optional().default("US"),
+    logo: z.string().optional().default(""),
+    description: z.string().trim().optional().default(""),
+    workspaceType: z.enum(["BUSINESS", "INDIVIDUAL"]),
+    addressStructured: addressStructuredSchema.optional(),
+  }),
+  settings: z.object({
+    general: workspaceGeneralSettingsSchema,
+  }),
+  meta: z.object({
+    permissions: z.object({
+      isBusinessCreator: z.boolean(),
+      canEditBusinessDetails: z.boolean(),
+    }),
+  }),
+});
 
 export interface NotificationPreferences {
   ticketCreatedAlerts: boolean;
@@ -15,6 +77,20 @@ export interface NotificationPreferences {
   emailEnabled?: boolean;
   phoneEnabled?: boolean;
 }
+
+export type PersonalProfileSettings = z.infer<
+  typeof WorkspaceProfileSettingsSchema
+>["personalProfile"];
+
+export type WorkspaceProfileSettings = z.infer<
+  typeof WorkspaceProfileSettingsSchema
+>;
+
+export type WorkspaceGeneralSettings = WorkspaceProfileSettings["settings"]["general"];
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
 
 export interface SecuritySettings {
   currentPassword: string;

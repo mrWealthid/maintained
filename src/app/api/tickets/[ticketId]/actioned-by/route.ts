@@ -11,7 +11,7 @@ import { PERMISSION } from "@/shared/auth/permission-registry";
 
 const actionedByBodySchema = z.object({
   actionedBy: z.string().min(1),
-  status: z.string().min(1),
+  status: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -46,7 +46,10 @@ export async function PATCH(
       throw ApiError.forbidden("You are not allowed to update this ticket");
     }
 
-    await Ticket.findByIdAndUpdate(ticketId, { actionedBy, status });
+    const update: { actionedBy: string; status?: string } = { actionedBy };
+    if (status) update.status = status;
+
+    await Ticket.findByIdAndUpdate(ticketId, update);
 
     return NextResponse.json(
       { message: "Ticket actionedBy updated successfully", ticket },

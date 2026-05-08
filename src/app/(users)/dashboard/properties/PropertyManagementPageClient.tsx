@@ -32,7 +32,7 @@ const PropertyManagementPage = () => {
         className="space-y-6"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm sm:w-auto">
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none sm:w-auto">
             <TabsTrigger
               value="properties"
               className="justify-start gap-3 rounded-full px-3 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground"

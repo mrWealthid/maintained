@@ -1036,7 +1036,7 @@ export function AppEmailTemplateEditorScreen({
 
               {/* Link dialog */}
               {showLinkDialog && (
-                <div className="rounded-lg border border-border bg-popover p-4 shadow-lg">
+                <div className="rounded-md border border-border bg-popover p-4 shadow-xs">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Link2 className="h-4 w-4 text-chart-2" />
@@ -1094,7 +1094,7 @@ export function AppEmailTemplateEditorScreen({
 
               {/* Image dialog */}
               {showImageDialog && (
-                <div className="rounded-lg border border-border bg-popover p-4 shadow-lg">
+                <div className="rounded-md border border-border bg-popover p-4 shadow-xs">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ImageIcon className="h-4 w-4 text-chart-2" />
@@ -1152,7 +1152,7 @@ export function AppEmailTemplateEditorScreen({
 
               {/* Merge variables */}
               {showMergeVars && (
-                <div className="rounded-lg border border-chart-2/20 bg-popover shadow-lg">
+                <div className="rounded-md border border-chart-2/20 bg-popover shadow-xs">
                   <div className="flex items-center justify-between border-b border-border px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Variable className="h-4 w-4 text-chart-2" />

@@ -6,10 +6,8 @@ import {
   Eye,
   Edit,
   Send,
-  UserPlus,
   Repeat,
   Trash2,
-  ClipboardCheck,
   Wrench,
 } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -27,7 +25,6 @@ import ErrorList from "@/components/ui/ErrorList";
 import { Button } from "@/components/ui/button";
 
 import { TICKET_STATUS } from "@/shared/enums/enums";
-import { useAppContext } from "@/shared/contexts/AppContext";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
@@ -42,7 +39,6 @@ import {
 import { TICKET_PRIORITY } from "../models/ticket-priority.model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  useAssignTicket,
   useCreateTicket,
   useDeleteTicket,
 } from "../hooks/ticketHooks";
@@ -51,7 +47,7 @@ import TicketSummary from "./TicketSummary";
 import HandOffTicketForm from "../forms/HandOffTicketForm";
 import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
 
-type ConfirmKey = "self-assign" | "delete";
+type ConfirmKey = "delete";
 
 type ConfirmConfigItem = {
   title: string;
@@ -64,7 +60,6 @@ type ConfirmConfigItem = {
 
 export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const router = useRouter();
-  const { user } = useAppContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -74,15 +69,12 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
 
   const { isDeleting, handleDeleteTicket, deleteTicketError } =
     useDeleteTicket();
-  const { isUpdating, handleAssignTicket, assignTicketError } =
-    useAssignTicket(ticket.id);
   const { isCreating, handleCreateTicket, createTicketError } = useCreateTicket(
     true,
     ticket.id,
   );
 
   const canEditTicket = useHasPermission(PERMISSION.TICKETS_EDIT);
-  const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
   const canManageTicketStatus = useHasPermission(
     PERMISSION.TICKETS_STATUS_MANAGE,
   );
@@ -91,8 +83,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
     PERMISSION.TECHNICIAN_REQUESTS_CREATE,
   );
 
-  const isActionedByCurrentUser = user?.id === ticket.actionedBy?.id;
-  const isLoading = isDeleting || isUpdating;
+  const isLoading = isDeleting;
 
   const methods = useForm<TicketCreateFormValues>({
     resolver: zodResolver(ticketCreateFormSchema) as never,
@@ -131,18 +122,6 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   };
 
   const confirmConfig: Record<ConfirmKey, ConfirmConfigItem> = {
-    "self-assign": {
-      title: "Admin Assignment",
-      description: "Are you sure you want to assign this ticket to yourself?",
-      confirmLabel: isUpdating ? "Assigning..." : "Assign to me",
-      icon: ClipboardCheck,
-      onConfirm: () => {
-        handleAssignTicket(
-          { actionedBy: user?.id, status: TICKET_STATUS.processing },
-          { onSuccess: () => setConfirmKey(null) },
-        );
-      },
-    },
     delete: {
       title: "Delete Maintenance Ticket",
       description:
@@ -182,8 +161,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
 
   if (
     ticket.status !== TICKET_STATUS.pending &&
-    (canManageTicketStatus ||
-      (canAssignTicket && isActionedByCurrentUser))
+    canManageTicketStatus
   ) {
     baseActions.push({
       label: "Handoff",
@@ -196,26 +174,18 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   }
 
   if (
-    ticket.status === TICKET_STATUS.processing &&
-    canCreateTechnicianRequest &&
-    (isActionedByCurrentUser || canAssignTicket)
-  ) {
-    baseActions.push({
-      label: "Assign",
-      action: () => {
-        setMenuOpen(false);
-        setSendRequestOpen(true);
-      },
-      icon: Send,
-    });
-  }
-
-  if (
-    ticket.status === TICKET_STATUS.pending_assignment &&
+    [
+      TICKET_STATUS.pending,
+      TICKET_STATUS.processing,
+      TICKET_STATUS.pending_assignment,
+    ].includes(ticket.status as TICKET_STATUS) &&
     canCreateTechnicianRequest
   ) {
     baseActions.push({
-      label: "Update assignment",
+      label:
+        ticket.status === TICKET_STATUS.pending_assignment
+          ? "Update assignment"
+          : "Send to technician",
       action: () => {
         setMenuOpen(false);
         setSendRequestOpen(true);
@@ -227,14 +197,6 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const confirmableActions: Array<
     Omit<ConfirmActions, "key"> & { key: ConfirmKey }
   > = [];
-
-  if (ticket.status === TICKET_STATUS.pending && canAssignTicket) {
-    confirmableActions.push({
-      label: "Assign to me",
-      key: "self-assign",
-      icon: UserPlus,
-    });
-  }
 
   if (canDeleteTicket) {
     confirmableActions.push({
@@ -352,9 +314,6 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
         >
           {confirmKey === "delete" && deleteTicketError ? (
             <ErrorList error={deleteTicketError} />
-          ) : null}
-          {confirmKey === "self-assign" && assignTicketError ? (
-            <ErrorList error={assignTicketError} />
           ) : null}
         </ActionConfirmDialog>
       ) : null}

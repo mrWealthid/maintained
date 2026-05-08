@@ -22,7 +22,7 @@ export const API_ROUTES = {
     me: `${base}/auth/me`,
     onboard: `${base}/auth/onboard`,
     sidebarProfile: `${base}/auth/sidebar-profile`,
-    workspaceCreate: `${base}/auth/workspaces`,
+    workspaceCreate: `${base}/workspaces`,
     workspaceSwitch: `${base}/auth/workspaces/switch`,
     workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
     passwordPolicyConfig: `${base}/auth/password-policy/config`,
@@ -64,6 +64,7 @@ export const API_ROUTES = {
     change_password: `${base}/user/change-password`,
   },
   settings: {
+    general: `${base}/dashboard/settings/general`,
     email: `${base}/dashboard/settings/email`,
     security: `${base}/dashboard/settings/security`,
   },
@@ -74,6 +75,11 @@ export const API_ROUTES = {
     resend: (id: string) => `${base}/team/${id}/resend`,
     permissionsById: (id: string) => `${base}/team/${id}/permissions`,
     roles: `${base}/team/roles`,
+  },
+
+  tenants: {
+    list: `${base}/tenants`,
+    byId: (id: string) => `${base}/tenants/${id}`,
   },
 
   ticketManagement: {

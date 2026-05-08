@@ -18,7 +18,6 @@ export const TeamAssignableRoleSchema = z.enum(
 
 export const TEAM_INVITE_ROLE_VALUES = [
   ...WORKSPACE_ASSIGNABLE_ROLE_VALUES,
-  USER_TYPE.tenant,
   USER_TYPE.technician,
 ] as const;
 

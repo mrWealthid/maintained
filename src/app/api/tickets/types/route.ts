@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
 import TicketType from "@/models/ticketTypeModel";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
@@ -27,20 +26,17 @@ export async function GET(request: NextRequest) {
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_VIEW);
 
-    const user = await User.findById(verify.id);
-    if (!user) throw ApiError.notFound("User not found");
-
     const parsedQuery = parseOrThrow(
       ticketTypeListQuerySchema,
       Object.fromEntries(request.nextUrl.searchParams.entries())
     );
 
-    const businessIds = user.memberships.map((m) =>
-      typeof m.business === "object" ? m.business._id : m.business,
-    );
-
     let filter: Record<string, unknown> = {
-      $or: [{ business: { $in: businessIds } }, { isDefault: true }],
+      isActive: true,
+      $or: [
+        { business: new mongoose.Types.ObjectId(String(verify.currentBusiness)) },
+        { isDefault: true },
+      ],
     };
 
     if (parsedQuery.name) {
@@ -60,9 +56,6 @@ export async function POST(request: NextRequest) {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
-
-    const user = await User.findById(verify.id);
-    if (!user) throw ApiError.notFound("User not found");
 
     const { name, description } = parseOrThrow(
       ticketTypeBodySchema,

@@ -10,6 +10,7 @@ import {
   Trash2,
   UserRound,
   Wallet,
+  GitCompare,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ import {
   useWorkspaceRoles,
 } from "../hooks/use-access-control";
 import AccessControlPageSkeleton from "./AccessControlPageSkeleton";
+import RoleCompareSheet from "./RoleCompareSheet";
 
 function getLegacyRoleIcon(role: TeamWorkspaceRoleDefinition["legacyRole"]) {
   if (role === WORKSPACE_ROLE.property_manager) return ShieldCheck;
@@ -75,8 +77,11 @@ export default function TeamRolesManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [archiveRoleId, setArchiveRoleId] = useState<string | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
 
   const roles = rolesQuery.data?.roles ?? [];
+  const selectedRoles = roles.filter((role) => selectedRoleIds.includes(role.id));
   const editingRole =
     roles.find((role) => role.id === editingRoleId) ?? null;
   const archiveTarget = roles.find((role) => role.id === archiveRoleId) ?? null;
@@ -129,6 +134,13 @@ export default function TeamRolesManager() {
       await createRole.mutateAsync(values);
     }
     setDialogOpen(false);
+  }
+
+  function toggleSelectedRole(roleId: string, checked: boolean) {
+    setSelectedRoleIds((current) => {
+      if (checked) return Array.from(new Set([...current, roleId]));
+      return current.filter((id) => id !== roleId);
+    });
   }
 
   return (
@@ -440,13 +452,22 @@ export default function TeamRolesManager() {
           <div className="grid gap-4 lg:grid-cols-2">
             {roles.map((role) => {
               const RoleIcon = getLegacyRoleIcon(role.legacyRole);
+              const selected = selectedRoleIds.includes(role.id);
               return (
                 <div
                   key={role.id}
-                  className="rounded-2xl border border-border/70 bg-card p-4"
+                  className={`rounded-lg border bg-card p-4 ${selected ? "border-primary/50 ring-2 ring-primary/15" : "border-border/70"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={selected}
+                        onCheckedChange={(checked) =>
+                          toggleSelectedRole(role.id, checked === true)
+                        }
+                        aria-label={`Select ${role.name} for comparison`}
+                        className="mt-2"
+                      />
                       <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <RoleIcon className="size-4" />
                       </div>
@@ -507,8 +528,36 @@ export default function TeamRolesManager() {
               );
             })}
           </div>
+
+          {selectedRoleIds.length >= 2 ? (
+            <div className="sticky bottom-4 z-20 flex items-center justify-between gap-3 rounded-md border bg-card/95 p-3 shadow-xs backdrop-blur">
+              <p className="text-sm text-muted-foreground">
+                {selectedRoleIds.length} roles selected
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedRoleIds([])}
+                >
+                  Clear
+                </Button>
+                <Button type="button" onClick={() => setCompareOpen(true)}>
+                  <GitCompare className="mr-2 size-4" />
+                  Compare
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
+
+      <RoleCompareSheet
+        open={compareOpen}
+        onOpenChange={setCompareOpen}
+        roles={selectedRoles}
+        permissionCatalog={permissionCatalog}
+      />
 
       <ActionConfirmDialog
         open={!!archiveTarget}

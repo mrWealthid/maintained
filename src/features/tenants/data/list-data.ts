@@ -33,3 +33,39 @@ export const INVITE_STATUS_FILTER_OPTIONS = (
   value,
   label: INVITE_STATUS_META[value].label,
 }));
+
+export const TENANT_LIST_FILTER_FIELDS = [
+  {
+    key: "name",
+    label: "Tenant",
+    searchType: "TEXT" as const,
+    placeholder: "Search tenant name",
+  },
+  {
+    key: "email",
+    label: "Email",
+    searchType: "TEXT" as const,
+    placeholder: "Search tenant email",
+  },
+  {
+    key: "property",
+    label: "Property",
+    searchType: "TEXT" as const,
+    placeholder: "Search property name",
+  },
+  {
+    key: "unit",
+    label: "Unit",
+    searchType: "TEXT" as const,
+    placeholder: "Search unit label",
+  },
+  {
+    key: "status",
+    label: "Status",
+    searchType: "DROPDOWN" as const,
+    selectOptions: [
+      { name: "Active", value: "active" },
+      { name: "Pending", value: "pending" },
+    ],
+  },
+];

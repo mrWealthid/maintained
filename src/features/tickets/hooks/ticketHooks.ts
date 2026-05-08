@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import {
   assignTechnician,
-  assignTicket,
   createTicket,
   deleteTicket,
   fetchAdmins,
@@ -116,26 +115,6 @@ export function useDeleteTicket() {
   });
 
   return { isDeleting, handleDeleteTicket, deleteTicketError };
-}
-export function useAssignTicket(id: string) {
-  const queryClient = useQueryClient();
-  const {
-    isPending: isUpdating,
-    mutate: handleAssignTicket,
-    error: assignTicketError,
-  } = useMutation({
-    mutationFn: (payload: { actionedBy?: string; status: TICKET_STATUS }) =>
-      assignTicket(id, payload),
-    onSuccess: () => {
-      toast.success("Ticket successfully assigned");
-      queryClient.invalidateQueries({
-        queryKey: ["tickets"],
-      });
-    },
-    onError: (err: ApiError) => toast.error(err.message),
-  });
-
-  return { isUpdating, handleAssignTicket, assignTicketError };
 }
 export function useProcessTechnicianResponse(id: string, close?: () => void) {
   const queryClient = useQueryClient();
@@ -297,13 +276,6 @@ export function useBulkTicketAction() {
           count > 0
             ? `${count} ticket${count === 1 ? "" : "s"} deleted.`
             : "No tickets were deleted.",
-        );
-      } else if (action === "assign-self") {
-        const count = res.data.modifiedCount ?? 0;
-        toast.success(
-          count > 0
-            ? `${count} ticket${count === 1 ? "" : "s"} assigned to you.`
-            : "No tickets were changed.",
         );
       } else if (action === "decline") {
         const count = res.data.modifiedCount ?? 0;

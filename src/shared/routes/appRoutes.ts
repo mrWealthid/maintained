@@ -7,6 +7,7 @@ import {
   Settings,
   Shield,
   Users,
+  UserRound,
   Wrench,
 } from "lucide-react";
 
@@ -38,6 +39,12 @@ export const routes: Routes[] = [
     permission: PERMISSION.PROPERTIES_VIEW,
   },
   {
+    name: "Tenant Management",
+    path: APP_ROUTES.DASHBOARD.TENANTS,
+    icon: UserRound,
+    permission: PERMISSION.TENANTS_VIEW,
+  },
+  {
     name: "Team Management",
     path: APP_ROUTES.DASHBOARD.TEAM,
     icon: Users,
@@ -59,7 +66,6 @@ export const routes: Routes[] = [
     name: "Settings",
     path: APP_ROUTES.DASHBOARD.SETTINGS,
     icon: Settings,
-    permission: PERMISSION.SETTINGS_VIEW,
   },
 ];
 

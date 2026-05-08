@@ -7,6 +7,9 @@ import AppSidebar from "@/shared/components/sidebar/AppSidebar";
 import { AppShell } from "@/shared/shells/AppShell";
 import { requireDashboardAccess } from "@/lib/auth/requireDashboardAccess";
 import { getSessionTimeoutMinutesForVerifiedUser } from "@/lib/auth/session-timeout";
+import { isPlatformSuperAdminRole } from "@/shared/auth/roles";
+import Business from "@/models/businessModel";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -14,6 +17,16 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const verify = await requireDashboardAccess();
+  if (!isPlatformSuperAdminRole(verify.platformRole)) {
+    const business = await Business.findById(verify.businessId)
+      .select("onboardingCompletedAt")
+      .lean<{ onboardingCompletedAt?: Date | null } | null>();
+
+    if (!business?.onboardingCompletedAt) {
+      redirect("/onboarding");
+    }
+  }
+
   const sessionTimeoutMinutes =
     await getSessionTimeoutMinutesForVerifiedUser(verify);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, FolderOpen, Mail, Shield, Ticket, Workflow } from "lucide-react";
+import { Bell, FolderOpen, Globe, Mail, Shield, Ticket, Workflow } from "lucide-react";
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
 } from "./SettingsIconBadge";
 import { SettingsSection } from "./SettingsSection";
 import NotificationSettings from "./NotificationSettings";
+import GeneralSettings from "./GeneralSettings";
 import EmailSettings from "./EmailSettings";
 import SecuritySettings from "./SecuritySettings";
 import CategoryManagement from "./CategoryManagement";
@@ -176,10 +177,15 @@ function OperationsSettings() {
 
 const tabs = [
   {
+    value: "general",
+    label: "General",
+    icon: Globe,
+    content: GeneralSettings,
+  },
+  {
     value: "notifications",
     label: "Notifications",
     icon: Bell,
-    permission: PERMISSION.SETTINGS_VIEW,
     content: NotificationSettings,
   },
   {
@@ -209,7 +215,7 @@ const tabs = [
 ] as const;
 
 const tabTriggerClassName =
-  "group h-10 min-w-[120px] flex-none gap-2 rounded-lg px-3 data-[state=active]:shadow-md";
+  "group h-10 min-w-[120px] flex-none gap-2 rounded-full px-3 data-[state=active]:shadow-none";
 
 const SettingsPage: React.FC = () => {
   const { user } = useAppContext();
@@ -218,9 +224,9 @@ const SettingsPage: React.FC = () => {
       ? tab.permissions.some((permission) =>
           user.permissions.includes(permission)
         )
-      : user.permissions.includes(tab.permission)
+      : !("permission" in tab) || user.permissions.includes(tab.permission)
   );
-  const defaultTab = visibleTabs[0]?.value ?? "notifications";
+  const defaultTab = visibleTabs[0]?.value ?? "general";
 
   return (
     <div className="space-y-6">
@@ -233,7 +239,7 @@ const SettingsPage: React.FC = () => {
 
       {visibleTabs.length ? (
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className="h-auto max-w-full w-fit justify-start gap-1 overflow-x-auto rounded-xl p-1">
+          <TabsList className="h-auto max-w-full w-fit justify-start gap-1 overflow-x-auto rounded-full bg-secondary p-1">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               return (

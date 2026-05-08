@@ -20,7 +20,7 @@ import {
 import { normalizeTimeZone } from "@/lib/date/timezone-options";
 import User, { UserDoc } from "@/models/userModel";
 import Business from "@/models/businessModel";
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 import { WORKSPACE_ROLE } from "@/shared/auth/roles";
 import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
 import { SignupSchema } from "@/app/auth/model/model";
@@ -115,13 +115,6 @@ export async function POST(request: NextRequest) {
       role: WORKSPACE_ROLE.owner,
     });
 
-    newUser.memberships.push({
-      business: business._id as never,
-      role: ROLES.admin,
-      status: INVITE_STATUS.activated,
-      isCreator: true,
-      roleDefinition: ownerRoleDefinitionId ?? undefined,
-    } as never);
     await upsertActiveWorkspaceMembership({
       workspaceId: business._id as mongoose.Types.ObjectId,
       userId: newUser._id as mongoose.Types.ObjectId,

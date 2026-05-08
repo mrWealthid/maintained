@@ -1,6 +1,6 @@
 "use client";
 import React, { FC, useState, type ComponentType } from "react";
-import { Trash2, UserPlus, XCircle } from "lucide-react";
+import { Trash2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableColumn } from "@/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
@@ -35,13 +35,6 @@ const BULK_CONFIRM_CONFIG: Record<BulkTicketAction, ConfirmConfigItem> = {
     variant: "destructive",
     icon: Trash2,
   },
-  "assign-self": {
-    title: "Assign to Me",
-    describe: (n) =>
-      `${n} ticket${n === 1 ? "" : "s"} will be actioned by you.`,
-    confirmLabel: "Assign",
-    icon: UserPlus,
-  },
   decline: {
     title: "Decline Tickets",
     describe: (n) => `${n} ticket${n === 1 ? "" : "s"} will be declined.`,
@@ -62,7 +55,6 @@ const TicketList: FC = () => {
   } | null>(null);
 
   const canDeleteTicket = useHasPermission(PERMISSION.TICKETS_DELETE);
-  const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
   const canManageTicketStatus = useHasPermission(
     PERMISSION.TICKETS_STATUS_MANAGE,
   );
@@ -113,13 +105,6 @@ const TicketList: FC = () => {
     };
 
     const actions: ActionEntry[] = [
-      {
-        key: "assign-self",
-        label: "Assign to me",
-        icon: UserPlus,
-        variant: "outline",
-        enabled: canAssignTicket,
-      },
       {
         key: "decline",
         label: "Decline",
@@ -217,8 +202,7 @@ const TicketList: FC = () => {
     },
   ];
 
-  const enableSelection =
-    canDeleteTicket || canAssignTicket || canManageTicketStatus;
+  const enableSelection = canDeleteTicket || canManageTicketStatus;
 
   return (
     <>

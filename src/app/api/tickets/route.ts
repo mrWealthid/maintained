@@ -2,6 +2,7 @@ import APIFeatures from "@/utils/apiFeatures";
 import { NextRequest, NextResponse } from "next/server";
 import Ticket from "@/models/ticketModel";
 import Category from "@/models/ticketCategoryModel";
+import Unit from "@/models/unitModel";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
@@ -204,6 +205,8 @@ export async function POST(request: NextRequest) {
     if (!user) throw ApiError.notFound("User not found");
 
     const body = parseOrThrow(ticketCreateBodySchema, await request.json());
+    const businessId = user.currentBusiness;
+
     if (body.relatedTo) {
       if (!mongoose.Types.ObjectId.isValid(body.relatedTo)) {
         throw ApiError.badRequest("Invalid related ticket");
@@ -211,7 +214,7 @@ export async function POST(request: NextRequest) {
 
       const relatedTicket = await Ticket.findOne({
         _id: body.relatedTo,
-        business: user.currentBusiness,
+        business: businessId,
       }).select("_id");
 
       if (!relatedTicket) {
@@ -219,13 +222,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const propertyId = verify.isUserRole ? verify.property : body.property;
+    const unitId = verify.isUserRole ? verify.unit : body.unit;
+
+    if (!propertyId || !unitId) {
+      throw ApiError.badRequest("Property and unit are required");
+    }
+
+    const unit = await Unit.findOne({
+      _id: unitId,
+      property: propertyId,
+      business: businessId,
+      isActive: true,
+    }).select("tenantUser tenantActive");
+
+    if (!unit) {
+      throw ApiError.badRequest("Selected unit was not found in this workspace");
+    }
+
+    const requesterId = verify.isUserRole ? verify.id : unit.tenantUser;
+    if (!requesterId || (!verify.isUserRole && !unit.tenantActive)) {
+      throw ApiError.badRequest("Selected unit has no active tenant");
+    }
+
     const data = await Ticket.create({
       ...body,
       relatedTo: body.relatedTo || undefined,
-      property: body.property ?? verify.property,
-      unit: body.unit ?? verify.unit,
-      user: verify.id,
-      business: user.currentBusiness,
+      property: propertyId,
+      unit: unitId,
+      user: requesterId,
+      actionedBy: verify.isUserRole ? undefined : verify.id,
+      business: businessId,
     });
 
     await TicketActivity.create({
@@ -234,9 +261,10 @@ export async function POST(request: NextRequest) {
       description: `Ticket created with title: "${data.title}"`,
       changedBy: user.id,
       metadata: {
-        field: "assignedTo",
+        field: "user",
         previous: null,
-        current: user.id,
+        current: requesterId,
+        createdBy: verify.id,
       },
     });
 

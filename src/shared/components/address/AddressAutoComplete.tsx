@@ -235,7 +235,7 @@ export default function AddressAutocomplete({
         <ul
           id="addr-listbox"
           role="listbox"
-          className="absolute z-50 mt-2 w-full rounded-lg border border-border bg-popover shadow-lg max-h-72 overflow-auto"
+          className="absolute z-50 mt-2 w-full rounded-sm border border-border bg-popover shadow-xs max-h-72 overflow-auto"
         >
           {preds.map((p, i) => (
             <li

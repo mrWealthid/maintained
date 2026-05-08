@@ -11,7 +11,7 @@ const SESSION_ACTIVITY_REFRESH_MS = 30 * 1000;
 
 export async function createAuthSession(args: {
   userId: string;
-  businessId: string;
+  businessId?: string;
   role: ROLES;
   workspaceRole?: WORKSPACE_ROLE | null;
   ipAddress?: string | null;
@@ -20,11 +20,25 @@ export async function createAuthSession(args: {
 }) {
   const now = new Date();
   const sessionId = randomBytes(24).toString("hex");
+  const businessId = args.businessId ?? "";
+
+  await AuthSession.updateMany(
+    {
+      user: args.userId,
+      businessId,
+      revokedAt: ACTIVE_SESSION_REVOKED_AT,
+    },
+    {
+      $set: {
+        businessId,
+      },
+    },
+  );
 
   if (args.maxActiveSessions !== "unlimited") {
     const activeSessions = await AuthSession.find({
       user: args.userId,
-      businessId: args.businessId,
+      businessId,
       revokedAt: ACTIVE_SESSION_REVOKED_AT,
     })
       .sort({ lastSeenAt: 1, createdAt: 1 })
@@ -32,7 +46,7 @@ export async function createAuthSession(args: {
 
     const overflowCount =
       activeSessions.length -
-      Math.max(0, Number(args.maxActiveSessions ?? 5)) +
+      Math.max(0, Number(args.maxActiveSessions ?? 0)) +
       1;
 
     if (overflowCount > 0) {
@@ -43,7 +57,7 @@ export async function createAuthSession(args: {
       if (sessionIdsToRevoke.length) {
         await AuthSession.updateMany(
           { sessionId: { $in: sessionIdsToRevoke } },
-          { $set: { revokedAt: now } }
+          { $set: { revokedAt: now } },
         );
       }
     }
@@ -52,7 +66,7 @@ export async function createAuthSession(args: {
   await AuthSession.create({
     sessionId,
     user: args.userId,
-    businessId: args.businessId,
+    businessId,
     role: args.role,
     workspaceRole: args.workspaceRole ?? null,
     ipAddress: args.ipAddress ?? "",
@@ -110,6 +124,6 @@ export async function touchAuthSession(sessionId: string, now = new Date()) {
         { lastSeenAt: { $exists: false } },
       ],
     },
-    { $set: { lastSeenAt: now } }
+    { $set: { lastSeenAt: now } },
   );
 }

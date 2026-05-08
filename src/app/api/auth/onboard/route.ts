@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 import { connect } from "@/dbConfig/dbConfig";
 import Business from "@/models/businessModel";
+import Unit from "@/models/unitModel";
 import User from "@/models/userModel";
 import { sendTeamWelcomeEmail } from "@/lib/email/senders/team/sendTeamWelcomeEmail";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/lib/tenancy/workspace-invite-access";
 import { upsertActiveWorkspaceMembership } from "@/lib/tenancy/provisioning";
 import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
+import { USER_TYPE } from "@/shared/auth/roles";
 
 const getRequestId = (req: NextRequest) =>
   req.headers.get("x-request-id") ?? undefined;
@@ -161,6 +163,21 @@ export async function POST(request: NextRequest) {
       targetUser.emailVerifiedAt = acceptedAt;
     }
 
+    if (workspaceInvite.role === USER_TYPE.tenant && workspaceInvite.unit) {
+      const unit = await Unit.findOne({
+        _id: workspaceInvite.unit,
+        business: workspaceId,
+      }).select("tenantUser tenantActive");
+
+      if (
+        unit?.tenantUser &&
+        unit.tenantUser.toString() !==
+          (targetUser._id as mongoose.Types.ObjectId).toString()
+      ) {
+        throw ApiError.badRequest("This unit already has an active tenant");
+      }
+    }
+
     await targetUser.save({ validateBeforeSave: false });
     await upsertActiveWorkspaceMembership({
       workspaceId,
@@ -173,6 +190,28 @@ export async function POST(request: NextRequest) {
       property: workspaceInvite.property,
       unit: workspaceInvite.unit,
     });
+
+    if (workspaceInvite.role === USER_TYPE.tenant && workspaceInvite.unit) {
+      await Unit.findOneAndUpdate(
+        {
+          _id: workspaceInvite.unit,
+          business: workspaceId,
+        },
+        {
+          $set: {
+            tenantUser: targetUser._id,
+            tenantActive: true,
+          },
+          $push: {
+            tenants: {
+              user: targetUser._id,
+              start: acceptedAt,
+            },
+          },
+        },
+      );
+    }
+
     await acceptWorkspaceInviteRecord({
       inviteId: workspaceInvite._id as mongoose.Types.ObjectId,
       acceptedBy: targetUser._id as mongoose.Types.ObjectId,

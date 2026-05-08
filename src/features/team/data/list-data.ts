@@ -54,14 +54,6 @@ export const WORKSPACE_ROLE_INVITE_OPTIONS: ReadonlyArray<{
   label: string;
   description: string;
 }> = TEAM_INVITE_ROLE_VALUES.map((role) => {
-  if (role === USER_TYPE.tenant) {
-    return {
-      value: role,
-      label: "Tenant",
-      description:
-        "Resident access to raise maintenance tickets and track repairs.",
-    };
-  }
   if (role === USER_TYPE.technician) {
     return {
       value: role,

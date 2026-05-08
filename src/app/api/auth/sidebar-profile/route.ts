@@ -6,7 +6,6 @@ import { getEffectiveWorkspacePermissionSet } from "@/lib/auth/effective-permiss
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
 import Business from "@/models/businessModel";
 import User from "@/models/userModel";
-import { INVITE_STATUS } from "@/shared/enums/enums";
 import { isSuperAdminRole } from "@/lib/auth/roles";
 import {
   DEFAULT_WORKSPACE_TYPE,
@@ -14,17 +13,11 @@ import {
   resolveWorkspaceType,
   type WorkspaceType,
 } from "@/shared/model/workspace.model";
-import { resolveWorkspaceRole } from "@/shared/auth/roles";
+import { resolveWorkspaceRole, WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { listActiveWorkspaceMemberships } from "@/lib/tenancy/workspace-membership-access";
 
 type StringableId = {
   toString(): string;
-};
-
-type LeanMembership = {
-  business?: StringableId | null;
-  role?: string | null;
-  status?: string | null;
-  isCreator?: boolean | null;
 };
 
 type LeanUser = {
@@ -33,7 +26,6 @@ type LeanUser = {
   email?: string;
   photo?: string;
   currentBusiness?: StringableId | null;
-  memberships?: LeanMembership[];
 };
 
 type LeanBusiness = {
@@ -49,12 +41,12 @@ function getBusinessId(value?: StringableId | string | null) {
 }
 
 function isWorkspaceOwner(args: {
-  membership?: LeanMembership | null;
+  role?: string | null;
   business?: LeanBusiness | null;
   userId: string;
 }) {
   const creatorId = getBusinessId(args.business?.creator);
-  return args.membership?.isCreator === true || creatorId === args.userId;
+  return args.role === WORKSPACE_ROLE.owner || creatorId === args.userId;
 }
 
 export async function GET(request: NextRequest) {
@@ -67,19 +59,23 @@ export async function GET(request: NextRequest) {
     await connect();
 
     const user = await User.findById(verify.id)
-      .select("name email photo currentBusiness memberships")
+      .select("name email photo currentBusiness")
       .lean<LeanUser | null>();
 
     if (!user) {
       throw ApiError.unauthorized("Authentication required");
     }
 
-    const activeMemberships =
-      user.memberships?.filter(
-        (membership) => membership.status === INVITE_STATUS.activated
-      ) ?? [];
+    const activeMemberships = await listActiveWorkspaceMemberships({
+      userId: verify.id,
+    }).lean<
+      Array<{
+        workspace?: StringableId | null;
+        role?: string | null;
+      }>
+    >();
     const membershipBusinessIds = activeMemberships
-      .map((membership) => getBusinessId(membership.business))
+      .map((membership) => getBusinessId(membership.workspace))
       .filter((businessId): businessId is string => Boolean(businessId));
 
     const businesses = membershipBusinessIds.length
@@ -104,13 +100,13 @@ export async function GET(request: NextRequest) {
       : null;
     const currentMembership =
       activeMemberships.find(
-        (membership) => getBusinessId(membership.business) === currentWorkspaceId
+        (membership) => getBusinessId(membership.workspace) === currentWorkspaceId
       ) ?? null;
     const workspaceType = isSuperAdminRole(verify.role)
       ? null
       : resolveWorkspaceType(currentBusiness?.workspaceType);
     const isOwner = isWorkspaceOwner({
-      membership: currentMembership,
+      role: currentMembership?.role,
       business: currentBusiness,
       userId: verify.id,
     });
@@ -127,7 +123,7 @@ export async function GET(request: NextRequest) {
       ? []
       : activeMemberships
           .map((membership) => {
-            const businessId = getBusinessId(membership.business);
+            const businessId = getBusinessId(membership.workspace);
             if (!businessId) return null;
             const business = businessesById.get(businessId);
             if (!business) return null;
@@ -141,11 +137,6 @@ export async function GET(request: NextRequest) {
               role: membership.role ?? "",
               workspaceRole: resolveWorkspaceRole({
                 storedRole: membership.role,
-                isWorkspaceOwner: isWorkspaceOwner({
-                  membership,
-                  business,
-                  userId: verify.id,
-                }),
               }),
               workspaceType: membershipWorkspaceType,
               workspaceLabel: getWorkspaceTypeLabel(membershipWorkspaceType, {

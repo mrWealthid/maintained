@@ -1,4 +1,4 @@
-import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { technicianRequestCreateSchema } from "@/features/technician-requests/models/technician-request.model";
@@ -38,13 +38,6 @@ export async function POST(
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) throw ApiError.notFound("Ticket not found");
 
-    if (
-      verify.role === ROLES.admin &&
-      ticket.actionedBy?.toString() !== verify.id.toString()
-    ) {
-      throw ApiError.forbidden("You are not allowed to perform this action");
-    }
-
     const existingRequests = await TechnicianRequest.find({ ticket: ticketId });
     const alreadyRequestedTechIds = existingRequests.map((r) =>
       r.technician.toString(),
@@ -65,7 +58,11 @@ export async function POST(
       ),
     );
 
+    const previousStatus = ticket.status;
+    const previousActionedBy = ticket.actionedBy;
+
     if (newRequests.length > 0) {
+      ticket.actionedBy = adminUser.id;
       ticket.status = TICKET_STATUS.pending_assignment;
       await ticket.save();
     }
@@ -73,12 +70,17 @@ export async function POST(
     await TicketActivity.create({
       ticket: ticketId,
       action: "status-changed",
-      description: `Request sent to technicians for assignment`,
+      description: `Technician assignment request sent by ${adminUser.name}`,
       changedBy: adminUser.id,
       metadata: {
-        field: "status",
-        previous: ticket.status,
-        current: ticket.status,
+        status: {
+          previous: previousStatus,
+          current: ticket.status,
+        },
+        actionedBy: {
+          previous: previousActionedBy,
+          current: ticket.actionedBy,
+        },
       },
     });
 
