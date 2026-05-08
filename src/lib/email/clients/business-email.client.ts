@@ -138,3 +138,60 @@ export async function sendBusinessTemplateEmail(args: {
     };
   }
 }
+
+export async function sendBusinessTransactionalEmail(args: {
+  businessId: string;
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+  attachments?: EmailAttachment[];
+}): Promise<DeliveryResult> {
+  if (!resendClient) {
+    return { sent: false, skippedReason: "RESEND_API_KEY is not configured" };
+  }
+
+  const { business, email } = await loadBusinessEmailSettings(args.businessId);
+  if (!business) {
+    return { sent: false, error: "Business not found" };
+  }
+
+  const senderEmail =
+    email.senderEmail?.trim() ||
+    process.env.BUSINESS_EMAIL_SENDER_EMAIL?.trim() ||
+    process.env.RESEND_FROM_EMAIL?.trim() ||
+    DEFAULT_EMAIL_SETTINGS.senderEmail;
+  const senderName =
+    email.senderName?.trim() || business.name || DEFAULT_EMAIL_SETTINGS.senderName;
+  const html = wrapWithBrandedEmailShell({
+    appName: appName(),
+    senderName,
+    contentHtml: args.html,
+  });
+
+  try {
+    const result = await resendClient.emails.send({
+      from: `${senderName} <${senderEmail}>`,
+      to: args.to,
+      subject: args.subject,
+      html,
+      reply_to: args.replyTo || email.replyTo || business.email || undefined,
+      bcc: parseBcc(email.bcc),
+      attachments: args.attachments,
+    });
+
+    if (result.error) {
+      return {
+        sent: false,
+        error: result.error.message || "Unable to send email",
+      };
+    }
+
+    return { sent: true, messageId: result.data?.id };
+  } catch (error) {
+    return {
+      sent: false,
+      error: error instanceof Error ? error.message : "Unknown email error",
+    };
+  }
+}

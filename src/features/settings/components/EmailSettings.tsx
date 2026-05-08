@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -10,7 +10,6 @@ import {
   Link2,
   Loader2,
   Mail,
-  Save,
   Send,
   Type,
   Variable,
@@ -43,6 +42,7 @@ import {
 } from "../data/email-template-registry-ui";
 import { SettingsField } from "./SettingsField";
 import { SettingsIconBadge } from "./SettingsIconBadge";
+import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 
 type EmailView =
@@ -174,7 +174,7 @@ const EmailSettings: React.FC = () => {
     setLocalSettings((current) => (current ? { ...current, ...patch } : current));
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!localSettings) return;
 
     const saved = await updateEmailSettings.mutateAsync({
@@ -185,10 +185,31 @@ const EmailSettings: React.FC = () => {
     const nextSettings = cloneSettings(saved.data);
     setLocalSettings(nextSettings);
     setSavedSettings(nextSettings);
-  };
+  }, [localSettings, updateEmailSettings.mutateAsync]);
   const hasChanges =
     Boolean(localSettings && savedSettings) &&
     JSON.stringify(localSettings) !== JSON.stringify(savedSettings);
+
+  const emailSaveSection = useMemo(
+    () => ({
+      id: "email",
+      label: "Email configuration",
+      save: handleSave,
+      isDirty: hasChanges,
+      isSaving: updateEmailSettings.isPending,
+      isLoading,
+      disabled: !localSettings,
+    }),
+    [
+      handleSave,
+      hasChanges,
+      isLoading,
+      localSettings,
+      updateEmailSettings.isPending,
+    ],
+  );
+
+  useSettingsSaveRegistration(emailSaveSection);
 
   if (isLoading || !localSettings) {
     return (
@@ -210,12 +231,9 @@ const EmailSettings: React.FC = () => {
       <EmailTemplateEditorScreen
         settings={localSettings}
         template={view.template}
-        saving={updateEmailSettings.isPending}
-        hasChanges={hasChanges}
         onBack={() =>
           setView(view.returnTo === "gallery" ? { mode: "gallery" } : { mode: "list" })
         }
-        onSave={handleSave}
         onUpdateTemplate={updateTemplate}
       />
     );
@@ -236,9 +254,6 @@ const EmailSettings: React.FC = () => {
   return (
     <EmailSection
       settings={localSettings}
-      saving={updateEmailSettings.isPending}
-      hasChanges={hasChanges}
-      onSave={handleSave}
       onPatchSettings={patchSettings}
       onUpdateTemplate={updateTemplate}
       onOpenGallery={() => setView({ mode: "gallery" })}
@@ -251,18 +266,12 @@ const EmailSettings: React.FC = () => {
 
 function EmailSection({
   settings,
-  saving,
-  hasChanges,
-  onSave,
   onPatchSettings,
   onUpdateTemplate,
   onOpenGallery,
   onEditTemplate,
 }: {
   settings: BusinessEmailSettings;
-  saving: boolean;
-  hasChanges: boolean;
-  onSave: () => void;
   onPatchSettings: (patch: Partial<BusinessEmailSettings>) => void;
   onUpdateTemplate: (
     key: BusinessEmailTemplateKey,
@@ -281,12 +290,6 @@ function EmailSection({
       title="Email Configuration"
       icon={Mail}
       description="Customize email templates and sender settings"
-      actions={
-        <Button type="button" onClick={onSave} disabled={saving || !hasChanges}>
-          <Save className="mr-2 h-4 w-4" />
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-      }
     >
       <div className="space-y-4">
         <div className="space-y-1">
@@ -584,18 +587,12 @@ function BusinessEmailPreviewGalleryScreen({
 function EmailTemplateEditorScreen({
   settings,
   template,
-  saving,
-  hasChanges,
   onBack,
-  onSave,
   onUpdateTemplate,
 }: {
   settings: BusinessEmailSettings;
   template: BusinessEmailSettingsTemplateMeta;
-  saving: boolean;
-  hasChanges: boolean;
   onBack: () => void;
-  onSave: () => void;
   onUpdateTemplate: (
     key: BusinessEmailTemplateKey,
     patch: Partial<EmailTemplateSetting>
@@ -662,10 +659,6 @@ function EmailTemplateEditorScreen({
           >
             <Eye className="mr-2 h-4 w-4" />
             Preview
-          </Button>
-          <Button type="button" onClick={onSave} disabled={saving || !hasChanges}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>

@@ -110,7 +110,7 @@ export function useLogout(router: AppRouterInstance) {
     mutationFn: () => handleLogout(),
     onSuccess: () => {
       queryClient.clear();
-      router.push("/auth/login");
+      router.replace("/auth/login");
       router.refresh();
     },
     onError: (err: ApiError) => toast.error(err.message),

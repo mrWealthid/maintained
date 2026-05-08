@@ -102,14 +102,22 @@ export async function GET(request: NextRequest) {
     const [memberships, invites] = await Promise.all([
       WorkspaceMembership.find(membershipFilter)
         .populate({ path: "user", select: "name email active" })
-        .populate({ path: "property", select: "name" })
-        .populate({ path: "unit", select: "label tenantActive" })
+        .populate({ path: "property", select: "name type" })
+        .populate({
+          path: "unit",
+          select:
+            "label floor bedrooms bathrooms sizeSqft monthlyRent tenantActive",
+        })
         .sort({ updatedAt: -1 })
         .lean(),
       WorkspaceInvite.find(inviteFilter)
         .select("name email invitedUser property unit invitedAt tokenExpiresAt")
-        .populate({ path: "property", select: "name" })
-        .populate({ path: "unit", select: "label tenantActive" })
+        .populate({ path: "property", select: "name type" })
+        .populate({
+          path: "unit",
+          select:
+            "label floor bedrooms bathrooms sizeSqft monthlyRent tenantActive",
+        })
         .sort({ updatedAt: -1 })
         .lean(),
     ]);

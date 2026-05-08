@@ -9,14 +9,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendPasswordResetEmail } from "@/lib/email/senders/auth/sendPasswordResetEmail";
 import { z } from "zod";
 
-connect();
-
 const forgotPasswordBodySchema = z.object({
   email: z.string().email("Please provide a valid email"),
 });
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+
     const { email } = parseOrThrow(
       forgotPasswordBodySchema,
       await request.json()

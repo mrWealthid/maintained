@@ -39,7 +39,8 @@ export async function PATCH(
   try {
     const { requestId } = await params;
     const verify = await getUserFromCookies();
-    if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    if (!verify) throw ApiError.unauthorized();
+    if (verify.isUserRole) throw ApiError.forbidden();
     if (!verify.isTechnicianRole) {
       await assertLegacyWorkspacePermission(
         verify,

@@ -31,11 +31,21 @@ export type TenantListItem = {
     _id?: string;
     id?: string;
     name?: string;
+    type?: string;
   } | null;
   unit?: {
     _id?: string;
     id?: string;
     label?: string;
+    floor?: string | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    sizeSqft?: number | null;
+    tenantActive?: boolean | null;
+    monthlyRent?: {
+      amount?: number | null;
+      currency?: string | null;
+    } | null;
   } | null;
   joinedAt?: string | null;
   invitedAt?: string | null;

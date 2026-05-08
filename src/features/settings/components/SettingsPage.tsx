@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, FolderOpen, Globe, Mail, Shield, Ticket, Workflow } from "lucide-react";
+import {
+  Bell,
+  FolderOpen,
+  Globe,
+  Loader2,
+  Mail,
+  Save,
+  Shield,
+  Ticket,
+  Workflow,
+} from "lucide-react";
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import { Button } from "@/components/ui/button";
@@ -26,6 +36,10 @@ import {
   SETTINGS_TAB_ICON_BADGE_CLASSNAME,
 } from "./SettingsIconBadge";
 import { SettingsSection } from "./SettingsSection";
+import {
+  SettingsSaveProvider,
+  useSettingsSave,
+} from "./SettingsSaveContext";
 import NotificationSettings from "./NotificationSettings";
 import GeneralSettings from "./GeneralSettings";
 import EmailSettings from "./EmailSettings";
@@ -217,8 +231,16 @@ const tabs = [
 const tabTriggerClassName =
   "group h-10 min-w-[120px] flex-none gap-2 rounded-full px-3 data-[state=active]:shadow-none";
 
-const SettingsPage: React.FC = () => {
+const SettingsPageContent: React.FC = () => {
   const { user } = useAppContext();
+  const {
+    saveAll,
+    dirtyCount,
+    hasDirty,
+    isBusy,
+    isBlocked,
+    blockedReason,
+  } = useSettingsSave();
   const visibleTabs = tabs.filter((tab) =>
     "permissions" in tab
       ? tab.permissions.some((permission) =>
@@ -230,11 +252,33 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mb-8 flex flex-col gap-2">
-        <AppPageHeader name="Settings" />
-        <p className="text-sm text-muted-foreground">
-          Manage workspace preferences, notifications, email, and security.
-        </p>
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0">
+          <AppPageHeader name="Settings" />
+          <p className="mt-2 text-sm text-muted-foreground">
+            Manage workspace preferences, notifications, email, and security.
+          </p>
+          {isBlocked && blockedReason ? (
+            <p className="mt-2 text-sm text-destructive">{blockedReason}</p>
+          ) : null}
+        </div>
+        <Button
+          type="button"
+          disabled={!hasDirty || isBusy || isBlocked}
+          onClick={() => void saveAll()}
+          className="w-full sm:w-auto"
+        >
+          {isBusy ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 size-4" />
+          )}
+          {isBusy
+            ? "Saving..."
+            : dirtyCount > 1
+              ? `Save ${dirtyCount} sections`
+              : "Save Changes"}
+        </Button>
       </div>
 
       {visibleTabs.length ? (
@@ -280,5 +324,11 @@ const SettingsPage: React.FC = () => {
     </div>
   );
 };
+
+const SettingsPage: React.FC = () => (
+  <SettingsSaveProvider>
+    <SettingsPageContent />
+  </SettingsSaveProvider>
+);
 
 export default SettingsPage;

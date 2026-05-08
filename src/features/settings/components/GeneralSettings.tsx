@@ -7,12 +7,11 @@ import {
   Info,
   Loader2,
   Lock,
-  Save,
   TrendingUp,
   UserRound,
   Webhook,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -51,6 +50,7 @@ import {
 } from "../hooks/settingsHooks";
 import { SettingsField } from "./SettingsField";
 import { SettingsIconBadge } from "./SettingsIconBadge";
+import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 
 type IntegrationKey = "googleCalendar" | "slack" | "mailchimp" | "zapier";
@@ -292,54 +292,66 @@ export default function GeneralSettings() {
     }
   };
 
-  const handleSave = async (values: WorkspaceProfileSettings) => {
-    const personalPhone = normalizedPhoneNumber(
-      values.personalProfile.contact,
-      values.personalProfile.countryCode,
-    );
-    if (personalPhone === null) {
-      setError("personalProfile.contact", {
-        message: "Enter a valid phone number.",
+  const handleSave = useCallback(
+    async (values: WorkspaceProfileSettings) => {
+      const personalPhone = normalizedPhoneNumber(
+        values.personalProfile.contact,
+        values.personalProfile.countryCode,
+      );
+      if (personalPhone === null) {
+        setError("personalProfile.contact", {
+          message: "Enter a valid phone number.",
+        });
+        return;
+      }
+
+      const saved = await updateSettings.mutateAsync({
+        personalProfile: {
+          ...values.personalProfile,
+          contact: personalPhone,
+        },
+        business: {
+          name: values.business.name,
+          description: values.business.description,
+          addressStructured: values.business.addressStructured,
+        },
+        settings: values.settings,
       });
-      return;
-    }
 
-    const saved = await updateSettings.mutateAsync({
-      personalProfile: {
-        ...values.personalProfile,
-        contact: personalPhone,
-      },
-      business: {
-        name: values.business.name,
-        description: values.business.description,
-        addressStructured: values.business.addressStructured,
-      },
-      settings: values.settings,
-    });
+      form.reset(saved.data);
+      setPreviewUrl(getPreviewImageSrc(saved.data.business.logo));
+    },
+    [form, setError, updateSettings.mutateAsync],
+  );
 
-    form.reset(saved.data);
-    setPreviewUrl(getPreviewImageSrc(saved.data.business.logo));
-  };
+  const saveGeneralSettings = useCallback(
+    () => form.handleSubmit(handleSave)(),
+    [form, handleSave],
+  );
+
+  const generalSaveSection = useMemo(
+    () => ({
+      id: "general",
+      label: "General settings",
+      save: saveGeneralSettings,
+      isDirty,
+      isSaving,
+      isLoading,
+      disabled: isUploadingLogo,
+      disabledReason: isUploadingLogo
+        ? "Wait for the workspace icon upload to finish before saving settings."
+        : undefined,
+    }),
+    [isDirty, isLoading, isSaving, isUploadingLogo, saveGeneralSettings],
+  );
+
+  useSettingsSaveRegistration(generalSaveSection);
 
   return (
     <SettingsSection
       title="General Settings"
       icon={Globe}
       description={`Configure general ${workspaceEntityLabel.toLowerCase()} and app settings`}
-      actions={
-        <Button
-          type="submit"
-          form="general-settings-form"
-          disabled={isLoading || isSaving || !isDirty}
-        >
-          {isSaving ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Save className="size-4" />
-          )}
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
-      }
     >
       <ErrorList error={error || updateSettings.error} />
 

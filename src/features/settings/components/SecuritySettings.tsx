@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Clock3,
   Globe,
@@ -44,6 +44,7 @@ import {
   useUpdateSecuritySettings,
 } from "../hooks/settingsHooks";
 import { SettingsField } from "./SettingsField";
+import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsToggleRow } from "./SettingsToggleRow";
 
@@ -206,11 +207,34 @@ const SecuritySettings: React.FC = () => {
     setIpDraftError(null);
   }
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     const saved = await updateSecuritySettings.mutateAsync(savePayload);
     setSettings(saved.data);
     setSavedSettings(saved.data);
-  }
+  }, [savePayload, updateSecuritySettings.mutateAsync]);
+
+  const securitySaveSection = useMemo(
+    () => ({
+      id: "security",
+      label: "Security settings",
+      save: handleSave,
+      isDirty: canManageSecurity && hasChanges,
+      isSaving: updateSecuritySettings.isPending,
+      isLoading,
+      disabled: Boolean(whitelistError),
+      disabledReason: whitelistError ?? undefined,
+    }),
+    [
+      canManageSecurity,
+      handleSave,
+      hasChanges,
+      isLoading,
+      updateSecuritySettings.isPending,
+      whitelistError,
+    ],
+  );
+
+  useSettingsSaveRegistration(securitySaveSection);
 
   let activeSessionsContent = (
     <p className="rounded-2xl border border-dashed border-border/70 bg-background/40 px-4 py-5 text-sm text-muted-foreground">
@@ -295,22 +319,6 @@ const SecuritySettings: React.FC = () => {
         title="Security Settings"
         description="Manage authentication, active sessions, and workspace access restrictions"
         icon={Shield}
-        actions={
-          canManageSecurity ? (
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={
-                updateSecuritySettings.isPending ||
-                Boolean(whitelistError) ||
-                isLoading ||
-                !hasChanges
-              }
-            >
-              {updateSecuritySettings.isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          ) : null
-        }
       >
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-foreground">

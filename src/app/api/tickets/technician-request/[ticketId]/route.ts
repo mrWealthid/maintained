@@ -18,9 +18,8 @@ export async function POST(
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
 
-    if (!verify || verify.isUserRole || verify.isTechnicianRole) {
-      throw ApiError.unauthorized();
-    }
+    if (!verify) throw ApiError.unauthorized();
+    if (verify.isUserRole || verify.isTechnicianRole) throw ApiError.forbidden();
     await assertLegacyWorkspacePermission(
       verify,
       PERMISSION.TECHNICIAN_REQUESTS_CREATE

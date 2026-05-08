@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, Save } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Bell } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -19,6 +18,7 @@ import {
   useUpdateNotificationPreferences,
 } from "../hooks/settingsHooks";
 import { SettingsField } from "./SettingsField";
+import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsToggleRow } from "./SettingsToggleRow";
 
@@ -60,28 +60,32 @@ const NotificationSettings: React.FC = () => {
     setLocalPreferences((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     const saved = await updatePreferences.mutateAsync(localPreferences);
     const nextPreferences = { ...defaultPreferences, ...saved.data };
     setLocalPreferences(nextPreferences);
     setSavedPreferences(nextPreferences);
-  };
+  }, [localPreferences, updatePreferences.mutateAsync]);
+
+  const notificationSaveSection = useMemo(
+    () => ({
+      id: "notifications",
+      label: "Notification preferences",
+      save: handleSave,
+      isDirty: hasChanges,
+      isSaving: updatePreferences.isPending,
+      isLoading,
+    }),
+    [handleSave, hasChanges, isLoading, updatePreferences.isPending],
+  );
+
+  useSettingsSaveRegistration(notificationSaveSection);
 
   return (
     <SettingsSection
       title="Notification Preferences"
       description="Configure how and when you receive notifications"
       icon={Bell}
-      actions={
-        <Button
-          type="button"
-          onClick={handleSave}
-          disabled={updatePreferences.isPending || isLoading || !hasChanges}
-        >
-          <Save className="mr-2 h-4 w-4" />
-          {updatePreferences.isPending ? "Saving..." : "Save Changes"}
-        </Button>
-      }
     >
       <div className="space-y-4">
         <h4 className="text-sm font-medium text-foreground">

@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Home, MailPlus } from "lucide-react";
+import {
+  Clock3,
+  Home,
+  MailPlus,
+  UserCheck,
+  UsersRound,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +40,7 @@ export default function TenantManagementPageClient() {
         <div className="space-y-1">
           <AppPageHeader name="Tenant Management" />
           <p className="text-sm text-muted-foreground">
-            Manage residents separately from staff, tied to their property and unit.
+            Manage residents, invites, and unit assignment without mixing them into staff records.
           </p>
         </div>
         <InviteTenantSheet
@@ -50,22 +56,37 @@ export default function TenantManagementPageClient() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total tenants</CardDescription>
-            <CardTitle>{summary?.total ?? 0}</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+            <div>
+              <CardDescription>Total contacts</CardDescription>
+              <CardTitle>{summary?.total ?? 0}</CardTitle>
+            </div>
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <UsersRound className="size-5" />
+            </div>
           </CardHeader>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Active residents</CardDescription>
-            <CardTitle>{summary?.active ?? 0}</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+            <div>
+              <CardDescription>Active residents</CardDescription>
+              <CardTitle>{summary?.active ?? 0}</CardTitle>
+            </div>
+            <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+              <UserCheck className="size-5" />
+            </div>
           </CardHeader>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Pending invites</CardDescription>
-            <CardTitle>{summary?.pending ?? 0}</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+            <div>
+              <CardDescription>Pending invites</CardDescription>
+              <CardTitle>{summary?.pending ?? 0}</CardTitle>
+            </div>
+            <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+              <Clock3 className="size-5" />
+            </div>
           </CardHeader>
         </Card>
       </div>
@@ -74,7 +95,7 @@ export default function TenantManagementPageClient() {
         <CardHeader>
           <CardTitle>Residents</CardTitle>
           <CardDescription>
-            Use table filters to view tenants by property or by unit.
+            Filter tenants by resident, property, unit, invite status, or send bulk messages from the list.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -14,6 +14,7 @@ import {
   fetchTenantList,
   inviteTenant,
   removeTenant,
+  sendBulkTenantMessage,
   updateTenant,
 } from "../services/tenants-service";
 import type {
@@ -78,6 +79,22 @@ export function useRemoveTenant() {
     mutationFn: (id: string) => removeTenant(id),
     onSuccess: () => {
       toast.success("Tenant removed");
+      queryClient.invalidateQueries({ queryKey: TENANT_KEYS.all });
+    },
+    onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
+  });
+}
+
+export function useSendBulkTenantMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendBulkTenantMessage,
+    onSuccess: (response) => {
+      const sent = response.data?.successCount ?? 0;
+      toast.success(
+        sent === 1 ? "Tenant message sent" : `${sent} tenant messages sent`,
+      );
       queryClient.invalidateQueries({ queryKey: TENANT_KEYS.all });
     },
     onError: (err) => toast.error(ApiErrorHandler.extract(err).message),
