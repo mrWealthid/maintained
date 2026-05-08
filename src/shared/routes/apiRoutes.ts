@@ -80,6 +80,7 @@ export const API_ROUTES = {
   tenants: {
     list: `${base}/tenants`,
     byId: (id: string) => `${base}/tenants/${id}`,
+    bulkMessage: `${base}/tenants/bulk/message`,
   },
 
   ticketManagement: {

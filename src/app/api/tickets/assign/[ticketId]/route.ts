@@ -26,7 +26,8 @@ export async function PATCH(
     const { ticketId } = await params;
     const verify = await getUserFromCookies();
 
-    if (!verify || verify.isUserRole) throw ApiError.unauthorized();
+    if (!verify) throw ApiError.unauthorized();
+    if (verify.isUserRole) throw ApiError.forbidden();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_ASSIGN);
 
     const { assignedTo } = parseOrThrow(

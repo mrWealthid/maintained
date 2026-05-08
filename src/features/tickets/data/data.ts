@@ -2,32 +2,12 @@ import { TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/shared/enums/enums";
 
 export const ticketListFilterData = [
   {
-    label: "All",
-    value: TICKET_STATUS.all,
-  },
-  {
     label: "Pending",
     value: TICKET_STATUS.pending,
   },
   {
-    label: "Processing",
-    value: TICKET_STATUS.processing,
-  },
-  {
-    label: "Pending Assigment",
-    value: TICKET_STATUS.pending_assignment,
-  },
-  {
     label: "Assigned",
     value: TICKET_STATUS.assigned,
-  },
-  {
-    label: "Scheduled",
-    value: TICKET_STATUS.scheduled,
-  },
-  {
-    label: "Declined",
-    value: TICKET_STATUS.declined,
   },
   {
     label: "Completed",
@@ -35,10 +15,6 @@ export const ticketListFilterData = [
   },
 ];
 export const technicianListFilter = [
-  {
-    label: "All",
-    value: TECHNICIAN_RESPONSE.all,
-  },
   {
     label: "Pending",
     value: TECHNICIAN_RESPONSE.pending,
@@ -50,10 +26,5 @@ export const technicianListFilter = [
   {
     label: "Selected",
     value: TECHNICIAN_RESPONSE.selected,
-  },
-
-  {
-    label: "Declined",
-    value: TECHNICIAN_RESPONSE.declined,
   },
 ];

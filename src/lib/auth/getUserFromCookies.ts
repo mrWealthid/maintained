@@ -7,6 +7,7 @@ import type { MembershipRoleValue } from "@/models/userModel";
 import { ROLES } from "@/shared/enums/enums";
 import Business from "@/models/businessModel";
 import { AUTH_COOKIE_NAME } from "@/lib/auth/cookie";
+import { connect } from "@/dbConfig/dbConfig";
 import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 
 export async function getUserFromCookies(
@@ -28,6 +29,8 @@ export async function getUserFromCookies(
   if (!payload || (payload.exp && Date.now() > payload.exp * 1000)) {
     return null;
   }
+
+  await connect();
 
   const user = await User.findById(payload.id).select(
     "currentBusiness name"

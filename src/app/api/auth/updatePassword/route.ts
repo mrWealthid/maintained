@@ -9,8 +9,6 @@ import User, { UserDoc } from "@/models/userModel";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-connect();
-
 const updatePasswordBodySchema = z.object({
   email: z.string().email("Please provide a valid email"),
   currentPassword: z.string().min(1, "Current password is required"),
@@ -19,6 +17,8 @@ const updatePasswordBodySchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+
     const { email, newPassword, currentPassword } = parseOrThrow(
       updatePasswordBodySchema,
       await request.json()

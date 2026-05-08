@@ -5,6 +5,10 @@ import { ApiErrorHandler } from "@/utils/apiError";
 import { buildQueryString } from "@/utils/helpers";
 
 import type {
+  AudienceMessageContent,
+  AudienceMessageSendResult,
+} from "@/shared/model/audience-message.model";
+import type {
   TenantInviteFormValues,
   TenantListQuery,
 } from "../models/tenant-form.model";
@@ -67,6 +71,17 @@ export async function removeTenant(id: string) {
     const { data } = await http.delete(
       API_ROUTES.tenants.byId(id),
     );
+    return data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function sendBulkTenantMessage(
+  payload: AudienceMessageContent & { tenantIds: string[] },
+): Promise<{ status: string; data: AudienceMessageSendResult }> {
+  try {
+    const { data } = await http.post(API_ROUTES.tenants.bulkMessage, payload);
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);

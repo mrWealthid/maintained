@@ -12,8 +12,6 @@ import { getBusinessSecuritySettings, isIpAllowed } from "@/lib/security/busines
 import { getRequestSecurityContext } from "@/lib/security/request-context";
 import { z } from "zod";
 
-connect();
-
 const getLegacyTokenPreview = (user: UserDoc) => {
   const tenants = user.tenantsClaim();
 
@@ -35,6 +33,8 @@ const loginBodySchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+
     const { email, password } = parseOrThrow(
       loginBodySchema,
       await request.json()

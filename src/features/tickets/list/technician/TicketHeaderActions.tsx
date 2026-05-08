@@ -51,12 +51,12 @@ const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
         onValueChange={handleStatusTab}
         className="w-full xl:w-auto"
       >
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none xl:h-8 xl:w-auto xl:flex-nowrap">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none sm:w-auto xl:h-8">
           {technicianListFilter.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="min-w-fit rounded-full px-3 py-1.5 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground xl:py-1"
+              className="min-w-0 rounded-full px-3 py-1.5 text-[11px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground xl:py-1"
             >
               {tab.label}
             </TabsTrigger>

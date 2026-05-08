@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import AppConfig from "@/models/appConfigModel";
 import AuthSession from "@/models/authSessionModel";
 import Business from "@/models/businessModel";
@@ -18,11 +20,27 @@ import WorkspaceMembership from "@/models/workspaceMembershipModel";
 
 let registered = false;
 
-export function registerModels() {
-  if (registered) return;
+const REQUIRED_MODEL_NAMES = [
+  "AppConfig",
+  "AuthSession",
+  "Business",
+  "ChatMessage",
+  "ChatRoom",
+  "Property",
+  "RoleDefinition",
+  "TechnicianRequest",
+  "TicketActivity",
+  "TicketCategory",
+  "Ticket",
+  "TicketType",
+  "Unit",
+  "User",
+  "UserPermissionOverride",
+  "WorkspaceInvite",
+  "WorkspaceMembership",
+] as const;
 
-  // Touch model exports so Mongoose compiles/registers them once per runtime.
-  // Required so .populate() works in routes that only import a single model.
+function touchModelExports() {
   void AppConfig;
   void AuthSession;
   void Business;
@@ -40,6 +58,30 @@ export function registerModels() {
   void UserPermissionOverride;
   void WorkspaceInvite;
   void WorkspaceMembership;
+}
+
+function assertRequiredModelsRegistered() {
+  const missingModels = REQUIRED_MODEL_NAMES.filter(
+    (modelName) => !mongoose.models[modelName],
+  );
+
+  if (missingModels.length) {
+    throw new Error(
+      `Missing registered Mongoose model(s): ${missingModels.join(", ")}`,
+    );
+  }
+}
+
+export function registerModels() {
+  if (registered) {
+    assertRequiredModelsRegistered();
+    return;
+  }
+
+  // Touch model exports so Mongoose compiles/registers them once per runtime.
+  // Required so .populate() works in routes that only import a single model.
+  touchModelExports();
+  assertRequiredModelsRegistered();
 
   registered = true;
 }
