@@ -35,7 +35,7 @@ export function getWorkspaceTypeLabel(
   const workspaceType = resolveWorkspaceType(value);
 
   if (workspaceType === WORKSPACE_TYPE.INDIVIDUAL) {
-    return options?.short ? "Solo Organizer" : "Solo Organizer Workspace";
+    return options?.short ? "Solo Owner" : "Solo Owner Workspace";
   }
 
   return options?.short ? "Business" : "Business Workspace";

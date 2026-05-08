@@ -4,10 +4,10 @@ import { connect } from "@/dbConfig/dbConfig";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import TicketType from "@/models/ticketTypeModel";
-import { ROLES } from "@/shared/enums/enums";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import mongoose from "mongoose";
 
 connect();
 
@@ -17,12 +17,6 @@ const ticketTypeUpdateBodySchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-function assertTypeAdmin(role: string | undefined) {
-  if (role !== ROLES.admin && role !== ROLES.super_admin) {
-    throw ApiError.forbidden("Admin access required");
-  }
-}
-
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ typeId: string }> },
@@ -31,7 +25,6 @@ export async function PUT(
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
-    assertTypeAdmin(verify.role);
 
     const { name, description, isActive } = parseOrThrow(
       ticketTypeUpdateBodySchema,
@@ -39,8 +32,12 @@ export async function PUT(
     );
     const { typeId } = await params;
 
-    const ticketType = await TicketType.findByIdAndUpdate(
-      typeId,
+    const ticketType = await TicketType.findOneAndUpdate(
+      {
+        _id: typeId,
+        business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+        isDefault: { $ne: true },
+      },
       { name, description, isActive },
       { new: true },
     );
@@ -65,11 +62,13 @@ export async function DELETE(
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_MANAGE);
-    assertTypeAdmin(verify.role);
 
     const { typeId } = await params;
 
-    const ticketType = await TicketType.findById(typeId);
+    const ticketType = await TicketType.findOne({
+      _id: typeId,
+      business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+    });
     if (!ticketType) throw ApiError.notFound("Ticket type not found");
     if (ticketType.isDefault) {
       throw ApiError.badRequest("Cannot delete default ticket types");

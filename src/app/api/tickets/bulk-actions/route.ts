@@ -15,7 +15,7 @@ import { TICKET_STATUS } from "@/shared/enums/enums";
 
 const BulkTicketActionSchema = z
   .object({
-    action: z.enum(["delete", "assign-self", "decline"]),
+    action: z.enum(["delete", "decline"]),
     ticketIds: z.array(z.string().min(1)).min(1),
   })
   .strict();
@@ -48,26 +48,6 @@ export async function POST(request: NextRequest) {
         data: {
           action: dto.action,
           deletedCount: result.deletedCount ?? 0,
-        },
-      });
-    }
-
-    if (dto.action === "assign-self") {
-      await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_ASSIGN);
-      const result = await Ticket.updateMany(
-        { _id: { $in: uniqueIds } },
-        {
-          $set: {
-            actionedBy: verify.id,
-            status: TICKET_STATUS.processing,
-          },
-        },
-      );
-      return NextResponse.json({
-        success: true,
-        data: {
-          action: dto.action,
-          modifiedCount: result.modifiedCount ?? 0,
         },
       });
     }

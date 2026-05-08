@@ -6,13 +6,80 @@ import {
   CategoryFormData,
   TicketTypeFormData,
   NotificationPreferences,
+  PersonalProfileSettings,
   SecuritySettings,
   BusinessEmailSettings,
   EmailSettingsUpdateData,
   SecuritySessionSummary,
   WorkspaceSecuritySettings,
+  WorkspaceProfileSettings,
+  DeepPartial,
 } from "../models/settings.model";
 import { Category, TicketType } from "@/shared/model/model";
+
+export async function fetchPersonalProfile(): Promise<
+  ApiResponse<PersonalProfileSettings>
+> {
+  try {
+    const response = await http.get(API_ROUTES.userManagement.get_user);
+    const user = response.data.data;
+    return {
+      status: response.data.status,
+      message: response.data.message ?? "",
+      data: {
+        name: user.name ?? "",
+        email: user.email ?? "",
+        contact: user.contact ?? "",
+        countryCode: user.countryCode ?? "",
+      },
+    };
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updatePersonalProfile(
+  profile: Omit<PersonalProfileSettings, "email">,
+): Promise<ApiResponse<PersonalProfileSettings>> {
+  try {
+    const response = await http.put(API_ROUTES.userManagement.get_user, profile);
+    const user = response.data.data;
+    return {
+      status: response.data.status,
+      message: response.data.message ?? "",
+      data: {
+        name: user.name ?? "",
+        email: user.email ?? "",
+        contact: user.contact ?? "",
+        countryCode: user.countryCode ?? "",
+      },
+    };
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function fetchWorkspaceProfileSettings(): Promise<
+  ApiResponse<WorkspaceProfileSettings>
+> {
+  try {
+    const response = await http.get(API_ROUTES.settings.general);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
+export async function updateWorkspaceProfileSettings(
+  payload: DeepPartial<WorkspaceProfileSettings>,
+): Promise<ApiResponse<WorkspaceProfileSettings>> {
+  try {
+    const response = await http.patch(API_ROUTES.settings.general, payload);
+    return response.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
 
 // Notification Preferences
 export async function fetchNotificationPreferences(): Promise<

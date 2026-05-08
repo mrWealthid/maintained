@@ -54,6 +54,15 @@ export interface IBusiness extends Document {
     };
     general?: {
       timezone?: string;
+      dateFormat?: "mdy" | "dmy" | "ymd";
+      timeFormat?: "12h" | "24h";
+      language?: "en" | "es" | "fr" | "de" | "pt";
+      integrations?: {
+        googleCalendar?: { connected?: boolean };
+        slack?: { connected?: boolean };
+        mailchimp?: { connected?: boolean };
+        zapier?: { connected?: boolean };
+      };
       team?: {
         allowTeamInvitations?: boolean;
         defaultRoleForNewMembers?: string;
@@ -240,6 +249,27 @@ const SecuritySettingsSchema = new Schema(
 const GeneralSettingsSchema = new Schema(
   {
     timezone: { type: String, default: "America/New_York" },
+    dateFormat: { type: String, enum: ["mdy", "dmy", "ymd"], default: "mdy" },
+    timeFormat: { type: String, enum: ["12h", "24h"], default: "12h" },
+    language: {
+      type: String,
+      enum: ["en", "es", "fr", "de", "pt"],
+      default: "en",
+    },
+    integrations: {
+      googleCalendar: {
+        connected: { type: Boolean, default: false },
+      },
+      slack: {
+        connected: { type: Boolean, default: false },
+      },
+      mailchimp: {
+        connected: { type: Boolean, default: false },
+      },
+      zapier: {
+        connected: { type: Boolean, default: false },
+      },
+    },
     team: {
       allowTeamInvitations: { type: Boolean, default: true },
       defaultRoleForNewMembers: { type: String, default: "WORKSPACE_MEMBER" },

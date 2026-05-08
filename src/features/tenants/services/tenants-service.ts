@@ -1,6 +1,5 @@
 import { http } from "@/services/http";
 
-import { ROLES } from "@/shared/enums/enums";
 import { API_ROUTES } from "@/shared/routes/apiRoutes";
 import { ApiErrorHandler } from "@/utils/apiError";
 import { buildQueryString } from "@/utils/helpers";
@@ -11,17 +10,14 @@ import type {
 } from "../models/tenant-form.model";
 
 /**
- * Tenants are USER_TYPE.tenant actors. They are stored in the User
- * collection with a membership of role=USER, scoped to a property+unit.
- * The list endpoint reuses /api/users with role=USER.
+ * Tenants are workspace-scoped residents tied to a property and unit.
+ * They are managed separately from staff/team members.
  */
 
 export async function fetchTenantList(query: TenantListQuery) {
   try {
-    const qs = buildQueryString({ ...query, role: ROLES.tenant });
-    const { data } = await http.get(
-      `${API_ROUTES.userManagement.get_users}?${qs}`,
-    );
+    const qs = buildQueryString(query);
+    const { data } = await http.get(`${API_ROUTES.tenants.list}?${qs}`);
     return data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
@@ -31,7 +27,7 @@ export async function fetchTenantList(query: TenantListQuery) {
 export async function fetchTenantById(id: string) {
   try {
     const { data } = await http.get(
-      API_ROUTES.userManagement.userById(id),
+      API_ROUTES.tenants.byId(id),
     );
     return data;
   } catch (err: unknown) {
@@ -42,8 +38,8 @@ export async function fetchTenantById(id: string) {
 export async function inviteTenant(payload: TenantInviteFormValues) {
   try {
     const { data } = await http.post(
-      API_ROUTES.userManagement.invite_user,
-      { ...payload, role: ROLES.tenant },
+      API_ROUTES.tenants.list,
+      payload,
     );
     return data;
   } catch (err: unknown) {
@@ -57,7 +53,7 @@ export async function updateTenant(
 ) {
   try {
     const { data } = await http.patch(
-      API_ROUTES.userManagement.userById(id),
+      API_ROUTES.tenants.byId(id),
       payload,
     );
     return data;
@@ -69,7 +65,7 @@ export async function updateTenant(
 export async function removeTenant(id: string) {
   try {
     const { data } = await http.delete(
-      API_ROUTES.userManagement.userById(id),
+      API_ROUTES.tenants.byId(id),
     );
     return data;
   } catch (err: unknown) {

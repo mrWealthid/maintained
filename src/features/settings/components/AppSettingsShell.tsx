@@ -32,6 +32,9 @@ export function AppSettingsShell({
     },
     mode: "onChange",
   });
+  const {
+    formState: { isDirty },
+  } = form;
 
   useEffect(() => {
     if (!data?.settings) return;
@@ -55,7 +58,7 @@ export function AppSettingsShell({
               Toggles below apply to every workspace on the platform.
             </p>
           </div>
-          <Button type="submit" disabled={isPending || isLoading}>
+          <Button type="submit" disabled={isPending || isLoading || !isDirty}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />

@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 import { connect } from "@/dbConfig/dbConfig";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { assertPermission } from "@/lib/auth/permission-guards";
-import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
+import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import {
+  ensureWorkspaceRoleDefinitions,
+  resolveWorkspaceRoleDefinitionId,
+} from "@/lib/auth/role-definitions";
+import { normalizeTimeZone } from "@/lib/date/timezone-options";
+import { upsertActiveWorkspaceMembership } from "@/lib/tenancy/provisioning";
+import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
+import { CreateWorkspaceSchema } from "@/shared/model/workspace-create.model";
+import { WORKSPACE_ROLE } from "@/shared/auth/roles";
+import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import Business from "@/models/businessModel";
@@ -182,6 +192,81 @@ export async function GET(request: NextRequest) {
       results: data.length,
       data,
     });
+  } catch (error) {
+    return errorToNextResponse(error, getRequestId(request));
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await connect();
+    const verify = await getVerifiedUser(request);
+    if (!verify) throw ApiError.unauthorized();
+
+    const payload = parseOrThrow(CreateWorkspaceSchema, await request.json());
+    const user = await User.findById(verify.id).select("name email contact countryCode");
+    if (!user) throw ApiError.notFound("User not found");
+
+    const workspaceEmail = payload.businessEmail || user.email;
+    const businessExists = await Business.findOne({ email: workspaceEmail });
+    if (businessExists) {
+      throw ApiError.badRequest(
+        "Workspace email already in use. Choose a different one.",
+      );
+    }
+
+    const workspaceType = payload.workspaceType;
+    const business = await Business.create({
+      name: payload.businessName,
+      workspaceType,
+      email: workspaceEmail,
+      contact: payload.businessContact || user.contact || "",
+      countryCode: payload.businessCountryCode || user.countryCode || "US",
+      timezone: normalizeTimeZone(payload.timezone),
+      addressStructured: payload.addressStructured,
+      creator: user._id,
+      owner: user._id,
+      settings: {
+        general: {
+          timezone: normalizeTimeZone(payload.timezone),
+          team: {
+            allowTeamInvitations: workspaceType !== WORKSPACE_TYPE.INDIVIDUAL,
+            defaultRoleForNewMembers: WORKSPACE_ROLE.member,
+          },
+        },
+      },
+    });
+
+    await ensureWorkspaceRoleDefinitions({
+      workspaceId: business.id,
+      options: { createdBy: user._id as mongoose.Types.ObjectId },
+    });
+
+    const ownerRoleDefinitionId = await resolveWorkspaceRoleDefinitionId({
+      workspaceId: business.id,
+      role: WORKSPACE_ROLE.owner,
+    });
+
+    await upsertActiveWorkspaceMembership({
+      workspaceId: business._id as mongoose.Types.ObjectId,
+      userId: user._id as mongoose.Types.ObjectId,
+      role: WORKSPACE_ROLE.owner as never,
+      roleDefinition: ownerRoleDefinitionId as mongoose.Types.ObjectId | null,
+      createdBy: user._id as mongoose.Types.ObjectId,
+      source: WORKSPACE_MEMBERSHIP_SOURCE.signup,
+      joinedAt: new Date(),
+    });
+
+    user.currentBusiness = business._id as mongoose.Types.ObjectId;
+    await user.save({ validateBeforeSave: false });
+
+    return NextResponse.json({
+      ok: true,
+      message: "Workspace created",
+      data: {
+        businessId: business.id,
+      },
+    }, { status: 201 });
   } catch (error) {
     return errorToNextResponse(error, getRequestId(request));
   }

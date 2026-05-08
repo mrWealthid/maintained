@@ -4,11 +4,13 @@ import Property from "@/models/propertyModel";
 import Unit from "@/models/unitModel";
 import User from "@/models/userModel";
 import Business from "@/models/businessModel";
+import WorkspaceMembership from "@/models/workspaceMembershipModel";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
-import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
+import { ROLES } from "@/shared/enums/enums";
 import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { MEMBERSHIP_STATUS, WORKSPACE_ROLE } from "@/shared/auth/roles";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,20 +44,20 @@ export async function GET(request: NextRequest) {
         } | null>(),
       Property.countDocuments({ business: businessId, isActive: true }),
       Unit.countDocuments({ business: businessId, isActive: true }),
-      User.countDocuments({
-        "memberships.business": businessId,
-        "memberships.role": ROLES.admin,
-        "memberships.status": INVITE_STATUS.activated,
+      WorkspaceMembership.countDocuments({
+        workspace: businessId,
+        role: { $in: [WORKSPACE_ROLE.owner, WORKSPACE_ROLE.property_manager] },
+        status: MEMBERSHIP_STATUS.active,
       }),
-      User.countDocuments({
-        "memberships.business": businessId,
-        "memberships.role": ROLES.technician,
-        "memberships.status": INVITE_STATUS.activated,
+      WorkspaceMembership.countDocuments({
+        workspace: businessId,
+        role: ROLES.technician,
+        status: MEMBERSHIP_STATUS.active,
       }),
-      User.countDocuments({
-        "memberships.business": businessId,
-        "memberships.role": ROLES.tenant,
-        "memberships.status": INVITE_STATUS.activated,
+      WorkspaceMembership.countDocuments({
+        workspace: businessId,
+        role: ROLES.tenant,
+        status: MEMBERSHIP_STATUS.active,
       }),
     ]);
 

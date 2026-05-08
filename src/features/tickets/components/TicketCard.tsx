@@ -65,7 +65,7 @@ const TicketCard: FC<{ ticket: Ticket }> = ({ ticket }) => {
     imageCount + videoCount + docCount + attachCount + filesCount + mediaCount;
 
   return (
-    <Card className="w-full transition hover:shadow-md cursor-pointer">
+    <Card className="w-full cursor-pointer transition-colors hover:bg-muted/30">
       <CardHeader className="space-y-2">
         <div className="flex items-center flex-wrap  justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex flex-wrap items-center gap-3">

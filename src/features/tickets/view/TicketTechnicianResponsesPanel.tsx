@@ -10,7 +10,6 @@ import {
   MoreHorizontal,
   Send,
   User as UserIcon,
-  UserPlus,
   Wrench,
   X as XIcon,
 } from "lucide-react";
@@ -44,23 +43,18 @@ import { Label } from "@/components/ui/label";
 
 import {
   useAssignTechnician,
-  useAssignTicket,
   useProcessTechnicianResponse,
 } from "@/features/tickets/hooks/ticketHooks";
-import { useAppContext } from "@/shared/contexts/AppContext";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import {
   TECHNICIAN_RESPONSE,
-  TICKET_STATUS,
 } from "@/shared/enums/enums";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
 
 type ConfirmKey =
   | "assign-technician"
-  | "assign-to-me"
-  | "withdraw"
   | "decline-technician";
 
 type TechnicianRequest = {
@@ -82,8 +76,6 @@ type Props = {
 };
 
 export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
-  const { user } = useAppContext();
-
   const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
   const canManageTicketStatus = useHasPermission(
     PERMISSION.TICKETS_STATUS_MANAGE,
@@ -94,9 +86,6 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
   const hasTechnicianResponseActions = canAssignTicket || canManageTicketStatus;
 
   const { isAssigning, handleAssignTechnician } = useAssignTechnician(ticket.id);
-  const { isUpdating: isAssigningSelf, handleAssignTicket } = useAssignTicket(
-    ticket.id,
-  );
   const { isProcessing, processResponse } = useProcessTechnicianResponse(
     ticket.id,
   );
@@ -112,7 +101,7 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
   const [scheduleEnd, setScheduleEnd] = useState("");
 
   const requests = ticket.requests ?? [];
-  const isLoading = isAssigning || isAssigningSelf || isProcessing;
+  const isLoading = isAssigning || isProcessing;
 
   const closeConfirm = () => {
     setConfirmKey(null);
@@ -139,31 +128,6 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
         if (!targetRequestId) return;
         handleAssignTechnician(
           { assignedTo: targetRequestId },
-          { onSuccess: () => closeConfirm() },
-        );
-      },
-    },
-    "assign-to-me": {
-      title: "Assign to me",
-      description: "The ticket will be actioned by you.",
-      confirmLabel: isAssigningSelf ? "Assigning..." : "Assign to me",
-      icon: UserPlus,
-      onConfirm: () => {
-        handleAssignTicket(
-          { actionedBy: user?.id, status: TICKET_STATUS.processing },
-          { onSuccess: () => closeConfirm() },
-        );
-      },
-    },
-    withdraw: {
-      title: "Withdraw Assignment",
-      description: "The ticket will revert to pending.",
-      confirmLabel: isAssigningSelf ? "Withdrawing..." : "Withdraw",
-      icon: XIcon,
-      variant: "destructive",
-      onConfirm: () => {
-        handleAssignTicket(
-          { actionedBy: undefined, status: TICKET_STATUS.pending },
           { onSuccess: () => closeConfirm() },
         );
       },
@@ -226,18 +190,6 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
             </Badge>
           </CardTitle>
           <div className="flex items-center gap-2">
-            {canAssignTicket ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmKey("assign-to-me")}
-                disabled={isAssigningSelf}
-              >
-                <UserPlus className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                Assign to me
-              </Button>
-            ) : null}
             {canCreateTechnicianRequest ? (
               <Button
                 type="button"
@@ -314,11 +266,6 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
                       ) : null}
                       {canManageTicketStatus ? (
                         <>
-                          <DropdownMenuItem
-                            onSelect={() => setConfirmKey("withdraw")}
-                          >
-                            Withdraw
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onSelect={() =>
                               setScheduleRequestId(request.id)

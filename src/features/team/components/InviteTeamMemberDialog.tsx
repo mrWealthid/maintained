@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Home, MailPlus, ShieldCheck, User, Wallet, Wrench } from "lucide-react";
+import { MailPlus, ShieldCheck, User, Wallet, Wrench } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -38,13 +38,6 @@ const roleOptions = [
     description:
       "Read-only access - view tickets and properties without administrative controls.",
     icon: User,
-  },
-  {
-    value: USER_TYPE.tenant,
-    label: "Tenant",
-    description:
-      "Resident access - can raise maintenance tickets and track repairs for their unit.",
-    icon: Home,
   },
   {
     value: USER_TYPE.technician,

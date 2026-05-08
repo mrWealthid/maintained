@@ -18,7 +18,7 @@ export function TicketFormSectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="rounded-2xl shadow-sm">
+    <Card className="rounded-lg shadow-none">
       <CardHeader className="px-6 pb-2 pt-5">
         <div className="mb-2 flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

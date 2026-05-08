@@ -129,18 +129,22 @@ export default function CreateWorkspaceDialog({
       businessE164 = parsed.number as string;
     }
 
-    await createWorkspaceMutation.mutateAsync({
-      ...values,
-      businessEmail: values.businessEmail || "",
-      businessContact: businessE164,
-    });
+    try {
+      await createWorkspaceMutation.mutateAsync({
+        ...values,
+        businessEmail: values.businessEmail || "",
+        businessContact: businessE164,
+      });
+    } catch {
+      // ErrorList and the mutation toast render the failure; keep the sheet open.
+    }
   };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <AppSheetContent
         side="right"
-        className="w-screen max-w-screen md:max-w-[50vw]"
+        className="w-screen max-w-screen sm:max-w-2xl"
       >
         <AppSheetHeader
           title="Create New Workspace"
@@ -157,9 +161,9 @@ export default function CreateWorkspaceDialog({
               onSubmit={form.handleSubmit((values) => void onSubmit(values))}
               className="space-y-6"
             >
-              <section className="rounded-2xl border border-border/70 bg-muted/20 p-5">
+              <section className="rounded-lg border border-border/70 bg-muted/20 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Sparkles className="size-4" />
                   </div>
                   <p className="text-sm font-semibold text-foreground">
@@ -173,7 +177,7 @@ export default function CreateWorkspaceDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Choose the workspace setup that matches how you want to organize events
+                        Choose the workspace setup that matches how you manage maintenance operations
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
@@ -183,7 +187,7 @@ export default function CreateWorkspaceDialog({
                         >
                           <Label
                             htmlFor="create-workspace-type-business"
-                            className="cursor-pointer rounded-2xl border border-border/70 bg-background px-4 py-4"
+                            className="cursor-pointer rounded-lg border border-border/70 bg-background px-4 py-4"
                           >
                             <RadioGroupItem
                               id="create-workspace-type-business"
@@ -200,7 +204,7 @@ export default function CreateWorkspaceDialog({
                           </Label>
                           <Label
                             htmlFor="create-workspace-type-individual"
-                            className="cursor-pointer rounded-2xl border border-border/70 bg-background px-4 py-4"
+                            className="cursor-pointer rounded-lg border border-border/70 bg-background px-4 py-4"
                           >
                             <RadioGroupItem
                               id="create-workspace-type-individual"
@@ -208,10 +212,10 @@ export default function CreateWorkspaceDialog({
                             />
                             <div className="space-y-1">
                               <span className="text-sm font-semibold text-foreground">
-                                Solo Organizer
+                                Solo Owner
                               </span>
                               <p className="text-sm font-normal leading-6 text-muted-foreground">
-                                Run events on your own with a lightweight workspace built for solo operators.
+                                Manage a smaller property workspace on your own without staff access.
                               </p>
                             </div>
                           </Label>
@@ -223,9 +227,9 @@ export default function CreateWorkspaceDialog({
                 />
               </section>
 
-              <section className="rounded-2xl border border-border/70 bg-muted/20 p-5">
+              <section className="rounded-lg border border-border/70 bg-muted/20 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Building2 className="size-4" />
                   </div>
                   <p className="text-sm font-semibold text-foreground">
@@ -321,7 +325,7 @@ export default function CreateWorkspaceDialog({
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border/70 bg-muted/20 p-5">
+              <section className="rounded-lg border border-border/70 bg-muted/20 p-5">
                 <div className="mb-4 space-y-1">
                   <p className="text-sm font-semibold text-foreground">
                     Workspace Address

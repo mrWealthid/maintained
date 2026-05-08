@@ -12,6 +12,7 @@ import {
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import {
   MEMBERSHIP_STATUS,
+  USER_TYPE,
   WORKSPACE_ROLE,
 } from "@/shared/auth/roles";
 import Business from "@/models/businessModel";
@@ -132,7 +133,8 @@ export async function GET(request: NextRequest) {
         !membership.user?._id ||
         !membership.user.name ||
         !membership.user.email ||
-        membership.user.active === false
+        membership.user.active === false ||
+        membership.role === USER_TYPE.tenant
       ) {
         return [];
       }
@@ -161,7 +163,8 @@ export async function GET(request: NextRequest) {
       const invitedUserId = invite.invitedUser?._id?.toString() ?? null;
       if (
         (invitedUserId && activeMemberIds.has(invitedUserId)) ||
-        invite.invitedUser?.active === false
+        invite.invitedUser?.active === false ||
+        invite.role === USER_TYPE.tenant
       ) {
         return [];
       }
@@ -265,18 +268,15 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = body.email.toLowerCase().trim();
     const existingUser = await User.findOne({ email: normalizedEmail }).select(
-      "name email memberships",
+      "name email",
     );
     if (existingUser) {
-      const existingMembership = existingUser.memberships.find(
-        (m) => String(m.business) === businessId,
-      );
       const workspaceMembership = await findWorkspaceMembershipByUser({
         workspaceId: businessObjectId,
         userId: existingUser._id as mongoose.Types.ObjectId,
         statuses: [MEMBERSHIP_STATUS.active, MEMBERSHIP_STATUS.suspended],
       });
-      if (existingMembership || workspaceMembership) {
+      if (workspaceMembership) {
         throw ApiError.badRequest(
           "This user already belongs to the workspace.",
         );

@@ -182,7 +182,7 @@ export async function deleteTicket(id: string) {
   }
 }
 
-export type BulkTicketAction = "delete" | "assign-self" | "decline";
+export type BulkTicketAction = "delete" | "decline";
 
 export type BulkTicketActionPayload = {
   action: BulkTicketAction;
@@ -205,20 +205,6 @@ export async function runBulkTicketAction(payload: BulkTicketActionPayload) {
       payload,
     );
     return data;
-  } catch (err: unknown) {
-    throw ApiErrorHandler.toUIError(err);
-  }
-}
-export async function assignTicket(
-  id: string,
-  payload: { actionedBy?: string; status: TICKET_STATUS }
-) {
-  try {
-    const res = await http.patch(
-      `${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
-      payload
-    );
-    return res.data;
   } catch (err: unknown) {
     throw ApiErrorHandler.toUIError(err);
   }

@@ -22,6 +22,7 @@ export const APP_ROUTE_PATHS = {
     CHAT: "/dashboard/chat",
     USERS: "/dashboard/users",
     PROPERTIES: "/dashboard/properties",
+    TENANTS: "/dashboard/tenants",
     REPORTS: "/dashboard/reports",
     EXPORT_VERIFY: "/dashboard/exports/verify",
     WORKSPACES: "/dashboard/workspaces",

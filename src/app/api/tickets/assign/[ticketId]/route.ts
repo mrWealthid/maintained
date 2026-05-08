@@ -1,4 +1,4 @@
-import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ensureTicketRoom } from "@/lib/chat/chat";
 import { pusherServer } from "@/lib/pusher/pusher";
@@ -6,11 +6,13 @@ import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiErr
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket, { ITicket } from "@/models/ticketModel";
 import User from "@/models/userModel";
-import mongoose, { Types, HydratedDocument } from "mongoose";
+import { findWorkspaceMembershipByUser } from "@/lib/tenancy/workspace-membership-access";
+import { Types, HydratedDocument } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { USER_TYPE } from "@/shared/auth/roles";
 
 const assignTechnicianBodySchema = z.object({
   assignedTo: z.string().min(1),
@@ -35,16 +37,15 @@ export async function PATCH(
     const adminUser = await User.findById(verify.id);
     if (!adminUser) throw ApiError.notFound("Admin user not found");
 
-    const businessId = new mongoose.Types.ObjectId(verify.currentBusiness);
-
     const technician = await User.findById(assignedTo);
     if (!technician) throw ApiError.notFound("Technician not found");
 
-    const membership = technician.memberships.find(
-      (m) => m.business.equals(businessId) && m.role === ROLES.technician
-    );
+    const membership = await findWorkspaceMembershipByUser({
+      workspaceId: verify.currentBusiness,
+      userId: assignedTo,
+    });
 
-    if (!membership) {
+    if (!membership || membership.role !== USER_TYPE.technician) {
       throw ApiError.badRequest("User is not a technician in this business");
     }
 
@@ -67,7 +68,7 @@ export async function PATCH(
     const updatedRequest = (await Ticket.findByIdAndUpdate(
       ticketId,
       {
-        // actionedBy: adminUser.id,
+        actionedBy: adminUser.id,
         assignedTo,
         status: TICKET_STATUS.assigned,
       },
@@ -88,21 +89,30 @@ export async function PATCH(
     };
     await TicketActivity.create({
       ticket: ticketId,
-      action: "status-changed",
-      description: `Ticket assigned to ${technician.name}`,
+      action: "assigned",
+      description: `Ticket assigned to ${technician.name} by ${adminUser.name}`,
       changedBy: adminUser.id,
       metadata: {
-        field: "assignedTo",
-        previous: previous.assignedTo || null,
-        current: assignedTo,
+        assignedTo: {
+          previous: previous.assignedTo || null,
+          current: assignedTo,
+        },
+        actionedBy: {
+          previous: previous.actionedBy || null,
+          current: adminUser.id,
+        },
+        status: {
+          previous: previous.status,
+          current: TICKET_STATUS.assigned,
+        },
       },
     });
 
     // assertPopulated<typeof Ticket>(updatedRequest, "user");
 
     const sysText =
-      previous.assignedTo && previous.assignedTo !== updatedRequest?.assignedTo
-        ? `Technician changed from ${previous.assignedTo?.name ?? "previous"} to new technician by ${updatedRequest.assignedTo?.name}.`
+      previous.assignedTo?.id && previous.assignedTo.id !== updatedRequest?.assignedTo?.id
+        ? `Technician changed from ${previous.assignedTo?.name ?? "previous"} to ${updatedRequest.assignedTo?.name} by ${updatedRequest.actionedBy?.name}.`
         : `Technician ${updatedRequest.assignedTo?.name} assigned by ${updatedRequest.actionedBy?.name}.`;
 
     const { room, msg } = await ensureTicketRoom({

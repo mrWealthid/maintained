@@ -4,7 +4,7 @@ import RoleDefinition, {
   ROLE_DEFINITION_STATUS,
   type IRoleDefinition,
 } from "@/models/roleDefinitionModel";
-import User from "@/models/userModel";
+import WorkspaceMembership from "@/models/workspaceMembershipModel";
 import {
   PERMISSION_DEFINITIONS,
   PERMISSION_SCOPE,
@@ -14,10 +14,10 @@ import {
   type PermissionKey,
 } from "@/shared/auth/permission-registry";
 import {
+  MEMBERSHIP_STATUS,
   WORKSPACE_ROLE,
   type AssignableWorkspaceRole,
 } from "@/shared/auth/roles";
-import { INVITE_STATUS } from "@/shared/enums/enums";
 
 type ObjectIdLike = mongoose.Types.ObjectId | string;
 
@@ -109,21 +109,20 @@ export function getWorkspaceRolePermissionCatalog() {
 }
 
 async function getRoleMemberCounts(workspaceId: mongoose.Types.ObjectId) {
-  const memberCounts = await User.aggregate<{
+  const memberCounts = await WorkspaceMembership.aggregate<{
     _id: mongoose.Types.ObjectId;
     memberCount: number;
   }>([
-    { $unwind: "$memberships" },
     {
       $match: {
-        "memberships.business": workspaceId,
-        "memberships.status": INVITE_STATUS.activated,
-        "memberships.roleDefinition": { $ne: null },
+        workspace: workspaceId,
+        status: MEMBERSHIP_STATUS.active,
+        roleDefinition: { $ne: null },
       },
     },
     {
       $group: {
-        _id: "$memberships.roleDefinition",
+        _id: "$roleDefinition",
         memberCount: { $sum: 1 },
       },
     },
@@ -229,23 +228,15 @@ export async function syncWorkspaceMembershipRoleAssignments(args: {
     return;
   }
 
-  await User.updateMany(
+  await WorkspaceMembership.updateMany(
     {
-      "memberships.business": workspaceId,
-      "memberships.roleDefinition": roleDefinitionId,
+      workspace: workspaceId,
+      roleDefinition: roleDefinitionId,
     },
     {
       $set: {
-        "memberships.$[membership].role": args.legacyRole,
+        role: args.legacyRole,
       },
-    },
-    {
-      arrayFilters: [
-        {
-          "membership.business": workspaceId,
-          "membership.roleDefinition": roleDefinitionId,
-        },
-      ],
     }
   );
 }

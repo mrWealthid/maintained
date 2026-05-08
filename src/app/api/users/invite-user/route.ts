@@ -1,4 +1,3 @@
-import { INVITE_STATUS } from "@/shared/enums/enums";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { assertWorkspacePermissionKey } from "@/lib/auth/permission-guards";
 import {
@@ -16,6 +15,8 @@ import {
   upsertPendingWorkspaceInvite,
 } from "@/lib/tenancy/invites";
 import { WORKSPACE_INVITE_STATUS } from "@/lib/tenancy/model";
+import { findWorkspaceMembershipByUser } from "@/lib/tenancy/workspace-membership-access";
+import { MEMBERSHIP_STATUS, USER_TYPE } from "@/shared/auth/roles";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -90,12 +91,23 @@ export async function POST(request: NextRequest) {
       const userData = usersData[i];
 
       try {
+        if (userData.role === USER_TYPE.tenant) {
+          errors.push({
+            index: i,
+            email: userData.email,
+            error: "Use tenant management to invite tenants",
+          });
+          continue;
+        }
+
         const existingUser = await User.findOne({ email: userData.email });
 
         if (existingUser) {
-          const alreadyMember = existingUser.memberships.some(
-            (m) => m.business.toString() === currentBusinessId.toString()
-          );
+          const alreadyMember = await findWorkspaceMembershipByUser({
+            workspaceId: currentBusinessId,
+            userId: existingUser._id as mongoose.Types.ObjectId,
+            statuses: [MEMBERSHIP_STATUS.active, MEMBERSHIP_STATUS.suspended],
+          });
 
           if (alreadyMember) {
             errors.push({
@@ -211,10 +223,12 @@ export async function PATCH(request: NextRequest) {
     const user = await User.findOne({ email });
     if (!user) throw ApiError.notFound("User not found");
 
-    const membership = user.memberships.find(
-      (m: any) => String(m.business) === String(currentBusinessId)
-    );
-    if (membership?.status === INVITE_STATUS.activated) {
+    const membership = await findWorkspaceMembershipByUser({
+      workspaceId: currentBusinessId,
+      userId: user._id as mongoose.Types.ObjectId,
+      statuses: [MEMBERSHIP_STATUS.active, MEMBERSHIP_STATUS.suspended],
+    });
+    if (membership?.status === MEMBERSHIP_STATUS.active) {
       throw ApiError.badRequest("User is already activated for this business");
     }
     const existingInvite = await WorkspaceInvite.findOne({
