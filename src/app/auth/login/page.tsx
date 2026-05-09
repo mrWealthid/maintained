@@ -120,6 +120,8 @@ const LoginComponent = () => {
   const onSubmit = async (payload: LoginForm) => {
     try {
       await loginAsync(payload);
+      const next = searchParams.get("next");
+      window.location.assign(next?.startsWith("/") ? next : "/dashboard");
     } catch (e) {
       console.error(e);
     }

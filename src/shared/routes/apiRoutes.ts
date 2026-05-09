@@ -22,7 +22,7 @@ export const API_ROUTES = {
     me: `${base}/auth/me`,
     onboard: `${base}/auth/onboard`,
     sidebarProfile: `${base}/auth/sidebar-profile`,
-    workspaceCreate: `${base}/workspaces`,
+    workspaceCreate: `${base}/auth/workspaces`,
     workspaceSwitch: `${base}/auth/workspaces/switch`,
     workspaceUpgrade: `${base}/auth/workspaces/upgrade`,
     passwordPolicyConfig: `${base}/auth/password-policy/config`,

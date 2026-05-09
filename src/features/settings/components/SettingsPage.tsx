@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   FolderOpen,
@@ -15,6 +15,7 @@ import {
 
 import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import { Button } from "@/components/ui/button";
+import ErrorList from "@/components/ui/ErrorList";
 import {
   Card,
   CardContent,
@@ -36,10 +37,11 @@ import {
   SETTINGS_TAB_ICON_BADGE_CLASSNAME,
 } from "./SettingsIconBadge";
 import { SettingsSection } from "./SettingsSection";
+import { FormProvider, useForm } from "react-hook-form";
 import {
-  SettingsSaveProvider,
-  useSettingsSave,
-} from "./SettingsSaveContext";
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from "libphonenumber-js";
 import NotificationSettings from "./NotificationSettings";
 import GeneralSettings from "./GeneralSettings";
 import EmailSettings from "./EmailSettings";
@@ -48,7 +50,25 @@ import CategoryManagement from "./CategoryManagement";
 import TicketTypeManagement from "./TicketTypeManagement";
 import { useAppContext } from "@/shared/contexts/AppContext";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { useCategories, useTicketTypes } from "../hooks/settingsHooks";
+import {
+  useCategories,
+  useEmailSettings,
+  useNotificationPreferences,
+  useSecuritySettings,
+  useTicketTypes,
+  useUpdateEmailSettings,
+  useUpdateNotificationPreferences,
+  useUpdateSecuritySettings,
+  useUpdateWorkspaceProfileSettings,
+  useWorkspaceProfileSettings,
+} from "../hooks/settingsHooks";
+import {
+  defaultBusinessEmailSettings,
+  defaultNotificationPreferences,
+  defaultWorkspaceSecuritySettings,
+  defaultWorkspaceSettingsFormValues,
+  type WorkspaceSettingsFormValues,
+} from "../models/settings-form.model";
 
 type OperationsSheet = "categories" | "ticket-types" | null;
 
@@ -231,16 +251,41 @@ const tabs = [
 const tabTriggerClassName =
   "group h-10 min-w-[120px] flex-none gap-2 rounded-full px-3 data-[state=active]:shadow-none";
 
+function normalizedPhoneNumber(
+  value: string | undefined,
+  countryCode: string | undefined,
+) {
+  if (!value?.trim()) return "";
+  const parsed = parsePhoneNumberFromString(
+    value,
+    (countryCode || "US") as CountryCode,
+  );
+  return parsed?.isValid() ? parsed.number : null;
+}
+
 const SettingsPageContent: React.FC = () => {
   const { user } = useAppContext();
+  const form = useForm<WorkspaceSettingsFormValues>({
+    defaultValues: defaultWorkspaceSettingsFormValues,
+    mode: "onChange",
+    shouldUnregister: false,
+  });
   const {
-    saveAll,
-    dirtyCount,
-    hasDirty,
-    isBusy,
-    isBlocked,
-    blockedReason,
-  } = useSettingsSave();
+    formState: { dirtyFields, isDirty, errors },
+    handleSubmit,
+    reset,
+    setError,
+    getValues,
+  } = form;
+  const generalQuery = useWorkspaceProfileSettings();
+  const notificationsQuery = useNotificationPreferences();
+  const emailQuery = useEmailSettings();
+  const securityQuery = useSecuritySettings();
+  const updateGeneral = useUpdateWorkspaceProfileSettings();
+  const updateNotifications = useUpdateNotificationPreferences();
+  const updateEmail = useUpdateEmailSettings();
+  const updateSecurity = useUpdateSecuritySettings();
+  const hasHydratedFormRef = useRef(false);
   const visibleTabs = tabs.filter((tab) =>
     "permissions" in tab
       ? tab.permissions.some((permission) =>
@@ -249,31 +294,161 @@ const SettingsPageContent: React.FC = () => {
       : !("permission" in tab) || user.permissions.includes(tab.permission)
   );
   const defaultTab = visibleTabs[0]?.value ?? "general";
+  const isLoading =
+    generalQuery.isLoading ||
+    notificationsQuery.isLoading ||
+    emailQuery.isLoading ||
+    securityQuery.isLoading;
+  const isSaving =
+    updateGeneral.isPending ||
+    updateNotifications.isPending ||
+    updateEmail.isPending ||
+    updateSecurity.isPending;
+  const dirtyCount = [
+    dirtyFields.general,
+    dirtyFields.notifications,
+    dirtyFields.email,
+    dirtyFields.security,
+  ].filter(Boolean).length;
+  const whitelistError =
+    typeof errors.security?.ipWhitelist?.ips?.message === "string"
+      ? errors.security.ipWhitelist.ips.message
+      : null;
+
+  useEffect(() => {
+    if (hasHydratedFormRef.current || isLoading) return;
+    hasHydratedFormRef.current = true;
+
+    reset({
+      general:
+        generalQuery.data ?? defaultWorkspaceSettingsFormValues.general,
+      notifications: {
+        ...defaultNotificationPreferences,
+        ...(notificationsQuery.data ?? {}),
+      },
+      email: {
+        ...defaultBusinessEmailSettings,
+        ...(emailQuery.data ?? {}),
+        templates: {
+          ...defaultBusinessEmailSettings.templates,
+          ...(emailQuery.data?.templates ?? {}),
+        },
+      },
+      security: {
+        ...defaultWorkspaceSecuritySettings,
+        ...(securityQuery.data ?? {}),
+        ipWhitelist: {
+          ...defaultWorkspaceSecuritySettings.ipWhitelist,
+          ...(securityQuery.data?.ipWhitelist ?? {}),
+        },
+      },
+    });
+  }, [
+    emailQuery.data,
+    generalQuery.data,
+    isLoading,
+    notificationsQuery.data,
+    reset,
+    securityQuery.data,
+  ]);
+
+  async function onSubmit(values: WorkspaceSettingsFormValues) {
+    const nextValues = getValues();
+
+    if (dirtyFields.general) {
+      const personalPhone = normalizedPhoneNumber(
+        values.general.personalProfile.contact,
+        values.general.personalProfile.countryCode,
+      );
+      if (personalPhone === null) {
+        setError("general.personalProfile.contact", {
+          message: "Enter a valid phone number.",
+        });
+        return;
+      }
+
+      const saved = await updateGeneral.mutateAsync({
+        personalProfile: {
+          ...values.general.personalProfile,
+          contact: personalPhone,
+        },
+        business: {
+          name: values.general.business.name,
+          description: values.general.business.description,
+          addressStructured: values.general.business.addressStructured,
+        },
+        settings: values.general.settings,
+      });
+      nextValues.general = saved.data;
+    }
+
+    if (dirtyFields.notifications) {
+      const saved = await updateNotifications.mutateAsync(values.notifications);
+      nextValues.notifications = {
+        ...defaultNotificationPreferences,
+        ...saved.data,
+      };
+    }
+
+    if (dirtyFields.email) {
+      const saved = await updateEmail.mutateAsync({
+        replyTo: values.email.replyTo,
+        bcc: values.email.bcc,
+        templates: values.email.templates,
+      });
+      nextValues.email = {
+        ...defaultBusinessEmailSettings,
+        ...saved.data,
+        templates: {
+          ...defaultBusinessEmailSettings.templates,
+          ...saved.data.templates,
+        },
+      };
+    }
+
+    if (dirtyFields.security) {
+      if (
+        values.security.ipWhitelist.enabled &&
+        values.security.ipWhitelist.ips.length === 0
+      ) {
+        setError("security.ipWhitelist.ips", {
+          message:
+            "Add at least one allowed IP address before enabling IP whitelisting.",
+        });
+        return;
+      }
+
+      const saved = await updateSecurity.mutateAsync(values.security);
+      nextValues.security = saved.data;
+    }
+
+    reset(nextValues);
+  }
 
   return (
-    <div className="space-y-6">
+    <FormProvider {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <AppPageHeader name="Settings" />
           <p className="mt-2 text-sm text-muted-foreground">
             Manage workspace preferences, notifications, email, and security.
           </p>
-          {isBlocked && blockedReason ? (
-            <p className="mt-2 text-sm text-destructive">{blockedReason}</p>
+          {whitelistError ? (
+            <p className="mt-2 text-sm text-destructive">{whitelistError}</p>
           ) : null}
         </div>
         <Button
-          type="button"
-          disabled={!hasDirty || isBusy || isBlocked}
-          onClick={() => void saveAll()}
+          type="submit"
+          disabled={!isDirty || isLoading || isSaving}
           className="w-full sm:w-auto"
         >
-          {isBusy ? (
+          {isSaving ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
             <Save className="mr-2 size-4" />
           )}
-          {isBusy
+          {isSaving
             ? "Saving..."
             : dirtyCount > 1
               ? `Save ${dirtyCount} sections`
@@ -321,14 +496,24 @@ const SettingsPageContent: React.FC = () => {
           You do not have access to any settings sections in this workspace.
         </p>
       )}
-    </div>
+      <ErrorList
+        error={
+          generalQuery.error ||
+          notificationsQuery.error ||
+          emailQuery.error ||
+          securityQuery.error ||
+          updateGeneral.error ||
+          updateNotifications.error ||
+          updateEmail.error ||
+          updateSecurity.error
+        }
+        title="Settings error"
+      />
+      </form>
+    </FormProvider>
   );
 };
 
-const SettingsPage: React.FC = () => (
-  <SettingsSaveProvider>
-    <SettingsPageContent />
-  </SettingsSaveProvider>
-);
+const SettingsPage: React.FC = () => <SettingsPageContent />;
 
 export default SettingsPage;

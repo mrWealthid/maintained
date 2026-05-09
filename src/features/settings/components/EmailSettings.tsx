@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -29,20 +29,19 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormContext } from "react-hook-form";
 import {
-  BusinessEmailSettings,
   BusinessEmailTemplateKey,
   EmailTemplateDelay,
   EmailTemplateSetting,
 } from "../models/settings.model";
-import { useEmailSettings, useUpdateEmailSettings } from "../hooks/settingsHooks";
+import type { WorkspaceSettingsFormValues } from "../models/settings-form.model";
 import {
   BusinessEmailSettingsTemplateMeta,
   getBusinessEmailSettingsGroupsWithIcons,
 } from "../data/email-template-registry-ui";
 import { SettingsField } from "./SettingsField";
 import { SettingsIconBadge } from "./SettingsIconBadge";
-import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 
 type EmailView =
@@ -104,18 +103,6 @@ const mergeVariableGroups = [
   },
 ] as const;
 
-function cloneSettings(settings: BusinessEmailSettings): BusinessEmailSettings {
-  return {
-    ...settings,
-    templates: Object.fromEntries(
-      Object.entries(settings.templates).map(([key, value]) => [
-        key,
-        { ...EMPTY_TEMPLATE, ...value },
-      ])
-    ) as BusinessEmailSettings["templates"],
-  };
-}
-
 function renderPreview(value: string) {
   return Object.entries(previewVariables).reduce(
     (text, [key, replacement]) =>
@@ -125,7 +112,7 @@ function renderPreview(value: string) {
 }
 
 function getTemplate(
-  settings: BusinessEmailSettings,
+  settings: WorkspaceSettingsFormValues["email"],
   key: BusinessEmailTemplateKey
 ) {
   return {
@@ -135,101 +122,39 @@ function getTemplate(
 }
 
 const EmailSettings: React.FC = () => {
-  const { data: settings, isLoading } = useEmailSettings();
-  const updateEmailSettings = useUpdateEmailSettings();
-  const [localSettings, setLocalSettings] =
-    useState<BusinessEmailSettings | null>(null);
-  const [savedSettings, setSavedSettings] =
-    useState<BusinessEmailSettings | null>(null);
+  const { watch, setValue } = useFormContext<WorkspaceSettingsFormValues>();
+  const emailSettings = watch("email");
   const [view, setView] = useState<EmailView>({ mode: "list" });
-
-  useEffect(() => {
-    if (!settings) return;
-    const nextSettings = cloneSettings(settings);
-    setLocalSettings(nextSettings);
-    setSavedSettings(nextSettings);
-  }, [settings]);
 
   const updateTemplate = (
     key: BusinessEmailTemplateKey,
     patch: Partial<EmailTemplateSetting>
   ) => {
-    setLocalSettings((current) => {
-      if (!current) return current;
-
-      return {
-        ...current,
-        templates: {
-          ...current.templates,
-          [key]: {
-            ...getTemplate(current, key),
-            ...patch,
-          },
-        },
-      };
+    const current = getTemplate(emailSettings, key);
+    Object.entries({ ...current, ...patch }).forEach(([fieldKey, value]) => {
+      setValue(
+        `email.templates.${key}.${fieldKey as keyof EmailTemplateSetting}`,
+        value as never,
+        { shouldDirty: true, shouldValidate: true },
+      );
     });
   };
 
-  const patchSettings = (patch: Partial<BusinessEmailSettings>) => {
-    setLocalSettings((current) => (current ? { ...current, ...patch } : current));
-  };
-
-  const handleSave = useCallback(async () => {
-    if (!localSettings) return;
-
-    const saved = await updateEmailSettings.mutateAsync({
-      replyTo: localSettings.replyTo,
-      bcc: localSettings.bcc,
-      templates: localSettings.templates,
+  const patchSettings = (
+    patch: Partial<WorkspaceSettingsFormValues["email"]>,
+  ) => {
+    Object.entries(patch).forEach(([fieldKey, value]) => {
+      setValue(`email.${fieldKey as keyof WorkspaceSettingsFormValues["email"]}`, value as never, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     });
-    const nextSettings = cloneSettings(saved.data);
-    setLocalSettings(nextSettings);
-    setSavedSettings(nextSettings);
-  }, [localSettings, updateEmailSettings.mutateAsync]);
-  const hasChanges =
-    Boolean(localSettings && savedSettings) &&
-    JSON.stringify(localSettings) !== JSON.stringify(savedSettings);
-
-  const emailSaveSection = useMemo(
-    () => ({
-      id: "email",
-      label: "Email configuration",
-      save: handleSave,
-      isDirty: hasChanges,
-      isSaving: updateEmailSettings.isPending,
-      isLoading,
-      disabled: !localSettings,
-    }),
-    [
-      handleSave,
-      hasChanges,
-      isLoading,
-      localSettings,
-      updateEmailSettings.isPending,
-    ],
-  );
-
-  useSettingsSaveRegistration(emailSaveSection);
-
-  if (isLoading || !localSettings) {
-    return (
-      <SettingsSection
-        title="Email Configuration"
-        icon={Mail}
-        description="Loading email settings..."
-      >
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Loading email configuration
-        </div>
-      </SettingsSection>
-    );
-  }
+  };
 
   if (view.mode === "edit") {
     return (
       <EmailTemplateEditorScreen
-        settings={localSettings}
+        settings={emailSettings}
         template={view.template}
         onBack={() =>
           setView(view.returnTo === "gallery" ? { mode: "gallery" } : { mode: "list" })
@@ -242,7 +167,7 @@ const EmailSettings: React.FC = () => {
   if (view.mode === "gallery") {
     return (
       <BusinessEmailPreviewGalleryScreen
-        settings={localSettings}
+        settings={emailSettings}
         onBack={() => setView({ mode: "list" })}
         onEditTemplate={(template) =>
           setView({ mode: "edit", template, returnTo: "gallery" })
@@ -253,7 +178,7 @@ const EmailSettings: React.FC = () => {
 
   return (
     <EmailSection
-      settings={localSettings}
+      settings={emailSettings}
       onPatchSettings={patchSettings}
       onUpdateTemplate={updateTemplate}
       onOpenGallery={() => setView({ mode: "gallery" })}
@@ -271,8 +196,8 @@ function EmailSection({
   onOpenGallery,
   onEditTemplate,
 }: {
-  settings: BusinessEmailSettings;
-  onPatchSettings: (patch: Partial<BusinessEmailSettings>) => void;
+  settings: WorkspaceSettingsFormValues["email"];
+  onPatchSettings: (patch: Partial<WorkspaceSettingsFormValues["email"]>) => void;
   onUpdateTemplate: (
     key: BusinessEmailTemplateKey,
     patch: Partial<EmailTemplateSetting>
@@ -480,7 +405,7 @@ function BusinessEmailPreviewGalleryScreen({
   onBack,
   onEditTemplate,
 }: {
-  settings: BusinessEmailSettings;
+  settings: WorkspaceSettingsFormValues["email"];
   onBack: () => void;
   onEditTemplate: (template: BusinessEmailSettingsTemplateMeta) => void;
 }) {
@@ -590,7 +515,7 @@ function EmailTemplateEditorScreen({
   onBack,
   onUpdateTemplate,
 }: {
-  settings: BusinessEmailSettings;
+  settings: WorkspaceSettingsFormValues["email"];
   template: BusinessEmailSettingsTemplateMeta;
   onBack: () => void;
   onUpdateTemplate: (

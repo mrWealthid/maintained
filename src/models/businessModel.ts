@@ -295,10 +295,14 @@ const businessSchema = new Schema<IBusiness>(
     createdAt: { type: Date, default: Date.now },
     email: {
       type: String,
-      required: [true, "Please provide your business email"],
-      unique: true,
       lowercase: true,
-      validate: [validator.isEmail, "Please provide a valid email"],
+      trim: true,
+      validate: {
+        validator(value: string) {
+          return !value || validator.isEmail(value);
+        },
+        message: "Please provide a valid email",
+      },
     },
     creator: {
       type: Schema.Types.ObjectId,

@@ -76,8 +76,12 @@ export function scrollElementIntoView(element: HTMLElement, options?: ScrollToEl
     });
   });
 
+  if (scrollableAncestors.length > 0) {
+    return;
+  }
+
   const rect = element.getBoundingClientRect();
-  if (!isWithinViewport(rect) || scrollableAncestors.length === 0) {
+  if (!isWithinViewport(rect)) {
     const absoluteTop = window.scrollY + rect.top - offset;
     window.scrollTo({
       top: Math.max(0, absoluteTop),
