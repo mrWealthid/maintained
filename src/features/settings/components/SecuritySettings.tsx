@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Clock3,
   Globe,
@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useFormContext } from "react-hook-form";
 import {
   isValidIpAddress,
   normalizeIpAddress,
@@ -35,32 +36,21 @@ import {
 } from "@/lib/security/ip-address";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { useAppContext } from "@/shared/contexts/AppContext";
-import type { WorkspaceSecuritySettings } from "../models/settings.model";
+import type {
+  WorkspaceSecuritySettings,
+} from "../models/settings.model";
+import type { WorkspaceSettingsFormValues } from "../models/settings-form.model";
 import {
   useRevokeOtherSecuritySessions,
   useRevokeSecuritySession,
   useSecuritySessions,
-  useSecuritySettings,
-  useUpdateSecuritySettings,
 } from "../hooks/settingsHooks";
 import { SettingsField } from "./SettingsField";
-import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsToggleRow } from "./SettingsToggleRow";
 
 const EMPTY_WHITELIST_MESSAGE =
   "Add at least one allowed IP address before enabling IP whitelisting.";
-
-const defaultSecuritySettings: WorkspaceSecuritySettings = {
-  require2fa: false,
-  sessionTimeoutMinutes: 60,
-  maxActiveSessions: "unlimited",
-  ipWhitelist: {
-    enabled: false,
-    ips: [],
-  },
-  currentRequestIp: null,
-};
 
 function formatSessionDate(value: string) {
   return new Date(value).toLocaleString();
@@ -97,26 +87,20 @@ const SecuritySettings: React.FC = () => {
   const canRevokeSessions = user.permissions.includes(
     PERMISSION.SETTINGS_SESSIONS_REVOKE
   );
-  const { data, isLoading } = useSecuritySettings();
-  const updateSecuritySettings = useUpdateSecuritySettings();
+  const {
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext<WorkspaceSettingsFormValues>();
+  const settings = watch("security");
   const { data: sessions = [], isLoading: loadingSessions } =
     useSecuritySessions();
   const revokeSessionMutation = useRevokeSecuritySession();
   const revokeOtherSessionsMutation = useRevokeOtherSecuritySessions();
-  const [settings, setSettings] = useState<WorkspaceSecuritySettings>(
-    defaultSecuritySettings
-  );
-  const [savedSettings, setSavedSettings] = useState<WorkspaceSecuritySettings>(
-    defaultSecuritySettings
-  );
   const [ipDraft, setIpDraft] = useState("");
   const [ipDraftError, setIpDraftError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!data) return;
-    setSettings(data);
-    setSavedSettings(data);
-  }, [data]);
 
   const allowedIps = useMemo(
     () => normalizeIpAddressList(settings.ipWhitelist.ips),
@@ -126,49 +110,41 @@ const SecuritySettings: React.FC = () => {
   const currentIpAllowed =
     currentRequestIp.length > 0 && allowedIps.includes(currentRequestIp);
   const whitelistError =
-    settings.ipWhitelist.enabled && allowedIps.length === 0
-      ? EMPTY_WHITELIST_MESSAGE
-      : null;
+    typeof errors.security?.ipWhitelist?.ips?.message === "string"
+      ? errors.security.ipWhitelist.ips.message
+      : settings.ipWhitelist.enabled && allowedIps.length === 0
+        ? EMPTY_WHITELIST_MESSAGE
+        : null;
   const otherSessionCount = sessions.filter((session) => !session.current).length;
-  const savePayload = useMemo(
-    () => ({
-      ...settings,
-      ipWhitelist: {
-        enabled: settings.ipWhitelist.enabled,
-        ips: allowedIps,
-      },
-    }),
-    [allowedIps, settings],
-  );
-  const savedPayload = useMemo(
-    () => ({
-      ...savedSettings,
-      ipWhitelist: {
-        enabled: savedSettings.ipWhitelist.enabled,
-        ips: normalizeIpAddressList(savedSettings.ipWhitelist.ips),
-      },
-    }),
-    [savedSettings],
-  );
-  const hasChanges = JSON.stringify(savePayload) !== JSON.stringify(savedPayload);
+  useEffect(() => {
+    if (settings.ipWhitelist.enabled && allowedIps.length === 0) {
+      setError("security.ipWhitelist.ips", {
+        message: EMPTY_WHITELIST_MESSAGE,
+      });
+      return;
+    }
+
+    clearErrors("security.ipWhitelist.ips");
+  }, [
+    allowedIps.length,
+    clearErrors,
+    setError,
+    settings.ipWhitelist.enabled,
+  ]);
 
   function patchSettings(patch: Partial<WorkspaceSecuritySettings>) {
-    setSettings((current) => ({
-      ...current,
-      ...patch,
-      ipWhitelist: {
-        ...current.ipWhitelist,
-        ...(patch.ipWhitelist ?? {}),
-      },
-    }));
+    Object.entries(patch).forEach(([fieldKey, value]) => {
+      setValue(`security.${fieldKey as keyof WorkspaceSecuritySettings}`, value as never, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    });
   }
 
   function applyAllowedIps(nextIps: string[]) {
-    patchSettings({
-      ipWhitelist: {
-        ...settings.ipWhitelist,
-        ips: normalizeIpAddressList(nextIps),
-      },
+    setValue("security.ipWhitelist.ips", normalizeIpAddressList(nextIps), {
+      shouldDirty: true,
+      shouldValidate: true,
     });
   }
 
@@ -206,35 +182,6 @@ const SecuritySettings: React.FC = () => {
     applyAllowedIps([...allowedIps, currentRequestIp]);
     setIpDraftError(null);
   }
-
-  const handleSave = useCallback(async () => {
-    const saved = await updateSecuritySettings.mutateAsync(savePayload);
-    setSettings(saved.data);
-    setSavedSettings(saved.data);
-  }, [savePayload, updateSecuritySettings.mutateAsync]);
-
-  const securitySaveSection = useMemo(
-    () => ({
-      id: "security",
-      label: "Security settings",
-      save: handleSave,
-      isDirty: canManageSecurity && hasChanges,
-      isSaving: updateSecuritySettings.isPending,
-      isLoading,
-      disabled: Boolean(whitelistError),
-      disabledReason: whitelistError ?? undefined,
-    }),
-    [
-      canManageSecurity,
-      handleSave,
-      hasChanges,
-      isLoading,
-      updateSecuritySettings.isPending,
-      whitelistError,
-    ],
-  );
-
-  useSettingsSaveRegistration(securitySaveSection);
 
   let activeSessionsContent = (
     <p className="rounded-2xl border border-dashed border-border/70 bg-background/40 px-4 py-5 text-sm text-muted-foreground">

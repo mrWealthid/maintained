@@ -11,19 +11,13 @@ import {
   UserRound,
   Webhook,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  parsePhoneNumberFromString,
-  type CountryCode,
-} from "libphonenumber-js";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import ErrorList from "@/components/ui/ErrorList";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -40,17 +34,10 @@ import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import { InternationalPhoneField } from "@/shared/components/phone-number/International-phonefield";
 import { useUpgradeWorkspace } from "@/shared/hooks/useWorkspaceActions";
 import { isSoloWorkspaceType } from "@/shared/model/workspace.model";
-import {
-  WorkspaceProfileSettingsSchema,
-  type WorkspaceProfileSettings,
-} from "../models/settings.model";
-import {
-  useUpdateWorkspaceProfileSettings,
-  useWorkspaceProfileSettings,
-} from "../hooks/settingsHooks";
+import type { WorkspaceSettingsFormValues } from "../models/settings-form.model";
+import { useUpdateWorkspaceProfileSettings } from "../hooks/settingsHooks";
 import { SettingsField } from "./SettingsField";
 import { SettingsIconBadge } from "./SettingsIconBadge";
-import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 
 type IntegrationKey = "googleCalendar" | "slack" | "mailchimp" | "zapier";
@@ -59,55 +46,6 @@ type IntegrationMeta = {
   key: IntegrationKey;
   name: string;
   description: string;
-};
-
-const defaultGeneralSettings: WorkspaceProfileSettings = {
-  personalProfile: {
-    name: "",
-    email: "",
-    contact: "",
-    countryCode: "US",
-  },
-  business: {
-    name: "",
-    email: "",
-    contact: "",
-    countryCode: "US",
-    logo: "",
-    description: "",
-    workspaceType: "BUSINESS",
-    addressStructured: {
-      line1: "",
-      line2: "",
-      city: "",
-      state: "",
-      postalCode: "",
-      countryCode: "US",
-      country: "United States",
-      placeId: "",
-      source: "manual",
-    },
-  },
-  settings: {
-    general: {
-      timezone: "America/New_York",
-      dateFormat: "mdy",
-      timeFormat: "12h",
-      language: "en",
-      integrations: {
-        googleCalendar: { connected: false },
-        slack: { connected: false },
-        mailchimp: { connected: false },
-        zapier: { connected: false },
-      },
-    },
-  },
-  meta: {
-    permissions: {
-      isBusinessCreator: false,
-      canEditBusinessDetails: false,
-    },
-  },
 };
 
 async function uploadWorkspaceImage(
@@ -133,18 +71,6 @@ async function uploadWorkspaceImage(
   return data.secure_url || data.url;
 }
 
-function normalizedPhoneNumber(
-  value: string | undefined,
-  countryCode: string | undefined,
-) {
-  if (!value?.trim()) return "";
-  const parsed = parsePhoneNumberFromString(
-    value,
-    (countryCode || "US") as CountryCode,
-  );
-  return parsed?.isValid() ? parsed.number : null;
-}
-
 function getPreviewImageSrc(value: string | null | undefined) {
   const src = value?.trim();
   if (!src || src === "default.jpg") return null;
@@ -161,7 +87,6 @@ function getPreviewImageSrc(value: string | null | undefined) {
 }
 
 export default function GeneralSettings() {
-  const { data, isLoading, error } = useWorkspaceProfileSettings();
   const updateSettings = useUpdateWorkspaceProfileSettings();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -172,36 +97,24 @@ export default function GeneralSettings() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const upgradeWorkspaceMutation = useUpgradeWorkspace();
-
-  const form = useForm<WorkspaceProfileSettings>({
-    resolver: zodResolver(WorkspaceProfileSettingsSchema) as never,
-    defaultValues: defaultGeneralSettings,
-    mode: "onChange",
-  });
-
   const {
     control,
-    formState: { isDirty },
-    setError,
+    formState: { errors, isLoading },
     setValue,
     watch,
-  } = form;
-  const business = watch("business");
-  const general = watch("settings.general");
-  const personalProfile = watch("personalProfile");
-  const permissions = watch("meta.permissions");
+  } = useFormContext<WorkspaceSettingsFormValues>();
+  const business = watch("general.business");
+  const general = watch("general.settings.general");
+  const personalProfile = watch("general.personalProfile");
+  const permissions = watch("general.meta.permissions");
   const isSoloWorkspace = isSoloWorkspaceType(business.workspaceType);
   const workspaceEntityLabel = isSoloWorkspace ? "Workspace" : "Business";
   const workspaceOwnerLabel = isSoloWorkspace
     ? "workspace creator"
     : "business creator";
-  const isSaving = updateSettings.isPending;
-
   useEffect(() => {
-    if (!data) return;
-    form.reset(data);
-    setPreviewUrl(getPreviewImageSrc(data.business.logo));
-  }, [data, form]);
+    setPreviewUrl(getPreviewImageSrc(business.logo));
+  }, [business.logo]);
 
   useEffect(() => {
     return () => {
@@ -270,7 +183,10 @@ export default function GeneralSettings() {
       const saved = await updateSettings.mutateAsync({
         business: { logo: logoUrl },
       });
-      form.reset(saved.data);
+      setValue("general", saved.data, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
       setPreviewUrl(logoUrl);
       if (previewBlobUrlRef.current) {
         URL.revokeObjectURL(previewBlobUrlRef.current);
@@ -292,78 +208,15 @@ export default function GeneralSettings() {
     }
   };
 
-  const handleSave = useCallback(
-    async (values: WorkspaceProfileSettings) => {
-      const personalPhone = normalizedPhoneNumber(
-        values.personalProfile.contact,
-        values.personalProfile.countryCode,
-      );
-      if (personalPhone === null) {
-        setError("personalProfile.contact", {
-          message: "Enter a valid phone number.",
-        });
-        return;
-      }
-
-      const saved = await updateSettings.mutateAsync({
-        personalProfile: {
-          ...values.personalProfile,
-          contact: personalPhone,
-        },
-        business: {
-          name: values.business.name,
-          description: values.business.description,
-          addressStructured: values.business.addressStructured,
-        },
-        settings: values.settings,
-      });
-
-      form.reset(saved.data);
-      setPreviewUrl(getPreviewImageSrc(saved.data.business.logo));
-    },
-    [form, setError, updateSettings.mutateAsync],
-  );
-
-  const saveGeneralSettings = useCallback(
-    () => form.handleSubmit(handleSave)(),
-    [form, handleSave],
-  );
-
-  const generalSaveSection = useMemo(
-    () => ({
-      id: "general",
-      label: "General settings",
-      save: saveGeneralSettings,
-      isDirty,
-      isSaving,
-      isLoading,
-      disabled: isUploadingLogo,
-      disabledReason: isUploadingLogo
-        ? "Wait for the workspace icon upload to finish before saving settings."
-        : undefined,
-    }),
-    [isDirty, isLoading, isSaving, isUploadingLogo, saveGeneralSettings],
-  );
-
-  useSettingsSaveRegistration(generalSaveSection);
-
   return (
     <SettingsSection
       title="General Settings"
       icon={Globe}
       description={`Configure general ${workspaceEntityLabel.toLowerCase()} and app settings`}
     >
-      <ErrorList error={error || updateSettings.error} />
+      <ErrorList error={updateSettings.error} />
 
-      <Form<WorkspaceProfileSettings>
-        {...form}
-        schema={WorkspaceProfileSettingsSchema}
-      >
-        <form
-          id="general-settings-form"
-          onSubmit={form.handleSubmit(handleSave)}
-          className="space-y-6"
-        >
+      <div className="space-y-6">
           <div className="space-y-4">
             <input
               ref={fileInputRef}
@@ -510,7 +363,7 @@ export default function GeneralSettings() {
                     value={personalProfile.name ?? ""}
                     disabled={isLoading}
                     onChange={(event) =>
-                      setValue("personalProfile.name", event.target.value, {
+                      setValue("general.personalProfile.name", event.target.value, {
                         shouldDirty: true,
                         shouldValidate: true,
                       })
@@ -528,8 +381,8 @@ export default function GeneralSettings() {
                   />
                 </SettingsField>
 
-                <InternationalPhoneField<WorkspaceProfileSettings>
-                  name="personalProfile.contact"
+                <InternationalPhoneField<WorkspaceSettingsFormValues>
+                  name="general.personalProfile.contact"
                   control={control}
                   label="Your Phone"
                   allowedCountries={CODES}
@@ -542,7 +395,7 @@ export default function GeneralSettings() {
                   enforceDigitHints
                   disabled={isLoading}
                   onCountryChange={(country) => {
-                    setValue("personalProfile.countryCode", country, {
+                    setValue("general.personalProfile.countryCode", country, {
                       shouldDirty: true,
                       shouldValidate: true,
                     });
@@ -581,7 +434,7 @@ export default function GeneralSettings() {
                     value={business.name}
                     disabled={!permissions.canEditBusinessDetails}
                     onChange={(event) =>
-                      setValue("business.name", event.target.value, {
+                      setValue("general.business.name", event.target.value, {
                         shouldDirty: true,
                         shouldValidate: true,
                       })
@@ -602,8 +455,8 @@ export default function GeneralSettings() {
                   />
                 </SettingsField>
 
-                <InternationalPhoneField<WorkspaceProfileSettings>
-                  name="business.contact"
+                <InternationalPhoneField<WorkspaceSettingsFormValues>
+                  name="general.business.contact"
                   control={control}
                   label={`${workspaceEntityLabel} Phone Number`}
                   allowedCountries={CODES}
@@ -624,7 +477,7 @@ export default function GeneralSettings() {
                     value={business.description ?? ""}
                     disabled={!permissions.canEditBusinessDetails}
                     onChange={(event) =>
-                      setValue("business.description", event.target.value, {
+                      setValue("general.business.description", event.target.value, {
                         shouldDirty: true,
                         shouldValidate: true,
                       })
@@ -642,7 +495,7 @@ export default function GeneralSettings() {
                         : "pointer-events-none opacity-70"
                     }
                   >
-                    <AddressField<WorkspaceProfileSettings> namePrefix="business.addressStructured" />
+                    <AddressField<WorkspaceSettingsFormValues> namePrefix="general.business.addressStructured" />
                   </div>
                 </SettingsField>
               </div>
@@ -659,14 +512,14 @@ export default function GeneralSettings() {
             <div className="grid gap-4 sm:grid-cols-2">
               <Controller
                 control={control}
-                name="settings.general.timezone"
+                name="general.settings.general.timezone"
                 render={({ field }) => (
                   <SettingsField label="Timezone">
                     <Select
                       value={field.value}
                       onValueChange={(value) => {
                         field.onChange(value);
-                        setValue("settings.general.timezone", value, {
+                        setValue("general.settings.general.timezone", value, {
                           shouldDirty: true,
                           shouldValidate: true,
                         });
@@ -689,7 +542,7 @@ export default function GeneralSettings() {
 
               <Controller
                 control={control}
-                name="settings.general.dateFormat"
+                name="general.settings.general.dateFormat"
                 render={({ field }) => (
                   <SettingsField label="Date Format">
                     <Select value={field.value} onValueChange={field.onChange}>
@@ -708,7 +561,7 @@ export default function GeneralSettings() {
 
               <Controller
                 control={control}
-                name="settings.general.timeFormat"
+                name="general.settings.general.timeFormat"
                 render={({ field }) => (
                   <SettingsField label="Time Format">
                     <Select value={field.value} onValueChange={field.onChange}>
@@ -726,7 +579,7 @@ export default function GeneralSettings() {
 
               <Controller
                 control={control}
-                name="settings.general.language"
+                name="general.settings.general.language"
                 render={({ field }) => (
                   <SettingsField label="Language">
                     <Select value={field.value} onValueChange={field.onChange}>
@@ -788,7 +641,7 @@ export default function GeneralSettings() {
                       size="sm"
                       onClick={() => {
                         setValue(
-                          `settings.general.integrations.${integration.key}.connected`,
+                          `general.settings.general.integrations.${integration.key}.connected`,
                           !connected,
                           { shouldDirty: true, shouldValidate: true },
                         );
@@ -801,8 +654,7 @@ export default function GeneralSettings() {
               })}
             </div>
           </div>
-        </form>
-      </Form>
+      </div>
 
       <ActionConfirmDialog
         open={upgradeDialogOpen}

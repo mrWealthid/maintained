@@ -37,7 +37,7 @@ export function useLogin() {
     mutationFn: (payload: LoginPayload) => handleLogin(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
-      router.refresh();
+      queryClient.invalidateQueries({ queryKey: ["sidebar-profile"] });
     },
     onError: (err: ApiError) => toast.error(err.message),
   });

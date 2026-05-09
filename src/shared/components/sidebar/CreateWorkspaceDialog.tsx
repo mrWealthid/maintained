@@ -56,6 +56,7 @@ export default function CreateWorkspaceDialog({
   onOpenChange,
 }: CreateWorkspaceDialogProps) {
   const createWorkspaceMutation = useCreateWorkspace();
+  const { reset: resetCreateWorkspaceMutation } = createWorkspaceMutation;
   const form = useForm<CreateWorkspaceValues>({
     resolver: zodResolver(CreateWorkspaceSchema),
     mode: "onChange",
@@ -88,12 +89,13 @@ export default function CreateWorkspaceDialog({
   useEffect(() => {
     if (!open) return;
 
+    resetCreateWorkspaceMutation();
     form.setValue("timezone", detectBrowserTimeZone(), {
       shouldDirty: false,
       shouldTouch: false,
       shouldValidate: true,
     });
-  }, [form, open]);
+  }, [form, open, resetCreateWorkspaceMutation]);
 
   useEffect(() => {
     if (open) return;
@@ -135,7 +137,17 @@ export default function CreateWorkspaceDialog({
         businessEmail: values.businessEmail || "",
         businessContact: businessE164,
       });
-    } catch {
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create workspace. Try again.";
+      if (message.toLowerCase().includes("workspace email")) {
+        form.setError("businessEmail", {
+          type: "server",
+          message,
+        });
+      }
       // ErrorList and the mutation toast render the failure; keep the sheet open.
     }
   };
@@ -144,7 +156,7 @@ export default function CreateWorkspaceDialog({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <AppSheetContent
         side="right"
-        className="w-screen max-w-screen sm:max-w-2xl"
+        className="w-screen max-w-screen md:max-w-[50vw]"
       >
         <AppSheetHeader
           title="Create New Workspace"
@@ -340,12 +352,13 @@ export default function CreateWorkspaceDialog({
           </Form>
         </AppSheetBody>
 
-        <AppSheetFooter>
+        <AppSheetFooter className="flex-row items-center justify-end gap-2 sm:gap-3">
           <Button
             type="button"
             variant="outline"
             disabled={createWorkspaceMutation.isPending}
             onClick={() => onOpenChange(false)}
+            className="min-w-0 shrink px-4"
           >
             Cancel
           </Button>
@@ -353,6 +366,7 @@ export default function CreateWorkspaceDialog({
             type="submit"
             form="create-workspace-form"
             disabled={createWorkspaceMutation.isPending}
+            className="min-w-0 shrink px-4"
           >
             {createWorkspaceMutation.isPending ? (
               <Loader2 className="size-4 animate-spin" />

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bell } from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -13,73 +13,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { NotificationPreferences } from "../models/settings.model";
-import {
-  useNotificationPreferences,
-  useUpdateNotificationPreferences,
-} from "../hooks/settingsHooks";
+import type { WorkspaceSettingsFormValues } from "../models/settings-form.model";
 import { SettingsField } from "./SettingsField";
-import { useSettingsSaveRegistration } from "./SettingsSaveContext";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsToggleRow } from "./SettingsToggleRow";
 
-const defaultPreferences: NotificationPreferences = {
-  ticketCreatedAlerts: true,
-  ticketStatusAlerts: true,
-  ticketAssignmentAlerts: true,
-  technicianRequestAlerts: true,
-  tenantMessageAlerts: true,
-  commentAlerts: true,
-  emailFrequency: "immediate",
-  smsPreference: "urgent",
-  pushPreference: "important",
-};
-
 const NotificationSettings: React.FC = () => {
-  const { data: preferences, isLoading } = useNotificationPreferences();
-  const updatePreferences = useUpdateNotificationPreferences();
-  const [localPreferences, setLocalPreferences] =
-    useState<NotificationPreferences>(defaultPreferences);
-  const [savedPreferences, setSavedPreferences] =
-    useState<NotificationPreferences>(defaultPreferences);
-
-  useEffect(() => {
-    if (preferences) {
-      const nextPreferences = { ...defaultPreferences, ...preferences };
-      setLocalPreferences(nextPreferences);
-      setSavedPreferences(nextPreferences);
-    }
-  }, [preferences]);
-
-  const hasChanges =
-    JSON.stringify(localPreferences) !== JSON.stringify(savedPreferences);
+  const { watch, setValue, control } =
+    useFormContext<WorkspaceSettingsFormValues>();
+  const preferences = watch("notifications");
 
   const patchPreference = <K extends keyof NotificationPreferences>(
     key: K,
     value: NotificationPreferences[K]
   ) => {
-    setLocalPreferences((current) => ({ ...current, [key]: value }));
+    setValue(`notifications.${key}`, value as never, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
-
-  const handleSave = useCallback(async () => {
-    const saved = await updatePreferences.mutateAsync(localPreferences);
-    const nextPreferences = { ...defaultPreferences, ...saved.data };
-    setLocalPreferences(nextPreferences);
-    setSavedPreferences(nextPreferences);
-  }, [localPreferences, updatePreferences.mutateAsync]);
-
-  const notificationSaveSection = useMemo(
-    () => ({
-      id: "notifications",
-      label: "Notification preferences",
-      save: handleSave,
-      isDirty: hasChanges,
-      isSaving: updatePreferences.isPending,
-      isLoading,
-    }),
-    [handleSave, hasChanges, isLoading, updatePreferences.isPending],
-  );
-
-  useSettingsSaveRegistration(notificationSaveSection);
 
   return (
     <SettingsSection
@@ -96,7 +48,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="New Ticket Alerts"
             description="Get notified when tenants submit new maintenance requests"
-            checked={localPreferences.ticketCreatedAlerts}
+            checked={preferences.ticketCreatedAlerts}
             onCheckedChange={(value) =>
               patchPreference("ticketCreatedAlerts", value)
             }
@@ -105,7 +57,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="Status Change Alerts"
             description="Receive alerts when a ticket moves through the workflow"
-            checked={localPreferences.ticketStatusAlerts}
+            checked={preferences.ticketStatusAlerts}
             onCheckedChange={(value) =>
               patchPreference("ticketStatusAlerts", value)
             }
@@ -114,7 +66,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="Assignment Alerts"
             description="Notify team members when work is assigned or reassigned"
-            checked={localPreferences.ticketAssignmentAlerts}
+            checked={preferences.ticketAssignmentAlerts}
             onCheckedChange={(value) =>
               patchPreference("ticketAssignmentAlerts", value)
             }
@@ -123,7 +75,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="Technician Request Alerts"
             description="Notify technicians when they are requested for a ticket"
-            checked={localPreferences.technicianRequestAlerts}
+            checked={preferences.technicianRequestAlerts}
             onCheckedChange={(value) =>
               patchPreference("technicianRequestAlerts", value)
             }
@@ -142,7 +94,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="Tenant Message Alerts"
             description="Get notified when tenants send updates or replies"
-            checked={localPreferences.tenantMessageAlerts}
+            checked={preferences.tenantMessageAlerts}
             onCheckedChange={(value) =>
               patchPreference("tenantMessageAlerts", value)
             }
@@ -151,7 +103,7 @@ const NotificationSettings: React.FC = () => {
           <SettingsToggleRow
             label="Internal Comment Alerts"
             description="Notify relevant team members when ticket comments are added"
-            checked={localPreferences.commentAlerts}
+            checked={preferences.commentAlerts}
             onCheckedChange={(value) => patchPreference("commentAlerts", value)}
           />
         </div>
@@ -165,70 +117,64 @@ const NotificationSettings: React.FC = () => {
         </h4>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <SettingsField label="Email Notifications">
-            <Select
-              value={localPreferences.emailFrequency}
-              onValueChange={(value) =>
-                patchPreference(
-                  "emailFrequency",
-                  value as NotificationPreferences["emailFrequency"]
-                )
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select frequency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="immediate">Immediate</SelectItem>
-                <SelectItem value="hourly">Hourly Digest</SelectItem>
-                <SelectItem value="daily">Daily Digest</SelectItem>
-                <SelectItem value="weekly">Weekly Digest</SelectItem>
-                <SelectItem value="off">Off</SelectItem>
-              </SelectContent>
-            </Select>
-          </SettingsField>
+          <Controller
+            control={control}
+            name="notifications.emailFrequency"
+            render={({ field }) => (
+              <SettingsField label="Email Notifications">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immediate">Immediate</SelectItem>
+                    <SelectItem value="hourly">Hourly Digest</SelectItem>
+                    <SelectItem value="daily">Daily Digest</SelectItem>
+                    <SelectItem value="weekly">Weekly Digest</SelectItem>
+                    <SelectItem value="off">Off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SettingsField>
+            )}
+          />
 
-          <SettingsField label="SMS Notifications">
-            <Select
-              value={localPreferences.smsPreference}
-              onValueChange={(value) =>
-                patchPreference(
-                  "smsPreference",
-                  value as NotificationPreferences["smsPreference"]
-                )
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select SMS preference" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Notifications</SelectItem>
-                <SelectItem value="urgent">Urgent Only</SelectItem>
-                <SelectItem value="off">Off</SelectItem>
-              </SelectContent>
-            </Select>
-          </SettingsField>
+          <Controller
+            control={control}
+            name="notifications.smsPreference"
+            render={({ field }) => (
+              <SettingsField label="SMS Notifications">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select SMS preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Notifications</SelectItem>
+                    <SelectItem value="urgent">Urgent Only</SelectItem>
+                    <SelectItem value="off">Off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SettingsField>
+            )}
+          />
 
-          <SettingsField label="Push Notifications">
-            <Select
-              value={localPreferences.pushPreference}
-              onValueChange={(value) =>
-                patchPreference(
-                  "pushPreference",
-                  value as NotificationPreferences["pushPreference"]
-                )
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select push preference" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Notifications</SelectItem>
-                <SelectItem value="important">Important Only</SelectItem>
-                <SelectItem value="off">Off</SelectItem>
-              </SelectContent>
-            </Select>
-          </SettingsField>
+          <Controller
+            control={control}
+            name="notifications.pushPreference"
+            render={({ field }) => (
+              <SettingsField label="Push Notifications">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select push preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Notifications</SelectItem>
+                    <SelectItem value="important">Important Only</SelectItem>
+                    <SelectItem value="off">Off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SettingsField>
+            )}
+          />
         </div>
 
         <p className="text-sm text-muted-foreground">

@@ -207,19 +207,11 @@ export async function POST(request: NextRequest) {
     const user = await User.findById(verify.id).select("name email contact countryCode");
     if (!user) throw ApiError.notFound("User not found");
 
-    const workspaceEmail = payload.businessEmail || user.email;
-    const businessExists = await Business.findOne({ email: workspaceEmail });
-    if (businessExists) {
-      throw ApiError.badRequest(
-        "Workspace email already in use. Choose a different one.",
-      );
-    }
-
     const workspaceType = payload.workspaceType;
     const business = await Business.create({
       name: payload.businessName,
       workspaceType,
-      email: workspaceEmail,
+      email: payload.businessEmail || user.email,
       contact: payload.businessContact || user.contact || "",
       countryCode: payload.businessCountryCode || user.countryCode || "US",
       timezone: normalizeTimeZone(payload.timezone),

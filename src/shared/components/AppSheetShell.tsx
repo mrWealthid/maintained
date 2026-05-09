@@ -47,7 +47,7 @@ export function AppSheetContent({
   return (
     <SheetContent
       className={cn(
-        "flex h-[100dvh] min-h-0 w-full max-w-[100vw] flex-col gap-0 overflow-hidden p-0",
+        "flex h-full min-h-0 w-full max-w-[100vw] flex-col gap-0 overflow-hidden p-0",
         className,
       )}
       {...props}
@@ -146,7 +146,7 @@ export function AppSheetFooter({
   return (
     <SheetFooter
       className={cn(
-        "shrink-0 border-t border-border bg-card/60 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]",
+        "mt-0 shrink-0 border-t border-border bg-card/60 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]",
         className,
       )}
       {...props}

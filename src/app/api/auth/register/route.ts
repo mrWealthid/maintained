@@ -62,14 +62,6 @@ export async function POST(request: NextRequest) {
     const exists = await User.findOne({ email: payload.email });
     if (exists) throw ApiError.badRequest("Email already in use");
 
-    const workspaceEmail = payload.businessEmail || payload.email;
-    const businessExists = await Business.findOne({ email: workspaceEmail });
-    if (businessExists) {
-      throw ApiError.badRequest(
-        "Workspace email already in use. Choose a different one.",
-      );
-    }
-
     const newUser = await User.create({
       name: payload.name,
       email: payload.email,
@@ -84,7 +76,7 @@ export async function POST(request: NextRequest) {
     const business = await Business.create({
       name: payload.businessName,
       workspaceType,
-      email: workspaceEmail,
+      email: payload.businessEmail || payload.email,
       contact: payload.businessContact || payload.contact,
       countryCode: payload.businessCountryCode || payload.countryCode,
       addressStructured: payload.addressStructured,
