@@ -10,7 +10,10 @@ export default async function WorkspacesPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <AppPageHeader name="Workspaces" />
+      <AppPageHeader
+        title="Workspaces"
+        description="Browse, audit, and manage every business workspace on the platform."
+      />
       <WorkspaceList />
     </div>
   );

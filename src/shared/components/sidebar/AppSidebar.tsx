@@ -68,11 +68,28 @@ function AppSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {routes.map((link) => {
-                const isActive = pathname === link.path;
+              {(() => {
+                // Pick the sidebar entry whose path is the longest prefix of
+                // the current URL — that way `/dashboard/ticket-management/abc`
+                // activates the "Tickets" entry, and any deeper sub-route
+                // (e.g. `/dashboard/volunteers/timecards`) still picks the
+                // most specific entry rather than lighting up its parent too.
+                const matches = routes.filter((link) => {
+                  if (pathname === link.path) return true;
+                  return pathname.startsWith(`${link.path}/`);
+                });
+                const longestMatch = matches.reduce<string | null>(
+                  (best, link) =>
+                    best === null || link.path.length > best.length
+                      ? link.path
+                      : best,
+                  null,
+                );
+                return routes.map((link) => {
+                  const isActive = link.path === longestMatch;
 
-                return (
-                  <SidebarMenuItem key={link.name}>
+                  return (
+                    <SidebarMenuItem key={link.name}>
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => {
@@ -94,7 +111,8 @@ function AppSidebar({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
-              })}
+                });
+              })()}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

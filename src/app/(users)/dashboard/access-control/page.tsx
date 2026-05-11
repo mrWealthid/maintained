@@ -17,14 +17,14 @@ export default async function AccessControlPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-1">
-        <AppPageHeader name="Access Control" />
-        <p className="text-sm text-muted-foreground">
-          {isSuperAdmin
+      <AppPageHeader
+        title="Access Control"
+        description={
+          isSuperAdmin
             ? "Review app-wide platform roles and their default permission configuration."
-            : "Create and maintain workspace roles, then assign precise permission sets for your teams."}
-        </p>
-      </div>
+            : "Create and maintain workspace roles, then assign precise permission sets for your teams."
+        }
+      />
       {isSuperAdmin ? <PlatformRolesManager /> : <TeamRolesManager />}
     </div>
   );

@@ -428,33 +428,32 @@ const SettingsPageContent: React.FC = () => {
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0">
-          <AppPageHeader name="Settings" />
-          <p className="mt-2 text-sm text-muted-foreground">
-            Manage workspace preferences, notifications, email, and security.
-          </p>
-          {whitelistError ? (
-            <p className="mt-2 text-sm text-destructive">{whitelistError}</p>
-          ) : null}
-        </div>
-        <Button
-          type="submit"
-          disabled={!isDirty || isLoading || isSaving}
-          className="w-full sm:w-auto"
-        >
-          {isSaving ? (
-            <Loader2 className="mr-2 size-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 size-4" />
-          )}
-          {isSaving
-            ? "Saving..."
-            : dirtyCount > 1
-              ? `Save ${dirtyCount} sections`
-              : "Save Changes"}
-        </Button>
-      </div>
+      <AppPageHeader
+        title="Settings"
+        description="Manage workspace preferences, notifications, email, and security."
+        className="mb-8"
+        actions={
+          <Button
+            type="submit"
+            disabled={!isDirty || isLoading || isSaving}
+            className="w-full sm:w-auto"
+          >
+            {isSaving ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 size-4" />
+            )}
+            {isSaving
+              ? "Saving..."
+              : dirtyCount > 1
+                ? `Save ${dirtyCount} sections`
+                : "Save Changes"}
+          </Button>
+        }
+      />
+      {whitelistError ? (
+        <p className="-mt-4 mb-4 text-sm text-destructive">{whitelistError}</p>
+      ) : null}
 
       {visibleTabs.length ? (
         <Tabs defaultValue={defaultTab} className="space-y-6">
