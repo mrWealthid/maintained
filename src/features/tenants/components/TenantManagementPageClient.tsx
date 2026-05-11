@@ -36,24 +36,22 @@ export default function TenantManagementPageClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <AppPageHeader name="Tenant Management" />
-          <p className="text-sm text-muted-foreground">
-            Manage residents, invites, and unit assignment without mixing them into staff records.
-          </p>
-        </div>
-        <InviteTenantSheet
-          open={inviteOpen}
-          onOpenChange={setInviteOpen}
-          trigger={
-            <Button>
-              <MailPlus className="mr-2 size-4" />
-              Invite Tenant
-            </Button>
-          }
-        />
-      </div>
+      <AppPageHeader
+        title="Tenant Management"
+        description="Manage residents, invites, and unit assignment without mixing them into staff records."
+        actions={
+          <InviteTenantSheet
+            open={inviteOpen}
+            onOpenChange={setInviteOpen}
+            trigger={
+              <Button>
+                <MailPlus className="mr-2 size-4" />
+                Invite Tenant
+              </Button>
+            }
+          />
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Card className="overflow-hidden">

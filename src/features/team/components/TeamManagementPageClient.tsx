@@ -22,24 +22,21 @@ export default function TeamManagementPageClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <AppPageHeader name="Team Management" />
-          <p className="text-sm text-muted-foreground">
-            Invite workspace members, assign roles, and manage team lifecycle.
-          </p>
-        </div>
-
-        <InviteTeamMemberDialog
-          defaultRole={meta?.defaultRoleForNewMembers ?? WORKSPACE_ROLE.member}
-          trigger={
-            <Button>
-              <MailPlus className="mr-2 size-4" />
-              Invite Team Member
-            </Button>
-          }
-        />
-      </div>
+      <AppPageHeader
+        title="Team Management"
+        description="Invite workspace members, assign roles, and manage team lifecycle."
+        actions={
+          <InviteTeamMemberDialog
+            defaultRole={meta?.defaultRoleForNewMembers ?? WORKSPACE_ROLE.member}
+            trigger={
+              <Button>
+                <MailPlus className="mr-2 size-4" />
+                Invite Team Member
+              </Button>
+            }
+          />
+        }
+      />
 
       <Card>
         <CardHeader>

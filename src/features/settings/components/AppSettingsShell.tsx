@@ -51,24 +51,22 @@ export function AppSettingsShell({
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <AppPageHeader name="Platform Settings" />
-            <p className="text-sm text-muted-foreground">
-              Toggles below apply to every workspace on the platform.
-            </p>
-          </div>
-          <Button type="submit" disabled={isPending || isLoading || !isDirty}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Saving…
-              </>
-            ) : (
-              "Save changes"
-            )}
-          </Button>
-        </div>
+        <AppPageHeader
+          title="Platform Settings"
+          description="Toggles below apply to every workspace on the platform."
+          actions={
+            <Button type="submit" disabled={isPending || isLoading || !isDirty}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save changes"
+              )}
+            </Button>
+          }
+        />
 
         <AppSettingsTabs defaultTab={defaultTab} />
       </form>
