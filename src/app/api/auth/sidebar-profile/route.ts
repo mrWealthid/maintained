@@ -9,6 +9,7 @@ import User from "@/models/userModel";
 import { isSuperAdminRole } from "@/lib/auth/roles";
 import {
   DEFAULT_WORKSPACE_TYPE,
+  WORKSPACE_TYPE,
   getWorkspaceTypeLabel,
   resolveWorkspaceType,
   type WorkspaceType,
@@ -183,7 +184,10 @@ export async function GET(request: NextRequest) {
               short: true,
             }),
         currentWorkspaceId,
-        canUpgradeCurrentWorkspace: false,
+        canUpgradeCurrentWorkspace:
+          !isSuperAdminRole(verify.role) &&
+          currentMembership?.role === WORKSPACE_ROLE.owner &&
+          workspaceType === WORKSPACE_TYPE.INDIVIDUAL,
         workspaces,
         imageUrl: isSuperAdminRole(verify.role)
           ? ""
