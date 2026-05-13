@@ -13,7 +13,7 @@ import {
   ChatRoomMessage,
   ChatUser,
 } from "../model/chat.model";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   ApiError,
   ApiPaginatedResponse,

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Lora, Roboto_Mono } from "next/font/google";
 import "./global.css";
 import Provider from "@/utils/Provider";
-import { Toaster } from "react-hot-toast";
 import { Toaster as Toasts } from "@/components/ui/sonner";
 import { ThemeProvider } from "../shared/contexts/ThemeProvider";
 
@@ -48,39 +47,10 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster
-            position="bottom-center"
-            gutter={12}
-            containerStyle={{ margin: "8px" }}
-            toastOptions={{
-              success: { duration: 3000 },
-              error: { duration: 4000 },
-              style: {
-                fontSize: "14px",
-                maxWidth: "500px",
-                padding: "16px 24px",
-              },
-            }}
-          />
-
-          <Toasts />
+          <Toasts position="bottom-center" />
 
           <Provider>{children}</Provider>
         </ThemeProvider>
-        {/* <Toaster
-          position="bottom-center"
-          gutter={12}
-          containerStyle={{ margin: "8px" }}
-          toastOptions={{
-            success: { duration: 3000 },
-            error: { duration: 4000 },
-            style: {
-              fontSize: "14px",
-              maxWidth: "500px",
-              padding: "16px 24px",
-            },
-          }}
-        /> */}
       </body>
     </html>
   );

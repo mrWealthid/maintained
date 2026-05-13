@@ -10,7 +10,7 @@
         "mcp-remote",
         "https://mcp.v0.dev",
         "--header",
-        "Authorization: Bearer v1:aXGYGyv0B9bSk3rEMTDQgURv:vcp_30u2bVIL7CS78IKeF2LfB74efjBurwD3OffbAT2nX3nE4PUcwz4E2o4t"
+        "Authorization: Bearer v1:L3tKKGjmaKwE4asC2iftRQfA:vcp_8EVjyz0ZJWVSwR6UN9cREWN3eHdGu9FC5fsHb5rxbbpSiYCyQ50NdvL2"
       ]
     },
     "filesystem": {

@@ -13,7 +13,7 @@ import {
   handleCreateMultipleProperties,
   handleCreateUnits,
 } from "../service/onboarding-service";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function useCreateProperty(isEditing: boolean, close?: () => void) {
   const queryClient = useQueryClient();

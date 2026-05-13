@@ -3,7 +3,7 @@
 import { useMemo, useState, type FC } from "react";
 import { useRouter } from "next/navigation";
 import { useFormContext } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import type { ManageTicketFormProps } from "../models/ticket.model";
 import type { TicketCreateFormValues } from "../models/ticket-form.model";

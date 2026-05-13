@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import Image from "next/image";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   FileText,
