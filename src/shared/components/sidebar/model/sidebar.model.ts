@@ -2,6 +2,7 @@ import { ROLES } from "@/shared/enums/enums";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
 import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
 import type { PermissionKey } from "@/shared/auth/permission-registry";
+import type { TeamPermissionCatalogSection } from "@/features/access-control/models/access-control.model";
 
 export interface SidebarProps {
   role: ROLES;
@@ -17,6 +18,8 @@ export interface SidebarProfileData {
   role: ROLES;
   workspaceRole?: WORKSPACE_ROLE | null;
   permissions: PermissionKey[];
+  effectivePermissions?: PermissionKey[];
+  permissionCatalog?: TeamPermissionCatalogSection[];
   isWorkspaceOwner?: boolean;
   currentBusiness: {
     id: string;

@@ -1,5 +1,6 @@
 import APIFeatures from "@/utils/apiFeatures";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import Ticket from "@/models/ticketModel";
 import Category from "@/models/ticketCategoryModel";
 import Unit from "@/models/unitModel";
@@ -185,14 +186,35 @@ export async function GET(request: NextRequest) {
   }
 }
 
-const ticketCreateBodySchema = ticketFormSchema.partial({
-  // The route resolves property/unit from the verified user when omitted,
-  // so they are optional in the wire schema even though the form requires them.
-  property: true,
-  unit: true,
+const emptyStringToUndefined = (value: unknown) =>
+  value === "" ? undefined : value;
+
+const ticketCreateBaseBodySchema = ticketFormSchema.partial({
   images: true,
   videos: true,
   documents: true,
+});
+
+const tenantTicketCreateBodySchema = ticketCreateBaseBodySchema
+  .partial({
+    // Tenant tickets resolve property/unit from the verified session.
+    property: true,
+    unit: true,
+  })
+  .extend({
+    property: z.preprocess(
+      emptyStringToUndefined,
+      ticketFormSchema.shape.property.optional()
+    ),
+    unit: z.preprocess(
+      emptyStringToUndefined,
+      ticketFormSchema.shape.unit.optional()
+    ),
+  });
+
+const adminTicketCreateBodySchema = ticketCreateBaseBodySchema.extend({
+  property: ticketFormSchema.shape.property,
+  unit: ticketFormSchema.shape.unit,
 });
 
 export async function POST(request: NextRequest) {
@@ -204,7 +226,13 @@ export async function POST(request: NextRequest) {
     const user = await User.findById(verify.id);
     if (!user) throw ApiError.notFound("User not found");
 
-    const body = parseOrThrow(ticketCreateBodySchema, await request.json());
+    const rawBody = await request.json();
+    const body = parseOrThrow(
+      verify.isUserRole
+        ? tenantTicketCreateBodySchema
+        : adminTicketCreateBodySchema,
+      rawBody
+    );
     const businessId = user.currentBusiness;
 
     if (body.relatedTo) {
@@ -226,7 +254,11 @@ export async function POST(request: NextRequest) {
     const unitId = verify.isUserRole ? verify.unit : body.unit;
 
     if (!propertyId || !unitId) {
-      throw ApiError.badRequest("Property and unit are required");
+      throw ApiError.badRequest(
+        verify.isUserRole
+          ? "Tenant session is missing property and unit access"
+          : "Property and unit are required"
+      );
     }
 
     const unit = await Unit.findOne({
@@ -240,7 +272,10 @@ export async function POST(request: NextRequest) {
       throw ApiError.badRequest("Selected unit was not found in this workspace");
     }
 
-    const requesterId = verify.isUserRole ? verify.id : unit.tenantUser;
+    const requesterId = verify.isUserRole
+      ? verify.id
+      : unit.tenantUser;
+
     if (!requesterId || (!verify.isUserRole && !unit.tenantActive)) {
       throw ApiError.badRequest("Selected unit has no active tenant");
     }

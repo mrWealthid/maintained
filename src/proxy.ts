@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { ROLES } from "./shared/enums/enums";
 import {
   AUTH_COOKIE_NAME,
+  LEGACY_AUTH_COOKIE_NAMES,
   getClearedAuthCookieOptions,
 } from "@/lib/auth/cookie";
 import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
@@ -114,7 +115,9 @@ export function proxy(request: NextRequest) {
   // don't keep seeing a dead token.
   if (isAuthBase && !valid && token) {
     const res = NextResponse.next();
-    res.cookies.set(AUTH_COOKIE_NAME, "", getClearedAuthCookieOptions());
+    for (const cookieName of [AUTH_COOKIE_NAME, ...LEGACY_AUTH_COOKIE_NAMES]) {
+      res.cookies.set(cookieName, "", getClearedAuthCookieOptions());
+    }
     return res;
   }
 

@@ -2,6 +2,9 @@ import { z } from "zod";
 
 import { TICKET_PRIORITY_VALUES, type TicketPriority } from "./ticket-priority.model";
 
+const emptyStringToUndefined = (value: unknown) =>
+  value === "" ? undefined : value;
+
 /**
  * Zod schema for the ticket create / edit form. Use with `react-hook-form`
  * via `zodResolver`. Mirrors the API expectations in
@@ -34,15 +37,32 @@ export type TicketFormValues = z.infer<typeof ticketFormSchema>;
  * Attachment URLs are produced at submit time and live on the payload, not the
  * form.
  */
-export const ticketCreateFormSchema = ticketFormSchema
+const ticketCreateBaseFormSchema = ticketFormSchema.omit({
+  images: true,
+  videos: true,
+  documents: true,
+});
+
+export const ticketCreateFormSchema = ticketCreateBaseFormSchema
+  .extend({
+    property: z.preprocess(
+      emptyStringToUndefined,
+      z.string().min(1, "Property is required").optional(),
+    ),
+    unit: z.preprocess(
+      emptyStringToUndefined,
+      z.string().min(1, "Unit is required").optional(),
+    ),
+  });
+
+export const ticketAdminCreateFormSchema = ticketCreateBaseFormSchema
   .omit({
-    images: true,
-    videos: true,
-    documents: true,
+    relatedTo: true,
   })
-  .partial({
-    property: true,
-    unit: true,
+  .extend({
+    property: z.string().min(1, "Property is required"),
+    unit: z.string().min(1, "Unit is required"),
+    relatedTo: z.string().optional().nullable(),
   });
 
 type ResolvedFormValues = z.infer<typeof ticketCreateFormSchema>;

@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
+import {
+  getVerifiedUserState,
+  VERIFIED_USER_STATE_STATUS,
+} from "@/lib/auth/getVerifiedUser";
 import { isPlatformSuperAdminRole } from "@/shared/auth/roles";
 import Business from "@/models/businessModel";
 import Property from "@/models/propertyModel";
@@ -13,8 +16,17 @@ import OnboardingWizard, {
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-  const verify = await getVerifiedUser();
-  if (!verify) redirect("/auth/login");
+  const verifyState = await getVerifiedUserState();
+
+  if (verifyState.status === VERIFIED_USER_STATE_STATUS.INACTIVE_BUSINESS) {
+    redirect("/auth/inactive-business");
+  }
+
+  if (verifyState.status !== VERIFIED_USER_STATE_STATUS.AUTHORIZED) {
+    redirect(`/auth/session-expired?next=${encodeURIComponent("/onboarding")}`);
+  }
+
+  const verify = verifyState.user;
 
   // Onboarding is a tenant-workspace concept; platform admins skip it.
   if (isPlatformSuperAdminRole(verify.platformRole)) redirect("/dashboard");

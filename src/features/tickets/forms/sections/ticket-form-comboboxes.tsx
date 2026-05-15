@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   ChevronsUpDown,
   Loader2,
   Plus,
-  Wrench,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,29 +25,29 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { FORM_CONTROL_TRANSPARENT_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import type { Category, TicketType } from "@/shared/model/model";
 import {
   useCreateCategory,
   useCreateTicketType,
 } from "@/features/settings/hooks/settingsHooks";
-import type { TicketCreateFormValues } from "../../models/ticket-form.model";
 import { fetchTicketCategory } from "../../services/ticket-service";
 
 export function CategoryCombobox({
+  value,
   initialCategory,
   onChange,
   disabled,
 }: {
+  value?: string;
   initialCategory?: Category;
   onChange: (category: Category) => void;
   disabled?: boolean;
 }) {
-  const { watch } = useFormContext<TicketCreateFormValues>();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Category | undefined>(initialCategory);
-  const value = watch("category");
   const { data, isLoading } = useQuery({
     queryKey: ["category", search],
     queryFn: () => fetchTicketCategory<Category>(search || null),
@@ -95,9 +93,9 @@ export function CategoryCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled || isCreating}
-          className="h-10 w-full justify-between rounded-xl font-normal"
+          className={`${FORM_CONTROL_TRANSPARENT_CLASS} justify-between px-3 py-1 font-normal`}
         >
-          <span className={cn(!display && "text-muted-foreground")}>
+          <span className={cn("truncate", !display && "text-muted-foreground")}>
             {display || "Select a category..."}
           </span>
           {isCreating ? (
@@ -238,16 +236,15 @@ export function TicketTypeCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled || isCreating}
-          className="h-10 w-full justify-between rounded-xl font-normal"
+          className={`${FORM_CONTROL_TRANSPARENT_CLASS} justify-between px-3 py-1 font-normal`}
         >
           <span
             className={cn(
-              "flex min-w-0 items-center gap-2 truncate",
+              "min-w-0 truncate",
               !display && "text-muted-foreground",
             )}
           >
-            <Wrench className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="truncate">{display || "Select a ticket type"}</span>
+            {display || "Select a ticket type"}
           </span>
           {isCreating ? (
             <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-70" />

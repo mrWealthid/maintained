@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   CheckCircle2,
   ChevronRight,
@@ -23,6 +24,7 @@ import {
   formatDashboardDate,
   formatDashboardLocation,
 } from "../helper/dashboard-view.helper";
+import CreateTicketSheet from "@/features/tickets/components/CreateTicketSheet";
 import type { DashboardAnalytics } from "../models/dashboard.model";
 import {
   DashboardEmptyState,
@@ -165,21 +167,30 @@ function RepairHistory({ data }: { data: DashboardAnalytics }) {
 }
 
 function ReportRepairCard() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Card className="rounded-lg border-primary bg-primary text-primary-foreground">
-      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-semibold">Report a repair</h2>
-          <p className="mt-1 text-xs leading-5 opacity-75">
-            Submit a maintenance request for your assigned unit.
-          </p>
-        </div>
-        <button className="inline-flex w-fit items-center gap-2 rounded-md bg-primary-foreground px-3 py-2 text-xs font-semibold text-primary transition-opacity hover:opacity-90">
-          <PlusCircle className="size-3.5" />
-          New ticket
-        </button>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="rounded-lg border-primary bg-primary text-primary-foreground">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold">Report a repair</h2>
+            <p className="mt-1 text-xs leading-5 opacity-75">
+              Submit a maintenance request for your assigned unit.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="inline-flex w-fit items-center gap-2 rounded-md bg-primary-foreground px-3 py-2 text-xs font-semibold text-primary transition-opacity hover:opacity-90"
+          >
+            <PlusCircle className="size-3.5" />
+            New ticket
+          </button>
+        </CardContent>
+      </Card>
+      <CreateTicketSheet open={open} onOpenChange={setOpen} />
+    </>
   );
 }
 
