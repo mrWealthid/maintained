@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import {
   ClipboardList,
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Category, TicketType } from "@/shared/model/model";
 import { useFetchTicketType } from "../hooks/ticketHooks";
 import { type TicketCreateFormValues } from "../models/ticket-form.model";
+import { fetchTicketCategory } from "../services/ticket-service";
 
 interface TicketSummaryProps {
   initialAttachmentCounts?: {
@@ -32,14 +34,21 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
   const { watch } = useFormContext<TicketCreateFormValues>();
   const watched = watch();
   const { data: ticketTypes } = useFetchTicketType<TicketType>();
+  const { data: categoriesResponse } = useQuery({
+    queryKey: ["category", "ticket-summary"],
+    queryFn: () => fetchTicketCategory<Category>(),
+  });
 
   const selectedTypeName = ticketTypes?.find(
     (t) => t.id === watched.type
   )?.name;
+  const selectedCategoryName = categoriesResponse?.data?.find(
+    (category) => category.id === watched.category
+  )?.name;
   const categoryName =
     typeof watched.category === "object"
       ? (watched.category as Category)?.name
-      : undefined;
+      : selectedCategoryName;
 
   const completedFields = [
     !!watched.title,

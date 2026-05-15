@@ -24,9 +24,10 @@ import {
 } from "@/shared/model/workspace.model";
 import { useSwitchWorkspace, useUpgradeWorkspace } from "@/shared/hooks/useWorkspaceActions";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
-import { Building2, Check, Loader2, Plus, TrendingUp } from "lucide-react";
+import { Building2, Check, Eye, Loader2, Plus, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CreateWorkspaceDialog from "./CreateWorkspaceDialog";
+import UserPermissionsSheet from "@/features/access-control/components/UserPermissionsSheet";
 import {
   formatWorkspaceRoleLabel,
   type WORKSPACE_ROLE,
@@ -65,6 +66,7 @@ export default function SidebarProfileShell({
   const { data, isLoading } = useSidebarProfile();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [permissionsSheetOpen, setPermissionsSheetOpen] = useState(false);
   const [switchingWorkspaceId, setSwitchingWorkspaceId] = useState<string | null>(
     null,
   );
@@ -78,6 +80,8 @@ export default function SidebarProfileShell({
     role: fallbackRole,
     workspaceRole: fallbackWorkspaceRole,
     permissions: [],
+    effectivePermissions: [],
+    permissionCatalog: [],
     isWorkspaceOwner: false,
     currentBusiness: {
       id: "",
@@ -105,6 +109,12 @@ export default function SidebarProfileShell({
   const canSwitchWorkspaces = availableWorkspaces.length > 1;
   const canCreateWorkspace =
     !isSuperAdminRole(profile.role) && profile.isWorkspaceOwner === true;
+  let roleLabel = "No role assigned";
+  if (isSuperAdminRole(profile.role)) {
+    roleLabel = "Platform administrator";
+  } else if (profile.workspaceRole) {
+    roleLabel = formatWorkspaceRoleLabel(profile.workspaceRole);
+  }
 
   const handleSwitchWorkspace = async (businessId: string) => {
     if (
@@ -129,7 +139,7 @@ export default function SidebarProfileShell({
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             size="lg"
-            className="h-auto min-h-14 rounded-xl border border-border/70 bg-background px-3 py-3 shadow-none transition-colors hover:border-primary/40 hover:bg-background focus-visible:ring-0 data-[state=open]:border-primary/50 data-[state=open]:bg-background data-[state=open]:text-foreground group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:border-border/60 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            className="h-auto min-h-14 rounded-xl border border-sidebar-border/70 bg-card px-3 py-3 shadow-none transition-colors hover:border-primary/40 hover:bg-sidebar-accent/70 focus-visible:ring-0 data-[state=open]:border-primary/50 data-[state=open]:bg-sidebar-accent/80 data-[state=open]:text-foreground dark:bg-sidebar-accent/55 dark:hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:border-sidebar-border/70 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
           >
             {hasResolvedProfile ? (
               <Profile {...profile} expanded={open} />
@@ -139,18 +149,37 @@ export default function SidebarProfileShell({
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-(--radix-dropdown-menu-trigger-width) min-w-72 rounded-xl border-border/70 bg-background p-2 shadow-xs"
+          className="w-(--radix-dropdown-menu-trigger-width) min-w-72 rounded-xl border-border/70 bg-popover p-2 shadow-xs dark:bg-card"
           side={isMobile ? "bottom" : "right"}
           align="end"
           sideOffset={4}
         >
-          <div className="rounded-xl border border-border/70 bg-background px-3 py-3">
+          <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-3 dark:bg-sidebar-accent/45">
             {hasResolvedProfile ? (
               <Profile {...profile} expanded />
             ) : (
               <SidebarProfileSkeleton expanded />
             )}
           </div>
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="rounded-lg px-3 py-2"
+            onSelect={(event) => {
+              event.preventDefault();
+              setPermissionsSheetOpen(true);
+            }}
+          >
+            <Eye className="size-4" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">
+                Access Details
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Review your role and workspace access.
+              </p>
+            </div>
+          </DropdownMenuItem>
 
           {canCreateWorkspace ? (
             <>
@@ -203,7 +232,7 @@ export default function SidebarProfileShell({
                     disabled={switchWorkspaceMutation.isPending}
                     className={cn(
                       "rounded-lg px-3 py-2",
-                      workspace.isCurrent && "bg-muted/50",
+                      workspace.isCurrent && "bg-sidebar-accent/70",
                     )}
                     onSelect={(event) => {
                       event.preventDefault();
@@ -285,6 +314,17 @@ export default function SidebarProfileShell({
       <CreateWorkspaceDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+      />
+
+      <UserPermissionsSheet
+        open={permissionsSheetOpen}
+        onOpenChange={setPermissionsSheetOpen}
+        userName={profile.name}
+        roleLabel={roleLabel}
+        effectivePermissions={
+          new Set(profile.effectivePermissions ?? profile.permissions ?? [])
+        }
+        permissionCatalog={profile.permissionCatalog ?? []}
       />
     </>
   );

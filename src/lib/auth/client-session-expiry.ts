@@ -7,8 +7,9 @@ type AuthRedirectWindow = Window & {
 function isProtectedClientPath(pathname: string) {
   return (
     pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/admin/dashboard") ||
-    pathname.startsWith("/technician/dashboard")
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/technician/dashboard") ||
+    pathname.startsWith("/onboarding")
   );
 }
 

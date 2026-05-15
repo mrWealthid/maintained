@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_TRANSPARENT_CLASS } from "@/shared/components/form-elements/form-control-styles";
 
 type NativeDateFieldProps = Omit<React.ComponentProps<"input">, "type"> & {
   wrapperClassName?: string;
@@ -179,7 +180,8 @@ const NativeDateField = forwardRef<HTMLInputElement, NativeDateFieldProps>(
               disabled={disabled}
               aria-invalid={props["aria-invalid"]}
               className={cn(
-                "w-full justify-start bg-transparent font-normal hover:bg-transparent dark:bg-input/30 dark:hover:bg-input/30",
+                FORM_CONTROL_TRANSPARENT_CLASS,
+                "justify-start font-normal hover:bg-transparent dark:hover:bg-input/30",
                 !label && "text-muted-foreground",
                 className,
               )}

@@ -5,6 +5,7 @@ import { Clock3 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_CLASS } from "@/shared/components/form-elements/form-control-styles";
 
 type NativeTimeFieldProps = Omit<
   React.ComponentProps<"input">,
@@ -88,7 +89,8 @@ const NativeTimeField = forwardRef<HTMLInputElement, NativeTimeFieldProps>(
         <div
           aria-hidden="true"
           className={cn(
-            "border-input dark:bg-input/30 flex h-10 w-full min-w-0 items-center rounded-md border bg-transparent px-3 py-2 text-base shadow-2xs transition-[border-color,box-shadow] sm:h-9 sm:py-1 sm:text-sm",
+            FORM_CONTROL_CLASS,
+            "flex min-w-0 items-center px-3 py-1 text-sm transition-[border-color,box-shadow]",
             "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
             disabled ? "cursor-not-allowed opacity-50" : null,
             props["aria-invalid"]

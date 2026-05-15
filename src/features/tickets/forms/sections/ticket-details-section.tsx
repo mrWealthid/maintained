@@ -1,12 +1,13 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { FileText } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import type { Category } from "@/shared/model/model";
 import type { TicketCreateFormValues } from "../../models/ticket-form.model";
 import { CategoryCombobox } from "./ticket-form-comboboxes";
@@ -21,7 +22,7 @@ export function TicketDetailsSection({
 }) {
   const {
     register,
-    setValue,
+    control,
     formState: { errors },
   } = useFormContext<TicketCreateFormValues>();
 
@@ -42,7 +43,7 @@ export function TicketDetailsSection({
           placeholder="e.g. Leaking faucet in master bathroom"
           disabled={disabled}
           aria-invalid={!!errors.title}
-          className="h-10 rounded-xl"
+          className={FORM_CONTROL_CLASS}
           {...register("title", { required: "This field is required" })}
         />
         {errors.title?.message ? (
@@ -60,7 +61,7 @@ export function TicketDetailsSection({
           placeholder="Describe the issue in detail: when it started, severity, hazards..."
           disabled={disabled}
           aria-invalid={!!errors.description}
-          className="rounded-xl"
+          className="rounded-md"
           {...register("description", { required: "This field is required" })}
         />
         {errors.description?.message ? (
@@ -72,21 +73,18 @@ export function TicketDetailsSection({
         <Label htmlFor="category-combobox" required>
           Category
         </Label>
-        <CategoryCombobox
-          initialCategory={initialCategory}
-          disabled={disabled}
-          onChange={(category) =>
-            setValue("category", category.id, {
-              shouldDirty: true,
-              shouldValidate: true,
-              shouldTouch: true,
-            })
-          }
-        />
-        <input
-          type="hidden"
-          id="category"
-          {...register("category", { required: "This field is required" })}
+        <Controller
+          name="category"
+          control={control}
+          rules={{ required: "Please select a category" }}
+          render={({ field }) => (
+            <CategoryCombobox
+              value={field.value}
+              initialCategory={initialCategory}
+              disabled={disabled}
+              onChange={(category) => field.onChange(category.id)}
+            />
+          )}
         />
         {errors.category?.message ? (
           <ErrorMessage errorMsg={errors.category.message.toString()} />

@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import type { Ticket } from "@/shared/model/model";
 import { fetchTicketList } from "../../services/ticket-service";
 import type { TicketCreateFormValues } from "../../models/ticket-form.model";
@@ -111,7 +112,7 @@ export function TicketRelatedTicketSection({
                 disabled={disabled || ticketsQuery.isLoading}
                 onValueChange={field.onChange}
               >
-                <SelectTrigger id="relatedTo" className="h-10 w-full rounded-xl">
+                <SelectTrigger id="relatedTo" className={FORM_CONTROL_CLASS}>
                   <SelectValue
                     placeholder={
                       ticketsQuery.isLoading

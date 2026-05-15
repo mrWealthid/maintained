@@ -8,8 +8,9 @@ import {
   CountryCode,
 } from "libphonenumber-js";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useFieldRequired } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -23,6 +24,7 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,12 +67,13 @@ function codeToFlagEmoji(code: string) {
 
 /** ---- Props ---- */
 export type InternationalPhoneFieldProps<
-  TFieldValues extends FieldValues = any,
+  TFieldValues extends FieldValues = FieldValues,
 > = {
   /** RHF field that stores DIGITS-ONLY (e.g., "3362103489") */
   name: string;
-  control: Control<TFieldValues, any>;
-  label?: string;
+  control: Control<TFieldValues>;
+  label?: React.ReactNode;
+  required?: boolean;
   allowedCountries?: readonly CountryCode[];
   defaultCountry?: CountryCode;
   /** You can override or add examples per country here; otherwise we use EXAMPLE_PLACEHOLDERS. */
@@ -87,11 +90,12 @@ export type InternationalPhoneFieldProps<
 };
 
 export function InternationalPhoneField<
-  TFieldValues extends FieldValues = any,
+  TFieldValues extends FieldValues = FieldValues,
 >({
   name,
   control,
   label = "Phone number",
+  required,
   allowedCountries = ["US"],
   defaultCountry = "US",
   placeholderByCountry,
@@ -102,6 +106,8 @@ export function InternationalPhoneField<
   enforceDigitHints = true,
   onCountryChange,
 }: InternationalPhoneFieldProps<TFieldValues>) {
+  const inferredRequired = useFieldRequired(name);
+  const isRequired = required ?? inferredRequired ?? false;
   const inputId = React.useId();
   const options = React.useMemo(
     () => COUNTRY_OPTIONS.filter((o) => allowedCountries.includes(o.code)),
@@ -127,6 +133,7 @@ export function InternationalPhoneField<
           name={name}
           showFlags={showFlags}
           enforceDigitHints={enforceDigitHints}
+          required={isRequired}
           onCountryChange={onCountryChange}
         />
       )}
@@ -139,16 +146,17 @@ type PhoneInputControlProps = {
   field: {
     name: string;
     value: unknown; // stores DIGITS (not E.164)
-    onChange: (v: any) => void;
+    onChange: (v: string) => void;
     onBlur: () => void;
-    ref: (el: any) => void;
+    ref: (el: HTMLInputElement | null) => void;
   };
   fieldState: { error?: { message?: string } | undefined };
   options: CountryOption[];
   defaultCountry: CountryCode;
   placeholderByCountry?: Partial<Record<CountryCode, string>>;
   disabled?: boolean;
-  label?: string;
+  label?: React.ReactNode;
+  required: boolean;
   description?: string;
   className?: string;
   inputId: string;
@@ -166,6 +174,7 @@ function PhoneInputControl({
   placeholderByCountry,
   disabled,
   label,
+  required,
   description,
   className,
   inputId,
@@ -177,6 +186,14 @@ function PhoneInputControl({
   const [country, setCountry] = React.useState<CountryCode>(defaultCountry);
   const [digits, setDigits] = React.useState<string>(""); // national digits ONLY
   const [open, setOpen] = React.useState(false);
+
+  const fieldName = React.useMemo(() => field.name, [field.name]);
+  const fieldRefCallback = React.useCallback(
+    (el: HTMLInputElement | null) => {
+      field.ref(el);
+    },
+    [field],
+  );
 
   // Sync from external value (supports edit population from digits OR E.164)
   React.useEffect(() => {
@@ -192,7 +209,6 @@ function PhoneInputControl({
     } else {
       setDigits(v.replace(/\D/g, "")); // keep only digits
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.value]);
 
   const limits = NATIONAL_LENGTH_HINTS[country];
@@ -234,75 +250,127 @@ function PhoneInputControl({
     }
   };
 
+  const hasError = !!fieldState.error;
+  let describedBy: string | undefined;
+  if (hasError) {
+    describedBy = `${name}-error`;
+  } else if (description) {
+    describedBy = `${name}-description`;
+  }
+
   return (
-    <div className={className}>
+    <div className={cn("w-full space-y-2", className)}>
       {label && (
-        <label htmlFor={inputId} className="block mb-1 text-sm font-medium">
+        <Label
+          htmlFor={inputId}
+          required={required}
+          className={cn(
+            "block text-sm font-medium leading-none",
+            hasError ? "text-destructive" : "text-foreground",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+        >
           {label}
-        </label>
+        </Label>
       )}
 
-      <div className="flex">
+      <div
+        className={cn(
+          "relative flex rounded-md border border-input bg-background shadow-xs transition-colors",
+          "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+          "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+          hasError && "border-destructive",
+        )}
+      >
         {/* Left: country picker (joined with input) */}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button
+            <button
               type="button"
-              variant="outline"
               disabled={disabled}
               className={cn(
-                "inline-flex items-center gap-2  h-fit rounded-r-none border-r-0",
-                "min-w-26 justify-between"
+                "border-input data-placeholder:text-muted-foreground",
+                "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+                "h-9 min-w-[120px] rounded-r-none border-r border-input bg-transparent px-3 py-1 dark:bg-input/30",
+                "flex items-center justify-between gap-2 text-base shadow-xs outline-none transition-[color,box-shadow] md:text-sm",
+                "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                hasError && "border-destructive",
+                open && "bg-muted",
               )}
               aria-label="Select country"
+              aria-expanded={open}
             >
-              <span className="flex items-center gap-2 truncate">
+              <span className="flex min-w-0 flex-1 items-center gap-2">
                 {showFlags && (
-                  <span className="text-base">{codeToFlagEmoji(country)}</span>
+                  <span className="shrink-0 text-base leading-none">
+                    {codeToFlagEmoji(country)}
+                  </span>
                 )}
-                <span className="truncate">
+                <span className="hidden min-w-0 truncate text-sm font-medium sm:inline">
                   {options.find((o) => o.code === country)?.name ?? country}
                 </span>
-                <span className="text-muted-foreground">({dial})</span>
+                <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                  {dial}
+                </span>
               </span>
-              <ChevronsUpDown className="h-4 w-4 opacity-60" />
-            </Button>
+              <ChevronsUpDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-muted-foreground opacity-50 transition-transform duration-200",
+                  open && "rotate-180",
+                )}
+              />
+            </button>
           </PopoverTrigger>
-          <PopoverContent className="p-0 w-88" align="start">
-            <Command>
-              <CommandInput placeholder="Search country..." />
-              <CommandEmpty>No country found.</CommandEmpty>
+          <PopoverContent
+            className="w-[280px] p-0"
+            align="start"
+            sideOffset={4}
+          >
+            <Command className="rounded-lg">
+              <CommandInput placeholder="Search country..." className="h-9" />
+              <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                No country found.
+              </CommandEmpty>
               <CommandGroup>
-                <ScrollArea className="max-h-72">
-                  {options.map((opt) => {
-                    const value = opt.code;
-                    const dialCode = `+${getCountryCallingCode(opt.code)}`;
-                    const isActive = country === opt.code;
-                    return (
-                      <CommandItem
-                        key={value}
-                        value={`${opt.name} ${value} ${dialCode}`}
-                        onSelect={() => selectCountry(value)}
-                        className="gap-2"
-                      >
-                        <Check
+                <ScrollArea className="max-h-[300px]">
+                  <div className="p-1">
+                    {options.map((opt) => {
+                      const value = opt.code;
+                      const dialCode = `+${getCountryCallingCode(opt.code)}`;
+                      const isActive = country === opt.code;
+                      return (
+                        <CommandItem
+                          key={value}
+                          value={`${opt.name} ${value} ${dialCode}`}
+                          onSelect={() => selectCountry(value)}
                           className={cn(
-                            "h-4 w-4",
-                            isActive ? "opacity-100" : "opacity-0"
+                            "flex cursor-pointer items-center gap-3 rounded-md px-2 py-2.5",
+                            "transition-colors duration-150",
+                            isActive && "bg-muted text-foreground",
                           )}
-                        />
-                        {showFlags && (
-                          <span className="text-base">
-                            {codeToFlagEmoji(opt.code)}
+                        >
+                          <Check
+                            className={cn(
+                              "h-4 w-4 shrink-0 transition-opacity duration-200",
+                              isActive ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          {showFlags && (
+                            <span className="shrink-0 text-lg leading-none">
+                              {codeToFlagEmoji(opt.code)}
+                            </span>
+                          )}
+                          <span className="flex-1 truncate text-sm font-medium">
+                            {opt.name}
                           </span>
-                        )}
-                        <span className="flex-1 truncate">{opt.name}</span>
-                        <span className="text-muted-foreground">
-                          {dialCode}
-                        </span>
-                      </CommandItem>
-                    );
-                  })}
+                          <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                            {dialCode}
+                          </span>
+                        </CommandItem>
+                      );
+                    })}
+                  </div>
                 </ScrollArea>
               </CommandGroup>
             </Command>
@@ -310,40 +378,50 @@ function PhoneInputControl({
         </Popover>
 
         {/* Right: plain digits input (joined) */}
-        <Input
-          id={inputId}
-          ref={field.ref}
-          name={field.name}
-          type="tel"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          disabled={disabled}
-          placeholder={placeholder} // <-- REAL EXAMPLE per country
-          value={digits}
-          onChange={handleDigitsChange}
-          onBlur={handleBlur}
-          aria-invalid={!!fieldState.error}
-          aria-describedby={fieldState.error ? `${name}-error` : undefined}
-          className={cn(
-            "rounded-l-none border-l-0",
-            fieldState.error && "border-destructive/40 focus-visible:ring-red-500"
-          )}
-          maxLength={enforceDigitHints && limits?.max ? limits.max : undefined}
-        />
+        <div className="relative flex-1">
+          <Input
+            id={inputId}
+            ref={fieldRefCallback}
+            name={fieldName}
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            disabled={disabled}
+            placeholder={placeholder}
+            value={digits}
+            onChange={handleDigitsChange}
+            onBlur={handleBlur}
+            aria-invalid={hasError}
+            aria-describedby={describedBy}
+            className={cn(
+              "h-9 rounded-l-none border-0 border-l border-input bg-transparent pl-3 shadow-none",
+              "focus-visible:border-l-ring focus-visible:ring-0",
+              hasError && "border-l-destructive",
+            )}
+            maxLength={
+              enforceDigitHints && limits?.max ? limits.max : undefined
+            }
+          />
+        </div>
       </div>
 
-      {description && !fieldState.error && (
-        <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      {description && !hasError && (
+        <p
+          id={`${name}-description`}
+          className="text-xs leading-relaxed text-muted-foreground"
+        >
+          {description}
+        </p>
       )}
 
-      {fieldState.error && (
-        <p
+      {hasError && fieldState.error?.message && (
+        <div
           id={`${name}-error`}
-          className="mt-1 text-xs text-destructive"
+          role="alert"
           aria-live="polite"
         >
-          {fieldState.error.message}
-        </p>
+          <ErrorMessage errorMsg={fieldState.error.message} />
+        </div>
       )}
     </div>
   );

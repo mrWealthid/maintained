@@ -36,6 +36,7 @@ import {
   AppDialogFooter,
   AppDialogHeader,
 } from "@/shared/components/AppDialogShell";
+import { FORM_CONTROL_TRANSPARENT_CLASS } from "@/shared/components/form-elements/form-control-styles";
 
 type Props = Pick<SendTechnicianRequestFormProps, "ticket"> & {
   open: boolean;
@@ -104,7 +105,7 @@ export default function SendTechnicianRequestForm({
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className=" w-full justify-between bg-transparent hover:bg-transparent"
+                        className={`${FORM_CONTROL_TRANSPARENT_CLASS} justify-between hover:bg-transparent`}
                         type="button"
                       >
                         {selectedValues.length > 0
@@ -241,7 +242,7 @@ export default function SendTechnicianRequestForm({
                           variant="outline"
                           id="date-picker"
                           onClick={() => setIsPopoverOpen(true)}
-                          className={` w-full bg-transparent hover:bg-transparent justify-between font-normal ${
+                          className={`${FORM_CONTROL_TRANSPARENT_CLASS} justify-between font-normal hover:bg-transparent ${
                             hasValue
                               ? "text-foreground"
                               : "text-muted-foreground"

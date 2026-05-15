@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import type { TicketType } from "@/shared/model/model";
 import type { TicketCreateFormValues } from "../../models/ticket-form.model";
 import { TicketTypeCombobox } from "./ticket-form-comboboxes";
@@ -52,7 +53,7 @@ export function TicketLocationTypeSection({
           <Label htmlFor="area" required>
             Area
           </Label>
-          <InputGroup className="h-10 rounded-xl">
+          <InputGroup className={FORM_CONTROL_CLASS}>
             <InputGroupAddon align="inline-start">
               <MapPin className="text-muted-foreground" />
             </InputGroupAddon>

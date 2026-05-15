@@ -1,6 +1,7 @@
 import { errorToNextResponse } from "@/lib/errors/apiError";
 import {
   AUTH_COOKIE_NAME,
+  LEGACY_AUTH_COOKIE_NAMES,
   getClearedAuthCookieOptions,
 } from "@/lib/auth/cookie";
 import { connect } from "@/dbConfig/dbConfig";
@@ -21,7 +22,9 @@ export async function GET(request: NextRequest) {
       status: "success",
       message: "User was logged out",
     });
-    response.cookies.set(AUTH_COOKIE_NAME, "", getClearedAuthCookieOptions());
+    for (const cookieName of [AUTH_COOKIE_NAME, ...LEGACY_AUTH_COOKIE_NAMES]) {
+      response.cookies.set(cookieName, "", getClearedAuthCookieOptions());
+    }
 
     return response;
   } catch (error) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Home } from "lucide-react";
+import AppPageHeader from "@/shared/components/app-header/AppPageHeader";
 import PropertyList from "@/features/properties/list/PropertyList";
 import UnitList from "@/features/units/list/UnitList";
 import PropertyHeaderActions from "@/features/properties/list/PropertyHeaderActions";
@@ -13,17 +14,10 @@ const PropertyManagementPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Property Management
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your properties and units
-          </p>
-        </div>
-      </div>
+      <AppPageHeader
+        title="Property Management"
+        description="Manage your properties and units"
+      />
 
       {/* Tabs */}
       <Tabs

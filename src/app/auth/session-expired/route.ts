@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE_NAME, getClearedAuthCookieOptions } from "@/lib/auth/cookie";
+import {
+  AUTH_COOKIE_NAME,
+  LEGACY_AUTH_COOKIE_NAMES,
+  getClearedAuthCookieOptions,
+} from "@/lib/auth/cookie";
 
 export async function GET(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next");
@@ -10,6 +14,8 @@ export async function GET(request: NextRequest) {
   }
 
   const response = NextResponse.redirect(loginUrl);
-  response.cookies.set(AUTH_COOKIE_NAME, "", getClearedAuthCookieOptions());
+  for (const cookieName of [AUTH_COOKIE_NAME, ...LEGACY_AUTH_COOKIE_NAMES]) {
+    response.cookies.set(cookieName, "", getClearedAuthCookieOptions());
+  }
   return response;
 }

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ErrorMessage from "@/shared/components/form-elements/ErrorMessage";
+import { FORM_CONTROL_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import { usePropertyList } from "@/features/properties/hooks/use-properties";
 import { useUnitList } from "@/features/units/hooks/use-units";
 import type { Property } from "@/features/properties/services/property-service";
@@ -57,7 +58,7 @@ export function TicketPropertyUnitFields({ disabled }: { disabled?: boolean }) {
                 });
               }}
             >
-              <SelectTrigger id="property" className="h-10 w-full rounded-xl">
+              <SelectTrigger id="property" className={FORM_CONTROL_CLASS}>
                 <SelectValue
                   placeholder={
                     propertiesQuery.isLoading
@@ -95,7 +96,7 @@ export function TicketPropertyUnitFields({ disabled }: { disabled?: boolean }) {
               disabled={disabled || !selectedPropertyId || unitsQuery.isLoading}
               onValueChange={field.onChange}
             >
-              <SelectTrigger id="unit" className="h-10 w-full rounded-xl">
+              <SelectTrigger id="unit" className={FORM_CONTROL_CLASS}>
                 <SelectValue
                   placeholder={
                     !selectedPropertyId

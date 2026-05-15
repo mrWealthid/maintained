@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 5868",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 5868",
     "lint": "next lint",
     "lint:no-nested-ternary": "eslint . --ext .js,.jsx,.ts,.tsx --rule \"no-nested-ternary: error\"",
     "lint:no-hardcoded-current-business": "rg \"currentBusiness:\\\\s*string\" src/app/api && exit 1 || exit 0",

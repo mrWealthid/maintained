@@ -30,6 +30,7 @@ type DashboardAccessOptions = {
   requiredPermission?: PermissionKey;
   loginPath?: string;
   forbiddenPath?: string;
+  nextPath?: string;
 };
 
 function dashboardPathForRole(role: ROLES | string): string {
@@ -43,11 +44,15 @@ export async function requireDashboardAccess(
   const verifyState = await getVerifiedUserState();
 
   if (verifyState.status === VERIFIED_USER_STATE_STATUS.UNAUTHENTICATED) {
-    redirect(options.loginPath ?? "/auth/login");
+    const nextPath = options.nextPath ?? "/dashboard";
+    redirect(
+      options.loginPath ??
+        `/auth/session-expired?next=${encodeURIComponent(nextPath)}`,
+    );
   }
 
   if (verifyState.status === VERIFIED_USER_STATE_STATUS.INACTIVE_BUSINESS) {
-    redirect(options.forbiddenPath ?? "/auth/login");
+    redirect(options.forbiddenPath ?? "/auth/inactive-business");
   }
 
   const user = verifyState.user;

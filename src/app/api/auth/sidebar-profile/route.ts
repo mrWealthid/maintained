@@ -16,6 +16,7 @@ import {
 } from "@/shared/model/workspace.model";
 import { resolveWorkspaceRole, WORKSPACE_ROLE } from "@/shared/auth/roles";
 import { listActiveWorkspaceMemberships } from "@/lib/tenancy/workspace-membership-access";
+import { getWorkspaceRolePermissionCatalog } from "@/lib/auth/workspace-role-management";
 
 type StringableId = {
   toString(): string;
@@ -167,6 +168,8 @@ export async function GET(request: NextRequest) {
         role: verify.role,
         workspaceRole: verify.workspaceRole,
         permissions,
+        effectivePermissions: permissions.sort(),
+        permissionCatalog: getWorkspaceRolePermissionCatalog(),
         isWorkspaceOwner: isOwner,
         currentBusiness: {
           id: currentWorkspaceId ?? verify.businessId,
