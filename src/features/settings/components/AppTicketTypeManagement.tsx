@@ -91,61 +91,68 @@ export default function AppTicketTypeManagement() {
         )}
         {!isLoading && hasTicketTypes && (
           <div className="space-y-3">
-            {ticketTypes!.map((ticketType: TicketType) => (
-              <div
-                key={ticketType.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-medium">{ticketType.name}</h3>
-                    <Badge
-                      variant={ticketType.isActive ? "outline" : "secondary"}
-                    >
-                      {ticketType.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                    <Badge variant="outline">Platform</Badge>
+            {ticketTypes!.map((ticketType: TicketType) => {
+              const canEditTicketType = canManage && !ticketType.isSystem;
+
+              return (
+                <div
+                  key={ticketType.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-medium">{ticketType.name}</h3>
+                      <Badge
+                        variant={ticketType.isActive ? "outline" : "secondary"}
+                      >
+                        {ticketType.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant="outline">Platform</Badge>
+                      {ticketType.isSystem && (
+                        <Badge variant="secondary">System</Badge>
+                      )}
+                    </div>
+                    {ticketType.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {ticketType.description}
+                      </p>
+                    )}
                   </div>
-                  {ticketType.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {ticketType.description}
-                    </p>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {canEditTicketType && (
+                      <>
+                        <Switch
+                          checked={ticketType.isActive}
+                          onCheckedChange={() => handleToggleStatus(ticketType)}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button type="button" variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(ticketType)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setSelectedType(ticketType)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {canManage && (
-                    <>
-                      <Switch
-                        checked={ticketType.isActive}
-                        onCheckedChange={() => handleToggleStatus(ticketType)}
-                      />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button type="button" variant="outline" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(ticketType)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedType(ticketType)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </SettingsSection>

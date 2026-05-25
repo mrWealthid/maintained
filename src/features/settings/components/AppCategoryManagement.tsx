@@ -93,61 +93,68 @@ export default function AppCategoryManagement() {
         )}
         {!isLoading && hasCategories && (
           <div className="space-y-3">
-            {categories!.map((category: Category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-medium">{category.name}</h3>
-                    <Badge
-                      variant={category.isActive ? "outline" : "secondary"}
-                    >
-                      {category.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                    <Badge variant="outline">Platform</Badge>
+            {categories!.map((category: Category) => {
+              const canEditCategory = canManage && !category.isSystem;
+
+              return (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-medium">{category.name}</h3>
+                      <Badge
+                        variant={category.isActive ? "outline" : "secondary"}
+                      >
+                        {category.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant="outline">Platform</Badge>
+                      {category.isSystem && (
+                        <Badge variant="secondary">System</Badge>
+                      )}
+                    </div>
+                    {category.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {category.description}
+                      </p>
+                    )}
                   </div>
-                  {category.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {category.description}
-                    </p>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {canEditCategory && (
+                      <>
+                        <Switch
+                          checked={category.isActive}
+                          onCheckedChange={() => handleToggleStatus(category)}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button type="button" variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(category)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setSelectedCategory(category)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {canManage && (
-                    <>
-                      <Switch
-                        checked={category.isActive}
-                        onCheckedChange={() => handleToggleStatus(category)}
-                      />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button type="button" variant="outline" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(category)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedCategory(category)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </SettingsSection>

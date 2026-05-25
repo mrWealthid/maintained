@@ -33,7 +33,23 @@ export enum TECHNICIAN_RESPONSE {
 }
 
 export enum TICKET_PRIORITY {
+	emergency = 'EMERGENCY',
 	low = 'LOW',
 	medium = 'MEDIUM',
 	high = 'HIGH'
+}
+
+export enum AI_TRIAGE_STATUS {
+	notStarted = 'NOT_STARTED',
+	pending = 'PENDING',
+	processing = 'PROCESSING',
+	completed = 'COMPLETED',
+	failed = 'FAILED'
+}
+
+export enum AI_TRIAGE_SOURCE {
+	n8n = 'n8n',
+	flowise = 'flowise',
+	manual = 'manual',
+	system = 'system'
 }

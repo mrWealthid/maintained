@@ -3,16 +3,19 @@ import Business from './businessModel';
 
 interface ITicketCategory extends Document {
 	name: string;
+	key?: string;
 	description?: string;
 	createdAt: Date;
 	business?: mongoose.Types.ObjectId;
 	isDefault?: boolean;
+	isSystem?: boolean;
 	isActive: boolean;
 }
 
 const ticketCategorySchema = new Schema<ITicketCategory>(
 	{
 		name: { type: String, required: true },
+		key: { type: String, trim: true },
 		description: { type: String },
 		createdAt: {
 			type: Date,
@@ -28,8 +31,9 @@ const ticketCategorySchema = new Schema<ITicketCategory>(
 		},
 		isDefault: {
 			type: Boolean,
-			default: true
+			default: false
 		},
+		isSystem: { type: Boolean, default: false },
 		isActive: { type: Boolean, default: true }
 	},
 	{
@@ -39,6 +43,17 @@ const ticketCategorySchema = new Schema<ITicketCategory>(
 	}
 );
 
+ticketCategorySchema.index(
+	{ key: 1 },
+	{
+		unique: true,
+		partialFilterExpression: {
+			key: { $type: "string" },
+			business: null,
+			isSystem: true
+		}
+	}
+);
 
 ticketCategorySchema.set('toJSON', {
 	virtuals: true,

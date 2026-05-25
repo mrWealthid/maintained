@@ -3,11 +3,21 @@ import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiErr
 import Ticket from "@/models/ticketModel";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import { ticketFormSchema } from "@/features/tickets/models/ticket-form.model";
+import {
+  ticketAiTriageSchema,
+  ticketAiTriageWorkflowSchema,
+  ticketFormSchema,
+} from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { AI_TRIAGE_STATUS } from "@/shared/enums/enums";
 
-const ticketUpdateBodySchema = ticketFormSchema.partial();
+const ticketUpdateBodySchema = ticketFormSchema
+  .partial()
+  .merge(ticketAiTriageWorkflowSchema)
+  .extend({
+    aiTriage: ticketAiTriageSchema.optional(),
+  });
 
 export async function GET(
   request: NextRequest,
@@ -74,9 +84,41 @@ export async function PATCH(
       }
     }
 
+    const now = new Date();
+    const update = {
+      ...rest,
+      aiTriageStartedAt:
+        rest.aiTriageStartedAt ??
+        (rest.aiTriageStatus === AI_TRIAGE_STATUS.processing ? now : undefined),
+      aiTriageCompletedAt:
+        rest.aiTriageCompletedAt ??
+        (rest.aiTriageStatus === AI_TRIAGE_STATUS.completed ? now : undefined),
+      aiTriageFailedAt:
+        rest.aiTriageFailedAt ??
+        (rest.aiTriageStatus === AI_TRIAGE_STATUS.failed ? now : undefined),
+      ...(rest.aiTriage
+        ? {
+            aiTriage: {
+              ...rest.aiTriage,
+              analyzedAt: rest.aiTriage.analyzedAt ?? now,
+            },
+          }
+        : {}),
+    };
+    const ticketFilter = verify.isUserRole
+      ? {
+          _id: ticketId,
+          user: verify.id,
+          business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+        }
+      : {
+          _id: ticketId,
+          business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+        };
+
     const updatedRequest = await Ticket.findOneAndUpdate(
-      { _id: ticketId, user: verify.id },
-      rest,
+      ticketFilter,
+      update,
       { new: true, runValidators: true },
     );
 

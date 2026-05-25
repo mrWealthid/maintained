@@ -191,6 +191,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({
           disabled={busy}
           ticketTypes={ticketTypes ?? []}
           showPropertyUnitFields={showPropertyUnitFields}
+          showTicketTypeField={isEditing}
         />
         <TicketRelatedTicketSection
           disabled={busy}

@@ -1,4 +1,6 @@
 import {
+  AI_TRIAGE_SOURCE,
+  AI_TRIAGE_STATUS,
   INVITE_STATUS,
   ROLES,
   TICKET_PRIORITY,
@@ -14,18 +16,49 @@ export interface Category {
   name: string;
   description?: string;
   createdAt?: Date;
-  business: string;
+  business?: string | null;
   isActive: boolean;
   isDefault: boolean;
+  isSystem?: boolean;
 }
 export interface TicketType {
   name: string;
+  key?: string;
   description?: string;
   createdAt?: Date;
   id: string;
   isActive: boolean;
   isDefault: boolean;
+  isSystem?: boolean;
   business: string;
+}
+
+export interface TicketTechnicianDiagnosis {
+  probableIssue?: string;
+  inspectionPoints?: string[];
+  recommendedTools?: string[];
+  safetyNotes?: string[];
+}
+
+export interface TicketAiTriage {
+  priorityReason?: string;
+  isMinorFix?: boolean;
+  requiresTechnician?: boolean;
+  immediateActionRequired?: boolean;
+  safetyInstructions?: string[];
+  userTroubleshootingSteps?: string[];
+  technicianDiagnosis?: TicketTechnicianDiagnosis | null;
+  userReply?: string;
+  routeTo?: string;
+  confidenceScore?: number;
+  needsHumanReview?: boolean;
+  missingInformation?: string[];
+  safetyRisk?: "Low" | "Medium" | "High";
+  riskType?: string[];
+  adminNotes?: string;
+  estimatedResponseWindow?: string;
+  analyzedAt?: string | Date;
+  analyzedBy?: string;
 }
 
 export interface Ticket {
@@ -47,8 +80,18 @@ export interface Ticket {
     | string
     | Pick<Ticket, "id" | "title" | "status" | "createdAt">
     | null;
-  type: string;
+  type?: string;
   priority: TICKET_PRIORITY;
+  aiTriageStatus: AI_TRIAGE_STATUS;
+  aiTriage?: TicketAiTriage;
+  aiTriageStartedAt?: string | Date;
+  aiTriageCompletedAt?: string | Date;
+  aiTriageFailedAt?: string | Date;
+  aiTriageError?: string;
+  aiTriageRunId?: string;
+  aiTriageRetryCount?: number;
+  aiTriageSource?: AI_TRIAGE_SOURCE;
+  aiTriageVersion?: string;
   propertyName: string;
   unitLabel: string;
 }
@@ -72,6 +115,16 @@ export interface CreateTicketPayload
     | "unitLabel"
     | "relatedTo"
     | "priority"
+    | "aiTriageStatus"
+    | "aiTriage"
+    | "aiTriageStartedAt"
+    | "aiTriageCompletedAt"
+    | "aiTriageFailedAt"
+    | "aiTriageError"
+    | "aiTriageRunId"
+    | "aiTriageRetryCount"
+    | "aiTriageSource"
+    | "aiTriageVersion"
   > {
   status?: TICKET_STATUS;
   category: string;
@@ -79,6 +132,11 @@ export interface CreateTicketPayload
   unit?: string;
   relatedTo?: string | null;
   priority?: TICKET_PRIORITY;
+  aiTriageStatus?: AI_TRIAGE_STATUS;
+  aiTriage?: TicketAiTriage;
+  aiTriageRunId?: string;
+  aiTriageSource?: AI_TRIAGE_SOURCE;
+  aiTriageVersion?: string;
 }
 
 export interface FileUploadPreview {

@@ -187,6 +187,8 @@ export function statusPillClasses(status?: string) {
 /** Colored pill classes for priority */
 export function priorityPillClasses(priority?: string) {
   switch ((priority || "").toUpperCase()) {
+    case "EMERGENCY":
+      return "bg-status-overdue text-status-overdue-foreground";
     case "LOW":
       return "bg-muted text-muted-foreground";
     case "MEDIUM":

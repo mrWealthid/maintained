@@ -19,6 +19,7 @@ export const DASHBOARD_TICKET_STATUS_ORDER = [
 ] as const;
 
 export const DASHBOARD_PRIORITY_ORDER = [
+  TICKET_PRIORITY.emergency,
   TICKET_PRIORITY.high,
   TICKET_PRIORITY.medium,
   TICKET_PRIORITY.low,

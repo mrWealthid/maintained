@@ -3,7 +3,12 @@ import type { ObjectId } from "mongoose";
 import Business from "./businessModel";
 import User from "./userModel";
 import Category from "./ticketCategoryModel";
-import { TICKET_PRIORITY, TICKET_STATUS } from "@/shared/enums/enums";
+import {
+  AI_TRIAGE_SOURCE,
+  AI_TRIAGE_STATUS,
+  TICKET_PRIORITY,
+  TICKET_STATUS,
+} from "@/shared/enums/enums";
 import "./technicanRequest";
 
 export interface LocationSnapshot {
@@ -19,6 +24,34 @@ export interface LocationSnapshot {
     lat?: number;
     lng?: number;
   };
+}
+
+export interface TicketTechnicianDiagnosisSnapshot {
+  probableIssue?: string;
+  inspectionPoints?: string[];
+  recommendedTools?: string[];
+  safetyNotes?: string[];
+}
+
+export interface TicketAiTriage {
+  priorityReason?: string;
+  isMinorFix?: boolean;
+  requiresTechnician?: boolean;
+  immediateActionRequired?: boolean;
+  safetyInstructions?: string[];
+  userTroubleshootingSteps?: string[];
+  technicianDiagnosis?: TicketTechnicianDiagnosisSnapshot | null;
+  userReply?: string;
+  routeTo?: string;
+  confidenceScore?: number;
+  needsHumanReview?: boolean;
+  missingInformation?: string[];
+  safetyRisk?: "Low" | "Medium" | "High";
+  riskType?: string[];
+  adminNotes?: string;
+  estimatedResponseWindow?: string;
+  analyzedAt?: Date;
+  analyzedBy?: string;
 }
 
 export interface ITicket extends Document {
@@ -38,6 +71,16 @@ export interface ITicket extends Document {
   relatedTo?: ObjectId;
   type: ObjectId;
   priority: TICKET_PRIORITY;
+  aiTriageStatus: AI_TRIAGE_STATUS;
+  aiTriage?: TicketAiTriage;
+  aiTriageStartedAt?: Date;
+  aiTriageCompletedAt?: Date;
+  aiTriageFailedAt?: Date;
+  aiTriageError?: string;
+  aiTriageRunId?: string;
+  aiTriageRetryCount?: number;
+  aiTriageSource?: AI_TRIAGE_SOURCE;
+  aiTriageVersion?: string;
   dueDate?: Date;
   completedAt?: Date;
   closedAt?: Date;
@@ -59,6 +102,44 @@ const allowedTransitions: Record<string, string[]> = {
   DECLINED: [],
   COMPLETED: [],
 };
+
+const TicketTechnicianDiagnosisSchema =
+  new Schema<TicketTechnicianDiagnosisSnapshot>(
+    {
+      probableIssue: { type: String },
+      inspectionPoints: { type: [String], default: undefined },
+      recommendedTools: { type: [String], default: undefined },
+      safetyNotes: { type: [String], default: undefined },
+    },
+    { _id: false, id: false },
+  );
+
+const TicketAiTriageSchema = new Schema<TicketAiTriage>(
+  {
+    priorityReason: { type: String },
+    isMinorFix: { type: Boolean },
+    requiresTechnician: { type: Boolean },
+    immediateActionRequired: { type: Boolean },
+    safetyInstructions: { type: [String], default: undefined },
+    userTroubleshootingSteps: { type: [String], default: undefined },
+    technicianDiagnosis: {
+      type: TicketTechnicianDiagnosisSchema,
+      default: undefined,
+    },
+    userReply: { type: String },
+    routeTo: { type: String },
+    confidenceScore: { type: Number, min: 0, max: 1 },
+    needsHumanReview: { type: Boolean },
+    missingInformation: { type: [String], default: undefined },
+    safetyRisk: { type: String, enum: ["Low", "Medium", "High"] },
+    riskType: { type: [String], default: undefined },
+    adminNotes: { type: String },
+    estimatedResponseWindow: { type: String },
+    analyzedAt: { type: Date },
+    analyzedBy: { type: String },
+  },
+  { _id: false, id: false },
+);
 
 const TicketSchema = new Schema<ITicket>(
   {
@@ -127,6 +208,31 @@ const TicketSchema = new Schema<ITicket>(
       enum: TICKET_PRIORITY,
       default: TICKET_PRIORITY.medium,
     },
+    aiTriageStatus: {
+      type: String,
+      enum: Object.values(AI_TRIAGE_STATUS),
+      default: AI_TRIAGE_STATUS.notStarted,
+      index: true,
+    },
+    aiTriage: {
+      type: TicketAiTriageSchema,
+      default: undefined,
+    },
+    aiTriageStartedAt: { type: Date },
+    aiTriageCompletedAt: { type: Date },
+    aiTriageFailedAt: { type: Date },
+    aiTriageError: { type: String },
+    aiTriageRunId: { type: String },
+    aiTriageRetryCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    aiTriageSource: {
+      type: String,
+      enum: Object.values(AI_TRIAGE_SOURCE),
+    },
+    aiTriageVersion: { type: String },
 
     // Lifecycle dates — useful for SLA/reporting
     dueDate: { type: Date },

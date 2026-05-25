@@ -1,9 +1,64 @@
 import { z } from "zod";
 
+import { AI_TRIAGE_SOURCE, AI_TRIAGE_STATUS } from "@/shared/enums/enums";
 import { TICKET_PRIORITY_VALUES, type TicketPriority } from "./ticket-priority.model";
 
 const emptyStringToUndefined = (value: unknown) =>
   value === "" ? undefined : value;
+const AI_TRIAGE_STATUS_VALUES = Object.values(AI_TRIAGE_STATUS) as [
+  AI_TRIAGE_STATUS,
+  ...AI_TRIAGE_STATUS[],
+];
+const AI_TRIAGE_SOURCE_VALUES = Object.values(AI_TRIAGE_SOURCE) as [
+  AI_TRIAGE_SOURCE,
+  ...AI_TRIAGE_SOURCE[],
+];
+
+const boundedStringArray = z
+  .array(z.string().trim().min(1).max(500))
+  .max(25);
+
+export const ticketTechnicianDiagnosisSchema = z.object({
+  probableIssue: z.string().trim().max(1000).optional(),
+  inspectionPoints: boundedStringArray.optional(),
+  recommendedTools: boundedStringArray.optional(),
+  safetyNotes: boundedStringArray.optional(),
+});
+
+export const ticketAiTriageSchema = z.object({
+  priorityReason: z.string().trim().max(1000).optional(),
+  isMinorFix: z.boolean().optional(),
+  requiresTechnician: z.boolean().optional(),
+  immediateActionRequired: z.boolean().optional(),
+  safetyInstructions: boundedStringArray.optional(),
+  userTroubleshootingSteps: boundedStringArray.optional(),
+  technicianDiagnosis: ticketTechnicianDiagnosisSchema.nullable().optional(),
+  userReply: z.string().trim().max(4000).optional(),
+  routeTo: z.string().trim().max(160).optional(),
+  confidenceScore: z.number().min(0).max(1).optional(),
+  needsHumanReview: z.boolean().optional(),
+  missingInformation: boundedStringArray.optional(),
+  safetyRisk: z.enum(["Low", "Medium", "High"]).optional(),
+  riskType: boundedStringArray.optional(),
+  adminNotes: z.string().trim().max(4000).optional(),
+  estimatedResponseWindow: z.string().trim().max(160).optional(),
+  analyzedAt: z.coerce.date().optional(),
+  analyzedBy: z.string().trim().max(160).optional(),
+});
+
+export const ticketAiTriageWorkflowSchema = z.object({
+  aiTriageStatus: z
+    .enum(AI_TRIAGE_STATUS_VALUES)
+    .optional(),
+  aiTriageStartedAt: z.coerce.date().optional(),
+  aiTriageCompletedAt: z.coerce.date().optional(),
+  aiTriageFailedAt: z.coerce.date().optional(),
+  aiTriageError: z.string().trim().max(2000).optional(),
+  aiTriageRunId: z.string().trim().max(200).optional(),
+  aiTriageRetryCount: z.number().int().min(0).optional(),
+  aiTriageSource: z.enum(AI_TRIAGE_SOURCE_VALUES).optional(),
+  aiTriageVersion: z.string().trim().max(120).optional(),
+});
 
 /**
  * Zod schema for the ticket create / edit form. Use with `react-hook-form`
@@ -16,7 +71,10 @@ export const ticketFormSchema = z.object({
   area: z.string().trim().min(1, "Area is required").max(120),
   description: z.string().trim().min(1, "Description is required").max(5000),
   category: z.string().min(1, "Category is required"),
-  type: z.string().min(1, "Type is required"),
+  type: z.preprocess(
+    emptyStringToUndefined,
+    z.string().min(1, "Type is required").optional(),
+  ),
   priority: z.enum(TICKET_PRIORITY_VALUES as [TicketPriority, ...TicketPriority[]], {
     required_error: "Priority is required",
   }),

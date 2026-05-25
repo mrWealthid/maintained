@@ -47,6 +47,7 @@ export function useLogin() {
     login: mutation.mutate,
     loginAsync: mutation.mutateAsync,
     data: mutation.data,
+    error: mutation.error,
   };
 }
 

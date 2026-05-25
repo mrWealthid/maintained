@@ -234,7 +234,7 @@ export default function CreateTicketSheet({
                 />
               </div>
               <div className="order-first min-w-0 lg:order-none">
-                <TicketSummary />
+                <TicketSummary showTicketType={false} />
               </div>
             </div>
           </AppSheetBody>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Clock3,
-  Home,
   MailPlus,
   UserCheck,
   UsersRound,
@@ -32,7 +31,6 @@ export default function TenantManagementPageClient() {
   );
   const tenantsQuery = useTenantList({ page: 1, limit: 1 });
   const summary = tenantsQuery.data?.summary;
-  const isEmpty = !tenantsQuery.isLoading && (summary?.total ?? 0) === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,21 +96,6 @@ export default function TenantManagementPageClient() {
         </CardHeader>
         <CardContent>
           <ErrorList error={tenantsQuery.error} title="Tenant load error" />
-
-          {isEmpty ? (
-            <div className="mb-4 flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-6 text-center">
-              <Home className="size-9 text-muted-foreground" />
-              <p className="mt-3 text-sm font-medium">No tenants yet</p>
-              <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                Invite residents from here so each tenant is tied to the right property and unit.
-              </p>
-              <Button className="mt-4" onClick={() => setInviteOpen(true)}>
-                <MailPlus className="mr-2 size-4" />
-                Invite Tenant
-              </Button>
-            </div>
-          ) : null}
-
           <TenantList onView={setSelectedTenant} />
         </CardContent>
       </Card>

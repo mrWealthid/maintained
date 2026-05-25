@@ -11,6 +11,7 @@ import {
 } from "@/lib/errors/apiError";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import TicketType from "@/models/ticketTypeModel";
+import { ensureDefaultTicketTypes } from "@/lib/tickets/default-ticket-type";
 
 const ticketTypeBodySchema = z.object({
   name: z.string().trim().min(1),
@@ -41,10 +42,11 @@ export async function GET(request: NextRequest) {
   try {
     await connect();
     await requirePlatformSettings(request, PERMISSION.PLATFORM_SETTINGS_VIEW);
+    await ensureDefaultTicketTypes();
 
     const ticketTypes = await TicketType.find({
       $or: [{ business: null }, { business: { $exists: false } }],
-    });
+    }).sort({ isSystem: -1, name: 1 });
 
     return NextResponse.json({ status: "success", data: ticketTypes });
   } catch (error) {
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
       description,
       business: null,
       isDefault: true,
+      isSystem: false,
     });
 
     return NextResponse.json({ status: "success", data }, { status: 201 });

@@ -61,6 +61,10 @@ const STATUS_CONFIG = {
 } satisfies Record<TICKET_STATUS, { label: string; className: string }>;
 
 const PRIORITY_CONFIG = {
+  [TICKET_PRIORITY.emergency]: {
+    label: "Emergency",
+    className: "border-red-600/30 bg-red-600/10 text-red-700",
+  },
   [TICKET_PRIORITY.high]: {
     label: "High",
     className: "border-rose-500/30 bg-rose-500/8 text-rose-700",

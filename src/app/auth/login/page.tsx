@@ -62,7 +62,7 @@ const AUTH_MODE = {
 type AuthMode = (typeof AUTH_MODE)[keyof typeof AUTH_MODE];
 
 const LoginComponent = () => {
-  const { isLoading, loginAsync } = useLogin();
+  const { isLoading, loginAsync, error } = useLogin();
   const { data: passwordlessConfig } = usePasswordlessLoginConfig();
   const {
     isLoading: isRequestingPasswordlessLogin,
@@ -158,6 +158,8 @@ const LoginComponent = () => {
         </div>
 
         <div className="w-full space-y-4">
+          <ErrorList error={error} title="Auth Error" />
+
           <Card className="w-full border-border/70 shadow-sm">
             <CardHeader className="space-y-4 pb-4">
               {isPasswordlessEnabled ? (
@@ -259,7 +261,6 @@ const LoginComponent = () => {
                         name="password"
                         rules={{
                           required: "This field is required",
-                          minLength: { value: 8, message: "Min 8 characters" },
                         }}
                         render={({ field }) => (
                           <FormItem>

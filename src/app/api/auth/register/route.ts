@@ -26,6 +26,8 @@ import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
 import { SignupSchema } from "@/app/auth/model/model";
 import { upsertActiveWorkspaceMembership } from "@/lib/tenancy/provisioning";
 import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
+import { ensureDefaultTicketCategories } from "@/lib/tickets/default-categories";
+import { ensureDefaultTicketTypes } from "@/lib/tickets/default-ticket-type";
 
 const getRequestId = (request: NextRequest) =>
   request.headers.get("x-request-id") ?? undefined;
@@ -95,6 +97,8 @@ export async function POST(request: NextRequest) {
     });
 
     await Promise.all([
+      ensureDefaultTicketCategories(),
+      ensureDefaultTicketTypes(),
       ensurePlatformRoleDefinitions(),
       ensureWorkspaceRoleDefinitions({
         workspaceId: business.id,

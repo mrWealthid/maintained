@@ -7,7 +7,7 @@ import Unit from "@/models/unitModel";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { TicketActivity } from "@/models/ticketActivity";
-import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { AI_TRIAGE_STATUS, ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import mongoose from "mongoose";
 import { Ticket as ITicket } from "@/shared/model/model";
@@ -22,6 +22,8 @@ import {
 } from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { ensureDefaultRepairTicketType } from "@/lib/tickets/default-ticket-type";
+import { triggerAiTriageWebhook } from "@/lib/tickets/ai-triage-webhook";
 
 connect();
 
@@ -235,6 +237,9 @@ export async function POST(request: NextRequest) {
       rawBody
     );
     const businessId = user.currentBusiness;
+    const defaultType = body.type
+      ? null
+      : await ensureDefaultRepairTicketType();
 
     if (body.relatedTo) {
       if (!mongoose.Types.ObjectId.isValid(body.relatedTo)) {
@@ -283,12 +288,14 @@ export async function POST(request: NextRequest) {
 
     const data = await Ticket.create({
       ...body,
+      type: body.type || defaultType?._id,
       relatedTo: body.relatedTo || undefined,
       property: propertyId,
       unit: unitId,
       user: requesterId,
       actionedBy: verify.isUserRole ? undefined : verify.id,
       business: businessId,
+      aiTriageStatus: AI_TRIAGE_STATUS.pending,
     });
 
     await TicketActivity.create({
@@ -303,6 +310,30 @@ export async function POST(request: NextRequest) {
         createdBy: verify.id,
       },
     });
+
+    const triageWebhookResult = await triggerAiTriageWebhook({
+      ticketId: data.id,
+      title: data.title,
+      description: data.description,
+      area: data.area,
+      category: String(data.category),
+      property: String(data.property),
+      unit: String(data.unit),
+      images: data.images,
+      videos: data.videos,
+      documents: data.documents,
+    });
+
+    if (!triageWebhookResult.sent && "error" in triageWebhookResult) {
+      await Ticket.findByIdAndUpdate(data.id, {
+        aiTriageStatus: AI_TRIAGE_STATUS.failed,
+        aiTriageFailedAt: new Date(),
+        aiTriageError: triageWebhookResult.error,
+      });
+      data.aiTriageStatus = AI_TRIAGE_STATUS.failed;
+      data.aiTriageFailedAt = new Date();
+      data.aiTriageError = triageWebhookResult.error;
+    }
 
     return NextResponse.json({ status: "success", data }, { status: 201 });
   } catch (error) {

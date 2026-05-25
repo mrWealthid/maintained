@@ -60,6 +60,10 @@ export type TicketPriorityMeta = {
 
 export const TICKET_PRIORITY_META: Record<TicketPriority, TicketPriorityMeta> =
   {
+    [TICKET_PRIORITY.emergency]: {
+      label: "Emergency",
+      className: "bg-status-overdue text-status-overdue-foreground",
+    },
     [TICKET_PRIORITY.low]: {
       label: "Low",
       className: "bg-muted text-muted-foreground",

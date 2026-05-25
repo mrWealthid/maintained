@@ -105,7 +105,7 @@ export async function getDashboardAnalytics(
     }),
     Ticket.countDocuments({
       ...ticketFilter,
-      priority: TICKET_PRIORITY.high,
+      priority: { $in: [TICKET_PRIORITY.emergency, TICKET_PRIORITY.high] },
       status: { $in: DASHBOARD_OPEN_TICKET_STATUSES },
     }),
     Ticket.countDocuments({
@@ -261,7 +261,18 @@ async function getPropertyLoad(filter: Record<string, unknown>, now: Date) {
           },
         },
         highPriority: {
-          $sum: { $cond: [{ $eq: ["$priority", TICKET_PRIORITY.high] }, 1, 0] },
+          $sum: {
+            $cond: [
+              {
+                $in: [
+                  "$priority",
+                  [TICKET_PRIORITY.emergency, TICKET_PRIORITY.high],
+                ],
+              },
+              1,
+              0,
+            ],
+          },
         },
         overdue: {
           $sum: {

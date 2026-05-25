@@ -26,10 +26,12 @@ interface TicketSummaryProps {
     videos: number;
     documents: number;
   };
+  showTicketType?: boolean;
 }
 
 const TicketSummary: React.FC<TicketSummaryProps> = ({
   initialAttachmentCounts = { images: 0, videos: 0, documents: 0 },
+  showTicketType = true,
 }) => {
   const { watch } = useFormContext<TicketCreateFormValues>();
   const watched = watch();
@@ -55,7 +57,7 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
     !!watched.description,
     !!watched.category,
     !!watched.area,
-    !!watched.type,
+    showTicketType ? !!watched.type : true,
   ].filter(Boolean).length;
   const completeness = Math.round((completedFields / 5) * 100);
 
@@ -110,14 +112,18 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
           icon={<MapPin className="h-4 w-4" />}
         />
 
-        <Separator />
+        {showTicketType ? (
+          <>
+            <Separator />
 
-        <SummaryRow
-          label="Request Type"
-          value={selectedTypeName}
-          placeholder="No request type set"
-          icon={<Wrench className="h-4 w-4" />}
-        />
+            <SummaryRow
+              label="Request Type"
+              value={selectedTypeName}
+              placeholder="No request type set"
+              icon={<Wrench className="h-4 w-4" />}
+            />
+          </>
+        ) : null}
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">

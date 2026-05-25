@@ -51,6 +51,9 @@ export async function PUT(
     if (existing.business) {
       throw ApiError.badRequest("Not a platform-wide ticket type");
     }
+    if (existing.isSystem) {
+      throw ApiError.badRequest("System ticket types cannot be modified");
+    }
 
     const ticketType = await TicketType.findByIdAndUpdate(
       ticketTypeId,
@@ -82,6 +85,9 @@ export async function DELETE(
     if (!ticketType) throw ApiError.notFound("Ticket type not found");
     if (ticketType.business) {
       throw ApiError.badRequest("Not a platform-wide ticket type");
+    }
+    if (ticketType.isSystem) {
+      throw ApiError.badRequest("System ticket types cannot be deleted");
     }
 
     await TicketType.findByIdAndDelete(ticketTypeId);

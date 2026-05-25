@@ -16,6 +16,8 @@ import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
 import { upsertActiveWorkspaceMembership } from "@/lib/tenancy/provisioning";
 import { getVerifiedUser } from "@/lib/auth/getVerifiedUser";
 import { sendWorkspaceCreatedEmail } from "@/lib/email/senders/workspaces/sendWorkspaceCreatedEmail";
+import { ensureDefaultTicketCategories } from "@/lib/tickets/default-categories";
+import { ensureDefaultTicketTypes } from "@/lib/tickets/default-ticket-type";
 import Business from "@/models/businessModel";
 import User, { UserDoc } from "@/models/userModel";
 import { CreateWorkspaceSchema } from "@/shared/model/workspace-create.model";
@@ -51,6 +53,11 @@ export async function POST(request: NextRequest) {
         "Platform admins cannot create workspaces from this flow.",
       );
     }
+
+    await Promise.all([
+      ensureDefaultTicketCategories(),
+      ensureDefaultTicketTypes(),
+    ]);
 
     session = await mongoose.startSession();
     session.startTransaction();

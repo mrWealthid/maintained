@@ -8,6 +8,7 @@ import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiErr
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
+import { ensureDefaultTicketTypes } from "@/lib/tickets/default-ticket-type";
 
 connect();
 
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKET_TYPES_VIEW);
+    await ensureDefaultTicketTypes();
 
     const parsedQuery = parseOrThrow(
       ticketTypeListQuerySchema,
@@ -35,7 +37,8 @@ export async function GET(request: NextRequest) {
       isActive: true,
       $or: [
         { business: new mongoose.Types.ObjectId(String(verify.currentBusiness)) },
-        { isDefault: true },
+        { business: null, isDefault: true },
+        { business: { $exists: false }, isDefault: true },
       ],
     };
 
@@ -44,7 +47,10 @@ export async function GET(request: NextRequest) {
       filter = { ...filter, name: { $regex: regex } };
     }
 
-    const results = await TicketType.find(filter);
+    const results = await TicketType.find(filter).sort({
+      isDefault: -1,
+      name: 1,
+    });
     return NextResponse.json({ status: "success", data: results });
   } catch (error) {
     return errorToNextResponse(error, request.headers.get("x-request-id"));

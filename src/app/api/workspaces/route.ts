@@ -16,6 +16,8 @@ import { WORKSPACE_MEMBERSHIP_SOURCE } from "@/lib/tenancy/model";
 import { CreateWorkspaceSchema } from "@/shared/model/workspace-create.model";
 import { WORKSPACE_ROLE } from "@/shared/auth/roles";
 import { WORKSPACE_TYPE } from "@/shared/model/workspace.model";
+import { ensureDefaultTicketCategories } from "@/lib/tickets/default-categories";
+import { ensureDefaultTicketTypes } from "@/lib/tickets/default-ticket-type";
 import APIFeatures from "@/utils/apiFeatures";
 import { mapToObject } from "@/utils/helpers";
 import Business from "@/models/businessModel";
@@ -206,6 +208,10 @@ export async function POST(request: NextRequest) {
     const payload = parseOrThrow(CreateWorkspaceSchema, await request.json());
     const user = await User.findById(verify.id).select("name email contact countryCode");
     if (!user) throw ApiError.notFound("User not found");
+    await Promise.all([
+      ensureDefaultTicketCategories(),
+      ensureDefaultTicketTypes(),
+    ]);
 
     const workspaceType = payload.workspaceType;
     const business = await Business.create({

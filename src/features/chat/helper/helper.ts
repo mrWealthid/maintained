@@ -52,6 +52,8 @@ export const getStatusColor = (status: TICKET_STATUS) => {
 
 export const getPriorityColor = (priority: TICKET_PRIORITY) => {
   switch (priority) {
+    case TICKET_PRIORITY.emergency:
+      return "text-status-overdue";
     case TICKET_PRIORITY.high:
       return "text-status-overdue";
     case TICKET_PRIORITY.medium:

@@ -21,10 +21,12 @@ export function TicketLocationTypeSection({
   disabled,
   ticketTypes,
   showPropertyUnitFields = false,
+  showTicketTypeField = true,
 }: {
   disabled?: boolean;
   ticketTypes: TicketType[];
   showPropertyUnitFields?: boolean;
+  showTicketTypeField?: boolean;
 }) {
   const {
     control,
@@ -40,8 +42,12 @@ export function TicketLocationTypeSection({
     <TicketFormSectionCard
       step={2}
       icon={<MapPin className="h-4 w-4" />}
-      title="Location & Type"
-      subtitle="Where the issue is and what kind of service is needed"
+      title={showTicketTypeField ? "Location & Type" : "Location"}
+      subtitle={
+        showTicketTypeField
+          ? "Where the issue is and what kind of service is needed"
+          : "Where the issue is located"
+      }
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {showPropertyUnitFields ? (
@@ -70,30 +76,32 @@ export function TicketLocationTypeSection({
           ) : null}
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="ticketType" required>
-            Request Type
-          </Label>
-          <Controller
-            name="type"
-            control={control}
-            rules={{ required: "Please select a ticket type" }}
-            render={({ field }) => (
-              <TicketTypeCombobox
-                value={field.value}
-                types={ticketTypes}
-                disabled={disabled}
-                onChange={(type) => field.onChange(type.id)}
-              />
-            )}
-          />
-          {errors.type?.message ? (
-            <ErrorMessage errorMsg={errors.type.message.toString()} />
-          ) : null}
-        </div>
+        {showTicketTypeField ? (
+          <div className="space-y-1.5">
+            <Label htmlFor="ticketType" required>
+              Request Type
+            </Label>
+            <Controller
+              name="type"
+              control={control}
+              rules={{ required: "Please select a ticket type" }}
+              render={({ field }) => (
+                <TicketTypeCombobox
+                  value={field.value}
+                  types={ticketTypes}
+                  disabled={disabled}
+                  onChange={(type) => field.onChange(type.id)}
+                />
+              )}
+            />
+            {errors.type?.message ? (
+              <ErrorMessage errorMsg={errors.type.message.toString()} />
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
-      {selectedTypeName ? (
+      {showTicketTypeField && selectedTypeName ? (
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1.5 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
             <Settings2 className="h-3 w-3" />

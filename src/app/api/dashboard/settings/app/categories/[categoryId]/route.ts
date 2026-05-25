@@ -51,6 +51,9 @@ export async function PUT(
     if (existing.business) {
       throw ApiError.badRequest("Not a platform-wide category");
     }
+    if (existing.isSystem) {
+      throw ApiError.badRequest("System categories cannot be modified");
+    }
 
     const category = await Category.findByIdAndUpdate(
       categoryId,
@@ -82,6 +85,9 @@ export async function DELETE(
     if (!category) throw ApiError.notFound("Category not found");
     if (category.business) {
       throw ApiError.badRequest("Not a platform-wide category");
+    }
+    if (category.isSystem) {
+      throw ApiError.badRequest("System categories cannot be deleted");
     }
 
     await Category.findByIdAndDelete(categoryId);

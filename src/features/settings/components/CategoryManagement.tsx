@@ -101,50 +101,52 @@ const CategoryManagement: React.FC = () => {
         )}
         {!isLoading && hasCategories && (
           <div className="space-y-3">
-            {categories!.map((category: Category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-medium">{category.name}</h3>
-                    <Badge
-                      variant={category.isActive ? "outline" : "secondary"}
-                    >
-                      {category.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                    {category.isDefault && (
-                      <Badge variant="outline">Default</Badge>
+            {categories!.map((category: Category) => {
+              const canEditCategory = !category.isDefault;
+
+              return (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-medium">{category.name}</h3>
+                      <Badge
+                        variant={category.isActive ? "outline" : "secondary"}
+                      >
+                        {category.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      {category.isDefault && (
+                        <Badge variant="outline">Default</Badge>
+                      )}
+                    </div>
+                    {category.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {category.description}
+                      </p>
                     )}
                   </div>
-                  {category.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {category.description}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  {canManageCategories && (
-                    <>
-                      <Switch
-                        checked={category.isActive}
-                        onCheckedChange={() => handleToggleStatus(category)}
-                      />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(category)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          {!category.isDefault && (
+                  <div className="flex items-center space-x-2">
+                    {canManageCategories && canEditCategory && (
+                      <>
+                        <Switch
+                          checked={category.isActive}
+                          onCheckedChange={() => handleToggleStatus(category)}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(category)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDelete(category)}
                               className="text-destructive"
@@ -152,14 +154,14 @@ const CategoryManagement: React.FC = () => {
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </SettingsSection>
