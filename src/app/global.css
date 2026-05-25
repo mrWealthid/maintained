@@ -59,9 +59,10 @@
   --color-pending: hsl(var(--pending-color));
   --color-light-blue: hsl(var(--light-blue));
 
-  --font-sans: Plus Jakarta Sans, sans-serif;
-  --font-mono: Roboto Mono, monospace;
-  --font-serif: Lora, serif;
+  --font-sans: var(--font-quicksand);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-serif: var(--font-merriweather);
+  --font-display: var(--font-sora), var(--font-quicksand);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -121,6 +122,7 @@
   }
   body {
     letter-spacing: var(--tracking-normal);
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -363,9 +365,10 @@
   --sidebar-accent-foreground: oklch(0.3729 0.0306 259.7328);
   --sidebar-border: oklch(0.8687 0.0043 56.3660);
   --sidebar-ring: oklch(0.5854 0.2041 277.1173);
-  --font-sans: Plus Jakarta Sans, sans-serif;
-  --font-serif: Lora, serif;
-  --font-mono: Roboto Mono, monospace;
+  --font-sans: var(--font-quicksand), sans-serif;
+  --font-serif: var(--font-merriweather), serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+  --font-display: var(--font-sora), var(--font-quicksand), sans-serif;
   --shadow-color: hsl(240 4% 60%);
   --shadow-opacity: 0.08;
   --shadow-blur: 6px;
@@ -382,7 +385,7 @@
   --shadow-lg: 0 4px 10px -3px hsl(240 4% 60% / 0.12);
   --shadow-xl: 0 8px 18px -8px hsl(240 4% 60% / 0.14);
   --shadow-2xl: 0 12px 28px -12px hsl(240 4% 60% / 0.18);
-  --tracking-normal: 0em;
+  --tracking-normal: -0.01em;
 
   /* Maintenance domain status tokens (HSL triplets for hsl(var()) wrappers) */
   --status-open: 36 92% 45%;
@@ -432,9 +435,10 @@
   --sidebar-accent-foreground: oklch(0.8717 0.0093 258.3382);
   --sidebar-border: oklch(0.3359 0.0077 59.4197);
   --sidebar-ring: oklch(0.6801 0.1583 276.9349);
-  --font-sans: Plus Jakarta Sans, sans-serif;
-  --font-serif: Lora, serif;
-  --font-mono: Roboto Mono, monospace;
+  --font-sans: var(--font-quicksand), sans-serif;
+  --font-serif: var(--font-merriweather), serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+  --font-display: var(--font-sora), var(--font-quicksand), sans-serif;
   --shadow-color: hsl(0 0% 0%);
   --shadow-opacity: 0.12;
   --shadow-blur: 6px;
@@ -463,6 +467,12 @@
   --success-color: 158 45% 50%;
   --pending-color: 36 75% 55%;
   --light-blue: 210 65% 55%;
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
 }
 /* Dashboard body: thin styled scrollbar, visible on hover */
 .scroll-fancy {

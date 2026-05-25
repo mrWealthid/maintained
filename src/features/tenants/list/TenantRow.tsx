@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
+import RowActionsMenu from "@/shared/components/table/RowActionsMenu";
+import type { BaseActions } from "@/shared/model/model";
 import type { TenantListItem } from "../models/tenant-form.model";
 
 type TenantRowProps = {
@@ -85,6 +86,13 @@ export default function TenantRow({
         );
         const timelineDate =
           tenant.status === "active" ? tenant.joinedAt : tenant.invitedAt;
+        const baseActions: BaseActions[] = [
+          {
+            label: "View details",
+            action: () => onView(tenant),
+            icon: Eye,
+          },
+        ];
 
         return (
           <TableRow
@@ -188,17 +196,11 @@ export default function TenantRow({
               </div>
             </TableCell>
 
-            <TableCell className="py-3 px-2 text-right">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onView(tenant)}
-                className="gap-1"
-              >
-                <Eye className="size-4" />
-                View
-              </Button>
+            <TableCell className="md:px-2 py-2 space-x-3">
+              <RowActionsMenu
+                ariaLabel={`Actions for tenant ${tenant.name}`}
+                baseActions={baseActions}
+              />
             </TableCell>
           </TableRow>
         );

@@ -41,6 +41,7 @@ const ticketCreateBaseFormSchema = ticketFormSchema.omit({
   images: true,
   videos: true,
   documents: true,
+  priority: true,
 });
 
 export const ticketCreateFormSchema = ticketCreateBaseFormSchema

@@ -168,7 +168,7 @@ export default function TeamRow({
               </div>
             </TableCell>
 
-            <TableCell>
+            <TableCell className="md:px-2 py-2 space-x-3">
               <TeamActions member={member} inviteAllowed={inviteAllowed} />
             </TableCell>
           </TableRow>

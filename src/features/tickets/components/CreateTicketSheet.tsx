@@ -30,7 +30,6 @@ import {
   ticketCreateFormSchema,
   type TicketCreateFormValues,
 } from "@/features/tickets/models/ticket-form.model";
-import { TICKET_PRIORITY } from "@/features/tickets/models/ticket-priority.model";
 import TicketForm from "@/features/tickets/forms/TicketForm";
 import TicketSummary from "@/features/tickets/components/TicketSummary";
 import { useAppContext } from "@/shared/contexts/AppContext";
@@ -48,7 +47,6 @@ export const DEFAULT_TICKET_FORM_VALUES: TicketCreateFormValues = {
   description: "",
   category: "",
   type: "",
-  priority: TICKET_PRIORITY.medium,
   relatedTo: "",
   property: "",
   unit: "",

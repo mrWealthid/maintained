@@ -193,6 +193,7 @@ const ticketCreateBaseBodySchema = ticketFormSchema.partial({
   images: true,
   videos: true,
   documents: true,
+  priority: true,
 });
 
 const tenantTicketCreateBodySchema = ticketCreateBaseBodySchema

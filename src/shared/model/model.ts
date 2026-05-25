@@ -71,12 +71,14 @@ export interface CreateTicketPayload
     | "propertyName"
     | "unitLabel"
     | "relatedTo"
+    | "priority"
   > {
   status?: TICKET_STATUS;
   category: string;
   property?: string;
   unit?: string;
   relatedTo?: string | null;
+  priority?: TICKET_PRIORITY;
 }
 
 export interface FileUploadPreview {
