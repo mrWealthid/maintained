@@ -15,7 +15,6 @@ import type { TicketType } from "@/shared/model/model";
 import type { TicketCreateFormValues } from "../../models/ticket-form.model";
 import { TicketTypeCombobox } from "./ticket-form-comboboxes";
 import { TicketFormSectionCard } from "./ticket-form-section-card";
-import { TicketPriorityField } from "./ticket-priority-field";
 import { TicketPropertyUnitFields } from "./ticket-property-unit-fields";
 
 export function TicketLocationTypeSection({
@@ -93,8 +92,6 @@ export function TicketLocationTypeSection({
           ) : null}
         </div>
       </div>
-
-      <TicketPriorityField disabled={disabled} />
 
       {selectedTypeName ? (
         <div className="flex flex-wrap gap-2">

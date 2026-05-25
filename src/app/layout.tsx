@@ -1,25 +1,37 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans, Lora, Roboto_Mono } from 'next/font/google';
+import {
+	Quicksand,
+	Merriweather,
+	JetBrains_Mono,
+	Sora
+} from 'next/font/google';
 import './global.css';
 import Provider from '@/utils/Provider';
 import { Toaster as Toasts } from '@/components/ui/sonner';
 import { ThemeProvider } from '../shared/contexts/ThemeProvider';
 
-const fontSans = Plus_Jakarta_Sans({
+const fontSans = Quicksand({
 	subsets: ['latin'],
-	variable: '--font-sans',
+	variable: '--font-quicksand',
 	display: 'swap'
 });
 
-const fontSerif = Lora({
+const fontSerif = Merriweather({
 	subsets: ['latin'],
-	variable: '--font-serif',
+	weight: ['300', '400', '700', '900'],
+	variable: '--font-merriweather',
 	display: 'swap'
 });
 
-const fontMono = Roboto_Mono({
+const fontMono = JetBrains_Mono({
 	subsets: ['latin'],
-	variable: '--font-mono',
+	variable: '--font-jetbrains-mono',
+	display: 'swap'
+});
+
+const fontDisplay = Sora({
+	subsets: ['latin'],
+	variable: '--font-sora',
 	display: 'swap'
 });
 
@@ -36,7 +48,7 @@ export default async function RootLayout({
 	return (
 		<html
 			lang='en'
-			className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable}`}
+			className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} ${fontDisplay.variable}`}
 			suppressHydrationWarning>
 			<body className='font-sans antialiased'>
 				<ThemeProvider

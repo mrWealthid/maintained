@@ -139,7 +139,7 @@ export default function SidebarProfileShell({
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             size="lg"
-            className="h-auto min-h-14 rounded-xl border border-sidebar-border/70 bg-card px-3 py-3 shadow-none transition-colors hover:border-primary/40 hover:bg-sidebar-accent/70 focus-visible:ring-0 data-[state=open]:border-primary/50 data-[state=open]:bg-sidebar-accent/80 data-[state=open]:text-foreground dark:bg-sidebar-accent/55 dark:hover:bg-sidebar-accent/80 group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:border-sidebar-border/70 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            className="h-auto min-h-14 rounded-xl border border-sidebar-border/70 bg-card px-3 py-3 shadow-none transition-colors hover:border-border dark:hover:border-primary/40 focus-visible:ring-0 data-[state=open]:border-primary/50 data-[state=open]:bg-sidebar-accent/80 data-[state=open]:text-foreground dark:bg-sidebar-accent/55 group-data-[collapsible=icon]:size-11 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:border-sidebar-border/70 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
           >
             {hasResolvedProfile ? (
               <Profile {...profile} expanded={open} />

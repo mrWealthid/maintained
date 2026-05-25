@@ -36,7 +36,6 @@ import {
   ticketCreateFormSchema,
   type TicketCreateFormValues,
 } from "../models/ticket-form.model";
-import { TICKET_PRIORITY } from "../models/ticket-priority.model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useCreateTicket,
@@ -93,7 +92,6 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
       description: ticket.description,
       area: ticket.area,
       type: ticket.type,
-      priority: ticket.priority ?? TICKET_PRIORITY.medium,
       relatedTo: getRelatedTicketId(ticket.relatedTo),
       category:
         typeof ticket.category === "object"
