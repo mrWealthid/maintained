@@ -7,8 +7,7 @@ import { toast } from "sonner";
 
 import type { ManageTicketFormProps } from "../models/ticket.model";
 import type { TicketCreateFormValues } from "../models/ticket-form.model";
-import type { CreateTicketPayload, TicketType } from "@/shared/model/model";
-import { useFetchTicketType } from "../hooks/ticketHooks";
+import type { CreateTicketPayload } from "@/shared/model/model";
 import { batchUpload } from "../helpers/helpers";
 import {
   TicketAttachmentsSection,
@@ -37,7 +36,6 @@ const TicketForm: FC<ManageTicketFormProps> = ({
 }) => {
   const router = useRouter();
   const isEditing = Boolean(ticket?.id);
-  const { data: ticketTypes } = useFetchTicketType<TicketType>();
   const {
     handleSubmit,
     getValues,
@@ -189,9 +187,7 @@ const TicketForm: FC<ManageTicketFormProps> = ({
         <TicketDetailsSection disabled={busy} initialCategory={initialCategory} />
         <TicketLocationTypeSection
           disabled={busy}
-          ticketTypes={ticketTypes ?? []}
           showPropertyUnitFields={showPropertyUnitFields}
-          showTicketTypeField={isEditing}
         />
         <TicketRelatedTicketSection
           disabled={busy}

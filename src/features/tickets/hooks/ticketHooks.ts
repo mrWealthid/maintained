@@ -10,7 +10,6 @@ import {
   createTicket,
   deleteTicket,
   fetchAdmins,
-  fetchRequestType,
   fetchTechnicians,
   fetchTicketCategory,
   fetchTicketDetails,
@@ -31,7 +30,6 @@ import {
   Category,
   CreateTicketPayload,
   Ticket,
-  TicketType,
   User,
 } from "@/shared/model/model";
 import { ApiError } from "@/shared/model/model";
@@ -83,20 +81,6 @@ export function useFetchTickets<T>(
     ...data,
   };
 }
-export function useFetchTicketType<T>(page: number = 1, limit: number = 50) {
-  const { isLoading, data, error, isRefetching } = useQuery({
-    queryKey: ["ticket-types"],
-    queryFn: () => fetchRequestType<T>(),
-  });
-
-  return {
-    isLoading,
-    error,
-    isRefetching,
-    ...data,
-  };
-}
-
 export function useDeleteTicket() {
   const queryClient = useQueryClient();
   const {
@@ -244,26 +228,6 @@ export function useFetchCategories(page: number = 1, limit: number = 50) {
     data,
   };
 }
-export function useFetchRequestTypes(page: number = 1, limit: number = 50) {
-  const { isLoading, data, error, isRefetching } = useQuery({
-    queryKey: ["request-type"],
-    queryFn: () => fetchRequestType<TicketType>(),
-    select({ data }) {
-      return data.map((type) => ({
-        label: type.name,
-        value: type.id,
-      }));
-    },
-  });
-
-  return {
-    isLoading,
-    error,
-    isRefetching,
-    data,
-  };
-}
-
 export function useBulkTicketAction() {
   const queryClient = useQueryClient();
   return useMutation({

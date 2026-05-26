@@ -41,7 +41,7 @@ import {
 import { type TicketCreateFormValues } from "../models/ticket-form.model";
 import { CreateTicketPayload } from "@/shared/model/model";
 import { useFormContext } from "react-hook-form";
-import { useFetchCategories, useFetchRequestTypes } from "../hooks/ticketHooks";
+import { useFetchCategories } from "../hooks/ticketHooks";
 import { TICKET_PRIORITY } from "@/shared/enums/enums";
 import {
   batchUpload,
@@ -129,7 +129,6 @@ export function InteractiveTicketChat({
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: categories } = useFetchCategories();
-  const { data: requestTypes } = useFetchRequestTypes();
 
   // Initialize speech recognition
 
@@ -323,11 +322,11 @@ export function InteractiveTicketChat({
   const startConversation = () => {
     // if (messages.length > 0) return;
     addBotMessage(
-      "Hi! I'm here to help you submit a maintenance request. Let's start by identifying what type of request you'll like to submit.",
+      "Hi! I'm here to help you submit a maintenance request. Let's start by identifying the issue you're experiencing.",
       {
         inputType: "select",
-        selectOptions: requestTypes,
-        field: "type",
+        selectOptions: categories,
+        field: "category",
       }
     );
   };
@@ -366,16 +365,6 @@ export function InteractiveTicketChat({
 
   const processNextStep = (value: string, field?: string) => {
     switch (field) {
-      case "type":
-        addBotMessage(
-          "Got it! Can you identify the issue you're experiencing? This helps us categorize your request appropriately.",
-          {
-            inputType: "select",
-            selectOptions: categories,
-            field: "category",
-          }
-        );
-        break;
       case "category":
         // addBotMessage(
         //   "Got it! Now, how urgent is this issue? This helps us prioritize your request appropriately.",
@@ -475,16 +464,6 @@ export function InteractiveTicketChat({
   };
   const updateStep = (value: string, field?: string) => {
     switch (field) {
-      case "type":
-        addBotMessage(
-          "	Got it! Can you identify what type of request you'll like to submit.",
-          {
-            inputType: "select",
-            selectOptions: requestTypes,
-            field: "type",
-          }
-        );
-        break;
       case "category":
         addBotMessage(
           "Got it! Can you identify the issue you're experiencing? This helps us categorize your request appropriately.",

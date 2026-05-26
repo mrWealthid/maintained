@@ -27,11 +27,8 @@ import { cn } from "@/lib/utils";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { FORM_CONTROL_TRANSPARENT_CLASS } from "@/shared/components/form-elements/form-control-styles";
 import { useHasPermission } from "@/shared/hooks/usePermission";
-import type { Category, TicketType } from "@/shared/model/model";
-import {
-  useCreateCategory,
-  useCreateTicketType,
-} from "@/features/settings/hooks/settingsHooks";
+import type { Category } from "@/shared/model/model";
+import { useCreateCategory } from "@/features/settings/hooks/settingsHooks";
 import { fetchTicketCategory } from "../../services/ticket-service";
 
 export function CategoryCombobox({
@@ -178,141 +175,6 @@ export function CategoryCombobox({
                 </CommandGroup>
               </>
             )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-export function TicketTypeCombobox({
-  value,
-  types,
-  onChange,
-  disabled,
-}: {
-  value?: string;
-  types: TicketType[];
-  onChange: (type: TicketType) => void;
-  disabled?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const canCreate = useHasPermission(PERMISSION.TICKET_TYPES_MANAGE);
-  const { mutateAsync: createTicketType, isPending: isCreating } =
-    useCreateTicketType();
-  const trimmedSearch = search.trim();
-  const filtered = trimmedSearch
-    ? types.filter((type) =>
-        type.name.toLowerCase().includes(trimmedSearch.toLowerCase()),
-      )
-    : types;
-  const showCreate =
-    canCreate &&
-    Boolean(trimmedSearch) &&
-    !types.some((type) => type.name.toLowerCase() === trimmedSearch.toLowerCase());
-  const display = types.find((type) => type.id === value)?.name || "";
-
-  async function handleCreate() {
-    if (!showCreate) return;
-    const result = await createTicketType({
-      name: trimmedSearch,
-      description: "",
-      isActive: true,
-    });
-    const created = result?.data as TicketType | undefined;
-    if (!created) return;
-    onChange(created);
-    setSearch("");
-    setOpen(false);
-  }
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled || isCreating}
-          className={`${FORM_CONTROL_TRANSPARENT_CLASS} justify-between px-3 py-1 font-normal`}
-        >
-          <span
-            className={cn(
-              "min-w-0 truncate",
-              !display && "text-muted-foreground",
-            )}
-          >
-            {display || "Select a ticket type"}
-          </span>
-          {isCreating ? (
-            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-70" />
-          ) : (
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-(--radix-popover-trigger-width) p-0"
-        align="start"
-      >
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={
-              canCreate ? "Search or create ticket type..." : "Search ticket types..."
-            }
-            value={search}
-            onValueChange={setSearch}
-          />
-          <CommandList>
-            {showCreate ? (
-              <CommandGroup heading="Create">
-                <CommandItem
-                  onSelect={() => void handleCreate()}
-                  disabled={isCreating}
-                >
-                  {isCreating ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Plus className="mr-2 h-4 w-4" />
-                  )}
-                  {isCreating
-                    ? `Creating "${trimmedSearch}"...`
-                    : `Create "${trimmedSearch}"`}
-                </CommandItem>
-              </CommandGroup>
-            ) : null}
-            {!filtered.length && !showCreate ? (
-              <CommandEmpty>No ticket types found.</CommandEmpty>
-            ) : null}
-            <CommandGroup heading="Ticket Types">
-              {filtered.map((type) => (
-                <CommandItem
-                  key={type.id}
-                  value={type.id}
-                  onSelect={() => {
-                    onChange(type);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === type.id ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{type.name}</span>
-                    {type.description ? (
-                      <span className="line-clamp-1 text-xs text-muted-foreground">
-                        {type.description}
-                      </span>
-                    ) : null}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

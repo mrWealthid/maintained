@@ -46,7 +46,6 @@ export const DEFAULT_TICKET_FORM_VALUES: TicketCreateFormValues = {
   area: "",
   description: "",
   category: "",
-  type: "",
   relatedTo: "",
   property: "",
   unit: "",
@@ -234,7 +233,7 @@ export default function CreateTicketSheet({
                 />
               </div>
               <div className="order-first min-w-0 lg:order-none">
-                <TicketSummary showTicketType={false} />
+                <TicketSummary />
               </div>
             </div>
           </AppSheetBody>

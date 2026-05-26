@@ -114,4 +114,52 @@ Respond here: {{technician_request_url}}`,
     includeUnsubscribe: false,
     replyToOverride: "",
   },
+  [BUSINESS_EMAIL_TEMPLATE.TICKET_AI_TRIAGE_TENANT_UPDATE]: {
+    enabled: true,
+    subject: "Update on your maintenance request: {{ticket_title}}",
+    preheader: "We've reviewed your request and here's what happens next.",
+    body: `Hi {{attendee_name}},
+
+{{user_reply}}
+
+{{safety_instructions_block}}
+
+Request details
+Ticket: {{ticket_title}}
+Priority: {{ticket_priority}}
+Location: {{property_name}} {{unit_label}}
+
+You can follow progress here: {{ticket_url}}`,
+    delay: "immediate",
+    triggerDescription:
+      "Sent to the tenant who submitted the ticket once AI triage completes, with the AI's tenant-facing reply and any safety instructions.",
+    includeUnsubscribe: false,
+    replyToOverride: "",
+  },
+  [BUSINESS_EMAIL_TEMPLATE.TICKET_AI_TRIAGE_COMPLETE]: {
+    enabled: true,
+    subject: "[{{ticket_priority}}] AI triage complete: {{ticket_title}}",
+    preheader:
+      "A new maintenance ticket has been classified and is ready for dispatch.",
+    body: `Hi {{attendee_name}},
+
+AI triage just finished for a new maintenance ticket and it is ready for your review.
+
+Ticket: {{ticket_title}}
+Priority: {{ticket_priority}}
+Category: {{ticket_category}}
+Recommended type: {{recommended_ticket_type}}
+Location: {{property_name}} {{unit_label}}
+Needs human review: {{needs_human_review}}
+
+Admin notes
+{{admin_notes}}
+
+Open ticket: {{ticket_url}}`,
+    delay: "immediate",
+    triggerDescription:
+      "Sent to workspace admins when AI triage completes for a new ticket and the ticket transitions to PROCESSING.",
+    includeUnsubscribe: false,
+    replyToOverride: "",
+  },
 };

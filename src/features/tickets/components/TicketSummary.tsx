@@ -10,13 +10,11 @@ import {
   Paperclip,
   Tag,
   Video,
-  Wrench,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { Category, TicketType } from "@/shared/model/model";
-import { useFetchTicketType } from "../hooks/ticketHooks";
+import { Category } from "@/shared/model/model";
 import { type TicketCreateFormValues } from "../models/ticket-form.model";
 import { fetchTicketCategory } from "../services/ticket-service";
 
@@ -26,24 +24,18 @@ interface TicketSummaryProps {
     videos: number;
     documents: number;
   };
-  showTicketType?: boolean;
 }
 
 const TicketSummary: React.FC<TicketSummaryProps> = ({
   initialAttachmentCounts = { images: 0, videos: 0, documents: 0 },
-  showTicketType = true,
 }) => {
   const { watch } = useFormContext<TicketCreateFormValues>();
   const watched = watch();
-  const { data: ticketTypes } = useFetchTicketType<TicketType>();
   const { data: categoriesResponse } = useQuery({
     queryKey: ["category", "ticket-summary"],
     queryFn: () => fetchTicketCategory<Category>(),
   });
 
-  const selectedTypeName = ticketTypes?.find(
-    (t) => t.id === watched.type
-  )?.name;
   const selectedCategoryName = categoriesResponse?.data?.find(
     (category) => category.id === watched.category
   )?.name;
@@ -57,9 +49,8 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
     !!watched.description,
     !!watched.category,
     !!watched.area,
-    showTicketType ? !!watched.type : true,
   ].filter(Boolean).length;
-  const completeness = Math.round((completedFields / 5) * 100);
+  const completeness = Math.round((completedFields / 4) * 100);
 
   return (
     <Card className="overflow-hidden rounded-2xl py-0 shadow-sm lg:sticky lg:top-6">
@@ -111,19 +102,6 @@ const TicketSummary: React.FC<TicketSummaryProps> = ({
           placeholder="No area set"
           icon={<MapPin className="h-4 w-4" />}
         />
-
-        {showTicketType ? (
-          <>
-            <Separator />
-
-            <SummaryRow
-              label="Request Type"
-              value={selectedTypeName}
-              placeholder="No request type set"
-              icon={<Wrench className="h-4 w-4" />}
-            />
-          </>
-        ) : null}
 
         <div>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">

@@ -8,8 +8,11 @@ import {
   ticketAiTriageWorkflowSchema,
 } from "@/features/tickets/models/ticket-form.model";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
+import { sendAdminTriageCompleteEmail } from "@/lib/email/senders/tickets/sendAdminTriageCompleteEmail";
+import { sendTenantTriageCompleteEmail } from "@/lib/email/senders/tickets/sendTenantTriageCompleteEmail";
+import { resolveTicketTypeByRecommendation } from "@/lib/tickets/default-ticket-type";
 import Ticket from "@/models/ticketModel";
-import { AI_TRIAGE_STATUS, TICKET_PRIORITY } from "@/shared/enums/enums";
+import { AI_TRIAGE_STATUS, TICKET_PRIORITY, TICKET_STATUS } from "@/shared/enums/enums";
 
 const ticketPriorityValues = Object.values(TICKET_PRIORITY) as [
   TICKET_PRIORITY,
@@ -69,6 +72,17 @@ export async function POST(
     );
     const now = new Date();
     const aiTriageStatus = body.aiTriageStatus;
+    const recommendedTicketType = body.aiTriage?.recommendedTicketType;
+    const mappedTicketType = recommendedTicketType
+      ? await resolveTicketTypeByRecommendation({ recommendedTicketType })
+      : null;
+
+    const currentTicket = await Ticket.findById(ticketId).select("status");
+    if (!currentTicket) throw ApiError.notFound("Ticket not found");
+
+    const shouldAdvanceStatus =
+      aiTriageStatus === AI_TRIAGE_STATUS.completed &&
+      currentTicket.status === TICKET_STATUS.pending;
 
     const lifecyclePatch = {
       aiTriageStatus,
@@ -91,6 +105,8 @@ export async function POST(
     const update = removeUndefined({
       ...lifecyclePatch,
       priority: body.priority,
+      type: mappedTicketType,
+      status: shouldAdvanceStatus ? TICKET_STATUS.processing : undefined,
       aiTriage: body.aiTriage
         ? {
             ...body.aiTriage,
@@ -106,6 +122,43 @@ export async function POST(
     );
 
     if (!ticket) throw ApiError.notFound("Ticket not found");
+
+    if (shouldAdvanceStatus && ticket.business) {
+      const businessIdStr = String(ticket.business);
+      const ticketIdStr = String(ticket._id);
+
+      void sendAdminTriageCompleteEmail({
+        request,
+        businessId: businessIdStr,
+        ticketId: ticketIdStr,
+        ticketTitle: ticket.title,
+        ticketPriority: ticket.priority,
+        recommendedTicketType: ticket.aiTriage?.recommendedTicketType,
+        propertyName: ticket.propertyName,
+        unitLabel: ticket.unitLabel,
+        needsHumanReview: ticket.aiTriage?.needsHumanReview,
+        adminNotes: ticket.aiTriage?.adminNotes,
+      }).catch((error) => {
+        console.error("[ai-triage] admin email failed", error);
+      });
+
+      if (ticket.user) {
+        void sendTenantTriageCompleteEmail({
+          request,
+          businessId: businessIdStr,
+          tenantUserId: String(ticket.user),
+          ticketId: ticketIdStr,
+          ticketTitle: ticket.title,
+          ticketPriority: ticket.priority,
+          propertyName: ticket.propertyName,
+          unitLabel: ticket.unitLabel,
+          userReply: ticket.aiTriage?.userReply,
+          safetyInstructions: ticket.aiTriage?.safetyInstructions,
+        }).catch((error) => {
+          console.error("[ai-triage] tenant email failed", error);
+        });
+      }
+    }
 
     return NextResponse.json({
       status: "success",

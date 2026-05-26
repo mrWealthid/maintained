@@ -19,6 +19,9 @@ type TriggerAiTriageWebhookResult =
 export async function triggerAiTriageWebhook(
   payload: TriggerAiTriageWebhookArgs,
 ): Promise<TriggerAiTriageWebhookResult> {
+  const { getTicketTypePromptOptions, TICKET_TYPE_VALUES } = await import(
+    "@/shared/tickets/ticket-types"
+  );
   const webhookUrl = process.env.N8N_MAINTENANCE_TRIAGE_WEBHOOK_URL;
   if (!webhookUrl) {
     return { sent: false, skippedReason: "missing-webhook-url" };
@@ -33,12 +36,26 @@ export async function triggerAiTriageWebhook(
   }
 
   try {
+    console.log("Url", webhookUrl);
+    console.log("I got here, and I called the endpoint");
+    console.log("payload", payload);
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        aiTriageContext: {
+          recommendedTicketType: {
+            instruction:
+              "Return recommendedTicketType as exactly one of these enum values. Do not return MongoDB ids or free-form labels.",
+            enum: TICKET_TYPE_VALUES,
+            options: getTicketTypePromptOptions(),
+          },
+        },
+      }),
     });
 
+    console.log(response);
     if (!response.ok) {
       return {
         sent: false,
@@ -50,7 +67,8 @@ export async function triggerAiTriageWebhook(
   } catch (error) {
     return {
       sent: false,
-      error: error instanceof Error ? error.message : "Unknown n8n webhook error",
+      error:
+        error instanceof Error ? error.message : "Unknown n8n webhook error",
     };
   }
 }

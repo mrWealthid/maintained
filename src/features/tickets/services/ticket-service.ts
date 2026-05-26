@@ -66,16 +66,6 @@ export async function fetchTicketCategory<T>(
     throw ApiErrorHandler.toUIError(err);
   }
 }
-export async function fetchRequestType<T>(): Promise<ApiResponse<T[]>> {
-  const url = `${API_ROUTES.ticketManagement.get_request_types}`;
-  try {
-    const response = await http(url);
-
-    return response.data;
-  } catch (err: unknown) {
-    throw ApiErrorHandler.toUIError(err);
-  }
-}
 export async function fetchTechnicians(
   query?: string | null
 ): Promise<ApiResponse<User[]>> {

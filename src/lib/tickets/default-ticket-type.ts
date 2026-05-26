@@ -1,39 +1,8 @@
 import TicketType from "@/models/ticketTypeModel";
-
-export const DEFAULT_TICKET_TYPE_NAME = "Repair";
-
-export const DEFAULT_TICKET_TYPES = [
-  {
-    key: "repair",
-    name: DEFAULT_TICKET_TYPE_NAME,
-    description: "Default repair request type used before automated analysis.",
-  },
-  {
-    key: "inspection",
-    name: "Inspection",
-    description: "Requests that require an inspection or diagnosis first.",
-  },
-  {
-    key: "installation",
-    name: "Installation",
-    description: "Install new fixtures, equipment, or property components.",
-  },
-  {
-    key: "replacement",
-    name: "Replacement",
-    description: "Replace damaged, expired, or failed items.",
-  },
-  {
-    key: "preventive-maintenance",
-    name: "Preventive Maintenance",
-    description: "Scheduled upkeep to reduce future repair issues.",
-  },
-  {
-    key: "emergency",
-    name: "Emergency",
-    description: "Urgent requests that need immediate attention.",
-  },
-] as const;
+import {
+  DEFAULT_TICKET_TYPES,
+  normalizeTicketType,
+} from "@/shared/tickets/ticket-types";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -77,12 +46,11 @@ export async function ensureDefaultTicketTypes() {
   }
 }
 
-export async function ensureDefaultRepairTicketType() {
-  await ensureDefaultTicketTypes();
+export async function resolveTicketTypeByRecommendation(args: {
+  recommendedTicketType?: string | null;
+}) {
+  const recommendedTicketType = args.recommendedTicketType?.trim();
+  if (!recommendedTicketType) return null;
 
-  return TicketType.findOne({
-    key: "repair",
-    business: null,
-    isActive: true,
-  });
+  return normalizeTicketType(recommendedTicketType);
 }

@@ -22,7 +22,6 @@ import {
 } from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { ensureDefaultRepairTicketType } from "@/lib/tickets/default-ticket-type";
 import { triggerAiTriageWebhook } from "@/lib/tickets/ai-triage-webhook";
 
 connect();
@@ -237,9 +236,6 @@ export async function POST(request: NextRequest) {
       rawBody
     );
     const businessId = user.currentBusiness;
-    const defaultType = body.type
-      ? null
-      : await ensureDefaultRepairTicketType();
 
     if (body.relatedTo) {
       if (!mongoose.Types.ObjectId.isValid(body.relatedTo)) {
@@ -288,7 +284,6 @@ export async function POST(request: NextRequest) {
 
     const data = await Ticket.create({
       ...body,
-      type: body.type || defaultType?._id,
       relatedTo: body.relatedTo || undefined,
       property: propertyId,
       unit: unitId,

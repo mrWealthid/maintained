@@ -8,6 +8,7 @@ import {
   AI_TRIAGE_STATUS,
   TICKET_PRIORITY,
   TICKET_STATUS,
+  TICKET_TYPE,
 } from "@/shared/enums/enums";
 import "./technicanRequest";
 
@@ -34,6 +35,8 @@ export interface TicketTechnicianDiagnosisSnapshot {
 }
 
 export interface TicketAiTriage {
+  recommendedTicketType?: TICKET_TYPE;
+  recommendedTicketTypeReason?: string;
   priorityReason?: string;
   isMinorFix?: boolean;
   requiresTechnician?: boolean;
@@ -69,7 +72,7 @@ export interface ITicket extends Document {
   actionedBy: ObjectId;
   assignedTo?: ObjectId;
   relatedTo?: ObjectId;
-  type: ObjectId;
+  type?: TICKET_TYPE;
   priority: TICKET_PRIORITY;
   aiTriageStatus: AI_TRIAGE_STATUS;
   aiTriage?: TicketAiTriage;
@@ -116,6 +119,8 @@ const TicketTechnicianDiagnosisSchema =
 
 const TicketAiTriageSchema = new Schema<TicketAiTriage>(
   {
+    recommendedTicketType: { type: String, enum: Object.values(TICKET_TYPE) },
+    recommendedTicketTypeReason: { type: String },
     priorityReason: { type: String },
     isMinorFix: { type: Boolean },
     requiresTechnician: { type: Boolean },
@@ -154,9 +159,8 @@ const TicketSchema = new Schema<ITicket>(
     },
 
     type: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "TicketType",
-      required: true,
+      type: String,
+      enum: Object.values(TICKET_TYPE),
     },
 
     status: {

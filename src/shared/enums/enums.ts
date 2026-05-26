@@ -39,6 +39,15 @@ export enum TICKET_PRIORITY {
 	high = 'HIGH'
 }
 
+export enum TICKET_TYPE {
+	repair = 'repair',
+	inspection = 'inspection',
+	installation = 'installation',
+	replacement = 'replacement',
+	preventive_maintenance = 'preventive-maintenance',
+	emergency = 'emergency'
+}
+
 export enum AI_TRIAGE_STATUS {
 	notStarted = 'NOT_STARTED',
 	pending = 'PENDING',

@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 import { AI_TRIAGE_SOURCE, AI_TRIAGE_STATUS } from "@/shared/enums/enums";
+import {
+  normalizeTicketType,
+  TICKET_TYPE_VALUES,
+} from "@/shared/tickets/ticket-types";
 import { TICKET_PRIORITY_VALUES, type TicketPriority } from "./ticket-priority.model";
 
 const emptyStringToUndefined = (value: unknown) =>
@@ -17,6 +21,11 @@ const AI_TRIAGE_SOURCE_VALUES = Object.values(AI_TRIAGE_SOURCE) as [
 const boundedStringArray = z
   .array(z.string().trim().min(1).max(500))
   .max(25);
+const ticketTypeSchema = z.preprocess(
+  (value) =>
+    typeof value === "string" ? normalizeTicketType(value) ?? value : value,
+  z.enum(TICKET_TYPE_VALUES),
+);
 
 export const ticketTechnicianDiagnosisSchema = z.object({
   probableIssue: z.string().trim().max(1000).optional(),
@@ -26,6 +35,8 @@ export const ticketTechnicianDiagnosisSchema = z.object({
 });
 
 export const ticketAiTriageSchema = z.object({
+  recommendedTicketType: ticketTypeSchema.optional(),
+  recommendedTicketTypeReason: z.string().trim().max(1000).optional(),
   priorityReason: z.string().trim().max(1000).optional(),
   isMinorFix: z.boolean().optional(),
   requiresTechnician: z.boolean().optional(),
@@ -71,10 +82,6 @@ export const ticketFormSchema = z.object({
   area: z.string().trim().min(1, "Area is required").max(120),
   description: z.string().trim().min(1, "Description is required").max(5000),
   category: z.string().min(1, "Category is required"),
-  type: z.preprocess(
-    emptyStringToUndefined,
-    z.string().min(1, "Type is required").optional(),
-  ),
   priority: z.enum(TICKET_PRIORITY_VALUES as [TicketPriority, ...TicketPriority[]], {
     required_error: "Priority is required",
   }),

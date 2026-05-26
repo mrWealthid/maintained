@@ -91,7 +91,6 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
       title: ticket.title,
       description: ticket.description,
       area: ticket.area,
-      type: ticket.type,
       relatedTo: getRelatedTicketId(ticket.relatedTo),
       category:
         typeof ticket.category === "object"

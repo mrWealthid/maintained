@@ -41,6 +41,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { TICKET_PRIORITY, TICKET_STATUS } from "@/shared/enums/enums";
+import { getTicketTypeLabel } from "@/shared/tickets/ticket-types";
 import {
   TICKET_PRIORITY_META,
   TICKET_STATUS_META,
@@ -282,7 +283,10 @@ export default function TicketView({ ticketId }: { ticketId: string }) {
 
   const categoryName =
     typeof ticket.category === "object" ? ticket.category?.name : undefined;
-  const typeName = typeof ticket.type === "object" ? ticket.type?.name : undefined;
+  const typeName =
+    typeof ticket.type === "object"
+      ? ticket.type?.name
+      : getTicketTypeLabel(ticket.type);
   const propertyName =
     ticket.property?.name ?? ticket.propertyName ?? ticket.locationSnapshot?.propertyName;
   const unitLabel =

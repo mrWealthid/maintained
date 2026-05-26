@@ -5,6 +5,7 @@ import {
   ROLES,
   TICKET_PRIORITY,
   TICKET_STATUS,
+  TICKET_TYPE,
 } from "@/shared/enums/enums";
 import type { ComponentType } from "react";
 import { TechnicianRequest } from "../../features/tickets/models/ticket.model";
@@ -41,6 +42,8 @@ export interface TicketTechnicianDiagnosis {
 }
 
 export interface TicketAiTriage {
+  recommendedTicketType?: TICKET_TYPE;
+  recommendedTicketTypeReason?: string;
   priorityReason?: string;
   isMinorFix?: boolean;
   requiresTechnician?: boolean;
@@ -80,7 +83,7 @@ export interface Ticket {
     | string
     | Pick<Ticket, "id" | "title" | "status" | "createdAt">
     | null;
-  type?: string;
+  type?: TICKET_TYPE;
   priority: TICKET_PRIORITY;
   aiTriageStatus: AI_TRIAGE_STATUS;
   aiTriage?: TicketAiTriage;
@@ -114,6 +117,7 @@ export interface CreateTicketPayload
     | "propertyName"
     | "unitLabel"
     | "relatedTo"
+    | "type"
     | "priority"
     | "aiTriageStatus"
     | "aiTriage"

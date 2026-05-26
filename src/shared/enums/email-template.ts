@@ -23,6 +23,8 @@ export const BUSINESS_EMAIL_TEMPLATE = {
   TICKET_STATUS_UPDATED: "ticket_status_updated",
   TICKET_ASSIGNED: "ticket_assigned",
   TECHNICIAN_REQUEST: "technician_request",
+  TICKET_AI_TRIAGE_COMPLETE: "ticket_ai_triage_complete",
+  TICKET_AI_TRIAGE_TENANT_UPDATE: "ticket_ai_triage_tenant_update",
 } as const;
 
 export type BusinessEmailTemplateKey =

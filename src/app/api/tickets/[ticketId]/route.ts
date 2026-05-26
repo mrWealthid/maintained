@@ -31,7 +31,6 @@ export async function GET(
 
     const ticket = await Ticket.findById(ticketId).populate([
       { path: "category", select: "name description" },
-      { path: "type", select: "name description" },
       { path: "user", select: "name email photo contact" },
       { path: "assignedTo", select: "name email photo" },
       { path: "actionedBy", select: "name email photo" },
