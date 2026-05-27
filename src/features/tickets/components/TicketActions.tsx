@@ -25,8 +25,9 @@ import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import ErrorList from "@/components/ui/ErrorList";
 import { Button } from "@/components/ui/button";
 
-import { AI_TRIAGE_STATUS, TICKET_STATUS } from "@/shared/enums/enums";
+import { AI_TRIAGE_STATUS, ROLES, TICKET_STATUS } from "@/shared/enums/enums";
 import { useHasPermission } from "@/shared/hooks/usePermission";
+import { useAppContext } from "@/shared/contexts/AppContext";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
 import type { BaseActions, ConfirmActions } from "@/shared/model/model";
@@ -61,6 +62,7 @@ type ConfirmConfigItem = {
 
 export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const router = useRouter();
+  const { user } = useAppContext();
   const ticketSlug = ticket.slug;
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -85,6 +87,11 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const canCreateTechnicianRequest = useHasPermission(
     PERMISSION.TECHNICIAN_REQUESTS_CREATE,
   );
+  const isTenant =
+    user.role === ROLES.tenant || user.role === ROLES.user;
+  const canOpenEditTicket =
+    (canEditTicket && ticket.status === TICKET_STATUS.pending) ||
+    (isTenant && ticket.status === TICKET_STATUS.processing);
 
   const isLoading = isDeleting || isReTriaging;
 
@@ -149,7 +156,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
     },
   ];
 
-  if (ticket.status === TICKET_STATUS.pending && canEditTicket) {
+  if (canOpenEditTicket) {
     baseActions.push({
       label: "Edit",
       action: () => {
@@ -196,6 +203,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   }
 
   if (
+    !isTenant &&
     canEditTicket &&
     ticket.aiTriageStatus !== AI_TRIAGE_STATUS.pending &&
     ticket.aiTriageStatus !== AI_TRIAGE_STATUS.processing

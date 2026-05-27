@@ -4,6 +4,7 @@ import Ticket, { ITicket } from "@/models/ticketModel";
 import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import {
   ticketAiTriageSchema,
   ticketAiTriageWorkflowSchema,
@@ -11,7 +12,7 @@ import {
 } from "@/features/tickets/models/ticket-form.model";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import { AI_TRIAGE_STATUS } from "@/shared/enums/enums";
+import { AI_TRIAGE_STATUS, TICKET_STATUS } from "@/shared/enums/enums";
 import {
   hasReTriageAttemptsLeft,
   isTriageInFlight,
@@ -24,6 +25,16 @@ const ticketUpdateBodySchema = ticketFormSchema
   .extend({
     aiTriage: ticketAiTriageSchema.optional(),
   });
+
+const tenantTicketUpdateBodySchema = ticketFormSchema
+  .omit({
+    priority: true,
+    property: true,
+    unit: true,
+  })
+  .partial();
+
+type TicketUpdateBody = z.infer<typeof ticketUpdateBodySchema>;
 
 // Re-run AI triage only when the prior triage asked for more (human review or
 // missing information) AND the tenant actually changed the description that the
@@ -107,11 +118,13 @@ export async function PATCH(
     const { slug } = await params;
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
-    await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
 
     const ticketId = await resolveTicketIdentifier(slug);
 
-    const rest = parseOrThrow(ticketUpdateBodySchema, await request.json());
+    const rest = parseOrThrow(
+      verify.isUserRole ? tenantTicketUpdateBodySchema : ticketUpdateBodySchema,
+      await request.json(),
+    );
     if (rest.relatedTo === ticketId.toString()) {
       throw ApiError.badRequest("A ticket cannot be related to itself");
     }
@@ -121,29 +134,39 @@ export async function PATCH(
         throw ApiError.badRequest("Invalid related ticket");
       }
 
-      const relatedTicket = await Ticket.findById(rest.relatedTo).select("_id");
+      const relatedTicket = await Ticket.findOne({
+        _id: rest.relatedTo,
+        business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
+      }).select("_id");
       if (!relatedTicket) {
         throw ApiError.badRequest("Related ticket not found");
       }
     }
 
     const now = new Date();
+    const workflow = rest as Partial<TicketUpdateBody>;
     const update = {
       ...rest,
       aiTriageStartedAt:
-        rest.aiTriageStartedAt ??
-        (rest.aiTriageStatus === AI_TRIAGE_STATUS.processing ? now : undefined),
+        workflow.aiTriageStartedAt ??
+        (workflow.aiTriageStatus === AI_TRIAGE_STATUS.processing
+          ? now
+          : undefined),
       aiTriageCompletedAt:
-        rest.aiTriageCompletedAt ??
-        (rest.aiTriageStatus === AI_TRIAGE_STATUS.completed ? now : undefined),
+        workflow.aiTriageCompletedAt ??
+        (workflow.aiTriageStatus === AI_TRIAGE_STATUS.completed
+          ? now
+          : undefined),
       aiTriageFailedAt:
-        rest.aiTriageFailedAt ??
-        (rest.aiTriageStatus === AI_TRIAGE_STATUS.failed ? now : undefined),
-      ...(rest.aiTriage
+        workflow.aiTriageFailedAt ??
+        (workflow.aiTriageStatus === AI_TRIAGE_STATUS.failed
+          ? now
+          : undefined),
+      ...(workflow.aiTriage
         ? {
             aiTriage: {
-              ...rest.aiTriage,
-              analyzedAt: rest.aiTriage.analyzedAt ?? now,
+              ...workflow.aiTriage,
+              analyzedAt: workflow.aiTriage.analyzedAt ?? now,
             },
           }
         : {}),
@@ -160,12 +183,22 @@ export async function PATCH(
         };
 
     const existing = await Ticket.findOne(ticketFilter).select(
-      "description aiTriage aiTriageStatus aiTriageRetryCount",
+      "description status aiTriage aiTriageStatus aiTriageRetryCount",
     );
     if (!existing) {
       throw ApiError.forbidden(
         "You are not authorized to update this ticket or ticket not found",
       );
+    }
+
+    if (verify.isUserRole) {
+      if (existing.status !== TICKET_STATUS.processing) {
+        throw ApiError.forbidden(
+          "Tenant tickets can only be edited while they are processing",
+        );
+      }
+    } else {
+      await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
     }
 
     const updatedRequest = await Ticket.findOneAndUpdate(
