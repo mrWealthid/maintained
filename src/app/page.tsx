@@ -9,46 +9,134 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Home,
-  Search,
+  Sparkles,
   Wrench,
-  Users,
-  Star,
-  CheckCircle,
-  ArrowRight,
   Building2,
-  Shield,
+  Activity,
+  BarChart3,
+  MessagesSquare,
+  Bell,
   Clock,
-  TrendingUp,
-  Award,
-  Phone,
+  Shield,
+  CheckCircle2,
+  ArrowRight,
+  Star,
+  Users,
+  Route,
+  Inbox,
   Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/Theme-Toggle";
+import { ProperlyLogo } from "@/shared/components/ProperlyLogo";
+import { Reveal, CountUp } from "@/components/landing/motion";
+
+const features = [
+  {
+    icon: Sparkles,
+    title: "AI Triage",
+    desc: "Every request is read, categorized, prioritized, and routed the moment it lands — no manual sorting.",
+    tone: "primary" as const,
+    points: [
+      "Auto category & priority",
+      "Detects missing information",
+      "Drafts tenant replies",
+    ],
+  },
+  {
+    icon: Route,
+    title: "Smart Dispatch",
+    desc: "Matches each ticket to the right technician by skill, location, and workload, then tracks the job to done.",
+    tone: "resolved" as const,
+    points: [
+      "Skill-based assignment",
+      "Live job tracking",
+      "Re-triage in one click",
+    ],
+  },
+  {
+    icon: MessagesSquare,
+    title: "Tenant Requests",
+    desc: "A 24/7 portal where tenants report issues and follow progress, with built-in chat on every ticket.",
+    tone: "accent" as const,
+    points: [
+      "Submit from any device",
+      "Real-time status",
+      "In-thread messaging",
+    ],
+  },
+  {
+    icon: Building2,
+    title: "Multi-Property",
+    desc: "Manage every property, unit, and tenant from one workspace — with roles and access for your whole team.",
+    tone: "primary" as const,
+    points: ["Properties & units", "Tenant directory", "Role-based access"],
+  },
+  {
+    icon: Activity,
+    title: "Real-Time Tracking",
+    desc: "Status changes, assignments, and notes stream live to everyone involved, with instant notifications.",
+    tone: "resolved" as const,
+    points: ["Live activity feed", "Email & push alerts", "Full audit trail"],
+  },
+  {
+    icon: BarChart3,
+    title: "Insights",
+    desc: "See resolution times, technician workload, and recurring issues so you can fix problems before they repeat.",
+    tone: "accent" as const,
+    points: ["Resolution metrics", "Workload balance", "Recurring-issue trends"],
+  },
+];
+
+const toneClasses: Record<string, string> = {
+  primary: "bg-primary/10 text-primary",
+  resolved: "bg-status-resolved/15 text-status-resolved",
+  accent: "bg-accent text-accent-foreground",
+};
+
+const steps = [
+  {
+    step: "01",
+    icon: Inbox,
+    title: "Request comes in",
+    desc: "A tenant reports an issue through the portal or by email — no app install required.",
+  },
+  {
+    step: "02",
+    icon: Sparkles,
+    title: "AI triages it",
+    desc: "Properly categorizes the request, sets priority, and flags anything that's missing.",
+  },
+  {
+    step: "03",
+    icon: Route,
+    title: "Auto-dispatch",
+    desc: "The right technician is matched and assigned, with full context attached.",
+  },
+  {
+    step: "04",
+    icon: CheckCircle2,
+    title: "Tracked to resolved",
+    desc: "Everyone follows live status until the ticket is closed and logged.",
+  },
+];
+
+const stats = [
+  { to: 60, suffix: "%", label: "Faster first response", desc: "vs. manual triage" },
+  { to: 12000, suffix: "+", label: "Tickets triaged", desc: "Across active workspaces" },
+  { to: 4000, suffix: "+", label: "Units managed", desc: "In one platform" },
+  { to: 98, suffix: "%", label: "Resolution rate", desc: "Closed within SLA" },
+];
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col max-h-screen overflow-y-auto bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-semibold text-foreground">
-              ApartmentHub
-            </span>
-          </div>
+          <ProperlyLogo linkHref="/" size="md" />
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="#solutions"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Solutions
-            </Link>
             <Link
               href="#features"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -56,429 +144,337 @@ export default function LandingPage() {
               Features
             </Link>
             <Link
-              href="#pricing"
+              href="#how-it-works"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Pricing
+              How it works
             </Link>
             <Link
-              href="#support"
+              href="#results"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Support
+              Results
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
-              <Link href={"auth/login"}>Sign In</Link>
+              <Link href="auth/login">Sign In</Link>
             </Button>
             <Button asChild size="sm">
-              <Link href={"auth/signup"}>Get Started</Link>
+              <Link href="auth/signup">Get Started</Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="w-full py-16 md:py-24 lg:py-32">
-          <div className="container mx-auto px-4">
+        {/* Hero — animated gradient blobs + grid texture */}
+        <section className="relative w-full overflow-hidden py-20 md:py-28 lg:py-36">
+          <div className="pointer-events-none absolute inset-0 bg-grid [mask-[radial-gradient(ellipse_at_center,black,transparent_75%)] opacity-60" />
+          <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl animate-blob" />
+          <div className="pointer-events-none absolute top-10 -right-16 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl animate-blob [animation-delay:4s]" />
+
+          <div className="container relative mx-auto px-4">
             <div className="flex flex-col items-center space-y-8 text-center max-w-4xl mx-auto">
-              <div className="space-y-6">
+              <Reveal>
                 <Badge
                   variant="outline"
                   className="border-primary/30 bg-primary/5 text-primary"
                 >
-                  Enterprise Housing Solutions
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  AI-Powered Maintenance Triage
                 </Badge>
+              </Reveal>
+              <Reveal delay={0.08}>
                 <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
-                  Streamline Your
-                  <span className="block text-primary">
-                    Housing Operations
+                  Maintenance, resolved the
+                  <span className="block bg-linear-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent animate-gradient">
+                    moment it&apos;s reported
                   </span>
                 </h1>
+              </Reveal>
+              <Reveal delay={0.16}>
                 <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-                  Complete property management platform for modern businesses.
-                  Handle applications, maintenance requests, and property
-                  listings with enterprise-grade efficiency.
+                  Properly reads every maintenance request, triages it with AI,
+                  and dispatches the right technician automatically — so nothing
+                  slips through the cracks across all your properties.
                 </p>
-              </div>
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-                <Button size="lg" className="h-12 px-8 font-medium">
-                  Schedule Demo
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="lg" className="h-12 px-8">
-                  View Pricing
-                </Button>
-              </div>
-              <div className="flex items-center justify-center space-x-8 pt-4">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 fill-status-open text-status-open"
-                      />
-                    ))}
+              </Reveal>
+              <Reveal delay={0.24}>
+                <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
+                  <Button asChild size="lg" className="h-12 px-8 font-medium group">
+                    <Link href="auth/signup">
+                      Start free trial
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="h-12 px-8">
+                    <Link href="#how-it-works">See how it works</Link>
+                  </Button>
+                </div>
+              </Reveal>
+              <Reveal delay={0.32}>
+                <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-4">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-4 w-4 fill-status-open text-status-open"
+                        />
+                      ))}
+                    </div>
+                    <span className="font-medium">Loved by property teams</span>
                   </div>
-                  <span className="font-medium">4.9/5 Customer Rating</span>
+                  <div className="hidden sm:block h-4 w-px bg-border" />
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4" />
+                    <span className="font-medium">Built for multi-tenant teams</span>
+                  </div>
                 </div>
-                <div className="h-4 w-px bg-border" />
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">50,000+ Active Users</span>
-                </div>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
 
-        {/* Solutions Section */}
+        {/* Features — muted band with dotted texture */}
         <section
-          id="solutions"
-          className="w-full py-16 md:py-24 bg-muted/40"
+          id="features"
+          className="relative w-full border-y border-border bg-muted/30 py-20 md:py-28"
         >
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center space-y-4 text-center mb-16">
+          <div className="pointer-events-none absolute inset-0 bg-dots opacity-40" />
+          <div className="container relative mx-auto px-4">
+            <Reveal className="flex flex-col items-center space-y-4 text-center mb-16">
               <Badge
                 variant="outline"
                 className="border-primary/30 bg-primary/5 text-primary"
               >
-                Comprehensive Solutions
+                Everything in one workspace
               </Badge>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Everything your business needs
+                From request to resolved — handled
               </h2>
               <p className="max-w-2xl text-lg text-muted-foreground">
-                Integrated platform designed for property managers, real estate
-                professionals, and housing organizations.
+                Properly replaces spreadsheets, inboxes, and group chats with one
+                system built for property maintenance.
               </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Search className="h-5 w-5 text-primary" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold text-foreground">
-                      Property Search
-                    </CardTitle>
-                  </div>
-                  <CardDescription className="text-muted-foreground leading-relaxed">
-                    Advanced search capabilities with intelligent filtering,
-                    virtual tours, and automated matching algorithms.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Multi-criteria filtering system
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        360° virtual property tours
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        AI-powered recommendations
-                      </span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+            </Reveal>
 
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-status-resolved/15">
-                      <Wrench className="h-5 w-5 text-status-resolved" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold text-foreground">
-                      Maintenance Management
-                    </CardTitle>
-                  </div>
-                  <CardDescription className="text-muted-foreground leading-relaxed">
-                    Streamlined maintenance workflow with automated routing,
-                    real-time tracking, and vendor management.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    <li className="flex items-center space-x-3">
-                      <Clock className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        24/7 request submission portal
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Real-time status updates
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <Shield className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Certified service provider network
-                      </span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <Home className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold text-foreground">
-                      Property Listings
-                    </CardTitle>
-                  </div>
-                  <CardDescription className="text-muted-foreground leading-relaxed">
-                    Professional listing management with automated screening,
-                    digital contracts, and performance analytics.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Professional photography service
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Automated tenant screening
-                      </span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-4 w-4 text-status-resolved shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        Digital lease management
-                      </span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+              {features.map((f, i) => {
+                const Icon = f.icon;
+                return (
+                  <Reveal key={f.title} delay={(i % 3) * 0.08}>
+                    <Card className="group h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/40">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 ${toneClasses[f.tone]}`}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <CardTitle className="text-xl font-semibold text-foreground">
+                            {f.title}
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="text-muted-foreground leading-relaxed">
+                          {f.desc}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-3">
+                          {f.points.map((p) => (
+                            <li key={p} className="flex items-center space-x-3">
+                              <CheckCircle2 className="h-4 w-4 text-status-resolved shrink-0" />
+                              <span className="text-sm text-muted-foreground">
+                                {p}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* Process Section */}
-        <section className="w-full py-16 md:py-24">
+        {/* How it works — plain background with connecting line */}
+        <section id="how-it-works" className="w-full py-20 md:py-28">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center space-y-4 text-center mb-16">
+            <Reveal className="flex flex-col items-center space-y-4 text-center mb-16">
               <Badge
                 variant="outline"
                 className="border-primary/30 bg-primary/5 text-primary"
               >
-                Implementation Process
+                How it works
               </Badge>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Get started in four simple steps
+                Four steps, zero busywork
               </h2>
               <p className="max-w-2xl text-lg text-muted-foreground">
-                Our streamlined onboarding process gets your team up and running
-                quickly.
+                From the moment a tenant hits submit, Properly does the
+                coordinating for you.
               </p>
+            </Reveal>
+
+            <div className="relative grid gap-10 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+              <div className="pointer-events-none absolute left-0 right-0 top-7 hidden lg:block h-px bg-linear-to-r from-transparent via-border to-transparent" />
+              {steps.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <Reveal
+                    key={item.step}
+                    delay={index * 0.1}
+                    className="relative flex flex-col items-center text-center space-y-4"
+                  >
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-background text-primary shadow-sm animate-floaty" style={{ animationDelay: `${index * 0.4}s` }}>
+                      <Icon className="h-6 w-6" />
+                      <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-[15rem]">
+                      {item.desc}
+                    </p>
+                  </Reveal>
+                );
+              })}
             </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-              {[
-                {
-                  step: "01",
-                  title: "Consultation",
-                  desc: "Schedule a demo and discuss your specific requirements with our team.",
-                },
-                {
-                  step: "02",
-                  title: "Setup",
-                  desc: "We configure the platform according to your business needs and workflows.",
-                },
-                {
-                  step: "03",
-                  title: "Training",
-                  desc: "Comprehensive training sessions for your team to ensure smooth adoption.",
-                },
-                {
-                  step: "04",
-                  title: "Launch",
-                  desc: "Go live with full support and ongoing assistance from our experts.",
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-center space-y-4"
+          </div>
+        </section>
+
+        {/* Results — bold animated gradient band */}
+        <section
+          id="results"
+          className="relative w-full overflow-hidden bg-linear-to-br from-primary via-primary to-violet-600 py-20 md:py-28 text-primary-foreground animate-gradient"
+        >
+          <div className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-blob" />
+          <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-blob [animation-delay:5s]" />
+          <div className="container relative mx-auto px-4">
+            <Reveal className="text-center mb-14">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Results teams feel in week one
+              </h2>
+            </Reveal>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+              {stats.map((stat, index) => (
+                <Reveal
+                  key={stat.label}
+                  delay={index * 0.08}
+                  className="flex flex-col items-center text-center space-y-2"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary text-primary font-semibold">
-                    {item.step}
+                  <div className="text-4xl font-bold sm:text-5xl">
+                    <CountUp to={stat.to} suffix={stat.suffix} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
+                  <div className="text-sm font-medium">{stat.label}</div>
+                  <p className="text-xs text-primary-foreground/70">{stat.desc}</p>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="w-full py-16 md:py-24 bg-muted/40">
+        {/* CTA — contained gradient card with blobs */}
+        <section className="w-full py-20 md:py-28">
           <div className="container mx-auto px-4">
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
-              {[
-                {
-                  icon: <Users className="h-5 w-5" />,
-                  number: "50,000+",
-                  label: "Active Users",
-                  desc: "Property managers and tenants",
-                },
-                {
-                  icon: <Home className="h-5 w-5" />,
-                  number: "10,000+",
-                  label: "Properties Managed",
-                  desc: "Across multiple markets",
-                },
-                {
-                  icon: <Award className="h-5 w-5" />,
-                  number: "98%",
-                  label: "Customer Satisfaction",
-                  desc: "Based on user surveys",
-                },
-                {
-                  icon: <TrendingUp className="h-5 w-5" />,
-                  number: "40%",
-                  label: "Efficiency Increase",
-                  desc: "Average time savings",
-                },
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-center space-y-3 p-6"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    {stat.icon}
+            <Reveal>
+              <div className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-14 sm:px-12 md:py-20">
+                <div className="pointer-events-none absolute inset-0 bg-grid mask-[radial-gradient(ellipse_at_center,black,transparent_75%)] opacity-50" />
+                <div className="pointer-events-none absolute -top-16 -right-10 h-60 w-60 rounded-full bg-primary/20 blur-3xl animate-blob" />
+                <div className="relative flex flex-col items-center space-y-8 text-center max-w-3xl mx-auto">
+                  <div className="space-y-4">
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                      Put maintenance on autopilot
+                    </h2>
+                    <p className="text-lg text-muted-foreground leading-relaxed">
+                      Start triaging requests with AI today. Set up your workspace
+                      in minutes — no credit card required.
+                    </p>
                   </div>
-                  <div className="text-3xl font-bold text-foreground">
-                    {stat.number}
+                  <form className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                    <Input
+                      type="email"
+                      placeholder="Enter your work email"
+                      className="flex-1 h-12"
+                    />
+                    <Button asChild className="h-12 px-8 font-medium">
+                      <Link href="auth/signup">Get started</Link>
+                    </Button>
+                  </form>
+                  <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="h-4 w-4 text-status-resolved" /> Free trial
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-status-resolved" /> Setup in
+                      minutes
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Bell className="h-4 w-4 text-status-resolved" /> Cancel
+                      anytime
+                    </span>
                   </div>
-                  <div className="text-sm font-medium text-foreground">
-                    {stat.label}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.desc}
-                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="w-full py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center space-y-8 text-center max-w-3xl mx-auto">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Ready to transform your housing operations?
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Join industry leaders who trust ApartmentHub to streamline
-                  their property management processes.
-                </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                <Input
-                  type="email"
-                  placeholder="Enter your business email"
-                  className="flex-1 h-12"
-                />
-                <Button className="h-12 px-8 font-medium">
-                  Request Demo
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Free 30-day trial • No setup fees • Cancel anytime
-              </p>
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-background">
+      <footer className="border-t border-border bg-muted/30">
         <div className="container mx-auto px-4 py-12">
           <div className="grid gap-8 md:grid-cols-4">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
-                  <Building2 className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-semibold text-foreground">
-                  ApartmentHub
-                </span>
-              </div>
+              <ProperlyLogo linkHref="/" size="md" disableLink />
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Enterprise-grade housing management platform trusted by property
-                professionals worldwide.
+                AI maintenance triage and dispatch for property teams — every
+                request handled, from report to resolved.
               </p>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-4">
-                Solutions
+                Product
               </h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
-                    Property Search
+                  <Link href="#features" className="hover:text-foreground transition-colors">
+                    Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
-                    Maintenance
+                  <Link href="#how-it-works" className="hover:text-foreground transition-colors">
+                    How it works
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
-                    Listings
+                  <Link href="#results" className="hover:text-foreground transition-colors">
+                    Results
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
-                    Analytics
+                  <Link href="auth/signup" className="hover:text-foreground transition-colors">
+                    Get started
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-4">
-                Support
+                Company
               </h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <Link href="#" className="hover:text-foreground transition-colors">
-                    Documentation
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
-                    API Reference
+                    About
                   </Link>
                 </li>
                 <li>
@@ -488,30 +484,30 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <Link href="#" className="hover:text-foreground transition-colors">
-                    Contact Support
+                    Contact
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-4">
-                Contact
+                Get in touch
               </h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4" />
-                  <span>1-800-APARTMENT</span>
+                  <Mail className="h-4 w-4" />
+                  <span>hello@properly.app</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span>sales@apartmenthub.com</span>
+                  <Wrench className="h-4 w-4" />
+                  <span>Support 24/7</span>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
             <p className="text-xs text-muted-foreground">
-              © 2024 ApartmentHub. All rights reserved.
+              © {new Date().getFullYear()} Properly. All rights reserved.
             </p>
             <nav className="flex gap-6 mt-4 sm:mt-0">
               <Link href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
