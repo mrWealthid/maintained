@@ -2,7 +2,11 @@ import type { NextRequest } from "next/server";
 
 import { sendBusinessTemplateEmail } from "@/lib/email/clients/business-email.client";
 import { resolveAppBaseUrl } from "@/lib/email/helpers/app-url";
-import { asHtmlWithLinks, escapeHtml } from "@/lib/email/helpers/email-html";
+import {
+  EMAIL_LINK_COLOR,
+  escapeHtml,
+  normalizeTemplateText,
+} from "@/lib/email/helpers/email-html";
 import {
   buildGenericDetailsGrid,
   buildGenericEmailBadge,
@@ -53,6 +57,29 @@ function buildTextListBlock(title: string, items?: string[]): string {
   return `${title}:\n${bullets}`;
 }
 
+function buildHiddenPreheader(preheader: string) {
+  return `<div style="display:none;max-height:0;overflow:hidden;">${escapeHtml(preheader)}</div>`;
+}
+
+function buildBrandedParagraphs(text: string) {
+  const normalized = normalizeTemplateText(text);
+  if (!normalized) return "";
+
+  return normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => {
+      const html = escapeHtml(paragraph)
+        .replace(/\n/g, "<br />")
+        .replace(
+          /(https?:\/\/[^\s<]+)/g,
+          `<a href="$1" target="_blank" rel="noopener noreferrer" style="color:${EMAIL_LINK_COLOR};text-decoration:underline;font-weight:600">$1</a>`,
+        );
+
+      return `<p style="margin:0 0 12px 0;font-size:13px;line-height:1.6;color:#334155;">${html}</p>`;
+    })
+    .join("");
+}
+
 function buildBulletPanel(args: {
   title: string;
   items?: string[];
@@ -95,17 +122,15 @@ function buildBulletPanel(args: {
   `;
 }
 
-function buildAssessmentPanel(userReply: string) {
+function buildAssessmentPanel(args: { title: string; body: string }) {
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:24px;">
       <tr>
         <td style="padding:16px;">
           <p style="margin:0 0 10px 0;font-size:13px;font-weight:700;color:#1a1a2e;">
-            Assessment summary
+            ${escapeHtml(args.title)}
           </p>
-          <div style="font-size:13px;line-height:1.6;color:#334155;">
-            ${asHtmlWithLinks(userReply)}
-          </div>
+          ${buildBrandedParagraphs(args.body)}
         </td>
       </tr>
     </table>
@@ -171,7 +196,7 @@ function buildTenantTriageEmailHtml(args: {
         },
       ],
     })}
-    ${buildAssessmentPanel(args.userReply)}
+    ${buildAssessmentPanel({ title: "Assessment summary", body: args.userReply })}
     ${buildBulletPanel({
       title: "Safety guidance",
       items: args.safetyInstructions,
@@ -214,6 +239,92 @@ function buildTenantTriageEmailHtml(args: {
   `;
 }
 
+function buildMissingInformationEmailHtml(args: {
+  attendeeName: string;
+  ticketTitle: string;
+  ticketPriority: string;
+  propertyName?: string;
+  unitLabel?: string;
+  userReply: string;
+  missingInformation: string[];
+  estimatedResponseWindow?: string;
+  requiresTechnician?: boolean;
+  immediateActionRequired?: boolean;
+  ticketUrl: string;
+}) {
+  const priority = formatPriority(args.ticketPriority);
+  const location = locationLabel(args.propertyName, args.unitLabel);
+
+  return `
+    ${buildHiddenPreheader("Additional Information Requested")}
+    ${buildGenericEmailBadge({
+      label: "Additional Information Requested",
+      tone: "warning",
+      secondaryLabel: priority,
+    })}
+    ${buildGenericEmailLead({
+      attendeeName: args.attendeeName,
+      intro: `We received your maintenance request <strong style="color:#0f172a;">${escapeHtml(args.ticketTitle)}</strong>, but need a few more details before the property team can complete triage.`,
+    })}
+    ${buildGenericEmailBanner({
+      title: "We need a few more details",
+      description:
+        "Please reply with the information below, or open the ticket and add the details there. This helps the team route the request correctly.",
+      tone: "warning",
+    })}
+    ${buildGenericDetailsGrid({
+      stacked: true,
+      items: [
+        { label: "Ticket", value: args.ticketTitle },
+        { label: "Priority", value: priority },
+        { label: "Location", value: location || "Not provided" },
+        ...(args.estimatedResponseWindow
+          ? [{ label: "Expected response", value: args.estimatedResponseWindow }]
+          : []),
+        {
+          label: "Technician review",
+          value: args.requiresTechnician ? "Likely needed" : "Pending details",
+        },
+      ],
+    })}
+    ${buildBulletPanel({
+      title: "Information needed",
+      items: args.missingInformation,
+      tone: "warning",
+    })}
+    ${buildAssessmentPanel({ title: "What we have so far", body: args.userReply })}
+    ${buildGenericInfoPanel({
+      title: "Send the missing details",
+      description:
+        "Reply directly to this email with the requested information, or open the ticket to add it to the request history.",
+      tone: "info",
+      actionLabel: "Open Ticket",
+      actionUrl: args.ticketUrl,
+      actionAsButton: true,
+      note: args.immediateActionRequired
+        ? "If this issue is unsafe or urgent, contact your property team immediately."
+        : "Once the missing details are received, the property team can continue reviewing the request.",
+    })}
+    ${buildGenericKeyValueTable({
+      title: "What happens after you reply",
+      rows: [
+        {
+          label: "1",
+          value: "Your response is added to the ticket history.",
+        },
+        {
+          label: "2",
+          value: "The property team reviews the details and confirms the next action.",
+        },
+        {
+          label: "3",
+          value: "You will receive updates as the ticket moves forward.",
+        },
+      ],
+    })}
+  `;
+}
+
 export async function sendTenantTriageCompleteEmail(args: {
   request: NextRequest;
   businessId: string;
@@ -224,6 +335,7 @@ export async function sendTenantTriageCompleteEmail(args: {
   propertyName?: string;
   unitLabel?: string;
   userReply?: string;
+  missingInformation?: string[];
   safetyInstructions?: string[];
   userTroubleshootingSteps?: string[];
   estimatedResponseWindow?: string;
@@ -240,12 +352,19 @@ export async function sendTenantTriageCompleteEmail(args: {
   const userReply =
     args.userReply?.trim() ||
     "We have completed an initial assessment of your maintenance request. Your property team will review the ticket and confirm the next step.";
+  const missingInformation =
+    args.missingInformation
+      ?.map((item) => item.trim())
+      .filter(Boolean) ?? [];
+  const needsMoreInformation = missingInformation.length > 0;
 
   return sendBusinessTemplateEmail({
     businessId: args.businessId,
     templateKey: BUSINESS_EMAIL_TEMPLATE.TICKET_AI_TRIAGE_TENANT_UPDATE,
     to: tenant.email,
-    fallbackSubject: `Update on your maintenance request: ${args.ticketTitle}`,
+    fallbackSubject: needsMoreInformation
+      ? `Additional information requested: ${args.ticketTitle}`
+      : `Update on your maintenance request: ${args.ticketTitle}`,
     variables: {
       attendee_name: tenant.name,
       ticket_title: args.ticketTitle,
@@ -253,6 +372,10 @@ export async function sendTenantTriageCompleteEmail(args: {
       property_name: args.propertyName ?? "",
       unit_label: args.unitLabel ?? "",
       user_reply: userReply,
+      missing_information_block: buildTextListBlock(
+        "Additional information requested",
+        missingInformation,
+      ),
       safety_instructions_block: buildTextListBlock(
         "Important safety steps to take now",
         args.safetyInstructions,
@@ -266,19 +389,33 @@ export async function sendTenantTriageCompleteEmail(args: {
       immediate_action_required: args.immediateActionRequired ? "Yes" : "No",
       ticket_url: ticketUrl,
     },
-    customBodyHtml: buildTenantTriageEmailHtml({
-      attendeeName: tenant.name,
-      ticketTitle: args.ticketTitle,
-      ticketPriority: args.ticketPriority,
-      propertyName: args.propertyName,
-      unitLabel: args.unitLabel,
-      userReply,
-      safetyInstructions: args.safetyInstructions,
-      userTroubleshootingSteps: args.userTroubleshootingSteps,
-      estimatedResponseWindow: args.estimatedResponseWindow,
-      requiresTechnician: args.requiresTechnician,
-      immediateActionRequired: args.immediateActionRequired,
-      ticketUrl,
-    }),
+    customBodyHtml: needsMoreInformation
+      ? buildMissingInformationEmailHtml({
+          attendeeName: tenant.name,
+          ticketTitle: args.ticketTitle,
+          ticketPriority: args.ticketPriority,
+          propertyName: args.propertyName,
+          unitLabel: args.unitLabel,
+          userReply,
+          missingInformation,
+          estimatedResponseWindow: args.estimatedResponseWindow,
+          requiresTechnician: args.requiresTechnician,
+          immediateActionRequired: args.immediateActionRequired,
+          ticketUrl,
+        })
+      : buildTenantTriageEmailHtml({
+          attendeeName: tenant.name,
+          ticketTitle: args.ticketTitle,
+          ticketPriority: args.ticketPriority,
+          propertyName: args.propertyName,
+          unitLabel: args.unitLabel,
+          userReply,
+          safetyInstructions: args.safetyInstructions,
+          userTroubleshootingSteps: args.userTroubleshootingSteps,
+          estimatedResponseWindow: args.estimatedResponseWindow,
+          requiresTechnician: args.requiresTechnician,
+          immediateActionRequired: args.immediateActionRequired,
+          ticketUrl,
+        }),
   });
 }

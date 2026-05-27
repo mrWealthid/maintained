@@ -130,6 +130,10 @@ Technician review: {{requires_technician}}
 Immediate action needed: {{immediate_action_required}}
 {{#if estimated_response_window}}Expected response: {{estimated_response_window}}{{/if}}
 
+{{#if missing_information_block}}
+{{missing_information_block}}
+{{/if}}
+
 Assessment summary
 {{user_reply}}
 

@@ -157,6 +157,7 @@ export async function POST(
             propertyName: ticket.propertyName,
             unitLabel: ticket.unitLabel,
             userReply: ticket.aiTriage?.userReply,
+            missingInformation: ticket.aiTriage?.missingInformation,
             safetyInstructions: ticket.aiTriage?.safetyInstructions,
             userTroubleshootingSteps: ticket.aiTriage?.userTroubleshootingSteps,
             estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,
