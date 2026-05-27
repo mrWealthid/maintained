@@ -97,6 +97,35 @@ function locationLabel(propertyName?: string, unitLabel?: string) {
   return [propertyName, unitLabel].filter((value) => value?.trim()).join(" · ");
 }
 
+function buildAdminNotesPanel(adminNotes?: string) {
+  const notes = adminNotes?.trim() || "No additional admin notes were provided.";
+  const paragraphs = notes
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map(
+      (paragraph) => `
+        <p style="margin:0 0 12px 0;font-size:13px;line-height:1.65;color:#334155;">
+          ${escapeHtml(paragraph).replace(/\n/g, "<br />")}
+        </p>
+      `,
+    )
+    .join("");
+
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:24px;">
+      <tr>
+        <td style="padding:16px;">
+          <p style="margin:0 0 10px 0;font-size:13px;font-weight:700;color:#1a1a2e;">
+            Admin triage notes
+          </p>
+          ${paragraphs}
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function buildAdminTriageEmailHtml(args: {
   attendeeName: string;
   ticketTitle: string;
@@ -138,8 +167,9 @@ function buildAdminTriageEmailHtml(args: {
       tone,
     })}
     ${buildGenericDetailsGrid({
+      stacked: true,
       items: [
-        { label: "Ticket", value: args.ticketTitle, fullWidth: true },
+        { label: "Ticket", value: args.ticketTitle },
         { label: "Priority", value: priority },
         { label: "Location", value: location || "Not provided" },
         { label: "Category", value: args.ticketCategory || "Uncategorised" },
@@ -162,17 +192,7 @@ function buildAdminTriageEmailHtml(args: {
           : []),
       ],
     })}
-    ${buildGenericKeyValueTable({
-      title: "Admin triage notes",
-      rows: [
-        {
-          label: "Summary",
-          value:
-            args.adminNotes?.trim() || "No additional admin notes were provided.",
-          emphasized: true,
-        },
-      ],
-    })}
+    ${buildAdminNotesPanel(args.adminNotes)}
     ${buildGenericInfoPanel({
       title: "Open the ticket",
       description:
