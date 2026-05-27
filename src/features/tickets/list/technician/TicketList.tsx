@@ -1,7 +1,7 @@
 "use client";
 import { TableColumn } from "@/shared/components/table/models/table.model";
 import RequestRow from "./TicketRow";
-import { TICKET_STATUS } from "@/shared/enums/enums";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
 import { FC } from "react";
 import { fetchRequestTicketList } from "@/features/tickets/services/ticket-service";
 import TableComponent from "@/shared/components/table/Table";
@@ -47,10 +47,12 @@ const TicketList: FC = () => {
       searchType: "DROPDOWN",
       filterKey: "status",
       selectOptions: [
-        { name: "Pending", value: TICKET_STATUS.pending },
-        { name: "Assigned", value: TICKET_STATUS.assigned },
-        { name: "Completed", value: TICKET_STATUS.completed },
-        { name: "Declined", value: TICKET_STATUS.declined },
+        { name: "All", value: TECHNICIAN_RESPONSE.all },
+        { name: "Pending", value: TECHNICIAN_RESPONSE.pending },
+        { name: "Applied", value: TECHNICIAN_RESPONSE.applied },
+        { name: "Selected", value: TECHNICIAN_RESPONSE.selected },
+        { name: "Inspection Requested", value: TECHNICIAN_RESPONSE.inspection_requested },
+        { name: "Declined", value: TECHNICIAN_RESPONSE.declined },
       ],
       exportValue: (row) => row.status ?? "",
     },

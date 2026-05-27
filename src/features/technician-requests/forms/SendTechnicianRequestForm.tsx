@@ -57,7 +57,7 @@ export default function SendTechnicianRequestForm({
 
   const { isSubmitting, isValid, isDirty } = formState;
   const { isSending, handleSendTechnicianRequest } = useSendTechnicianRequest(
-    ticket.id,
+    ticket.slug,
     () => {
       reset();
       onOpenChange(false);
@@ -66,7 +66,7 @@ export default function SendTechnicianRequestForm({
 
   const { data: technicians } = useFetchTechnicians();
 
-  const { isLoading, data: ticketResponse } = useFetchTicketDetails(ticket.id);
+  const { isLoading, data: ticketResponse } = useFetchTicketDetails(ticket.slug);
   const ticketDetails = ticketResponse?.data;
 
   async function onSubmit(data: SendTechnicianRequestFormControls) {

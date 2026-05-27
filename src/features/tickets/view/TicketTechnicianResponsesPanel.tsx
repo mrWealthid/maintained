@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Calendar,
   Check,
@@ -43,8 +45,8 @@ import { Label } from "@/components/ui/label";
 
 import {
   useAssignTechnician,
-  useProcessTechnicianResponse,
 } from "@/features/tickets/hooks/ticketHooks";
+import { ProcessTechnicianResponse } from "@/features/tickets/services/ticket-service";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import {
@@ -52,6 +54,8 @@ import {
 } from "@/shared/enums/enums";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import SendTechnicianRequestForm from "@/features/technician-requests/forms/SendTechnicianRequestForm";
+import type { ApiError } from "@/shared/model/model";
+import type { ProcessRequest } from "@/features/tickets/models/ticket.model";
 
 type ConfirmKey =
   | "assign-technician"
@@ -66,7 +70,7 @@ type TechnicianRequest = {
 };
 
 type Ticket = {
-  id: string;
+  slug: string;
   status?: string;
   requests?: TechnicianRequest[];
 };
@@ -76,6 +80,7 @@ type Props = {
 };
 
 export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
+  const queryClient = useQueryClient();
   const canAssignTicket = useHasPermission(PERMISSION.TICKETS_ASSIGN);
   const canManageTicketStatus = useHasPermission(
     PERMISSION.TICKETS_STATUS_MANAGE,
@@ -85,10 +90,19 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
   );
   const hasTechnicianResponseActions = canAssignTicket || canManageTicketStatus;
 
-  const { isAssigning, handleAssignTechnician } = useAssignTechnician(ticket.id);
-  const { isProcessing, processResponse } = useProcessTechnicianResponse(
-    ticket.id,
+  const { isAssigning, handleAssignTechnician } = useAssignTechnician(
+    ticket.slug,
   );
+  const { isPending: isProcessing, mutate: processResponse } = useMutation({
+    mutationFn: (args: { requestId: string; payload: ProcessRequest }) =>
+      ProcessTechnicianResponse(args.requestId, args.payload),
+    onSuccess: () => {
+      toast.success("Ticket successfully updated");
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["ticketDetails", ticket.slug] });
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
 
   const [confirmKey, setConfirmKey] = useState<ConfirmKey | null>(null);
   const [targetRequestId, setTargetRequestId] = useState<string | null>(null);
@@ -142,9 +156,12 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
         if (!targetRequestId) return;
         processResponse(
           {
-            status: TECHNICIAN_RESPONSE.declined,
-            message: targetRequestId,
-          } as never,
+            requestId: targetRequestId,
+            payload: {
+              status: TECHNICIAN_RESPONSE.declined,
+              message: targetRequestId,
+            } as never,
+          },
           { onSuccess: () => closeConfirm() } as never,
         );
       },
@@ -159,14 +176,17 @@ export default function TicketTechnicianResponsesPanel({ ticket }: Props) {
       return;
     processResponse(
       {
-        status: TECHNICIAN_RESPONSE.selected,
-        schedule: {
-          day: scheduleDate,
-          start: `${scheduleDate}T${scheduleStart}`,
-          end: `${scheduleDate}T${scheduleEnd}`,
+        requestId: scheduleRequestId,
+        payload: {
+          status: TECHNICIAN_RESPONSE.selected,
+          schedule: {
+            day: scheduleDate,
+            start: `${scheduleDate}T${scheduleStart}`,
+            end: `${scheduleDate}T${scheduleEnd}`,
+          },
+          message: scheduleRequestId,
         },
-        message: scheduleRequestId,
-      } as never,
+      },
       {
         onSuccess: () => {
           setScheduleRequestId(null);

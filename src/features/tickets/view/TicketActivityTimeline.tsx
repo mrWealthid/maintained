@@ -12,6 +12,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { http } from "@/services/http";
 
 type ActivityAction =
@@ -64,8 +65,8 @@ const COLOR_BY_ACTION: Record<ActivityAction, string> = {
   "actioned-by": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
 };
 
-async function fetchActivity(ticketId: string): Promise<Activity[]> {
-  const { data } = await http.get(`/api/tickets/activity-log/${ticketId}`);
+async function fetchActivity(ticketSlug: string): Promise<Activity[]> {
+  const { data } = await http.get(`/api/tickets/activity-log/${ticketSlug}`);
   return (data?.data as Activity[]) ?? [];
 }
 
@@ -81,25 +82,25 @@ function formatTime(iso: string | undefined) {
 }
 
 export default function TicketActivityTimeline({
-  ticketId,
+  ticketSlug,
 }: {
-  ticketId: string;
+  ticketSlug: string;
 }) {
   const { data: activities = [], isLoading } = useQuery({
-    queryKey: ["ticket-activity", ticketId],
-    queryFn: () => fetchActivity(ticketId),
-    enabled: Boolean(ticketId),
+    queryKey: ["ticket-activity", ticketSlug],
+    queryFn: () => fetchActivity(ticketSlug),
+    enabled: Boolean(ticketSlug),
   });
 
   if (isLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, idx) => (
-          <div key={idx} className="flex items-start gap-3 animate-pulse">
-            <div className="mt-1 h-8 w-8 shrink-0 rounded-full bg-muted" />
+          <div key={idx} className="flex items-start gap-3">
+            <Skeleton className="mt-1 h-8 w-8 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-1/2 rounded bg-muted" />
-              <div className="h-3 w-3/4 rounded bg-muted" />
+              <Skeleton className="h-3 w-1/2 rounded" />
+              <Skeleton className="h-3 w-3/4 rounded" />
             </div>
           </div>
         ))}

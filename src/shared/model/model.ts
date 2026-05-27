@@ -66,6 +66,7 @@ export interface TicketAiTriage {
 
 export interface Ticket {
   title: string;
+  slug: string;
   description: string;
   status: TICKET_STATUS;
   id: string;
@@ -81,7 +82,7 @@ export interface Ticket {
   actionedBy?: Pick<User, "id" | "id" | "name">;
   relatedTo?:
     | string
-    | Pick<Ticket, "id" | "title" | "status" | "createdAt">
+    | Pick<Ticket, "id" | "slug" | "title" | "status" | "createdAt">
     | null;
   type?: TICKET_TYPE;
   priority: TICKET_PRIORITY;
@@ -110,6 +111,7 @@ export interface CreateTicketPayload
   extends Omit<
     Ticket,
     | "id"
+    | "slug"
     | "createdAt"
     | "category"
     | "user"

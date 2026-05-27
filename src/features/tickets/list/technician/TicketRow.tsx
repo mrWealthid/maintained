@@ -8,7 +8,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
   return (
     <>
       {data?.map((row, i) => {
-        const { area, title, user, category, id: ticketId } = row.ticket;
+        const { area, title, user, category, slug } = row.ticket;
         return (
           <TableRow key={row.id} className="relative  ">
             {/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
@@ -29,7 +29,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
             </TableCell>
             <TableCell colSpan={3}>
               <Link
-                href={`/dashboard/ticket-management/${ticketId}`}
+                href={`/dashboard/ticket-management/${slug}`}
                 title={title}
                 className="block font-medium text-foreground hover:text-primary hover:underline"
               >

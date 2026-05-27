@@ -117,19 +117,26 @@ Respond here: {{technician_request_url}}`,
   [BUSINESS_EMAIL_TEMPLATE.TICKET_AI_TRIAGE_TENANT_UPDATE]: {
     enabled: true,
     subject: "Update on your maintenance request: {{ticket_title}}",
-    preheader: "We've reviewed your request and here's what happens next.",
+    preheader:
+      "Your maintenance request has been assessed and the next steps are ready.",
     body: `Hi {{attendee_name}},
 
-{{user_reply}}
+We reviewed your maintenance request and added the assessment to your ticket.
 
-{{safety_instructions_block}}
-
-Request details
 Ticket: {{ticket_title}}
 Priority: {{ticket_priority}}
 Location: {{property_name}} {{unit_label}}
+Technician review: {{requires_technician}}
+Immediate action needed: {{immediate_action_required}}
+{{#if estimated_response_window}}Expected response: {{estimated_response_window}}{{/if}}
 
-You can follow progress here: {{ticket_url}}`,
+Assessment summary
+{{user_reply}}
+
+{{safety_instructions_block}}
+{{user_troubleshooting_steps_block}}
+
+Track this request here: {{ticket_url}}`,
     delay: "immediate",
     triggerDescription:
       "Sent to the tenant who submitted the ticket once AI triage completes, with the AI's tenant-facing reply and any safety instructions.",

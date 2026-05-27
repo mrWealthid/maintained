@@ -10,6 +10,7 @@ import {
   TICKET_STATUS,
   TICKET_TYPE,
 } from "@/shared/enums/enums";
+import { buildTicketSlug } from "@/lib/tickets/ticket-slug";
 import "./technicanRequest";
 
 export interface LocationSnapshot {
@@ -59,6 +60,7 @@ export interface TicketAiTriage {
 
 export interface ITicket extends Document {
   title: string;
+  slug: string;
   area: string;
   description: string;
   category: ObjectId;
@@ -149,6 +151,13 @@ const TicketAiTriageSchema = new Schema<TicketAiTriage>(
 const TicketSchema = new Schema<ITicket>(
   {
     title: { type: String, required: true },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      immutable: true,
+      trim: true,
+    },
     area: { type: String, required: true },
     description: { type: String, required: true },
 
@@ -312,6 +321,13 @@ TicketSchema.pre("findOneAndUpdate", async function (next) {
         `Invalid status transition from '${oldStatus}' to '${newStatus}'`
       )
     );
+  }
+  next();
+});
+
+TicketSchema.pre("validate", function (next) {
+  if (this.isNew && !this.slug) {
+    this.slug = buildTicketSlug(this.title ?? "");
   }
   next();
 });

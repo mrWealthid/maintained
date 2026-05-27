@@ -40,8 +40,16 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TICKET_PRIORITY, TICKET_STATUS } from "@/shared/enums/enums";
+import {
+  AI_TRIAGE_STATUS,
+  ROLES,
+  TICKET_PRIORITY,
+  TICKET_STATUS,
+} from "@/shared/enums/enums";
+import type { TicketAiTriage } from "@/shared/model/model";
+import { useAppContext } from "@/shared/contexts/AppContext";
 import { getTicketTypeLabel } from "@/shared/tickets/ticket-types";
+import TicketAiTriagePanel from "./TicketAiTriagePanel";
 import {
   TICKET_PRIORITY_META,
   TICKET_STATUS_META,
@@ -68,6 +76,7 @@ type RichUser = {
 
 type RichTicket = {
   id: string;
+  slug: string;
   title: string;
   description: string;
   status: TICKET_STATUS;
@@ -110,6 +119,7 @@ type RichTicket = {
   };
   relatedTo?: {
     id?: string;
+    slug?: string;
     title?: string;
     status?: TICKET_STATUS;
     priority?: TICKET_PRIORITY;
@@ -118,6 +128,13 @@ type RichTicket = {
     createdAt?: string;
   } | null;
   requests?: unknown[];
+  aiTriageStatus?: AI_TRIAGE_STATUS;
+  aiTriageError?: string;
+  aiTriageStartedAt?: string;
+  aiTriageCompletedAt?: string;
+  aiTriageFailedAt?: string;
+  aiTriageSource?: string;
+  aiTriage?: TicketAiTriage;
 };
 
 function formatDateTime(iso?: string | null) {
@@ -258,13 +275,16 @@ function MetaRow({
         {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
         {label}
       </span>
-      <span className="min-w-0 break-words text-right text-sm">{value}</span>
+      <span className="min-w-0 wrap-break-word text-right text-sm">{value}</span>
     </div>
   );
 }
 
-export default function TicketView({ ticketId }: { ticketId: string }) {
-  const { data, isLoading, error, refetch } = useFetchTicketDetails(ticketId);
+export default function TicketView({ slug }: { slug: string }) {
+  const { data, isLoading, error, refetch } = useFetchTicketDetails(slug);
+  const { user } = useAppContext();
+  const isStaff =
+    user.role !== ROLES.user && user.role !== ROLES.tenant;
   const ticket = (data as { data?: RichTicket } | undefined)?.data;
 
   if (isLoading) {
@@ -301,7 +321,7 @@ export default function TicketView({ ticketId }: { ticketId: string }) {
   const hasAttachments = hasImages || hasVideos || hasDocs;
 
   return (
-    <main className="w-full space-y-6 py-8">
+    <main className="mx-auto w-full max-w-[1600px] space-y-6 py-8">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
         <Link
@@ -313,372 +333,407 @@ export default function TicketView({ ticketId }: { ticketId: string }) {
         </Link>
       </nav>
 
-      {/* Header */}
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusPill status={ticket.status} />
-          <PriorityPill priority={ticket.priority} />
-          {ticket.assignedTo ? (
-            <Badge variant="outline" className="gap-1">
-              <UserCheck className="h-3 w-3" aria-hidden="true" />
-              Assigned
-            </Badge>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {ticket.title}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-mono">#{ticket.id.slice(-6).toUpperCase()}</span>
-              {" · "}Opened {formatDateTime(ticket.createdAt)}
-            </p>
+      {/* Hero header */}
+      <Card className="border-primary/30 bg-linear-to-br from-primary/15 via-primary/5 to-transparent">
+        <CardContent className="p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusPill status={ticket.status} />
+                <PriorityPill priority={ticket.priority} />
+                {ticket.assignedTo ? (
+                  <Badge variant="outline" className="gap-1">
+                    <UserCheck className="h-3 w-3" aria-hidden="true" />
+                    Assigned
+                  </Badge>
+                ) : null}
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  {ticket.title}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  <span className="font-mono">
+                    {ticket.slug}
+                  </span>
+                  {" · "}Opened {formatDateTime(ticket.createdAt)}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-x-5 gap-y-1.5 pt-1 text-xs text-muted-foreground">
+                {propertyName ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5" />
+                    {[propertyName, unitLabel].filter(Boolean).join(" · ")}
+                  </span>
+                ) : null}
+                {ticket.user?.name ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <UserIcon className="h-3.5 w-3.5" />
+                    {ticket.user.name}
+                  </span>
+                ) : null}
+                {ticket.area ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {ticket.area}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <div className="shrink-0 self-start">
+              <TicketActions ticket={ticket as unknown as Ticket} />
+            </div>
           </div>
-          <div className="shrink-0 self-start">
-            <TicketActions ticket={ticket as unknown as Ticket} />
-          </div>
-        </div>
-      </header>
+        </CardContent>
+      </Card>
 
       <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex flex-col gap-6">
-              {/* Description */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4" aria-hidden="true" />
-                    Description
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {ticket.description}
-                  </p>
-                  {ticket.area ? (
-                    <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      <MapPin className="h-3 w-3" aria-hidden="true" />
-                      {ticket.area}
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
+          <TicketAiTriagePanel
+            status={ticket.aiTriageStatus}
+            triage={ticket.aiTriage}
+            error={ticket.aiTriageError}
+            completedAt={ticket.aiTriageCompletedAt}
+            source={ticket.aiTriageSource}
+            isStaff={isStaff}
+          />
 
-              {/* Attachments */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <ImageIcon className="h-4 w-4" aria-hidden="true" />
-                    Attachments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  {!hasAttachments ? (
-                    <div className="rounded-xl border border-dashed bg-muted/30 px-6 py-10 text-center">
-                      <ImageIcon
-                        className="mx-auto h-7 w-7 text-muted-foreground"
-                        aria-hidden="true"
-                      />
-                      <p className="mt-3 text-sm font-medium">
-                        No attachments yet
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Photos, videos, or documents added to this ticket will
-                        appear here.
-                      </p>
-                    </div>
-                  ) : null}
-                    {hasImages ? (
-                      <div>
-                        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Images ({ticket.images!.length})
-                        </p>
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                          {ticket.images!.map((url) => (
-                            <a
-                              key={url}
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted"
-                            >
-                              <Image
-                                src={url}
-                                alt="Ticket attachment"
-                                fill
-                                sizes="(max-width: 768px) 50vw, 33vw"
-                                className="object-cover transition group-hover:scale-105"
-                              />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                    {hasVideos ? (
-                      <div>
-                        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Videos ({ticket.videos!.length})
-                        </p>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {ticket.videos!.map((url) => (
-                            <video
-                              key={url}
-                              src={url}
-                              controls
-                              className="aspect-video w-full rounded-lg border bg-black"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                    {hasDocs ? (
-                      <div>
-                        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Documents ({ticket.documents!.length})
-                        </p>
-                        <ul className="space-y-2">
-                          {ticket.documents!.map((url) => {
-                            const filename = url.split("/").pop() ?? url;
-                            return (
-                              <li key={url}>
-                                <a
-                                  href={url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm hover:border-primary/40"
-                                >
-                                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                  <span className="truncate">{filename}</span>
-                                </a>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ) : null}
-                </CardContent>
-              </Card>
-
-              {/* Related ticket */}
-              {ticket.relatedTo ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Link2 className="h-4 w-4" aria-hidden="true" />
-                      Related ticket
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Link
-                      href={`/dashboard/ticket-management/${ticket.relatedTo.id}`}
-                      className="flex items-start justify-between gap-3 rounded-lg border bg-card px-4 py-3 hover:border-primary/40"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {ticket.relatedTo.title ?? "Untitled"}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                          {[
-                            ticket.relatedTo.propertyName,
-                            ticket.relatedTo.unitLabel,
-                            ticket.relatedTo.createdAt
-                              ? formatDate(ticket.relatedTo.createdAt)
-                              : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <StatusPill status={ticket.relatedTo.status} />
-                        <PriorityPill priority={ticket.relatedTo.priority} />
-                      </div>
-                    </Link>
-                  </CardContent>
-                </Card>
+          {/* Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                Description
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {ticket.description}
+              </p>
+              {ticket.area ? (
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                  <MapPin className="h-3 w-3" aria-hidden="true" />
+                  {ticket.area}
+                </div>
               ) : null}
+            </CardContent>
+          </Card>
 
-              {/* Activity — fills remaining column height, content scrolls */}
-              <Card className="flex min-h-[20rem] flex-1 flex-col overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Clock className="h-4 w-4" aria-hidden="true" />
-                    Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex min-h-0 flex-1 flex-col p-0">
-                  <ScrollArea className="h-full px-6 pb-6">
-                    <TicketActivityTimeline ticketId={ticket.id} />
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sidebar */}
-            <aside className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">People</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <PersonRow
-                    label="Reporter"
-                    user={ticket.user}
-                    emptyText="Unknown reporter"
-                    icon={UserIcon}
+          {/* Attachments */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ImageIcon className="h-4 w-4" aria-hidden="true" />
+                Attachments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {!hasAttachments ? (
+                <div className="rounded-xl border border-dashed bg-muted/30 px-6 py-10 text-center">
+                  <ImageIcon
+                    className="mx-auto h-7 w-7 text-muted-foreground"
+                    aria-hidden="true"
                   />
+                  <p className="mt-3 text-sm font-medium">
+                    No attachments yet
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Photos, videos, or documents added to this ticket will
+                    appear here.
+                  </p>
+                </div>
+              ) : null}
+              {hasImages ? (
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Images ({ticket.images!.length})
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {ticket.images!.map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group relative aspect-4/3 overflow-hidden rounded-lg border bg-muted"
+                      >
+                        <Image
+                          src={url}
+                          alt="Ticket attachment"
+                          fill
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          className="object-cover transition group-hover:scale-105"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {hasVideos ? (
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Videos ({ticket.videos!.length})
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {ticket.videos!.map((url) => (
+                      <video
+                        key={url}
+                        src={url}
+                        controls
+                        className="aspect-video w-full rounded-lg border bg-black"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {hasDocs ? (
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Documents ({ticket.documents!.length})
+                  </p>
+                  <ul className="space-y-2">
+                    {ticket.documents!.map((url) => {
+                      const filename = url.split("/").pop() ?? url;
+                      return (
+                        <li key={url}>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm hover:border-primary/40"
+                          >
+                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{filename}</span>
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          {/* Related ticket */}
+          {ticket.relatedTo ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Link2 className="h-4 w-4" aria-hidden="true" />
+                  Related ticket
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link
+                  href={`/dashboard/ticket-management/${ticket.relatedTo.slug}`}
+                  className="flex items-start justify-between gap-3 rounded-lg border bg-card px-4 py-3 hover:border-primary/40"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {ticket.relatedTo.title ?? "Untitled"}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {[
+                        ticket.relatedTo.propertyName,
+                        ticket.relatedTo.unitLabel,
+                        ticket.relatedTo.createdAt
+                          ? formatDate(ticket.relatedTo.createdAt)
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <StatusPill status={ticket.relatedTo.status} />
+                    <PriorityPill priority={ticket.relatedTo.priority} />
+                  </div>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* Activity — fills remaining column height, content scrolls */}
+          <Card className="flex min-h-[20rem] flex-1 flex-col overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4" aria-hidden="true" />
+                Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+              <ScrollArea className="h-full px-6 pb-6">
+                <TicketActivityTimeline ticketSlug={ticket.slug} />
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">People</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <PersonRow
+                label="Reporter"
+                user={ticket.user}
+                emptyText="Unknown reporter"
+                icon={UserIcon}
+              />
+              <Separator />
+              <PersonRow
+                label="Assigned to"
+                user={ticket.assignedTo}
+                emptyText="Unassigned"
+                icon={Wrench}
+              />
+              {ticket.actionedBy ? (
+                <>
                   <Separator />
                   <PersonRow
-                    label="Assigned to"
-                    user={ticket.assignedTo}
-                    emptyText="Unassigned"
-                    icon={Wrench}
+                    label="Last actioned by"
+                    user={ticket.actionedBy}
+                    emptyText="—"
+                    icon={UserCheck}
                   />
-                  {ticket.actionedBy ? (
-                    <>
-                      <Separator />
-                      <PersonRow
-                        label="Last actioned by"
-                        user={ticket.actionedBy}
-                        emptyText="—"
-                        icon={UserCheck}
-                      />
-                    </>
-                  ) : null}
-                </CardContent>
-              </Card>
+                </>
+              ) : null}
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Building2 className="h-4 w-4" aria-hidden="true" />
-                    Location
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <MetaRow
-                    icon={Building2}
-                    label="Property"
-                    value={
-                      ticket.property?.id ? (
-                        <Link
-                          href={`/dashboard/properties/${ticket.property.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {propertyName}
-                        </Link>
-                      ) : (
-                        propertyName ?? "—"
-                      )
-                    }
-                  />
-                  <MetaRow icon={Hash} label="Unit" value={unitLabel ?? "—"} />
-                  {ticket.unit?.floor ? (
-                    <MetaRow label="Floor" value={ticket.unit.floor} />
-                  ) : null}
-                  {ticket.unit?.bedrooms !== undefined ? (
-                    <MetaRow
-                      icon={Bed}
-                      label="Bedrooms"
-                      value={ticket.unit.bedrooms}
-                    />
-                  ) : null}
-                  {ticket.unit?.bathrooms !== undefined ? (
-                    <MetaRow
-                      icon={Bath}
-                      label="Bathrooms"
-                      value={ticket.unit.bathrooms}
-                    />
-                  ) : null}
-                  {ticket.unit?.sizeSqft !== undefined ? (
-                    <MetaRow
-                      icon={Ruler}
-                      label="Size"
-                      value={`${ticket.unit.sizeSqft} sqft`}
-                    />
-                  ) : null}
-                  {addressLines?.length ? (
-                    <>
-                      <Separator />
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Address
-                        </p>
-                        <address className="mt-1 not-italic text-sm leading-relaxed text-foreground">
-                          {addressLines.map((line, idx) => (
-                            <div key={idx}>{line}</div>
-                          ))}
-                        </address>
-                      </div>
-                    </>
-                  ) : null}
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Building2 className="h-4 w-4" aria-hidden="true" />
+                Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <MetaRow
+                icon={Building2}
+                label="Property"
+                value={
+                  ticket.property?.id ? (
+                    <Link
+                      href={`/dashboard/properties/${ticket.property.id}`}
+                      className="font-medium hover:underline"
+                    >
+                      {propertyName}
+                    </Link>
+                  ) : (
+                    propertyName ?? "—"
+                  )
+                }
+              />
+              <MetaRow icon={Hash} label="Unit" value={unitLabel ?? "—"} />
+              {ticket.unit?.floor ? (
+                <MetaRow label="Floor" value={ticket.unit.floor} />
+              ) : null}
+              {ticket.unit?.bedrooms !== undefined ? (
+                <MetaRow
+                  icon={Bed}
+                  label="Bedrooms"
+                  value={ticket.unit.bedrooms}
+                />
+              ) : null}
+              {ticket.unit?.bathrooms !== undefined ? (
+                <MetaRow
+                  icon={Bath}
+                  label="Bathrooms"
+                  value={ticket.unit.bathrooms}
+                />
+              ) : null}
+              {ticket.unit?.sizeSqft !== undefined ? (
+                <MetaRow
+                  icon={Ruler}
+                  label="Size"
+                  value={`${ticket.unit.sizeSqft} sqft`}
+                />
+              ) : null}
+              {addressLines?.length ? (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Address
+                    </p>
+                    <address className="mt-1 not-italic text-sm leading-relaxed text-foreground">
+                      {addressLines.map((line, idx) => (
+                        <div key={idx}>{line}</div>
+                      ))}
+                    </address>
+                  </div>
+                </>
+              ) : null}
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Tag className="h-4 w-4" aria-hidden="true" />
-                    Classification
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <MetaRow
-                    icon={ClipboardList}
-                    label="Category"
-                    value={categoryName ?? "—"}
-                  />
-                  <MetaRow icon={Wrench} label="Type" value={typeName ?? "—"} />
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Tag className="h-4 w-4" aria-hidden="true" />
+                Classification
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <MetaRow
+                icon={ClipboardList}
+                label="Category"
+                value={categoryName ?? "—"}
+              />
+              <MetaRow icon={Wrench} label="Type" value={typeName ?? "—"} />
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarDays className="h-4 w-4" aria-hidden="true" />
-                    Dates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <MetaRow
-                    icon={CalendarDays}
-                    label="Created"
-                    value={formatDateTime(ticket.createdAt)}
-                  />
-                  {ticket.dueDate ? (
-                    <MetaRow
-                      icon={CalendarClock}
-                      label="Due"
-                      value={formatDate(ticket.dueDate)}
-                    />
-                  ) : null}
-                  {ticket.completedAt ? (
-                    <MetaRow
-                      icon={CheckCircle2}
-                      label="Completed"
-                      value={formatDateTime(ticket.completedAt)}
-                    />
-                  ) : null}
-                  {ticket.closedAt ? (
-                    <MetaRow
-                      label="Closed"
-                      value={formatDateTime(ticket.closedAt)}
-                    />
-                  ) : null}
-                  {ticket.updatedAt ? (
-                    <MetaRow
-                      label="Last updated"
-                      value={formatDateTime(ticket.updatedAt)}
-                    />
-                  ) : null}
-                </CardContent>
-              </Card>
-            </aside>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                Dates
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <MetaRow
+                icon={CalendarDays}
+                label="Created"
+                value={formatDateTime(ticket.createdAt)}
+              />
+              {ticket.dueDate ? (
+                <MetaRow
+                  icon={CalendarClock}
+                  label="Due"
+                  value={formatDate(ticket.dueDate)}
+                />
+              ) : null}
+              {ticket.completedAt ? (
+                <MetaRow
+                  icon={CheckCircle2}
+                  label="Completed"
+                  value={formatDateTime(ticket.completedAt)}
+                />
+              ) : null}
+              {ticket.closedAt ? (
+                <MetaRow
+                  label="Closed"
+                  value={formatDateTime(ticket.closedAt)}
+                />
+              ) : null}
+              {ticket.updatedAt ? (
+                <MetaRow
+                  label="Last updated"
+                  value={formatDateTime(ticket.updatedAt)}
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
 
       <TicketTechnicianResponsesPanel
         ticket={{
-          id: ticket.id,
+          slug: ticket.slug,
           status: ticket.status,
           requests: (ticket.requests as never) ?? [],
         }}

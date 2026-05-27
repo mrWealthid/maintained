@@ -13,7 +13,7 @@ import {
   assignTechnicianToTicket,
   createTicket,
   deleteTicket,
-  fetchTicketById,
+  fetchTicketBySlug,
   fetchTicketList,
   updateTicket,
   updateTicketStatus,
@@ -32,7 +32,7 @@ import type { TicketStatus } from "../models/ticket-status.model";
 export const TICKET_KEYS = {
   all: ["tickets"] as const,
   list: (query: TicketListQuery) => ["tickets", "list", query] as const,
-  byId: (id: string) => ["tickets", id] as const,
+  bySlug: (slug: string) => ["tickets", slug] as const,
 } as const;
 
 export function useTicketList(query: TicketListQuery) {
@@ -43,11 +43,11 @@ export function useTicketList(query: TicketListQuery) {
   });
 }
 
-export function useTicket(id: string | undefined) {
+export function useTicket(slug: string | undefined) {
   return useQuery({
-    queryKey: id ? TICKET_KEYS.byId(id) : ["tickets", "noop"],
-    queryFn: () => fetchTicketById(id as string),
-    enabled: Boolean(id),
+    queryKey: slug ? TICKET_KEYS.bySlug(slug) : ["tickets", "noop"],
+    queryFn: () => fetchTicketBySlug(slug as string),
+    enabled: Boolean(slug),
   });
 }
 
@@ -66,15 +66,15 @@ export function useCreateTicket() {
   });
 }
 
-export function useUpdateTicket(id: string) {
+export function useUpdateTicket(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: Partial<TicketFormValues>) =>
-      updateTicket(id, payload),
+      updateTicket(slug, payload),
     onSuccess: () => {
       toast.success("Ticket updated");
-      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.byId(id) });
+      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.bySlug(slug) });
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
@@ -98,15 +98,15 @@ export function useDeleteTicket() {
   });
 }
 
-export function useUpdateTicketStatus(id: string) {
+export function useUpdateTicketStatus(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: { status: TicketStatus; reason?: string }) =>
-      updateTicketStatus(id, payload),
+      updateTicketStatus(slug, payload),
     onSuccess: () => {
       toast.success("Ticket status updated");
-      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.byId(id) });
+      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.bySlug(slug) });
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {
@@ -115,15 +115,15 @@ export function useUpdateTicketStatus(id: string) {
   });
 }
 
-export function useAssignTechnician(id: string) {
+export function useAssignTechnician(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: { assignedTo: string }) =>
-      assignTechnicianToTicket(id, payload),
+      assignTechnicianToTicket(slug, payload),
     onSuccess: () => {
       toast.success("Technician assigned");
-      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.byId(id) });
+      queryClient.invalidateQueries({ queryKey: TICKET_KEYS.bySlug(slug) });
       queryClient.invalidateQueries({ queryKey: TICKET_KEYS.all });
     },
     onError: (err) => {

@@ -10,7 +10,10 @@ import Table from "@/shared/components/table/Table";
 import { Ticket } from "@/shared/model/model";
 import TicketHeaderActions from "./TicketHeaderActions";
 import TableComponent from "@/shared/components/table/Table";
-import { TICKET_LIST_FILTER_FIELDS } from "@/features/tickets/data/list-data";
+import {
+  TICKET_LIST_FILTER_FIELDS,
+  TICKET_STATUS_FILTER_SELECT_OPTIONS,
+} from "@/features/tickets/data/list-data";
 import type { BulkTicketAction } from "@/features/tickets/services/ticket-service";
 import { useBulkTicketAction } from "@/features/tickets/hooks/ticketHooks";
 import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
@@ -186,12 +189,7 @@ const TicketList: FC = () => {
       accessor: "status",
       searchType: "DROPDOWN",
       filterKey: "status",
-      selectOptions: [
-        { name: "Pending", value: TICKET_STATUS.pending },
-        { name: "Assigned", value: TICKET_STATUS.assigned },
-        { name: "Completed", value: TICKET_STATUS.completed },
-        { name: "Declined", value: TICKET_STATUS.declined },
-      ],
+      selectOptions: TICKET_STATUS_FILTER_SELECT_OPTIONS,
       exportValue: (row) => row.status ?? "",
     },
     {
@@ -211,7 +209,6 @@ const TicketList: FC = () => {
         queryKey="tickets"
         exportTitle="Tickets"
         searchKey="title"
-        defaultParams={{ status: TICKET_STATUS.pending }}
         headerActions={<TicketHeaderActions />}
         filterFields={TICKET_LIST_FILTER_FIELDS}
         enableSelection={enableSelection}

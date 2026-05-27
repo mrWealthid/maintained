@@ -31,7 +31,7 @@ async function findBusinessAdminRecipients(
 export async function sendAdminTriageCompleteEmail(args: {
   request: NextRequest;
   businessId: string;
-  ticketId: string;
+  ticketSlug: string;
   ticketTitle: string;
   ticketPriority: string;
   ticketCategory?: string;
@@ -47,7 +47,7 @@ export async function sendAdminTriageCompleteEmail(args: {
   }
 
   const baseUrl = resolveAppBaseUrl(args.request);
-  const ticketUrl = `${baseUrl}/tickets/${args.ticketId}`;
+  const ticketUrl = `${baseUrl}/dashboard/ticket-management/${args.ticketSlug}`;
 
   const results = await Promise.all(
     recipients.map((recipient) =>

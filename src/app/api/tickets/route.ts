@@ -23,6 +23,8 @@ import {
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { triggerAiTriageWebhook } from "@/lib/tickets/ai-triage-webhook";
+import { isSlugDuplicateKeyError } from "@/lib/tickets/ticket-slug";
+import { ensureTicketSlugs } from "@/lib/tickets/ensure-ticket-slug";
 
 connect();
 
@@ -77,6 +79,9 @@ export async function GET(request: NextRequest) {
       Object.fromEntries(request.nextUrl.searchParams.entries())
     );
     const transformedQuery: Record<string, unknown> = { ...parsedQuery };
+    if (transformedQuery.status === TICKET_STATUS.all) {
+      delete transformedQuery.status;
+    }
     //handling nested filters / partial match
     if (parsedQuery.title) {
       const regex = new RegExp(parsedQuery.title, "i"); // 'i' for case-insensitive
@@ -130,7 +135,7 @@ export async function GET(request: NextRequest) {
         },
         {
           path: "relatedTo",
-          select: "title status createdAt propertyName unitLabel",
+          select: "slug title status createdAt propertyName unitLabel",
         },
         // {
         //   path: "property",
@@ -142,6 +147,7 @@ export async function GET(request: NextRequest) {
         // },
       ]);
     const requests = await features.query;
+    await ensureTicketSlugs(requests);
 
     const countFeatures = new APIFeatures<ITicket>(
       Ticket.find(filter),
@@ -282,16 +288,31 @@ export async function POST(request: NextRequest) {
       throw ApiError.badRequest("Selected unit has no active tenant");
     }
 
-    const data = await Ticket.create({
-      ...body,
-      relatedTo: body.relatedTo || undefined,
-      property: propertyId,
-      unit: unitId,
-      user: requesterId,
-      actionedBy: verify.isUserRole ? undefined : verify.id,
-      business: businessId,
-      aiTriageStatus: AI_TRIAGE_STATUS.pending,
-    });
+    const createTicket = () =>
+      Ticket.create({
+        ...body,
+        relatedTo: body.relatedTo || undefined,
+        property: propertyId,
+        unit: unitId,
+        user: requesterId,
+        actionedBy: verify.isUserRole ? undefined : verify.id,
+        business: businessId,
+        aiTriageStatus: AI_TRIAGE_STATUS.pending,
+      });
+
+    const MAX_SLUG_ATTEMPTS = 5;
+    let data!: Awaited<ReturnType<typeof createTicket>>;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        data = await createTicket();
+        break;
+      } catch (err) {
+        if (isSlugDuplicateKeyError(err) && attempt < MAX_SLUG_ATTEMPTS) {
+          continue;
+        }
+        throw err;
+      }
+    }
 
     await TicketActivity.create({
       ticket: data.id,

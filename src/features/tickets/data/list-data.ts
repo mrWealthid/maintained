@@ -85,6 +85,14 @@ export const TICKET_STATUS_FILTER_OPTIONS = (
   label: TICKET_STATUS_META[value].label,
 }));
 
+export const TICKET_STATUS_FILTER_SELECT_OPTIONS = [
+  { name: "All", value: "ALL" },
+  ...(Object.keys(TICKET_STATUS_META) as TicketStatus[]).map((value) => ({
+    name: TICKET_STATUS_META[value].label,
+    value,
+  })),
+];
+
 export const TICKET_PRIORITY_FILTER_OPTIONS = (
   Object.keys(TICKET_PRIORITY_META) as TicketPriority[]
 ).map((value) => ({
@@ -115,12 +123,7 @@ export const TICKET_LIST_FILTER_FIELDS: TableFilterField[] = [
     key: "status",
     label: "Status",
     searchType: "DROPDOWN",
-    selectOptions: (Object.keys(TICKET_STATUS_META) as TicketStatus[]).map(
-      (value) => ({
-        name: TICKET_STATUS_META[value].label,
-        value,
-      }),
-    ),
+    selectOptions: TICKET_STATUS_FILTER_SELECT_OPTIONS,
   },
   {
     key: "priority",

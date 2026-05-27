@@ -10,6 +10,7 @@ import Ticket from "@/models/ticketModel";
 import Unit from "@/models/unitModel";
 import User from "@/models/userModel";
 import type { VerifiedUser } from "@/lib/auth/getVerifiedUser";
+import { findActiveWorkspaceMembership } from "@/lib/tenancy/workspace-membership-access";
 import {
   INVITE_STATUS,
   ROLES,
@@ -195,6 +196,21 @@ async function getTenantLocation(
   userObjectId: mongoose.Types.ObjectId,
 ) {
   if (verify.role !== ROLES.tenant) return {};
+
+  const activeMembership = await findActiveWorkspaceMembership({
+    userId: userObjectId,
+    workspaceId: verify.businessId,
+  }).lean<{
+    property?: mongoose.Types.ObjectId | null;
+    unit?: mongoose.Types.ObjectId | null;
+  } | null>();
+
+  if (activeMembership?.property || activeMembership?.unit) {
+    return {
+      property: activeMembership.property ?? undefined,
+      unit: activeMembership.unit ?? undefined,
+    };
+  }
 
   const user = await User.findById(userObjectId)
     .select("memberships")

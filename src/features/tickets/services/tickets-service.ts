@@ -27,10 +27,10 @@ export async function fetchTicketList(query: TicketListQuery) {
   }
 }
 
-export async function fetchTicketById(id: string) {
+export async function fetchTicketBySlug(slug: string) {
   try {
     const { data } = await http.get(
-      API_ROUTES.ticketManagement.ticketById(id),
+      API_ROUTES.ticketManagement.ticketBySlug(slug),
     );
     return data;
   } catch (err: unknown) {
@@ -50,10 +50,10 @@ export async function createTicket(payload: TicketFormValues) {
   }
 }
 
-export async function updateTicket(id: string, payload: Partial<TicketFormValues>) {
+export async function updateTicket(slug: string, payload: Partial<TicketFormValues>) {
   try {
     const { data } = await http.patch(
-      API_ROUTES.ticketManagement.ticketById(id),
+      API_ROUTES.ticketManagement.ticketBySlug(slug),
       payload,
     );
     return data;
@@ -62,10 +62,10 @@ export async function updateTicket(id: string, payload: Partial<TicketFormValues
   }
 }
 
-export async function deleteTicket(id: string) {
+export async function deleteTicket(slug: string) {
   try {
     const { data } = await http.delete(
-      API_ROUTES.ticketManagement.ticketById(id),
+      API_ROUTES.ticketManagement.ticketBySlug(slug),
     );
     return data;
   } catch (err: unknown) {
@@ -74,12 +74,12 @@ export async function deleteTicket(id: string) {
 }
 
 export async function updateTicketStatus(
-  id: string,
+  slug: string,
   payload: { status: TicketStatus; reason?: string },
 ) {
   try {
     const { data } = await http.put(
-      API_ROUTES.ticketManagement.update_status(id),
+      API_ROUTES.ticketManagement.update_status(slug),
       payload,
     );
     return data;
@@ -89,12 +89,12 @@ export async function updateTicketStatus(
 }
 
 export async function assignTechnicianToTicket(
-  id: string,
+  slug: string,
   payload: { assignedTo: string },
 ) {
   try {
     const { data } = await http.patch(
-      API_ROUTES.ticketManagement.assign_technician(id),
+      API_ROUTES.ticketManagement.assign_technician(slug),
       payload,
     );
     return data;

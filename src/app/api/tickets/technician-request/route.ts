@@ -14,6 +14,8 @@ import { TechnicianRequestDetails } from "@/features/tickets/models/ticket.model
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { technicianRequestListQuerySchema } from "@/features/technician-requests/models/technician-request.model";
+import { TECHNICIAN_RESPONSE } from "@/shared/enums/enums";
+import { ensureTicketSlugs } from "@/lib/tickets/ensure-ticket-slug";
 
 connect();
 
@@ -39,6 +41,9 @@ export async function GET(request: NextRequest) {
       Object.fromEntries(request.nextUrl.searchParams.entries())
     );
     const transformedQuery: Record<string, unknown> = { ...parsedQuery };
+    if (transformedQuery.status === TECHNICIAN_RESPONSE.all) {
+      delete transformedQuery.status;
+    }
 
     if (parsedQuery.title) {
       const matchingTickets = await Ticket.find({
@@ -62,6 +67,7 @@ export async function GET(request: NextRequest) {
         populate: [{ path: "category" }, { path: "user" }],
       });
     const requests = await features.query;
+    await ensureTicketSlugs(requests.map((request) => request.ticket));
 
     const countFeatures = new APIFeatures<TechnicianRequestDetails>(
       TechnicianRequest.find(filter),

@@ -23,6 +23,7 @@ const TicketRowActions = ({ technicianRequest }: TechnicianRowActionsProps) => {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [declineOpen, setDeclineOpen] = useState(false);
+  const ticketSlug = technicianRequest.ticket.slug;
 
   const isPendingResponse =
     technicianRequest.ticket.status === TICKET_STATUS.pending_assignment &&
@@ -34,7 +35,7 @@ const TicketRowActions = ({ technicianRequest }: TechnicianRowActionsProps) => {
       label: "View details",
       action: () =>
         router.push(
-          `${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${technicianRequest.ticket.id}`,
+          `${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${ticketSlug}`,
         ),
       icon: Eye,
     },
@@ -81,7 +82,7 @@ const TicketRowActions = ({ technicianRequest }: TechnicianRowActionsProps) => {
   return (
     <TableCell className="md:px-2 py-2 space-x-3">
       <RowActionsMenu
-        ariaLabel={`Actions for ticket ${technicianRequest.ticket.id}`}
+        ariaLabel={`Actions for ticket ${ticketSlug}`}
         open={menuOpen}
         onOpenChange={setMenuOpen}
         baseActions={baseActions}

@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import type { Property } from "../services/property-service";
 import { fetchUnitList } from "@/features/units/services/unit-service";
@@ -269,7 +270,7 @@ const PropertyView: FC<PropertyViewProps> = ({ property }) => {
           {isLoadingUnits ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, idx) => (
-                <div key={idx} className="h-12 animate-pulse rounded-lg bg-muted/50" />
+                <Skeleton key={idx} className="h-12 rounded-lg" />
               ))}
             </div>
           ) : units.length ? (

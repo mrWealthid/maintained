@@ -85,19 +85,19 @@ export const API_ROUTES = {
 
   ticketManagement: {
     get_tickets: `${base}/tickets`,
-    ticketById: (id: string) => resourceById("tickets")(id),
+    ticketBySlug: (slug: string) => resourceById("tickets")(slug),
     get_categories: `${base}/tickets/categories`,
     get_request_types: `${base}/tickets/types`,
-    actionedBy_ticket: (id: string) =>
-      `${resourceById("tickets")(id)}/actioned-by`,
+    actionedBy_ticket: (slug: string) =>
+      `${resourceById("tickets")(slug)}/actioned-by`,
     create_ticket: `${base}/tickets`,
-    update_status: (id: string) => resourceById("tickets/update-status")(id),
-    assign_technician: (id: string) => resourceById("tickets/assign")(id),
+    update_status: (slug: string) => resourceById("tickets/update-status")(slug),
+    assign_technician: (slug: string) => resourceById("tickets/assign")(slug),
     fetch_technician_requestDetails: `${base}/tickets/respond`,
     process_technician_response: (id: string) =>
       resourceById("tickets/respond")(id),
-    send_technician_request: (id: string) =>
-      resourceById("tickets/technician-request")(id),
+    send_technician_request: (slug: string) =>
+      resourceById("tickets/technician-request")(slug),
     get_technician_requests: `${base}/tickets/technician-request`,
     bulk_actions: `${base}/tickets/bulk-actions`,
   },

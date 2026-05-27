@@ -13,7 +13,7 @@ import TicketCardLoader from "./TicketCardLoader";
 import { useFetchTickets } from "../hooks/ticketHooks";
 
 const TicketComponent: FC = () => {
-  const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.pending);
+  const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.all);
   const [search, setSearch] = useState<string>("");
 
   const debouncedSearchTerm = useDebounce(search, 1000);

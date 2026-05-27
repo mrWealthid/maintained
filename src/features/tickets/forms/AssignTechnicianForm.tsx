@@ -28,7 +28,7 @@ const AssignTechnicianForm: FC<AssignTechnicianFormProps> = ({
 
   const { errors, isSubmitting, isValid, isDirty } = formState;
   const { isAssigning, handleAssignTechnician } = useAssignTechnician(
-    ticket.id,
+    ticket.slug,
     onCloseModal
   );
 

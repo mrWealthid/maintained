@@ -5,6 +5,7 @@ import { technicianRequestCreateSchema } from "@/features/technician-requests/mo
 import { TechnicianRequest } from "@/models/technicanRequest";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket from "@/models/ticketModel";
+import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
@@ -12,10 +13,10 @@ import { PERMISSION } from "@/shared/auth/permission-registry";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
     const verify = await getUserFromCookies();
 
     if (!verify) throw ApiError.unauthorized();
@@ -34,6 +35,7 @@ export async function POST(
     );
     const { technicianIds } = body;
 
+    const ticketId = await resolveTicketIdentifier(slug);
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) throw ApiError.notFound("Ticket not found");
 

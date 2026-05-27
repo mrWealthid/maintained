@@ -48,7 +48,7 @@ export default function HandOffTicketForm({ ticket, open, onOpenChange }: Props)
 
   const { isSubmitting, isValid, isDirty } = formState;
   const { isUpdating, handleHandleOffTicket } = useHandOffTicket(
-    ticket.id,
+    ticket.slug,
     () => {
       reset();
       onOpenChange(false);

@@ -13,26 +13,22 @@ import { ACTIVITY_LIST_DATE_PRESET_OPTIONS } from "@/shared/data/list-date-filte
 import type { ListDateFilterQuery } from "@/shared/model/list-date-filter.model";
 
 const TicketHeaderActions: FC<TicketQueryprops> = ({ onFilter }) => {
-  const [query, setQuery] = useState<TicketFilterQuery | null>({
-    status: TICKET_STATUS.pending,
-  });
+  const [status, setStatus] = useState<TICKET_STATUS>(TICKET_STATUS.all);
 
-  function applyQueryPatch(patch: TicketFilterQuery | null) {
-    setQuery(patch);
+  function applyQueryPatch(patch: TicketFilterQuery) {
     onFilter?.(patch);
   }
 
   function handleStatusTab(val: string) {
-    applyQueryPatch(
-      val === TICKET_STATUS.all
-        ? null
-        : { ...(query ?? {}), status: val as TICKET_STATUS },
-    );
+    const nextStatus = val as TICKET_STATUS;
+    setStatus(nextStatus);
+    applyQueryPatch({
+      status: nextStatus === TICKET_STATUS.all ? undefined : nextStatus,
+    });
   }
 
   function handleDateRangeFilter(range: ListDateFilterQuery | null) {
     applyQueryPatch({
-      ...(query ?? {}),
       dateFilter: range?.dateFilter ?? undefined,
       startDate: range?.startDate ?? undefined,
       endDate: range?.endDate ?? undefined,
@@ -42,11 +38,11 @@ const TicketHeaderActions: FC<TicketQueryprops> = ({ onFilter }) => {
   return (
     <div className="flex w-full flex-col gap-2 text-xs text-muted-foreground xl:w-auto xl:flex-row xl:items-center">
       <Tabs
-        value={query?.status ?? TICKET_STATUS.all}
+        value={status}
         onValueChange={handleStatusTab}
         className="w-full xl:w-auto"
       >
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none sm:w-auto xl:h-8">
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm xl:h-8 xl:w-auto xl:flex-nowrap">
           {ticketListFilterData.map((tab) => (
             <TabsTrigger
               key={tab.value}

@@ -1,6 +1,7 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import Ticket from "@/models/ticketModel";
+import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -21,13 +22,15 @@ const ticketUpdateBodySchema = ticketFormSchema
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
     const verify = await getUserFromCookies(request);
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_VIEW);
+
+    const ticketId = await resolveTicketIdentifier(slug);
 
     const ticket = await Ticket.findById(ticketId).populate([
       { path: "category", select: "name description" },
@@ -38,7 +41,7 @@ export async function GET(
       { path: "unit", select: "label floor bedrooms bathrooms sizeSqft" },
       {
         path: "relatedTo",
-        select: "title status createdAt propertyName unitLabel priority",
+        select: "slug title status createdAt propertyName unitLabel priority",
       },
       {
         path: "requests",
@@ -59,16 +62,18 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     await assertLegacyWorkspacePermission(verify, PERMISSION.TICKETS_EDIT);
 
+    const ticketId = await resolveTicketIdentifier(slug);
+
     const rest = parseOrThrow(ticketUpdateBodySchema, await request.json());
-    if (rest.relatedTo === ticketId) {
+    if (rest.relatedTo === ticketId.toString()) {
       throw ApiError.badRequest("A ticket cannot be related to itself");
     }
 
@@ -139,13 +144,15 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
     const verify = await getUserFromCookies();
     if (!verify) throw ApiError.unauthorized();
     if (!verify.isUserRole) throw ApiError.forbidden();
+
+    const ticketId = await resolveTicketIdentifier(slug);
 
     const ticket = await Ticket.findOneAndDelete({
       _id: ticketId,

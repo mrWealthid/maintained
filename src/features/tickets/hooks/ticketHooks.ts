@@ -37,7 +37,7 @@ import { IListResponse } from "@/shared/components/table/models/table.model";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getMembershipForBusiness } from "@/utils/helpers";
 
-export function useCreateTicket(isEditing: boolean, ticketId?: string) {
+export function useCreateTicket(isEditing: boolean, ticketSlug?: string) {
   const queryClient = useQueryClient();
   const {
     isPending: isCreating,
@@ -45,7 +45,7 @@ export function useCreateTicket(isEditing: boolean, ticketId?: string) {
     error: createTicketError,
   } = useMutation({
     mutationFn: (payload: CreateTicketPayload) =>
-      createTicket(payload, isEditing, ticketId),
+      createTicket(payload, isEditing, ticketSlug),
     onSuccess: () => {
       toast.success(
         ` 🎉 Maintenance request successfully ${isEditing ? "updated" : "created"}...`
@@ -100,11 +100,11 @@ export function useDeleteTicket() {
 
   return { isDeleting, handleDeleteTicket, deleteTicketError };
 }
-export function useProcessTechnicianResponse(id: string, close?: () => void) {
+export function useProcessTechnicianResponse(requestId: string, close?: () => void) {
   const queryClient = useQueryClient();
   const { isPending: isProcessing, mutate: processResponse } = useMutation({
     mutationFn: (payload: ProcessRequest) =>
-      ProcessTechnicianResponse(id, payload),
+      ProcessTechnicianResponse(requestId, payload),
     onSuccess: () => {
       toast.success("Ticket successfully updated");
       queryClient.invalidateQueries({
@@ -117,12 +117,12 @@ export function useProcessTechnicianResponse(id: string, close?: () => void) {
 
   return { isProcessing, processResponse };
 }
-export function useAssignTechnician(id: string, close?: () => void) {
+export function useAssignTechnician(ticketSlug: string, close?: () => void) {
   const queryClient = useQueryClient();
   const { isPending: isAssigning, mutate: handleAssignTechnician } =
     useMutation({
       mutationFn: (payload: { assignedTo: string }) =>
-        assignTechnician(id, payload),
+        assignTechnician(ticketSlug, payload),
       onSuccess: () => {
         toast.success("Ticket successfully assigned");
         queryClient.invalidateQueries({
@@ -155,11 +155,11 @@ export function useFetchTechnicians(page: number = 1, limit: number = 50) {
     data,
   };
 }
-export function useFetchTicketDetails(id: string) {
+export function useFetchTicketDetails(ticketSlug: string) {
   return useQuery({
-    queryKey: ["ticketDetails", id],
-    queryFn: () => fetchTicketDetails(id),
-    enabled: Boolean(id),
+    queryKey: ["ticketDetails", ticketSlug],
+    queryFn: () => fetchTicketDetails(ticketSlug),
+    enabled: Boolean(ticketSlug),
   });
 }
 export function useFetchAdmins<T>(page: number = 1, limit: number = 50) {
@@ -176,12 +176,12 @@ export function useFetchAdmins<T>(page: number = 1, limit: number = 50) {
   };
 }
 
-export function useSendTechnicianRequest(id: string, close?: () => void) {
+export function useSendTechnicianRequest(ticketSlug: string, close?: () => void) {
   const queryClient = useQueryClient();
   const { isPending: isSending, mutate: handleSendTechnicianRequest } =
     useMutation({
       mutationFn: (payload: SendTechnicianRequestPayload) =>
-        sendTechnicianRequest(id, payload),
+        sendTechnicianRequest(ticketSlug, payload),
       onSuccess: () => {
         toast.success("Request sent successfully");
         queryClient.invalidateQueries({
@@ -195,10 +195,11 @@ export function useSendTechnicianRequest(id: string, close?: () => void) {
   return { isSending, handleSendTechnicianRequest };
 }
 
-export function useHandOffTicket(id: string, close?: () => void) {
+export function useHandOffTicket(ticketSlug: string, close?: () => void) {
   const queryClient = useQueryClient();
   const { isPending: isUpdating, mutate: handleHandleOffTicket } = useMutation({
-    mutationFn: (payload: { actionedBy: string }) => handOffTicket(id, payload),
+    mutationFn: (payload: { actionedBy: string }) =>
+      handOffTicket(ticketSlug, payload),
     onSuccess: () => {
       toast.success("Ticket successfully assigned");
       queryClient.invalidateQueries({

@@ -14,30 +14,24 @@ import type { ListDateFilterQuery } from "@/shared/model/list-date-filter.model"
 const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
   onFilter,
 }) => {
-  const [query, setQuery] =
-    useState<TicketFilterQuery<TECHNICIAN_RESPONSE> | null>({
-      status: TECHNICIAN_RESPONSE.pending,
-    });
+  const [status, setStatus] =
+    useState<TECHNICIAN_RESPONSE>(TECHNICIAN_RESPONSE.all);
 
-  function applyQueryPatch(patch: TicketFilterQuery<TECHNICIAN_RESPONSE> | null) {
-    setQuery(patch);
+  function applyQueryPatch(patch: TicketFilterQuery<TECHNICIAN_RESPONSE>) {
     onFilter?.(patch);
   }
 
   function handleStatusTab(val: string) {
-    applyQueryPatch(
-      val === TECHNICIAN_RESPONSE.all
-        ? null
-        : {
-            ...(query ?? {}),
-            status: val as TECHNICIAN_RESPONSE,
-          },
-    );
+    const nextStatus = val as TECHNICIAN_RESPONSE;
+    setStatus(nextStatus);
+    applyQueryPatch({
+      status:
+        nextStatus === TECHNICIAN_RESPONSE.all ? undefined : nextStatus,
+    });
   }
 
   function handleDateRangeFilter(range: ListDateFilterQuery | null) {
     applyQueryPatch({
-      ...(query ?? {}),
       dateFilter: range?.dateFilter ?? undefined,
       startDate: range?.startDate ?? undefined,
       endDate: range?.endDate ?? undefined,
@@ -47,11 +41,11 @@ const TicketHeaderActions: FC<TicketQueryprops<TECHNICIAN_RESPONSE>> = ({
   return (
     <div className="flex w-full flex-col gap-2 text-xs text-muted-foreground xl:w-auto xl:flex-row xl:items-center">
       <Tabs
-        value={query?.status ?? TECHNICIAN_RESPONSE.all}
+        value={status}
         onValueChange={handleStatusTab}
         className="w-full xl:w-auto"
       >
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-full border border-border/70 bg-secondary p-1 shadow-none sm:w-auto xl:h-8">
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border/60 bg-muted/70 p-1 shadow-sm xl:h-8 xl:w-auto xl:flex-nowrap">
           {technicianListFilter.map((tab) => (
             <TabsTrigger
               key={tab.value}

@@ -5,6 +5,7 @@ import { pusherServer } from "@/lib/pusher/pusher";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket, { ITicket } from "@/models/ticketModel";
+import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import User from "@/models/userModel";
 import { findWorkspaceMembershipByUser } from "@/lib/tenancy/workspace-membership-access";
 import { Types, HydratedDocument } from "mongoose";
@@ -20,10 +21,10 @@ const assignTechnicianBodySchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
     const verify = await getUserFromCookies();
 
     if (!verify) throw ApiError.unauthorized();
@@ -49,6 +50,8 @@ export async function PATCH(
     if (!membership || membership.role !== USER_TYPE.technician) {
       throw ApiError.badRequest("User is not a technician in this business");
     }
+
+    const ticketId = await resolveTicketIdentifier(slug);
 
     const previous = (await Ticket.findById(ticketId)
       .populate<{ user: { name: string; id: string } }>("user", "id name")

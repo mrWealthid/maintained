@@ -5,6 +5,7 @@ import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import Ticket from "@/models/ticketModel";
+import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import { z } from "zod";
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
@@ -16,10 +17,10 @@ const actionedByBodySchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const { ticketId } = await params;
+    const { slug } = await params;
 
     const user = await getUserFromCookies(request);
     if (!user) {
@@ -36,6 +37,7 @@ export async function PATCH(
       throw ApiError.badRequest("Invalid actionedBy ID");
     }
 
+    const ticketId = await resolveTicketIdentifier(slug);
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) throw ApiError.notFound("Ticket not found");
 

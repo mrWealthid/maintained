@@ -1,5 +1,5 @@
 import { http } from "@/services/http";
-import { ROLES, TICKET_STATUS } from "@/shared/enums/enums";
+import { ROLES, TECHNICIAN_RESPONSE, TICKET_STATUS } from "@/shared/enums/enums";
 import {
   ApiPaginatedResponse,
   ApiResponse,
@@ -24,6 +24,23 @@ type TablePaginatedResponse<T> = ApiPaginatedResponse<T> & {
   summary: Record<string, number>;
 };
 
+function stripAllStatus<T extends { status?: unknown } | null | undefined>(
+  search: T,
+) {
+  if (!search || typeof search !== "object") return search;
+
+  if (
+    search.status === TICKET_STATUS.all ||
+    search.status === TECHNICIAN_RESPONSE.all ||
+    search.status === "all"
+  ) {
+    const { status: _status, ...rest } = search;
+    return rest as Omit<NonNullable<T>, "status">;
+  }
+
+  return search;
+}
+
 function withSummary<T>(
   response: ApiPaginatedResponse<T> & { summary?: Record<string, number> }
 ): TablePaginatedResponse<T> {
@@ -36,12 +53,12 @@ function withSummary<T>(
 export async function createTicket(
   data: CreateTicketPayload,
   isEditing: boolean,
-  requestId?: string
+  ticketSlug?: string
 ) {
   try {
-    const res = requestId
+    const res = ticketSlug
       ? await http.patch(
-          `${API_ROUTES.ticketManagement.ticketById(requestId)}`,
+          `${API_ROUTES.ticketManagement.ticketBySlug(ticketSlug)}`,
           data
         )
       : await http.post(`${API_ROUTES.ticketManagement.create_ticket}`, data);
@@ -80,9 +97,9 @@ export async function fetchTechnicians(
   }
 }
 export async function fetchTicketDetails(
-  id: string
+  ticketSlug: string
 ): Promise<ApiResponse<TicketDetailsResponse>> {
-  const url = `${API_ROUTES.ticketManagement.ticketById(id)}`;
+  const url = `${API_ROUTES.ticketManagement.ticketBySlug(ticketSlug)}`;
   try {
     const response = await http(url);
     return response.data;
@@ -113,7 +130,7 @@ export async function fetchTickets<T>({
   const queryString = buildQueryString({
     limit,
     page,
-    ...search,
+    ...stripAllStatus(search),
     ...(status !== TICKET_STATUS.all && { status }),
   });
 
@@ -133,7 +150,7 @@ export async function fetchTicketList({
 }: ListQueryParams<TicketListFilter>): Promise<
   TablePaginatedResponse<Ticket[]>
 > {
-  const queryString = buildQueryString({ limit, page, ...search });
+  const queryString = buildQueryString({ limit, page, ...stripAllStatus(search) });
   const url = `${API_ROUTES.ticketManagement.get_tickets}?${queryString}`;
 
   try {
@@ -150,7 +167,7 @@ export async function fetchRequestTicketList({
 }: ListQueryParams<TicketListFilter>): Promise<
   TablePaginatedResponse<TechnicianRequest[]>
 > {
-  const queryString = buildQueryString({ limit, page, ...search });
+  const queryString = buildQueryString({ limit, page, ...stripAllStatus(search) });
   const url = `${API_ROUTES.ticketManagement.get_technician_requests}?${queryString}`;
 
   try {
@@ -161,10 +178,10 @@ export async function fetchRequestTicketList({
   }
 }
 
-export async function deleteTicket(id: string) {
+export async function deleteTicket(ticketSlug: string) {
   try {
     const res = await http.delete(
-      `${API_ROUTES.ticketManagement.ticketById(id)}`
+      `${API_ROUTES.ticketManagement.ticketBySlug(ticketSlug)}`
     );
     return res.data;
   } catch (err: unknown) {
@@ -200,12 +217,12 @@ export async function runBulkTicketAction(payload: BulkTicketActionPayload) {
   }
 }
 export async function handOffTicket(
-  id: string,
+  ticketSlug: string,
   payload: { actionedBy: string }
 ) {
   try {
     const res = await http.patch(
-      `${API_ROUTES.ticketManagement.actionedBy_ticket(id)}`,
+      `${API_ROUTES.ticketManagement.actionedBy_ticket(ticketSlug)}`,
       payload
     );
     return res.data;
@@ -215,12 +232,12 @@ export async function handOffTicket(
 }
 
 export async function ProcessTechnicianResponse(
-  id: string,
+  requestId: string,
   payload: ProcessRequest
 ) {
   try {
     const res = await http.patch(
-      `${API_ROUTES.ticketManagement.process_technician_response(id)}`,
+      `${API_ROUTES.ticketManagement.process_technician_response(requestId)}`,
       payload
     );
     return res.data;
@@ -229,12 +246,12 @@ export async function ProcessTechnicianResponse(
   }
 }
 export async function assignTechnician(
-  id: string,
+  ticketSlug: string,
   payload: { assignedTo: string }
 ) {
   try {
     const res = await http.patch(
-      `${API_ROUTES.ticketManagement.assign_technician(id)}`,
+      `${API_ROUTES.ticketManagement.assign_technician(ticketSlug)}`,
       payload
     );
     return res.data;
@@ -244,12 +261,12 @@ export async function assignTechnician(
 }
 
 export async function sendTechnicianRequest(
-  id: string,
+  ticketSlug: string,
   payload: SendTechnicianRequestPayload
 ) {
   try {
     const res = await http.post(
-      `${API_ROUTES.ticketManagement.send_technician_request(id)}`,
+      `${API_ROUTES.ticketManagement.send_technician_request(ticketSlug)}`,
       payload
     );
     return res.data;

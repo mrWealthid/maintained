@@ -59,6 +59,7 @@ type ConfirmConfigItem = {
 
 export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const router = useRouter();
+  const ticketSlug = ticket.slug;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -70,7 +71,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
     useDeleteTicket();
   const { isCreating, handleCreateTicket, createTicketError } = useCreateTicket(
     true,
-    ticket.id,
+    ticketSlug,
   );
 
   const canEditTicket = useHasPermission(PERMISSION.TICKETS_EDIT);
@@ -101,7 +102,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   const {
     formState: { isDirty, isValid },
   } = methods;
-  const ticketFormId = `edit-ticket-form-${ticket.id}`;
+  const ticketFormId = `edit-ticket-form-${ticketSlug}`;
 
   const onSubmit = (
     data: CreateTicketPayload,
@@ -127,7 +128,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
       variant: "destructive",
       icon: Trash2,
       onConfirm: () => {
-        handleDeleteTicket(ticket.id, {
+        handleDeleteTicket(ticketSlug, {
           onSuccess: () => setConfirmKey(null),
         });
       },
@@ -140,7 +141,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
     {
       label: "View details",
       action: () =>
-        router.push(`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${ticket.id}`),
+        router.push(`${APP_ROUTE_PATHS.DASHBOARD.TICKETS}/${ticketSlug}`),
       icon: Eye,
     },
   ];
@@ -207,7 +208,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
   return (
     <>
       <RowActionsMenu
-        ariaLabel={`Actions for ticket ${ticket.title ?? ticket.id}`}
+        ariaLabel={`Actions for ticket ${ticket.title ?? ticketSlug}`}
         open={menuOpen}
         onOpenChange={setMenuOpen}
         baseActions={baseActions}
@@ -221,7 +222,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
       <Sheet open={editOpen} onOpenChange={setEditOpen}>
         <AppSheetContent
           side="bottom"
-          className="h-[100dvh] max-h-[100dvh] max-w-[100vw] md:max-w-full"
+          className="h-dvh max-h-dvh max-w-[100vw] md:max-w-full"
         >
           <AppSheetHeader
             title="Edit Maintenance Ticket"
@@ -249,7 +250,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
                     onCancel={() => setEditOpen(false)}
                   />
                 </div>
-                <div className="order-first min-w-0 lg:order-none">
+                <div className="order-first min-w-0 lg:order-0">
                   <TicketSummary
                     initialAttachmentCounts={{
                       images: ticket?.images?.length || 0,

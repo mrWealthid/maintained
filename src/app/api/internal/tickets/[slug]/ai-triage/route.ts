@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
 import { z } from "zod";
 
 import { connect } from "@/dbConfig/dbConfig";
+import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import {
   ticketAiTriageSchema,
   ticketAiTriageWorkflowSchema,
@@ -55,16 +55,14 @@ function removeUndefined<T extends Record<string, unknown>>(value: T) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ ticketId: string }> },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
     await connect();
     assertInternalWebhookAuth(request);
 
-    const { ticketId } = await params;
-    if (!mongoose.Types.ObjectId.isValid(ticketId)) {
-      throw ApiError.badRequest("Invalid ticket id");
-    }
+    const { slug } = await params;
+    const ticketId = await resolveTicketIdentifier(slug);
 
     const body = parseOrThrow(
       internalAiTriageBodySchema,
@@ -125,12 +123,12 @@ export async function POST(
 
     if (shouldAdvanceStatus && ticket.business) {
       const businessIdStr = String(ticket.business);
-      const ticketIdStr = String(ticket._id);
+      const ticketSlug = ticket.slug;
 
       void sendAdminTriageCompleteEmail({
         request,
         businessId: businessIdStr,
-        ticketId: ticketIdStr,
+        ticketSlug,
         ticketTitle: ticket.title,
         ticketPriority: ticket.priority,
         recommendedTicketType: ticket.aiTriage?.recommendedTicketType,
@@ -147,13 +145,17 @@ export async function POST(
           request,
           businessId: businessIdStr,
           tenantUserId: String(ticket.user),
-          ticketId: ticketIdStr,
+          ticketSlug,
           ticketTitle: ticket.title,
           ticketPriority: ticket.priority,
           propertyName: ticket.propertyName,
           unitLabel: ticket.unitLabel,
           userReply: ticket.aiTriage?.userReply,
           safetyInstructions: ticket.aiTriage?.safetyInstructions,
+          userTroubleshootingSteps: ticket.aiTriage?.userTroubleshootingSteps,
+          estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,
+          requiresTechnician: ticket.aiTriage?.requiresTechnician,
+          immediateActionRequired: ticket.aiTriage?.immediateActionRequired,
         }).catch((error) => {
           console.error("[ai-triage] tenant email failed", error);
         });
