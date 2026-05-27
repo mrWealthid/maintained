@@ -38,6 +38,9 @@ export function wrapWithBrandedEmailShell(args: {
                       </td>`
     : "";
 
+  const brandName = args.senderName || args.appName;
+  const showSubtitle = args.senderName.trim() !== "" && args.senderName !== args.appName;
+
   return `<!doctype html>
   <html>
     <body style="margin:0;padding:0;background:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:${EMAIL_TEXT_COLOR};">
@@ -51,8 +54,12 @@ export function wrapWithBrandedEmailShell(args: {
                     <tr>
                       ${logoCell}
                       <td style="vertical-align:middle;">
-                        <div style="font-size:18px;font-weight:700;color:#0f172a;">${escapeHtml(args.senderName || args.appName)}</div>
-                        <div style="margin-top:4px;font-size:12px;color:${EMAIL_MUTED_TEXT_COLOR};">${escapeHtml(args.appName)}</div>
+                        <div style="font-size:18px;font-weight:700;color:#0f172a;">${escapeHtml(brandName)}</div>
+                        ${
+                          showSubtitle
+                            ? `<div style="margin-top:4px;font-size:12px;color:${EMAIL_MUTED_TEXT_COLOR};">${escapeHtml(args.appName)}</div>`
+                            : ""
+                        }
                       </td>
                     </tr>
                   </table>
