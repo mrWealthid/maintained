@@ -121,45 +121,65 @@ export async function POST(
 
     if (!ticket) throw ApiError.notFound("Ticket not found");
 
-    if (shouldAdvanceStatus && ticket.business) {
+    const shouldSendTriageEmails =
+      aiTriageStatus === AI_TRIAGE_STATUS.completed && Boolean(ticket.business);
+
+    if (shouldSendTriageEmails && ticket.business) {
       const businessIdStr = String(ticket.business);
       const ticketSlug = ticket.slug;
-
-      void sendAdminTriageCompleteEmail({
-        request,
-        businessId: businessIdStr,
-        ticketSlug,
-        ticketTitle: ticket.title,
-        ticketPriority: ticket.priority,
-        recommendedTicketType: ticket.aiTriage?.recommendedTicketType,
-        propertyName: ticket.propertyName,
-        unitLabel: ticket.unitLabel,
-        needsHumanReview: ticket.aiTriage?.needsHumanReview,
-        adminNotes: ticket.aiTriage?.adminNotes,
-      }).catch((error) => {
-        console.error("[ai-triage] admin email failed", error);
-      });
-
-      if (ticket.user) {
-        void sendTenantTriageCompleteEmail({
+      const emailTasks = [
+        sendAdminTriageCompleteEmail({
           request,
           businessId: businessIdStr,
-          tenantUserId: String(ticket.user),
           ticketSlug,
           ticketTitle: ticket.title,
           ticketPriority: ticket.priority,
+          recommendedTicketType: ticket.aiTriage?.recommendedTicketType,
           propertyName: ticket.propertyName,
           unitLabel: ticket.unitLabel,
-          userReply: ticket.aiTriage?.userReply,
-          safetyInstructions: ticket.aiTriage?.safetyInstructions,
-          userTroubleshootingSteps: ticket.aiTriage?.userTroubleshootingSteps,
-          estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,
+          needsHumanReview: ticket.aiTriage?.needsHumanReview,
+          adminNotes: ticket.aiTriage?.adminNotes,
           requiresTechnician: ticket.aiTriage?.requiresTechnician,
           immediateActionRequired: ticket.aiTriage?.immediateActionRequired,
-        }).catch((error) => {
-          console.error("[ai-triage] tenant email failed", error);
-        });
+          estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,
+        }),
+      ];
+
+      if (ticket.user) {
+        emailTasks.push(
+          sendTenantTriageCompleteEmail({
+            request,
+            businessId: businessIdStr,
+            tenantUserId: String(ticket.user),
+            ticketSlug,
+            ticketTitle: ticket.title,
+            ticketPriority: ticket.priority,
+            propertyName: ticket.propertyName,
+            unitLabel: ticket.unitLabel,
+            userReply: ticket.aiTriage?.userReply,
+            safetyInstructions: ticket.aiTriage?.safetyInstructions,
+            userTroubleshootingSteps: ticket.aiTriage?.userTroubleshootingSteps,
+            estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,
+            requiresTechnician: ticket.aiTriage?.requiresTechnician,
+            immediateActionRequired: ticket.aiTriage?.immediateActionRequired,
+          }),
+        );
       }
+
+      const emailResults = await Promise.allSettled(emailTasks);
+      emailResults.forEach((result, index) => {
+        const audience = index === 0 ? "admin" : "tenant";
+        if (result.status === "rejected") {
+          console.error(`[ai-triage] ${audience} email failed`, result.reason);
+          return;
+        }
+        if (!result.value.sent) {
+          console.warn(
+            `[ai-triage] ${audience} email not sent`,
+            result.value.error ?? result.value.skippedReason ?? "Unknown reason",
+          );
+        }
+      });
     }
 
     return NextResponse.json({

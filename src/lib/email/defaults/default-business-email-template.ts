@@ -150,7 +150,7 @@ Track this request here: {{ticket_url}}`,
       "A new maintenance ticket has been classified and is ready for dispatch.",
     body: `Hi {{attendee_name}},
 
-AI triage just finished for a new maintenance ticket and it is ready for your review.
+AI triage just finished for a maintenance ticket and it is ready for your review.
 
 Ticket: {{ticket_title}}
 Priority: {{ticket_priority}}
@@ -158,6 +158,9 @@ Category: {{ticket_category}}
 Recommended type: {{recommended_ticket_type}}
 Location: {{property_name}} {{unit_label}}
 Needs human review: {{needs_human_review}}
+Technician review: {{requires_technician}}
+Immediate action needed: {{immediate_action_required}}
+{{#if estimated_response_window}}Expected response: {{estimated_response_window}}{{/if}}
 
 Admin notes
 {{admin_notes}}

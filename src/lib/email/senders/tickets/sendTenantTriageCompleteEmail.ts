@@ -230,10 +230,6 @@ export async function sendTenantTriageCompleteEmail(args: {
   requiresTechnician?: boolean;
   immediateActionRequired?: boolean;
 }) {
-  if (!args.userReply?.trim()) {
-    return { sent: false, skippedReason: "AI produced no userReply" };
-  }
-
   const tenant = await findTicketTenant(args.tenantUserId);
   if (!tenant) {
     return { sent: false, skippedReason: "Tenant user not found or has no email" };
@@ -241,6 +237,9 @@ export async function sendTenantTriageCompleteEmail(args: {
 
   const baseUrl = resolveAppBaseUrl(args.request);
   const ticketUrl = `${baseUrl}/dashboard/ticket-management/${args.ticketSlug}`;
+  const userReply =
+    args.userReply?.trim() ||
+    "We have completed an initial assessment of your maintenance request. Your property team will review the ticket and confirm the next step.";
 
   return sendBusinessTemplateEmail({
     businessId: args.businessId,
@@ -253,7 +252,7 @@ export async function sendTenantTriageCompleteEmail(args: {
       ticket_priority: args.ticketPriority,
       property_name: args.propertyName ?? "",
       unit_label: args.unitLabel ?? "",
-      user_reply: args.userReply.trim(),
+      user_reply: userReply,
       safety_instructions_block: buildTextListBlock(
         "Important safety steps to take now",
         args.safetyInstructions,
@@ -273,7 +272,7 @@ export async function sendTenantTriageCompleteEmail(args: {
       ticketPriority: args.ticketPriority,
       propertyName: args.propertyName,
       unitLabel: args.unitLabel,
-      userReply: args.userReply.trim(),
+      userReply,
       safetyInstructions: args.safetyInstructions,
       userTroubleshootingSteps: args.userTroubleshootingSteps,
       estimatedResponseWindow: args.estimatedResponseWindow,
