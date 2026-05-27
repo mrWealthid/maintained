@@ -24,7 +24,7 @@ const resendClient = process.env.RESEND_API_KEY
   : null;
 
 function appName() {
-  return process.env.NEXT_PUBLIC_APP_NAME?.trim() || "Maintainly";
+  return process.env.NEXT_PUBLIC_APP_NAME?.trim() || "Properly";
 }
 
 export async function sendAppTemplateEmail(args: {

@@ -72,7 +72,7 @@ const previewVariables = {
   unit_label: "Unit 4B",
   technician_name: "Avery Morgan",
   status: "In Progress",
-  workspace_name: "Maintain",
+  workspace_name: "Properly",
   support_email: "support@example.com",
 };
 

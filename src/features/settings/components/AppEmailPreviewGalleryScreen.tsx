@@ -79,7 +79,7 @@ export function AppEmailPreviewGalleryScreen({
       title="App Email Preview Gallery"
       description="Review every platform-level email with shared sample data before tweaking individual templates."
       groups={groups}
-      senderName={email.senderName || "Maintainly"}
+      senderName={email.senderName || "Properly"}
       senderEmail={email.senderEmail || "no-reply@maintainly.app"}
       footerText={footerText || undefined}
       footerNote={

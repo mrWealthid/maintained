@@ -4,7 +4,7 @@ import {
   EMAIL_TEXT_COLOR,
 } from "@/lib/email/helpers/email-theme";
 
-export const DEFAULT_EMAIL_APP_NAME = "Maintainly";
+export const DEFAULT_EMAIL_APP_NAME = "Properly";
 
 const DEFAULT_EMAIL_APP_ICON_URL =
   process.env.NEXT_PUBLIC_APP_ICON_URL?.trim() || "";

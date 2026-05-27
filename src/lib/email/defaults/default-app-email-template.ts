@@ -9,7 +9,7 @@ export { APP_EMAIL_TEMPLATE_KEYS };
 export type { AppEmailTemplateKey, EmailTemplateConfig as AppEmailTemplateConfig };
 
 export const DEFAULT_APP_EMAIL_SETTINGS = {
-  senderName: "Maintainly",
+  senderName: "Properly",
   senderEmail: "support@wealthtech.website",
   replyTo: "reply@wealthtech.website",
   bcc: "",

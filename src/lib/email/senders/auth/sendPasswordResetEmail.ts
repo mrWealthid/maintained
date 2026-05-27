@@ -16,7 +16,7 @@ export async function sendPasswordResetEmail(args: {
   return sendAppTemplateEmail({
     templateKey: APP_EMAIL_TEMPLATE.FORGOT_PASSWORD,
     to: args.to,
-    fallbackSubject: "Reset your Maintainly password",
+    fallbackSubject: "Reset your Properly password",
     variables: {
       attendee_name: args.attendeeName,
       reset_url: resetUrl,
@@ -25,7 +25,7 @@ export async function sendPasswordResetEmail(args: {
     customBodyHtml: buildSecureActionEmailHtml({
       badgeLabel: "Password Reset",
       attendeeName: args.attendeeName,
-      intro: "We received a request to reset your Maintainly password.",
+      intro: "We received a request to reset your Properly password.",
       actionTitle: "Choose a new password",
       actionDescription:
         "Use the secure link below to set a new password for your account.",

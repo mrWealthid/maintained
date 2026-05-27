@@ -36,7 +36,7 @@ const fontDisplay = Sora({
 });
 
 export const metadata: Metadata = {
-	title: 'Maintainly',
+	title: 'Properly',
 	description: 'Automate Maintenance Today!'
 };
 

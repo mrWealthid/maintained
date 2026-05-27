@@ -1,7 +1,7 @@
 import { ROLES } from "@/shared/enums/enums";
 
 /**
- * Multi-tier role taxonomy for the Maintain property-maintenance app.
+ * Multi-tier role taxonomy for the Properly property-maintenance app.
  *
  *  PLATFORM_ROLE   – system-wide roles (super admin)
  *  WORKSPACE_ROLE  – scoped to a property-management business / workspace

@@ -69,7 +69,7 @@ export function ConfirmationActions({
       const start = new Date(startsAt);
       const content = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Maintain//Confirmation//EN
+PRODID:-//Properly//Confirmation//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT

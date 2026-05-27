@@ -52,7 +52,7 @@ export async function sendPasswordlessLoginEmail(args: {
     customBodyHtml: buildSecureActionEmailHtml({
       badgeLabel: "Secure Sign-In",
       attendeeName: args.attendeeName,
-      intro: "You requested a passwordless sign-in link for Maintainly.",
+      intro: "You requested a passwordless sign-in link for Properly.",
       actionTitle: "Sign in without a password",
       actionDescription:
         "Use the secure link below to sign in. The link expires shortly and can only be used once.",

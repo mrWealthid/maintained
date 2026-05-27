@@ -1,7 +1,7 @@
 import { PLATFORM_ROLE, USER_TYPE, WORKSPACE_ROLE } from "@/shared/auth/roles";
 
 /**
- * Permission registry for the Maintain property-maintenance app.
+ * Permission registry for the Properly property-maintenance app.
  *
  * Two scopes:
  *   platform.*  – system-wide capabilities (super admin)

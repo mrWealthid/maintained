@@ -153,7 +153,7 @@ const LoginComponent = () => {
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
           <p className="text-muted-foreground">
-            Sign in to your Maintainly account
+            Sign in to your Properly account
           </p>
         </div>
 

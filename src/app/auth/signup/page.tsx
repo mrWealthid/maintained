@@ -269,7 +269,7 @@ export default function SignupComponent() {
                 Sign Up
               </CardTitle>
               <CardDescription className="text-sm leading-6 text-muted-foreground/90">
-                Create your Maintainly account and launch a{" "}
+                Create your Properly account and launch a{" "}
                 {workspaceTypeLabel.toLowerCase()} workspace
               </CardDescription>
             </CardHeader>

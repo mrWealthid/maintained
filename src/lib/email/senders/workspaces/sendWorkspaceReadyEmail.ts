@@ -33,7 +33,7 @@ export async function sendWorkspaceReadyEmail(args: {
   return sendAppTemplateEmail({
     templateKey: APP_EMAIL_TEMPLATE.BUSINESS_REGISTRATION,
     to: args.recipientEmail,
-    fallbackSubject: `Welcome to Maintainly, ${args.businessName}`,
+    fallbackSubject: `Welcome to Properly, ${args.businessName}`,
     variables: {
       attendee_name: args.recipientName,
       business_name: args.businessName,

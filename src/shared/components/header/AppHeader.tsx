@@ -1,7 +1,7 @@
 import { ThemeToggle } from "@/components/Theme-Toggle";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { MaintainLogo } from "../MaintainLogo";
+import { ProperlyLogo } from "../ProperlyLogo";
 
 const AppHeader = () => {
   return (
@@ -18,7 +18,7 @@ const AppHeader = () => {
 
 
         </div> */}
-        <MaintainLogo linkHref="/" />
+        <ProperlyLogo linkHref="/" />
         {/* <nav className="hidden md:flex items-center gap-6">
           <Link
             href="#how-it-works"

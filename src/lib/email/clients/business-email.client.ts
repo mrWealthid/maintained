@@ -28,7 +28,7 @@ const resendClient = process.env.RESEND_API_KEY
 type BusinessEmailSettings = EmailSettings<BusinessEmailTemplateKey>;
 
 function appName() {
-  return process.env.NEXT_PUBLIC_APP_NAME?.trim() || "Maintainly";
+  return process.env.NEXT_PUBLIC_APP_NAME?.trim() || "Properly";
 }
 
 async function loadBusinessEmailSettings(businessId: string) {

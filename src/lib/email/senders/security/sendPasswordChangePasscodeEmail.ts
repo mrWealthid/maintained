@@ -12,7 +12,7 @@ export async function sendPasswordChangePasscodeEmail(args: {
   return sendAppTemplateEmail({
     templateKey: APP_EMAIL_TEMPLATE.PASSWORD_CHANGE_PASSCODE,
     to: args.to,
-    fallbackSubject: "Your Maintainly verification code",
+    fallbackSubject: "Your Properly verification code",
     variables: {
       attendee_name: args.attendeeName,
       passcode: args.passcode,

@@ -17,7 +17,7 @@ export async function sendPasswordUpdatedEmail(args: {
   return sendAppTemplateEmail({
     templateKey: APP_EMAIL_TEMPLATE.PASSWORD_UPDATED,
     to: args.to,
-    fallbackSubject: "Your Maintainly password was updated",
+    fallbackSubject: "Your Properly password was updated",
     variables: {
       attendee_name: args.attendeeName,
       login_url: loginUrl,

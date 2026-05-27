@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Properly">
+  <!-- AI variant: house + spark, signaling automated triage. Uses currentColor. -->
+  <path d="M6 14.5 16 6l10 8.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 13v11.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 15l1.1 2.9L20 19l-2.9 1.1L16 23l-1.1-2.9L12 19l2.9-1.1L16 15Z" fill="currentColor"/>
+</svg>

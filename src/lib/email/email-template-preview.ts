@@ -9,7 +9,7 @@ export const appEmailPreviewVariablesSchema = z.object({
   attendee_name: stringVar("Jane Smith"),
   attendee_first_name: stringVar("Jane"),
   attendee_email: stringVar("jane@example.com"),
-  app_name: stringVar("Maintainly"),
+  app_name: stringVar("Properly"),
   support_email: stringVar("support@maintainly.app"),
   business_name: stringVar("Acme Properties"),
   workspace_label: stringVar("Property Management Workspace"),

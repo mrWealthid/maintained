@@ -16,7 +16,7 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { MaintainLogo } from "../MaintainLogo";
+import { ProperlyLogo } from "../ProperlyLogo";
 import { ROLES } from "@/shared/enums/enums";
 import SidebarProfileShell from "./SidebarProfileShell";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
@@ -60,7 +60,7 @@ function AppSidebar({
             </div>
           )} */}
 
-          <MaintainLogo size={"sm"} variant={open ? "full" : "icon"} />
+          <ProperlyLogo size={"sm"} variant={open ? "full" : "icon"} />
 
         </div>
       </SidebarHeader>

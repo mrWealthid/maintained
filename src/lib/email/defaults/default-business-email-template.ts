@@ -9,7 +9,7 @@ export const EMAIL_TEMPLATE_KEYS = BUSINESS_EMAIL_TEMPLATE_KEYS;
 export type { BusinessEmailTemplateKey, EmailTemplateConfig };
 
 export const DEFAULT_EMAIL_SETTINGS = {
-  senderName: "Maintainly",
+  senderName: "Properly",
   senderEmail: "support@wealthtech.website",
   replyTo: "",
   bcc: "",
@@ -24,7 +24,7 @@ export const DEFAULT_EMAIL_TEMPLATES: Record<
   [BUSINESS_EMAIL_TEMPLATE.TEAM_INVITE]: {
     enabled: true,
     subject: "You have been invited to join {{business_name}}",
-    preheader: "Complete onboarding to access your Maintainly workspace.",
+    preheader: "Complete onboarding to access your Properly workspace.",
     body: `Hi {{attendee_name}},
 
 You have been invited to join {{business_name}} on {{app_name}}.
