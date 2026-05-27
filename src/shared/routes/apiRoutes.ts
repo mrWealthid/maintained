@@ -90,6 +90,8 @@ export const API_ROUTES = {
     get_request_types: `${base}/tickets/types`,
     actionedBy_ticket: (slug: string) =>
       `${resourceById("tickets")(slug)}/actioned-by`,
+    retriage_ticket: (slug: string) =>
+      `${resourceById("tickets")(slug)}/retriage`,
     create_ticket: `${base}/tickets`,
     update_status: (slug: string) => resourceById("tickets/update-status")(slug),
     assign_technician: (slug: string) => resourceById("tickets/assign")(slug),

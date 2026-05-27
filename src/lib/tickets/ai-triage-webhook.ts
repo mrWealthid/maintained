@@ -9,6 +9,8 @@ type TriggerAiTriageWebhookArgs = {
   images?: string[];
   videos?: string[];
   documents?: string[];
+  isReTriage?: boolean;
+  priorMissingInformation?: string[];
 };
 
 type TriggerAiTriageWebhookResult =
@@ -50,6 +52,10 @@ export async function triggerAiTriageWebhook(
               "Return recommendedTicketType as exactly one of these enum values. Do not return MongoDB ids or free-form labels.",
             enum: TICKET_TYPE_VALUES,
             options: getTicketTypePromptOptions(),
+          },
+          reTriage: {
+            isReTriage: Boolean(payload.isReTriage),
+            priorMissingInformation: payload.priorMissingInformation ?? [],
           },
         },
       }),

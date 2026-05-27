@@ -16,11 +16,13 @@ import {
   ShieldCheck,
   Sparkles,
   Stethoscope,
+  RefreshCw,
   Wrench,
   XCircle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -35,7 +37,32 @@ type Props = {
   completedAt?: string;
   source?: string;
   isStaff: boolean;
+  canReTriage?: boolean;
+  isReTriaging?: boolean;
+  onReTriage?: () => void;
 };
+
+function ReTriageButton({
+  onReTriage,
+  isReTriaging,
+}: {
+  onReTriage: () => void;
+  isReTriaging?: boolean;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={onReTriage}
+      disabled={isReTriaging}
+      className="gap-1.5"
+    >
+      <RefreshCw className={cn("size-3.5", isReTriaging && "animate-spin")} />
+      {isReTriaging ? "Re-queuing…" : "Re-run triage"}
+    </Button>
+  );
+}
 
 const RISK_STYLES: Record<string, { wrap: string; icon: string; label: string }> =
   {
@@ -197,7 +224,12 @@ export default function TicketAiTriagePanel({
   completedAt,
   source,
   isStaff,
+  canReTriage,
+  isReTriaging,
+  onReTriage,
 }: Props) {
+  const showReTriage = Boolean(canReTriage && onReTriage);
+
   if (!status || status === AI_TRIAGE_STATUS.notStarted) {
     return null;
   }
@@ -237,6 +269,14 @@ export default function TicketAiTriagePanel({
             description="Automated assessment of this maintenance request."
             iconWrapClassName="bg-violet-500/10"
             iconClassName="text-violet-500"
+            actions={
+              showReTriage ? (
+                <ReTriageButton
+                  onReTriage={onReTriage!}
+                  isReTriaging={isReTriaging}
+                />
+              ) : undefined
+            }
           />
           <div className="flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
             <XCircle className="mt-0.5 size-5 shrink-0 text-rose-600" />
@@ -307,6 +347,12 @@ export default function TicketAiTriagePanel({
                   <Gauge className="size-3" />
                   {confidencePct}% confidence
                 </Badge>
+              ) : null}
+              {showReTriage ? (
+                <ReTriageButton
+                  onReTriage={onReTriage!}
+                  isReTriaging={isReTriaging}
+                />
               ) : null}
             </div>
           }

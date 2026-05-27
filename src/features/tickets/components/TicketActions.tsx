@@ -3,6 +3,7 @@
 import { useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bot,
   Eye,
   Edit,
   Send,
@@ -24,7 +25,7 @@ import ActionConfirmDialog from "@/shared/components/ActionConfirmDialog";
 import ErrorList from "@/components/ui/ErrorList";
 import { Button } from "@/components/ui/button";
 
-import { TICKET_STATUS } from "@/shared/enums/enums";
+import { AI_TRIAGE_STATUS, TICKET_STATUS } from "@/shared/enums/enums";
 import { useHasPermission } from "@/shared/hooks/usePermission";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { APP_ROUTE_PATHS } from "@/shared/routes/appRoutePaths";
@@ -40,6 +41,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useCreateTicket,
   useDeleteTicket,
+  useReTriageTicket,
 } from "../hooks/ticketHooks";
 import TicketForm from "../forms/TicketForm";
 import TicketSummary from "./TicketSummary";
@@ -69,6 +71,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
 
   const { isDeleting, handleDeleteTicket, deleteTicketError } =
     useDeleteTicket();
+  const { isReTriaging, handleReTriage } = useReTriageTicket();
   const { isCreating, handleCreateTicket, createTicketError } = useCreateTicket(
     true,
     ticketSlug,
@@ -83,7 +86,7 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
     PERMISSION.TECHNICIAN_REQUESTS_CREATE,
   );
 
-  const isLoading = isDeleting;
+  const isLoading = isDeleting || isReTriaging;
 
   const methods = useForm<TicketCreateFormValues>({
     resolver: zodResolver(ticketCreateFormSchema) as never,
@@ -189,6 +192,21 @@ export const TicketActions = ({ ticket }: TicketRowActionsProps) => {
         setSendRequestOpen(true);
       },
       icon: Send,
+    });
+  }
+
+  if (
+    canEditTicket &&
+    ticket.aiTriageStatus !== AI_TRIAGE_STATUS.pending &&
+    ticket.aiTriageStatus !== AI_TRIAGE_STATUS.processing
+  ) {
+    baseActions.push({
+      label: "Re-run AI triage",
+      action: () => {
+        setMenuOpen(false);
+        handleReTriage(ticket.slug);
+      },
+      icon: Bot,
     });
   }
 

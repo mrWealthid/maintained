@@ -178,6 +178,17 @@ export async function fetchRequestTicketList({
   }
 }
 
+export async function reTriageTicket(ticketSlug: string) {
+  try {
+    const res = await http.post(
+      `${API_ROUTES.ticketManagement.retriage_ticket(ticketSlug)}`,
+    );
+    return res.data;
+  } catch (err: unknown) {
+    throw ApiErrorHandler.toUIError(err);
+  }
+}
+
 export async function deleteTicket(ticketSlug: string) {
   try {
     const res = await http.delete(

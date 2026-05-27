@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useFetchTicketDetails } from "@/features/tickets/hooks/ticketHooks";
+import {
+  useFetchTicketDetails,
+  useReTriageTicket,
+} from "@/features/tickets/hooks/ticketHooks";
 import type { UIError } from "@/utils/apiError";
 import TicketDetailSkeleton from "./TicketDetailSkeleton";
 import TicketDetailNotFoundState from "./TicketDetailNotFoundState";
@@ -283,6 +286,7 @@ function MetaRow({
 export default function TicketView({ slug }: { slug: string }) {
   const { data, isLoading, error, refetch } = useFetchTicketDetails(slug);
   const { user } = useAppContext();
+  const { isReTriaging, handleReTriage } = useReTriageTicket();
   const isStaff =
     user.role !== ROLES.user && user.role !== ROLES.tenant;
   const ticket = (data as { data?: RichTicket } | undefined)?.data;
@@ -396,6 +400,13 @@ export default function TicketView({ slug }: { slug: string }) {
             completedAt={ticket.aiTriageCompletedAt}
             source={ticket.aiTriageSource}
             isStaff={isStaff}
+            canReTriage={
+              isStaff &&
+              (ticket.aiTriageStatus === AI_TRIAGE_STATUS.completed ||
+                ticket.aiTriageStatus === AI_TRIAGE_STATUS.failed)
+            }
+            isReTriaging={isReTriaging}
+            onReTriage={() => handleReTriage(ticket.slug)}
           />
 
           {/* Description */}

@@ -1,6 +1,6 @@
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
-import Ticket from "@/models/ticketModel";
+import Ticket, { ITicket } from "@/models/ticketModel";
 import { resolveTicketIdentifier } from "@/lib/tickets/resolve-ticket-identifier";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,6 +12,11 @@ import {
 import { assertLegacyWorkspacePermission } from "@/lib/auth/permission-guards";
 import { PERMISSION } from "@/shared/auth/permission-registry";
 import { AI_TRIAGE_STATUS } from "@/shared/enums/enums";
+import {
+  hasReTriageAttemptsLeft,
+  isTriageInFlight,
+  runReTriage,
+} from "@/lib/tickets/retriage";
 
 const ticketUpdateBodySchema = ticketFormSchema
   .partial()
@@ -19,6 +24,40 @@ const ticketUpdateBodySchema = ticketFormSchema
   .extend({
     aiTriage: ticketAiTriageSchema.optional(),
   });
+
+// Re-run AI triage only when the prior triage asked for more (human review or
+// missing information) AND the tenant actually changed the description that the
+// agent reads. Capped to avoid an edit war spinning the agent indefinitely.
+async function maybeReTriage({
+  existing,
+  rest,
+  ticket,
+}: {
+  existing: mongoose.HydratedDocument<ITicket>;
+  rest: { description?: string; aiTriage?: unknown; aiTriageStatus?: unknown };
+  ticket: mongoose.HydratedDocument<ITicket>;
+}) {
+  const priorTriage = existing.aiTriage;
+  const wasFlagged =
+    priorTriage?.needsHumanReview === true ||
+    (priorTriage?.missingInformation?.length ?? 0) > 0;
+  const descriptionChanged =
+    typeof rest.description === "string" &&
+    rest.description.trim() !== (existing.description ?? "").trim();
+  const adminEditedTriage = Boolean(rest.aiTriage) || Boolean(rest.aiTriageStatus);
+
+  if (
+    !wasFlagged ||
+    !descriptionChanged ||
+    isTriageInFlight(existing.aiTriageStatus) ||
+    !hasReTriageAttemptsLeft(existing.aiTriageRetryCount) ||
+    adminEditedTriage
+  ) {
+    return;
+  }
+
+  await runReTriage(ticket);
+}
 
 export async function GET(
   request: NextRequest,
@@ -120,6 +159,15 @@ export async function PATCH(
           business: new mongoose.Types.ObjectId(String(verify.currentBusiness)),
         };
 
+    const existing = await Ticket.findOne(ticketFilter).select(
+      "description aiTriage aiTriageStatus aiTriageRetryCount",
+    );
+    if (!existing) {
+      throw ApiError.forbidden(
+        "You are not authorized to update this ticket or ticket not found",
+      );
+    }
+
     const updatedRequest = await Ticket.findOneAndUpdate(
       ticketFilter,
       update,
@@ -131,6 +179,8 @@ export async function PATCH(
         "You are not authorized to update this ticket or ticket not found",
       );
     }
+
+    await maybeReTriage({ existing, rest, ticket: updatedRequest });
 
     return NextResponse.json({
       message: "Ticket Updated Successfully",

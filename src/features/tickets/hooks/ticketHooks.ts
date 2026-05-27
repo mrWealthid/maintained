@@ -16,6 +16,7 @@ import {
   fetchTickets,
   handOffTicket,
   ProcessTechnicianResponse,
+  reTriageTicket,
   runBulkTicketAction,
   sendTechnicianRequest,
 } from "../services/ticket-service";
@@ -60,6 +61,22 @@ export function useCreateTicket(isEditing: boolean, ticketSlug?: string) {
   });
 
   return { isCreating, handleCreateTicket, createTicketError };
+}
+
+export function useReTriageTicket(close?: () => void) {
+  const queryClient = useQueryClient();
+  const { isPending: isReTriaging, mutate: handleReTriage } = useMutation({
+    mutationFn: (ticketSlug: string) => reTriageTicket(ticketSlug),
+    onSuccess: () => {
+      toast.success("AI triage re-queued");
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["ticketDetails"] });
+      close?.();
+    },
+    onError: (err: ApiError) => toast.error(err.message),
+  });
+
+  return { isReTriaging, handleReTriage };
 }
 
 export function useFetchTickets<T>(

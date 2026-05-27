@@ -269,7 +269,7 @@ function buildMissingInformationEmailHtml(args: {
     ${buildGenericEmailBanner({
       title: "We need a few more details",
       description:
-        "Please reply with the information below, or open the ticket and add the details there. This helps the team route the request correctly.",
+        "Please go to your maintenance dashboard, open this ticket, and update the ticket information with the details below. This helps the team route the request correctly.",
       tone: "warning",
     })}
     ${buildGenericDetailsGrid({
@@ -294,27 +294,27 @@ function buildMissingInformationEmailHtml(args: {
     })}
     ${buildAssessmentPanel({ title: "What we have so far", body: args.userReply })}
     ${buildGenericInfoPanel({
-      title: "Send the missing details",
+      title: "Update the ticket information",
       description:
-        "Reply directly to this email with the requested information, or open the ticket to add it to the request history.",
+        "Use the maintenance dashboard to add the requested details to this ticket so the property team has the complete request history in one place.",
       tone: "info",
-      actionLabel: "Open Ticket",
+      actionLabel: "Open Maintenance Dashboard",
       actionUrl: args.ticketUrl,
       actionAsButton: true,
       note: args.immediateActionRequired
         ? "If this issue is unsafe or urgent, contact your property team immediately."
-        : "Once the missing details are received, the property team can continue reviewing the request.",
+        : "Once the ticket information is updated, the property team can continue reviewing the request.",
     })}
     ${buildGenericKeyValueTable({
       title: "What happens after you reply",
       rows: [
         {
           label: "1",
-          value: "Your response is added to the ticket history.",
+          value: "You open the ticket from your maintenance dashboard and update the missing information.",
         },
         {
           label: "2",
-          value: "The property team reviews the details and confirms the next action.",
+          value: "The update is saved to the ticket history for the property team to review.",
         },
         {
           label: "3",
