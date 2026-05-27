@@ -166,6 +166,13 @@ Technician review: {{requires_technician}}
 Immediate action needed: {{immediate_action_required}}
 {{#if estimated_response_window}}Expected response: {{estimated_response_window}}{{/if}}
 
+{{#if missing_information_block}}
+{{tenant_communication_status}}
+{{retriage_status}}
+
+{{missing_information_block}}
+{{/if}}
+
 Admin notes
 {{admin_notes}}
 

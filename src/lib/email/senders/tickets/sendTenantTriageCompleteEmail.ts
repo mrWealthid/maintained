@@ -137,6 +137,72 @@ function buildAssessmentPanel(args: { title: string; body: string }) {
   `;
 }
 
+function buildTenantNextStepRows(args: {
+  ticketPriority: string;
+  requiresTechnician?: boolean;
+  immediateActionRequired?: boolean;
+}) {
+  if (
+    args.immediateActionRequired ||
+    args.ticketPriority === TICKET_PRIORITY.emergency
+  ) {
+    return [
+      {
+        label: "1",
+        value:
+          "Your property team reviews the emergency assessment and prioritizes the request for urgent action.",
+      },
+      {
+        label: "2",
+        value:
+          "A technician or responsible team member will be assigned or contacted to respond.",
+      },
+      {
+        label: "3",
+        value:
+          "You will receive updates as the request is reviewed, assigned, and moved toward resolution.",
+      },
+    ];
+  }
+
+  if (args.ticketPriority === TICKET_PRIORITY.high) {
+    return [
+      {
+        label: "1",
+        value:
+          "Your property team reviews the high-priority assessment and confirms the next action.",
+      },
+      {
+        label: "2",
+        value: args.requiresTechnician
+          ? "A technician will be assigned or contacted for availability."
+          : "The team will update the ticket with instructions, scheduling details, or resolution notes.",
+      },
+      {
+        label: "3",
+        value: "You will receive updates as the ticket moves forward.",
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "1",
+      value: "Your property team reviews the assessment and confirms the next action.",
+    },
+    {
+      label: "2",
+      value: args.requiresTechnician
+        ? "A technician will be assigned or requested for availability."
+        : "The team will update the ticket with instructions or resolution notes.",
+    },
+    {
+      label: "3",
+      value: "You will receive updates as the ticket moves forward.",
+    },
+  ];
+}
+
 function buildTenantTriageEmailHtml(args: {
   attendeeName: string;
   ticketTitle: string;
@@ -219,22 +285,11 @@ function buildTenantTriageEmailHtml(args: {
     })}
     ${buildGenericKeyValueTable({
       title: "What happens next",
-      rows: [
-        {
-          label: "1",
-          value: "Your property team reviews the assessment and confirms the next action.",
-        },
-        {
-          label: "2",
-          value: args.requiresTechnician
-            ? "If needed, a technician will be assigned or requested for availability."
-            : "If no technician is needed, the team will update the ticket with instructions or resolution notes.",
-        },
-        {
-          label: "3",
-          value: "You will receive updates as the ticket moves forward.",
-        },
-      ],
+      rows: buildTenantNextStepRows({
+        ticketPriority: args.ticketPriority,
+        requiresTechnician: args.requiresTechnician,
+        immediateActionRequired: args.immediateActionRequired,
+      }),
     })}
   `;
 }

@@ -179,6 +179,12 @@ const TicketList: FC = () => {
       exportValue: (row) => row.area ?? "",
     },
     {
+      header: "Priority",
+      accessor: "priority",
+      searchType: "TEXT",
+      exportValue: (row) => row.priority ?? "",
+    },
+    {
       header: "Actioned By",
       accessor: "actionedBy.name",
       searchType: "TEXT",

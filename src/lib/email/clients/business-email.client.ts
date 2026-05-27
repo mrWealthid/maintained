@@ -52,6 +52,8 @@ export async function sendBusinessTemplateEmail(args: {
   to: string;
   variables: MergeVars;
   fallbackSubject: string;
+  subjectOverride?: string;
+  preheaderOverride?: string;
   replyTo?: string;
   customBodyHtml?: string;
   attachments?: EmailAttachment[];
@@ -87,10 +89,13 @@ export async function sendBusinessTemplateEmail(args: {
     ...args.variables,
   };
   const subject = renderTemplate(
-    template.subject?.trim() || args.fallbackSubject,
+    args.subjectOverride?.trim() || template.subject?.trim() || args.fallbackSubject,
     variables,
   );
-  const preheader = renderTemplate(template.preheader ?? "", variables);
+  const preheader = renderTemplate(
+    args.preheaderOverride ?? template.preheader ?? "",
+    variables,
+  );
   const bodyText = renderTemplate(normalizeTemplateText(template.body), variables);
   const footer = renderTemplate(email.footer || DEFAULT_EMAIL_SETTINGS.footer, variables);
   const contentHtml =

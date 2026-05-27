@@ -2,8 +2,12 @@ import Link from "next/link";
 import { TicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  TicketPriorityBadge,
+  TicketStatusBadge,
+} from "@/features/tickets/components/ticket-list-badges";
+
 function RequestRow({
   data,
   enableSelection,
@@ -65,23 +69,15 @@ function RequestRow({
               </span>
             </TableCell>
             <TableCell>
+              <TicketPriorityBadge priority={row.priority} />
+            </TableCell>
+            <TableCell>
               <span className="block" title={row.actionedBy?.name}>
                 {row.actionedBy?.name || "N/A"}
               </span>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary">
-                {row.status}
-                {/*
-								<IconLoader/> */}
-              </Badge>
-              {/* <span
-								style={{
-									backgroundColor: getStatusColor(row.status)
-								}}
-								className='text-[8px] md:text-xs text-primary py-2 px-3 rounded-3xl inline-flex'>
-								{row.status}
-							</span> */}
+              <TicketStatusBadge status={row.status} />
             </TableCell>
             <TableCell>
               <span className="flex justify-center gap-2 flex-col">

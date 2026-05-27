@@ -42,6 +42,12 @@ const TicketList: FC = () => {
       exportValue: (row) => row.ticket?.area ?? "",
     },
     {
+      header: "Priority",
+      accessor: "ticket.priority",
+      searchType: "TEXT",
+      exportValue: (row) => row.ticket?.priority ?? "",
+    },
+    {
       header: "Status",
       accessor: "status",
       searchType: "DROPDOWN",

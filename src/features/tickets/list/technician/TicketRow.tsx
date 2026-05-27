@@ -2,13 +2,16 @@ import Link from "next/link";
 import { TechnicianTicketRowProps } from "@/features/tickets/models/ticket.model";
 import TicketRowActions from "./TicketRowActions";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import {
+  TechnicianRequestStatusBadge,
+  TicketPriorityBadge,
+} from "@/features/tickets/components/ticket-list-badges";
 
 function RequestRow({ data }: TechnicianTicketRowProps) {
   return (
     <>
       {data?.map((row, i) => {
-        const { area, title, user, category, slug } = row.ticket;
+        const { area, title, user, category, priority, slug } = row.ticket;
         return (
           <TableRow key={row.id} className="relative  ">
             {/* <td className="p-2 font-medium md:px-2 md:py-4 whitespace-nowrap">
@@ -61,18 +64,10 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
               </span>
             </TableCell>
             <TableCell>
-              <Badge variant="outline">
-                {row.status}
-                {/*
-								<IconLoader/> */}
-              </Badge>
-              {/* <span
-								style={{
-									backgroundColor: getStatusColor(row.status)
-								}}
-								className='text-[8px] md:text-xs text-primary py-2 px-3 rounded-3xl inline-flex'>
-								{row.status}
-							</span> */}
+              <TicketPriorityBadge priority={priority} />
+            </TableCell>
+            <TableCell>
+              <TechnicianRequestStatusBadge status={row.status} />
             </TableCell>
             <TableCell>
               <span className="flex justify-center gap-2 flex-col">

@@ -53,6 +53,15 @@ function removeUndefined<T extends Record<string, unknown>>(value: T) {
   ) as Partial<T>;
 }
 
+function categoryLabel(category: unknown): string | undefined {
+  if (!category || typeof category !== "object" || !("name" in category)) {
+    return undefined;
+  }
+
+  const name = (category as { name?: unknown }).name;
+  return typeof name === "string" && name.trim() ? name.trim() : undefined;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
@@ -117,7 +126,7 @@ export async function POST(
       ticketId,
       { $set: update },
       { new: true, runValidators: true },
-    );
+    ).populate({ path: "category", select: "name" });
 
     if (!ticket) throw ApiError.notFound("Ticket not found");
 
@@ -134,11 +143,13 @@ export async function POST(
           ticketSlug,
           ticketTitle: ticket.title,
           ticketPriority: ticket.priority,
+          ticketCategory: categoryLabel(ticket.category),
           recommendedTicketType: ticket.aiTriage?.recommendedTicketType,
           propertyName: ticket.propertyName,
           unitLabel: ticket.unitLabel,
           needsHumanReview: ticket.aiTriage?.needsHumanReview,
           adminNotes: ticket.aiTriage?.adminNotes,
+          missingInformation: ticket.aiTriage?.missingInformation,
           requiresTechnician: ticket.aiTriage?.requiresTechnician,
           immediateActionRequired: ticket.aiTriage?.immediateActionRequired,
           estimatedResponseWindow: ticket.aiTriage?.estimatedResponseWindow,

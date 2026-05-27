@@ -97,6 +97,48 @@ function locationLabel(propertyName?: string, unitLabel?: string) {
   return [propertyName, unitLabel].filter((value) => value?.trim()).join(" · ");
 }
 
+function buildTextListBlock(title: string, items?: string[]): string {
+  if (!items?.length) return "";
+  const bullets = items
+    .map((item) => `- ${item}`)
+    .join("\n");
+  return `${title}:\n${bullets}`;
+}
+
+function buildHiddenPreheader(preheader: string) {
+  return `<div style="display:none;max-height:0;overflow:hidden;">${escapeHtml(preheader)}</div>`;
+}
+
+function buildMissingInformationPanel(items?: string[]) {
+  const missingInformation = items?.filter((item) => item.trim()) ?? [];
+  if (!missingInformation.length) return "";
+
+  const itemsHtml = missingInformation
+    .map(
+      (item) => `
+        <li style="margin:0 0 8px 0;font-size:13px;line-height:1.6;color:#9a3412;">
+          ${escapeHtml(item)}
+        </li>
+      `,
+    )
+    .join("");
+
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;margin-bottom:24px;">
+      <tr>
+        <td style="padding:16px;">
+          <p style="margin:0 0 10px 0;font-size:13px;font-weight:700;color:#1a1a2e;">
+            Information requested from tenant
+          </p>
+          <ul style="margin:0;padding-left:18px;">
+            ${itemsHtml}
+          </ul>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function buildAdminNotesPanel(adminNotes?: string) {
   const notes = adminNotes?.trim() || "No additional admin notes were provided.";
   const paragraphs = notes
@@ -126,6 +168,94 @@ function buildAdminNotesPanel(adminNotes?: string) {
   `;
 }
 
+function buildAdminMissingInformationEmailHtml(args: {
+  attendeeName: string;
+  ticketTitle: string;
+  ticketPriority: string;
+  ticketCategory?: string;
+  recommendedTicketType?: string;
+  propertyName?: string;
+  unitLabel?: string;
+  missingInformation: string[];
+  adminNotes?: string;
+  estimatedResponseWindow?: string;
+  ticketUrl: string;
+}) {
+  const priority = formatLabel(args.ticketPriority);
+  const location = locationLabel(args.propertyName, args.unitLabel);
+
+  return `
+    ${buildHiddenPreheader("Additional information needed before re-triage.")}
+    ${buildGenericEmailBadge({
+      label: "Additional Information Needed",
+      tone: "warning",
+      secondaryLabel: priority,
+    })}
+    ${buildGenericEmailLead({
+      attendeeName: args.attendeeName,
+      intro: `A maintenance request has been received for <strong style="color:#0f172a;">${escapeHtml(args.ticketTitle)}</strong>, but AI triage needs more tenant information before the request can be finalized.`,
+    })}
+    ${buildGenericEmailBanner({
+      title: "Tenant has been asked to update the ticket",
+      description:
+        "The tenant has been notified to go to the maintenance dashboard and update the ticket information with the missing details. A re-triage is needed after those details are provided.",
+      tone: "warning",
+    })}
+    ${buildGenericDetailsGrid({
+      stacked: true,
+      items: [
+        { label: "Ticket", value: args.ticketTitle },
+        { label: "Priority", value: priority },
+        { label: "Location", value: location || "Not provided" },
+        { label: "Category", value: args.ticketCategory || "Uncategorised" },
+        {
+          label: "Recommended type",
+          value: formatLabel(args.recommendedTicketType, "Pending re-triage"),
+        },
+        {
+          label: "Tenant communication",
+          value: "Additional information request sent",
+        },
+        {
+          label: "Re-triage",
+          value: "Required after tenant updates the ticket",
+        },
+        ...(args.estimatedResponseWindow
+          ? [{ label: "Response window", value: args.estimatedResponseWindow }]
+          : []),
+      ],
+    })}
+    ${buildMissingInformationPanel(args.missingInformation)}
+    ${buildAdminNotesPanel(args.adminNotes)}
+    ${buildGenericInfoPanel({
+      title: "Re-triage required",
+      description:
+        "Once the tenant updates the ticket information, run or trigger triage again so the request can be classified with the complete details.",
+      tone: "info",
+      actionLabel: "Open Ticket",
+      actionUrl: args.ticketUrl,
+      actionAsButton: true,
+    })}
+    ${buildGenericKeyValueTable({
+      title: "Suggested workflow",
+      rows: [
+        {
+          label: "1",
+          value: "Monitor the ticket for the tenant's updated information.",
+        },
+        {
+          label: "2",
+          value: "Review the new details and re-run triage.",
+        },
+        {
+          label: "3",
+          value: "Confirm priority, ticket type, and dispatch path after re-triage completes.",
+        },
+      ],
+    })}
+  `;
+}
+
 function buildAdminTriageEmailHtml(args: {
   attendeeName: string;
   ticketTitle: string;
@@ -134,6 +264,7 @@ function buildAdminTriageEmailHtml(args: {
   recommendedTicketType?: string;
   propertyName?: string;
   unitLabel?: string;
+  missingInformation?: string[];
   needsHumanReview?: boolean;
   adminNotes?: string;
   requiresTechnician?: boolean;
@@ -234,6 +365,7 @@ export async function sendAdminTriageCompleteEmail(args: {
   unitLabel?: string;
   needsHumanReview?: boolean;
   adminNotes?: string;
+  missingInformation?: string[];
   requiresTechnician?: boolean;
   immediateActionRequired?: boolean;
   estimatedResponseWindow?: string;
@@ -245,6 +377,11 @@ export async function sendAdminTriageCompleteEmail(args: {
 
   const baseUrl = resolveAppBaseUrl(args.request);
   const ticketUrl = `${baseUrl}/dashboard/ticket-management/${args.ticketSlug}`;
+  const missingInformation =
+    args.missingInformation
+      ?.map((item) => item.trim())
+      .filter(Boolean) ?? [];
+  const needsMoreInformation = missingInformation.length > 0;
 
   const results = await Promise.all(
     recipients.map((recipient) =>
@@ -252,7 +389,15 @@ export async function sendAdminTriageCompleteEmail(args: {
         businessId: args.businessId,
         templateKey: BUSINESS_EMAIL_TEMPLATE.TICKET_AI_TRIAGE_COMPLETE,
         to: recipient.email,
-        fallbackSubject: `[${args.ticketPriority}] AI triage complete: ${args.ticketTitle}`,
+        fallbackSubject: needsMoreInformation
+          ? `[${args.ticketPriority}] Additional information needed: ${args.ticketTitle}`
+          : `[${args.ticketPriority}] AI triage complete: ${args.ticketTitle}`,
+        subjectOverride: needsMoreInformation
+          ? "[{{ticket_priority}}] Additional information needed: {{ticket_title}}"
+          : undefined,
+        preheaderOverride: needsMoreInformation
+          ? "Tenant has been asked to update the ticket. Re-triage is needed."
+          : undefined,
         variables: {
           attendee_name: recipient.name,
           ticket_title: args.ticketTitle,
@@ -266,23 +411,47 @@ export async function sendAdminTriageCompleteEmail(args: {
           immediate_action_required: args.immediateActionRequired ? "Yes" : "No",
           estimated_response_window: args.estimatedResponseWindow ?? "",
           admin_notes: args.adminNotes?.trim() || "No additional notes.",
+          missing_information_block: buildTextListBlock(
+            "Information requested from tenant",
+            missingInformation,
+          ),
+          tenant_communication_status: needsMoreInformation
+            ? "The tenant has been asked to update the ticket from the maintenance dashboard."
+            : "",
+          retriage_status: needsMoreInformation
+            ? "Re-triage is required after the tenant updates the ticket."
+            : "",
           ticket_url: ticketUrl,
         },
-        customBodyHtml: buildAdminTriageEmailHtml({
-          attendeeName: recipient.name,
-          ticketTitle: args.ticketTitle,
-          ticketPriority: args.ticketPriority,
-          ticketCategory: args.ticketCategory,
-          recommendedTicketType: args.recommendedTicketType,
-          propertyName: args.propertyName,
-          unitLabel: args.unitLabel,
-          needsHumanReview: args.needsHumanReview,
-          adminNotes: args.adminNotes,
-          requiresTechnician: args.requiresTechnician,
-          immediateActionRequired: args.immediateActionRequired,
-          estimatedResponseWindow: args.estimatedResponseWindow,
-          ticketUrl,
-        }),
+        customBodyHtml: needsMoreInformation
+          ? buildAdminMissingInformationEmailHtml({
+              attendeeName: recipient.name,
+              ticketTitle: args.ticketTitle,
+              ticketPriority: args.ticketPriority,
+              ticketCategory: args.ticketCategory,
+              recommendedTicketType: args.recommendedTicketType,
+              propertyName: args.propertyName,
+              unitLabel: args.unitLabel,
+              missingInformation,
+              adminNotes: args.adminNotes,
+              estimatedResponseWindow: args.estimatedResponseWindow,
+              ticketUrl,
+            })
+          : buildAdminTriageEmailHtml({
+              attendeeName: recipient.name,
+              ticketTitle: args.ticketTitle,
+              ticketPriority: args.ticketPriority,
+              ticketCategory: args.ticketCategory,
+              recommendedTicketType: args.recommendedTicketType,
+              propertyName: args.propertyName,
+              unitLabel: args.unitLabel,
+              needsHumanReview: args.needsHumanReview,
+              adminNotes: args.adminNotes,
+              requiresTechnician: args.requiresTechnician,
+              immediateActionRequired: args.immediateActionRequired,
+              estimatedResponseWindow: args.estimatedResponseWindow,
+              ticketUrl,
+            }),
       }),
     ),
   );
