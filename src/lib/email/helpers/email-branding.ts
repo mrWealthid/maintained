@@ -1,3 +1,4 @@
+import { resolveAppOriginFromEnv } from "@/lib/email/helpers/app-url";
 import { escapeHtml } from "@/lib/email/helpers/email-html";
 import {
   EMAIL_FONT_STACK,
@@ -6,8 +7,10 @@ import {
 
 export const DEFAULT_EMAIL_APP_NAME = "Properly";
 
-const DEFAULT_EMAIL_APP_ICON_URL =
+// Override with a fully-qualified URL; otherwise the bundled Properly mark is used.
+const CONFIGURED_EMAIL_APP_ICON_URL =
   process.env.NEXT_PUBLIC_APP_ICON_URL?.trim() || "";
+const DEFAULT_EMAIL_LOGO_PATH = "/brand/email-logo.png";
 
 function isEmailSafeImage(src: string) {
   const normalized = src.trim().toLowerCase();
@@ -18,8 +21,21 @@ function isEmailSafeImage(src: string) {
   );
 }
 
+/**
+ * Resolve the brand logo for emails as an ABSOLUTE url. Email clients can't
+ * load relative paths or render inline SVG, so we serve a hosted PNG of the
+ * Properly mark and prefix relative paths with the app origin. Returns "" when
+ * no origin is configured and the source is relative (logo is then omitted).
+ */
 export function resolveEmailLogoSrc() {
-  return DEFAULT_EMAIL_APP_ICON_URL;
+  const candidate = CONFIGURED_EMAIL_APP_ICON_URL || DEFAULT_EMAIL_LOGO_PATH;
+
+  if (/^https?:\/\//i.test(candidate)) {
+    return candidate;
+  }
+
+  const origin = resolveAppOriginFromEnv();
+  return origin ? `${origin}${candidate}` : "";
 }
 
 export function buildEmailBrandHeader(args: {

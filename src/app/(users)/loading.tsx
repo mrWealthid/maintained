@@ -1,6 +1,8 @@
-import { DashboardSkeleton } from "@/features/dashboard/components/DashboardSkeleton";
+import { ProperlyLoader } from "@/shared/components/ProperlyLoader";
 
-// Delegates this route segment to the shared dashboard skeleton.
+// Route loader for the app shell: the animated Properly mark.
+// Page-specific skeletons (dashboard, chat, ticket-management) live in their
+// own loading.tsx files and take over for those segments.
 export default function Loading() {
-  return <DashboardSkeleton />;
+  return <ProperlyLoader />;
 }

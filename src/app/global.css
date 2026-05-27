@@ -241,6 +241,38 @@
     }
   }
 
+  /* ---- Brand route loader: the Properly mark draws itself on a loop ---- */
+  @keyframes properly-trace {
+    0% {
+      stroke-dashoffset: 100;
+    }
+    40% {
+      stroke-dashoffset: 0;
+    }
+    72% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -100;
+    }
+  }
+  .properly-loader path {
+    stroke-dasharray: 100;
+    animation: properly-trace 2.2s ease-in-out infinite;
+  }
+  .properly-loader path:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+  .properly-loader path:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .properly-loader path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
   :root {
     /* --primary-color: #1f295a;
 	--primary-color-light: #62698c;
