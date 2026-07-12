@@ -25,7 +25,7 @@ export default function TicketDetailNotFoundState() {
             </div>
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
               <Button asChild>
-                <Link href="/dashboard/ticket-management">
+                <Link href="/dashboard/tickets">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to tickets
                 </Link>

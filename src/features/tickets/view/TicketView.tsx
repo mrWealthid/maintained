@@ -11,6 +11,7 @@ import TicketDetailSkeleton from "./TicketDetailSkeleton";
 import TicketDetailNotFoundState from "./TicketDetailNotFoundState";
 import TicketDetailErrorState from "./TicketDetailErrorState";
 import TicketTechnicianResponsesPanel from "./TicketTechnicianResponsesPanel";
+import AdminRepairQuotesPanel from "@/features/repair-quotes/components/AdminRepairQuotesPanel";
 import { TicketActions } from "@/features/tickets/components/TicketActions";
 import type { Ticket } from "@/shared/model/model";
 import {
@@ -329,7 +330,7 @@ export default function TicketView({ slug }: { slug: string }) {
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
         <Link
-          href="/dashboard/ticket-management"
+          href="/dashboard/tickets"
           className="inline-flex items-center gap-1 hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -536,7 +537,7 @@ export default function TicketView({ slug }: { slug: string }) {
               </CardHeader>
               <CardContent>
                 <Link
-                  href={`/dashboard/ticket-management/${ticket.relatedTo.slug}`}
+                  href={`/dashboard/tickets/${ticket.relatedTo.slug}`}
                   className="flex items-start justify-between gap-3 rounded-lg border bg-card px-4 py-3 hover:border-primary/40"
                 >
                   <div className="min-w-0">
@@ -747,6 +748,28 @@ export default function TicketView({ slug }: { slug: string }) {
           slug: ticket.slug,
           status: ticket.status,
           requests: (ticket.requests as never) ?? [],
+        }}
+      />
+
+      <AdminRepairQuotesPanel
+        ticketSlug={ticket.slug}
+        ticket={{
+          slug: ticket.slug,
+          title: ticket.title,
+          area: ticket.area,
+          priority: ticket.priority,
+          propertyName: ticket.propertyName,
+          unitLabel: ticket.unitLabel,
+          diagnosis: ticket.aiTriage?.technicianDiagnosis
+            ? {
+                probableIssue: ticket.aiTriage.technicianDiagnosis.probableIssue,
+                inspectionPoints:
+                  ticket.aiTriage.technicianDiagnosis.inspectionPoints,
+                recommendedTools:
+                  ticket.aiTriage.technicianDiagnosis.recommendedTools,
+                safetyNotes: ticket.aiTriage.technicianDiagnosis.safetyNotes,
+              }
+            : undefined,
         }}
       />
     </main>

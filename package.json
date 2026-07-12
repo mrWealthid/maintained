@@ -9,7 +9,8 @@
     "lint": "next lint",
     "lint:no-nested-ternary": "eslint . --ext .js,.jsx,.ts,.tsx --rule \"no-nested-ternary: error\"",
     "lint:no-hardcoded-current-business": "rg \"currentBusiness:\\\\s*string\" src/app/api && exit 1 || exit 0",
-    "create:super-admin": "node scripts/create-super-admin.mjs"
+    "create:super-admin": "node scripts/create-super-admin.mjs",
+    "migrate:trades": "node scripts/migrate-technicians-to-trades.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.36",

@@ -1,7 +1,7 @@
 import { TICKET_STATUS } from "@/shared/enums/enums";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ensureTicketRoom } from "@/lib/chat/chat";
-import { pusherServer } from "@/lib/pusher/pusher";
+import { pusherServer } from "@/lib/pusher/server";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { TicketActivity } from "@/models/ticketActivity";
 import Ticket, { ITicket } from "@/models/ticketModel";

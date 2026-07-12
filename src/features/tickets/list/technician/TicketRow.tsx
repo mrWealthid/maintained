@@ -32,7 +32,7 @@ function RequestRow({ data }: TechnicianTicketRowProps) {
             </TableCell>
             <TableCell colSpan={3}>
               <Link
-                href={`/dashboard/ticket-management/${slug}`}
+                href={`/dashboard/tickets/${slug}`}
                 title={title}
                 className="block font-medium text-foreground hover:text-primary hover:underline"
               >

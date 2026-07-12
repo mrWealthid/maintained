@@ -5,7 +5,7 @@ import { Types } from "mongoose";
 import ChatMessage from "@/models/chatMessage";
 import chatRoom from "@/models/chatRoom";
 import { assertRoomAccess } from "@/lib/chat/chatAuth";
-import { pusherServer } from "@/lib/pusher/pusher";
+import { pusherServer } from "@/lib/pusher/server";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import { CHAT_TYPE } from "@/features/chat/data/enums";

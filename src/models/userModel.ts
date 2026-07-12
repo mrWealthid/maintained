@@ -11,6 +11,11 @@ import crypto from "crypto";
 import Business from "./businessModel";
 import { INVITE_STATUS, ROLES } from "@/shared/enums/enums";
 import {
+  ACCOUNT_KIND,
+  ACCOUNT_KIND_VALUES,
+  type AccountKind,
+} from "@/shared/enums/account-kind";
+import {
   USER_TYPE_VALUES,
   WORKSPACE_ROLE_VALUES,
   type USER_TYPE,
@@ -22,6 +27,13 @@ export type MembershipRoleValue = ROLES | USER_TYPE | WORKSPACE_ROLE;
 export interface IUser extends Document {
   name: string;
   email: string;
+  /**
+   * Top-level account taxonomy. `manager` users (or unset, legacy) belong to
+   * workspaces and act on tickets/tenants/properties. `trade` users own a
+   * `Tradesperson` profile, log into `/trades`, and have no workspace
+   * memberships in the staff sense.
+   */
+  accountKind?: AccountKind;
   photo?: string;
   password: string;
   contact?: string;
@@ -267,6 +279,12 @@ const userSchema = new Schema<IUser>(
       required: [true, "Please provide a password"],
       minlength: 8,
       select: false,
+    },
+    accountKind: {
+      type: String,
+      enum: ACCOUNT_KIND_VALUES,
+      default: ACCOUNT_KIND.MANAGER,
+      index: true,
     },
     memberships: {
       type: [MembershipSchema],

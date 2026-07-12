@@ -1,11 +1,11 @@
 import { requireDashboardAccess } from "@/lib/auth/requireDashboardAccess";
 import { PERMISSION } from "@/shared/auth/permission-registry";
-import TicketManagementPageClient from "./TicketManagementPageClient";
+import TicketsPageClient from "./TicketsPageClient";
 
-export default async function TicketManagementPage() {
+export default async function TicketsPage() {
   await requireDashboardAccess({
     requiredPermission: PERMISSION.TICKETS_VIEW,
   });
 
-  return <TicketManagementPageClient />;
+  return <TicketsPageClient />;
 }

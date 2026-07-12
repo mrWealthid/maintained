@@ -24,7 +24,15 @@ export function ProperlyLoader({
     <div
       className={cn(
         "grid place-items-center text-primary",
-        fullscreen ? "fixed inset-0 z-50 bg-background" : "min-h-[60vh] w-full",
+        // Fullscreen overlays the whole viewport (root + auth route loader).
+        // Non-fullscreen fills the available viewport minus the dashboard
+        // header so the mark lands in the real visual centre of the
+        // content area — `min-h-[60vh]` alone left it visibly high inside
+        // the dashboard shell. `--header-height` is set by the dashboard
+        // SidebarProvider; falls back to 0 elsewhere.
+        fullscreen
+          ? "fixed inset-0 z-50 bg-background"
+          : "min-h-[calc(100dvh-var(--header-height,0px))] w-full",
         className
       )}
       role="status"

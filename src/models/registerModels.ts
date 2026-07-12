@@ -5,8 +5,12 @@ import AuthSession from "@/models/authSessionModel";
 import Business from "@/models/businessModel";
 import ChatMessage from "@/models/chatMessage";
 import ChatRoom from "@/models/chatRoom";
+import Conversation from "@/models/conversationModel";
+import ConversationMessage from "@/models/conversationMessageModel";
 import Property from "@/models/propertyModel";
 import RoleDefinition from "@/models/roleDefinitionModel";
+import RepairRequest from "@/models/repairRequestModel";
+import RepairQuote from "@/models/repairQuoteModel";
 import { TechnicianRequest } from "@/models/technicanRequest";
 import { TicketActivity } from "@/models/ticketActivity";
 import TicketCategory from "@/models/ticketCategoryModel";
@@ -26,8 +30,12 @@ const REQUIRED_MODEL_NAMES = [
   "Business",
   "ChatMessage",
   "ChatRoom",
+  "Conversation",
+  "ConversationMessage",
   "Property",
   "RoleDefinition",
+  "RepairRequest",
+  "RepairQuote",
   "TechnicianRequest",
   "TicketActivity",
   "TicketCategory",
@@ -46,8 +54,12 @@ function touchModelExports() {
   void Business;
   void ChatMessage;
   void ChatRoom;
+  void Conversation;
+  void ConversationMessage;
   void Property;
   void RoleDefinition;
+  void RepairRequest;
+  void RepairQuote;
   void TechnicianRequest;
   void TicketActivity;
   void TicketCategory;

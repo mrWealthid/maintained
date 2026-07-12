@@ -9,7 +9,7 @@ import {
   ChatRoomListFilter,
   ChatRoomMessage,
 } from "../model/chat.model";
-import { getPusherClient } from "@/lib/pusher/pusher";
+import { getPusherClient } from "@/lib/pusher/client";
 
 export async function fetchChatRooms<T>({
   limit = 10,

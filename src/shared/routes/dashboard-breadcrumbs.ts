@@ -7,7 +7,7 @@
  */
 export const DASHBOARD_BREADCRUMB_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
-  "ticket-management": "Tickets",
+  tickets: "Tickets",
   properties: "Properties",
   tenants: "Tenants",
   team: "Team",
@@ -43,7 +43,7 @@ export type DashboardBreadcrumb = {
 
 /**
  * Build a breadcrumb trail from a pathname like
- * `/dashboard/ticket-management/abc/apply/xyz`. Always includes the leading
+ * `/dashboard/tickets/abc/apply/xyz`. Always includes the leading
  * "Dashboard" crumb. Unknown segments get a fallback label inferred from
  * their parent.
  */

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse } from "@/lib/errors/apiError";
-import { pusherServer } from "@/lib/pusher/pusher";
+import { pusherServer } from "@/lib/pusher/server";
 
 export async function POST(req: NextRequest) {
   try {

@@ -22,22 +22,27 @@ import SidebarProfileShell from "./SidebarProfileShell";
 import type { WorkspaceType } from "@/shared/model/workspace.model";
 import { getDashboardRoutes } from "@/shared/routes/appRoutes";
 import type { WORKSPACE_ROLE } from "@/shared/auth/roles";
-import { useSidebarProfile } from "./hooks/useSidebarProfile";
+import type { PermissionKey } from "@/shared/auth/permission-registry";
 
 function AppSidebar({
   role,
   workspaceRole,
   workspaceType,
   canViewPayments,
+  permissions,
 }: {
   role: ROLES;
   workspaceRole?: WORKSPACE_ROLE | null;
   workspaceType?: WorkspaceType | null;
   canViewPayments?: boolean;
+  permissions?: PermissionKey[];
 }) {
   const pathname = usePathname();
   const { open, setOpenMobile, isMobile } = useSidebar();
-  const { data: profile } = useSidebarProfile();
+  // Fail-closed filtering: if the permissions prop is missing for any reason,
+  // hide every permissioned route. Combined with the server-resolved set being
+  // passed down, this means the nav can only ever GROW from the most
+  // restrictive view — items never flash in and then disappear.
   const routes = getDashboardRoutes({
     role,
     workspaceRole,
@@ -45,8 +50,8 @@ function AppSidebar({
     canViewPayments,
   }).filter((route) => {
     if (!route.permission) return true;
-    if (!profile) return true;
-    return profile.permissions.includes(route.permission);
+    if (!permissions) return false;
+    return permissions.includes(route.permission);
   });
 
   return (
@@ -70,7 +75,7 @@ function AppSidebar({
             <SidebarMenu>
               {(() => {
                 // Pick the sidebar entry whose path is the longest prefix of
-                // the current URL — that way `/dashboard/ticket-management/abc`
+                // the current URL — that way `/dashboard/tickets/abc`
                 // activates the "Tickets" entry, and any deeper sub-route
                 // (e.g. `/dashboard/volunteers/timecards`) still picks the
                 // most specific entry rather than lighting up its parent too.
@@ -132,4 +137,4 @@ function AppSidebar({
   );
 }
 
-export default React.memo(AppSidebar);
+export default AppSidebar;

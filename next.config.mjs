@@ -5,8 +5,8 @@ const nextConfig = {
     IMG_PRESET: process.env.UPLOAD_IMAGE_PRESET,
     VIDEO_PRESET: process.env.UPLOAD_VIDEO_PRESET,
     DOCUMENT_PRESET: process.env.UPLOAD_DOCUMENT_PRESET,
-    PUSHER_KEY: process.env.PUSHER_KEY,
-    PUSHER_CLUSTER: process.env.PUSHER_CLUSTER,
+    NEXT_PUBLIC_PUSHER_KEY: process.env.PUSHER_KEY,
+    NEXT_PUBLIC_PUSHER_CLUSTER: process.env.PUSHER_CLUSTER,
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
   },
   images: {

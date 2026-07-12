@@ -17,8 +17,8 @@ export const APP_ROUTE_PATHS = {
   },
   DASHBOARD: {
     OVERVIEW: "/dashboard",
-    TICKETS: "/dashboard/ticket-management",
-    MANAGE_TICKET: "/dashboard/ticket-management/manage",
+    TICKETS: "/dashboard/tickets",
+    MANAGE_TICKET: "/dashboard/tickets/manage",
     CHAT: "/dashboard/chat",
     USERS: "/dashboard/users",
     PROPERTIES: "/dashboard/properties",
@@ -32,11 +32,12 @@ export const APP_ROUTE_PATHS = {
     VOLUNTEER_TIMECARDS: "/dashboard/volunteers/timecards",
     RESERVATIONS: "/dashboard/reservations",
     TEAM: "/dashboard/team",
+    TRADES: "/dashboard/trades",
     ACCESS_CONTROL: "/dashboard/access-control",
   },
   ADMIN_DASHBOARD: {
     OVERVIEW: "/dashboard",
-    TICKETS: "/dashboard/ticket-management",
+    TICKETS: "/dashboard/tickets",
     CHAT: "/dashboard/chat",
     USERS: "/dashboard/users",
     PROPERTIES: "/dashboard/properties",
@@ -44,7 +45,7 @@ export const APP_ROUTE_PATHS = {
   },
   TECHNICIAN_DASHBOARD: {
     OVERVIEW: "/dashboard",
-    TICKETS: "/dashboard/ticket-management",
+    TICKETS: "/dashboard/tickets",
     CHAT: "/dashboard/chat",
     SETTINGS: "/dashboard/settings",
   },

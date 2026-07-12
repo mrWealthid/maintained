@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import {
   Building2,
   Eye,
   EyeOff,
   Globe2,
+  HardHat,
   KeyRound,
   Mail,
   MapPin,
@@ -22,6 +24,8 @@ import { useRegister } from "../hooks/useAuth";
 import AuthWrapper from "../AuthWrapper";
 import { SignupSchema, SignupValues } from "../model/model";
 import { CODES } from "../data/data";
+import { SignupKindToggle, type SignupKind } from "./SignupKindToggle";
+import TradeSignupForm from "@/features/trades/components/TradeSignupForm";
 
 import {
   Card,
@@ -75,7 +79,7 @@ import {
   WORKSPACE_TYPE,
 } from "@/shared/model/workspace.model";
 
-export default function SignupComponent() {
+function ManagerSignupView() {
   const form = useForm<SignupValues>({
     resolver: zodResolver(SignupSchema),
     mode: "onChange",
@@ -211,6 +215,9 @@ export default function SignupComponent() {
               {isSoloOrganizerSignup ? "solo organizer" : "business"} identity,
               timezone, and address all in one guided setup.
             </p>
+          </div>
+          <div className="pt-1">
+            <SignupKindToggle kind="manager" />
           </div>
         </div>
 
@@ -663,5 +670,79 @@ export default function SignupComponent() {
         </div>
       </section>
     </AuthWrapper>
+  );
+}
+
+/**
+ * Trade branch of the unified signup page. Mirrors the layout of the
+ * manager view (intro + toggle + a single Card) but renders the much
+ * lighter `<TradeSignupForm />` — no workspace, timezone or address.
+ */
+function TradeSignupView() {
+  return (
+    <AuthWrapper>
+      <section className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <div className="space-y-2">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <HardHat className="size-6" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold text-foreground">
+              Join as a tradesperson
+            </h1>
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground/90">
+              Get found by property managers and start receiving repair
+              requests in your specialties.
+            </p>
+          </div>
+          <div className="pt-1">
+            <SignupKindToggle kind="trade" />
+          </div>
+        </div>
+
+        <Card className="w-full border-border/70 bg-card/95 shadow-sm">
+          <CardHeader className="space-y-2 pb-4">
+            <CardTitle className="text-xl font-semibold text-foreground">
+              Your trade account
+            </CardTitle>
+            <CardDescription className="text-sm leading-6 text-muted-foreground/90">
+              Tell us who you are and which trades you offer. You can edit
+              everything later from your trade profile.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <TradeSignupForm />
+            <p className="text-sm text-center text-muted-foreground">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                Login
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+    </AuthWrapper>
+  );
+}
+
+/**
+ * Default export. Reads `?kind` from the URL (defaults to `manager`) and
+ * renders the matching branch. Wrapped in Suspense because
+ * `useSearchParams` requires it during build.
+ */
+function SignupRouter() {
+  const search = useSearchParams();
+  const kind: SignupKind = search.get("kind") === "trade" ? "trade" : "manager";
+  return kind === "trade" ? <TradeSignupView /> : <ManagerSignupView />;
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupRouter />
+    </Suspense>
   );
 }

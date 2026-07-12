@@ -8,7 +8,7 @@ import ChatRoom from "@/models/chatRoom";
 import ChatRoomMessage from "@/models/chatMessage";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
-import { pusherServer } from "@/lib/pusher/pusher";
+import { pusherServer } from "@/lib/pusher/server";
 import { z } from "zod";
 
 const readMessageBodySchema = z.object({
