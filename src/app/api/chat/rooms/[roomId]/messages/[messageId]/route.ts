@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 
-import { pusherServer } from "@/lib/pusher/pusher";
+import { pusherServer } from "@/lib/pusher/server";
 import { getUserFromCookies } from "@/lib/auth/getUserFromCookies";
 import { ApiError, errorToNextResponse, parseOrThrow } from "@/lib/errors/apiError";
 import ChatMessage from "@/models/chatMessage";

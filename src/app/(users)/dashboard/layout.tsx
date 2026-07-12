@@ -7,9 +7,14 @@ import AppSidebar from "@/shared/components/sidebar/AppSidebar";
 import { AppShell } from "@/shared/shells/AppShell";
 import { requireDashboardAccess } from "@/lib/auth/requireDashboardAccess";
 import { getSessionTimeoutMinutesForVerifiedUser } from "@/lib/auth/session-timeout";
+import { getEffectiveWorkspacePermissionSet } from "@/lib/auth/effective-permissions";
 import { isPlatformSuperAdminRole } from "@/shared/auth/roles";
 import Business from "@/models/businessModel";
 import { redirect } from "next/navigation";
+
+// The layout reads cookies and per-user permissions, so it must always run
+// fresh — never cached across users or refreshes.
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({
   children,
@@ -30,6 +35,18 @@ export default async function DashboardLayout({
   const sessionTimeoutMinutes =
     await getSessionTimeoutMinutesForVerifiedUser(verify);
 
+  // Resolve the effective permission set on the server so the sidebar renders
+  // the identical nav during SSR and after hydration. Filtering nav purely
+  // from a client-side fetch caused items to flash in then disappear.
+  const permissions = Array.from(
+    await getEffectiveWorkspacePermissionSet({
+      userId: verify.id,
+      businessId: verify.businessId,
+      platformRole: verify.platformRole,
+      workspaceRole: verify.workspaceRole,
+    }),
+  );
+
   return (
     <div className="dashboard-shell h-dvh flex overflow-hidden">
       <SidebarProvider
@@ -40,7 +57,11 @@ export default async function DashboardLayout({
           } as CSSProperties
         }
       >
-        <AppSidebar role={verify.role} workspaceRole={verify.workspaceRole} />
+        <AppSidebar
+          role={verify.role}
+          workspaceRole={verify.workspaceRole}
+          permissions={permissions}
+        />
 
         <SidebarInset className="bg-background shadow-none!">
           <HeaderBar />

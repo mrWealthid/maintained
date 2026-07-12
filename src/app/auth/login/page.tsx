@@ -358,6 +358,13 @@ const LoginComponent = () => {
                     >
                       Sign up
                     </Link>
+                    <span aria-hidden>·</span>
+                    <Link
+                      href="/auth/signup?kind=trade"
+                      className="text-primary hover:underline text-sm"
+                    >
+                      I&apos;m a tradesperson
+                    </Link>
                   </p>
                 </form>
               </Form>

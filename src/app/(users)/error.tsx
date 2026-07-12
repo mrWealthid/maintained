@@ -1,15 +1,26 @@
-'use client';
+"use client";
+
+import { useEffect } from "react";
+import RouteErrorState from "@/shared/components/error/RouteErrorState";
+
 export default function Error({
-	error,
-	reset
+  error,
+  reset,
 }: {
-	error: Error & { digest?: string };
-	reset: () => void;
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
-	return (
-		<div>
-			<h2>Something went wrong! {error.message} </h2>
-			<h2>digest! {error.digest} </h2>
-		</div>
-	);
+  useEffect(() => {
+    // Surfaces the full client-visible error; the matching server stack is
+    // logged by Next.js against the same `digest` in the server terminal.
+    console.error(error);
+  }, [error]);
+
+  return (
+    <RouteErrorState
+      message={error.message}
+      digest={error.digest}
+      onRetry={reset}
+    />
+  );
 }

@@ -37,7 +37,7 @@ function RequestRow({
             </TableCell>
             <TableCell colSpan={3}>
               <Link
-                href={`/dashboard/ticket-management/${row.slug}`}
+                href={`/dashboard/tickets/${row.slug}`}
                 title={row.title}
                 className="block font-medium text-foreground hover:text-primary hover:underline"
               >

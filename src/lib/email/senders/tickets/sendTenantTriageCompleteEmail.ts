@@ -403,7 +403,7 @@ export async function sendTenantTriageCompleteEmail(args: {
   }
 
   const baseUrl = resolveAppBaseUrl(args.request);
-  const ticketUrl = `${baseUrl}/dashboard/ticket-management/${args.ticketSlug}`;
+  const ticketUrl = `${baseUrl}/dashboard/tickets/${args.ticketSlug}`;
   const userReply =
     args.userReply?.trim() ||
     "We have completed an initial assessment of your maintenance request. Your property team will review the ticket and confirm the next step.";

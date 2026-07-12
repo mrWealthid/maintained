@@ -376,7 +376,7 @@ export async function sendAdminTriageCompleteEmail(args: {
   }
 
   const baseUrl = resolveAppBaseUrl(args.request);
-  const ticketUrl = `${baseUrl}/dashboard/ticket-management/${args.ticketSlug}`;
+  const ticketUrl = `${baseUrl}/dashboard/tickets/${args.ticketSlug}`;
   const missingInformation =
     args.missingInformation
       ?.map((item) => item.trim())

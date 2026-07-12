@@ -10,7 +10,7 @@ import {
   getMsgId,
 } from "../helper/chatCache";
 import { addDelivered } from "../helper/chatCache"; // ⬅️ NEW
-import { getPusherClient } from "@/lib/pusher/pusher";
+import { getPusherClient } from "@/lib/pusher/client";
 import type { ChatRoomMessage } from "../model/chat.model";
 import type { ApiPaginatedResponse } from "@/shared/model/model";
 import { ackDelivered as apiAckDelivered } from "../services/chat.service"; // ⬅️ NEW

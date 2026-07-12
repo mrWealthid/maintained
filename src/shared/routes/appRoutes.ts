@@ -2,6 +2,7 @@
 
 import {
   Building2,
+  HardHat,
   Home,
   MessageSquare,
   Settings,
@@ -49,6 +50,14 @@ export const routes: Routes[] = [
     path: APP_ROUTES.DASHBOARD.TEAM,
     icon: Users,
     permission: PERMISSION.TEAM_VIEW,
+  },
+  {
+    name: "Tradespeople",
+    path: APP_ROUTES.DASHBOARD.TRADES,
+    icon: HardHat,
+    // Reuses the existing perm — same audience that can broadcast a
+    // repair request should be able to see who they've linked.
+    permission: PERMISSION.TECHNICIAN_REQUESTS_VIEW,
   },
   {
     name: "Access Control",
